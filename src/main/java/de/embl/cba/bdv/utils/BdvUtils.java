@@ -7,6 +7,7 @@ import bdv.util.Bdv;
 import bdv.util.BoundedValueDouble;
 import bdv.util.Prefs;
 import bdv.viewer.Interpolation;
+import bdv.viewer.Source;
 import bdv.viewer.ViewerPanel;
 import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
@@ -67,7 +68,6 @@ public abstract class BdvUtils
 		zoomToInterval( bdv, interval, 1.0 );
 	}
 
-
 	public static FinalInterval getInterval( Bdv bdv, int sourceId )
 	{
 		final AffineTransform3D sourceTransform = getSourceTransform( bdv, sourceId );
@@ -91,15 +91,30 @@ public abstract class BdvUtils
 	{
 		final List< SourceState< ? > > sources = bdv.getBdvHandle().getViewerPanel().getState().getSources();
 
-		int sourceId = -1;
 		for ( int i = 0; i < sources.size(); ++i )
 		{
 			if ( sources.get( i ).getSpimSource().getName().equals( sourceName ) )
 			{
-				sourceId = i;
+				return i;
 			}
 		}
-		return sourceId;
+		return -1;
+	}
+
+
+	public static int getSourceId( Bdv bdv, Source< ? > source )
+	{
+		final List< SourceState< ? > > sources = bdv.getBdvHandle().getViewerPanel().getState().getSources();
+
+		for ( int i = 0; i < sources.size(); ++i )
+		{
+			if ( sources.get( i ).getSpimSource().equals( source ) )
+			{
+				return i;
+			}
+		}
+
+		return -1;
 	}
 
 	public static String getName( Bdv bdv, int sourceId )

@@ -3,7 +3,9 @@ package de.embl.cba.bdv.utils;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.SliderPanelDouble;
 import bdv.util.Bdv;
+import bdv.util.BdvSource;
 import bdv.util.BoundedValueDouble;
+import bdv.viewer.Source;
 import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.state.SourceState;
 import ij.gui.GenericDialog;
@@ -84,6 +86,30 @@ public abstract class BdvUserInterfaceUtils
 				{
 					bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( i ).setColor( BdvUtils.asArgbType( color ) );
 				}
+
+				panel.setBackground( color );
+			}
+		} );
+
+
+		return colorButton;
+	}
+
+	public static JButton createColorButton( JPanel panel,
+											 int[] buttonDimensions,
+											 BdvSource bdvSource )
+	{
+		JButton colorButton = new JButton( "C" );
+		colorButton.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
+
+		colorButton.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				Color color = JColorChooser.showDialog( null, "", null );
+
+				bdvSource.setColor( BdvUtils.asArgbType( color ) );
 
 				panel.setBackground( color );
 			}
@@ -188,6 +214,27 @@ public abstract class BdvUserInterfaceUtils
 				{
 					visibilityAndGrouping.setSourceActive( i, !visibilityAndGrouping.isSourceActive( i ) );
 				}
+			}
+		} );
+
+		return button;
+	}
+
+
+	public static JButton createToggleButton( int[] buttonDimensions, BdvSource bdvSource )
+	{
+		JButton button = new JButton( "T" );
+		button.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
+
+		button.addActionListener( new ActionListener()
+		{
+			boolean isActive = true;
+
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				isActive = ! isActive;
+				bdvSource.setActive( isActive );
 			}
 		} );
 
