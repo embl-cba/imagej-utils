@@ -19,7 +19,7 @@ import net.imglib2.type.volatiles.*;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-public class ARGBConvertedUnsignedLongTypeLabelsSource implements Source< VolatileARGBType > {
+public class ARGBConvertedUnsignedLongTypeLabelsSource implements Source< VolatileARGBType >, LabelsSource {
     private long setupId;
     private SpimData spimData;
     private AbstractViewerSetupImgLoader< UnsignedLongType, VolatileUnsignedLongType > setupImgLoader;
@@ -116,5 +116,11 @@ public class ARGBConvertedUnsignedLongTypeLabelsSource implements Source< Volati
     @Override
     public int getNumMipmapLevels() {
         return setupImgLoader.getMipmapTransforms().length;
+    }
+
+    @Override
+    public void changeSeed()
+    {
+        volatileUnsignedLongTypeLabelsARGBConverter.changeSeed();
     }
 }

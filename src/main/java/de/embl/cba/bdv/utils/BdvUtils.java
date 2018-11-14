@@ -58,7 +58,7 @@ public abstract class BdvUtils
 
 	public static void zoomToSource( Bdv bdv, String sourceName )
 	{
-		zoomToSource( bdv, getSourceId( bdv, sourceName ) );
+		zoomToSource( bdv, getSourceIndex( bdv, sourceName ) );
 	}
 
 	public static void zoomToSource( Bdv bdv, int sourceId )
@@ -87,22 +87,7 @@ public abstract class BdvUtils
 		return viewerTransform.estimateBounds( new FinalInterval( min, max ) );
 	}
 
-	public static int getSourceId( Bdv bdv, String sourceName )
-	{
-		final List< SourceState< ? > > sources = bdv.getBdvHandle().getViewerPanel().getState().getSources();
-
-		for ( int i = 0; i < sources.size(); ++i )
-		{
-			if ( sources.get( i ).getSpimSource().getName().equals( sourceName ) )
-			{
-				return i;
-			}
-		}
-		return -1;
-	}
-
-
-	public static int getSourceId( Bdv bdv, Source< ? > source )
+	public static int getSourceIndex( Bdv bdv, Source< ? > source )
 	{
 		final List< SourceState< ? > > sources = bdv.getBdvHandle().getViewerPanel().getState().getSources();
 
@@ -122,6 +107,25 @@ public abstract class BdvUtils
 		return bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceId ).getSpimSource().getName();
 	}
 
+	public static ArrayList< String > getSourceNames( Bdv bdv )
+	{
+		final ArrayList< String > sourceNames = new ArrayList<>();
+
+		final List< SourceState< ? > > sources = bdv.getBdvHandle().getViewerPanel().getState().getSources();
+
+		for ( SourceState source : sources )
+		{
+			sourceNames.add( source.getSpimSource().getName() );
+		}
+
+		return sourceNames;
+	}
+
+
+	public static int getSourceIndex( Bdv bdv, String sourceName )
+	{
+		return getSourceNames( bdv ).indexOf( sourceName );
+	}
 
 	public static VoxelDimensions getVoxelDimensions( Bdv bdv, int sourceId )
 	{

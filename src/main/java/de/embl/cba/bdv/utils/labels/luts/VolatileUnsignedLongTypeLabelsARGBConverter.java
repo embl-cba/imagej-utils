@@ -46,6 +46,12 @@ public class VolatileUnsignedLongTypeLabelsARGBConverter implements Converter< V
         return ( ( ( r << 8 ) | g ) << 8 ) | b | alpha;
     }
 
+    public void changeSeed()
+	{
+		seed++;
+		lut = new HashMap<>();
+	}
+
 	@Override
 	public void convert( final VolatileUnsignedLongType input, final VolatileARGBType output )
 	{

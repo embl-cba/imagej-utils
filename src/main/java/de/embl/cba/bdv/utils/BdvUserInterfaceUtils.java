@@ -4,10 +4,14 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.SliderPanelDouble;
 import bdv.util.Bdv;
 import bdv.util.BdvSource;
+import bdv.util.BdvStackSource;
 import bdv.util.BoundedValueDouble;
 import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
 import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.state.SourceState;
+import de.embl.cba.bdv.utils.labels.luts.LabelsSource;
+import ij.IJ;
 import ij.gui.GenericDialog;
 
 import javax.swing.*;
@@ -121,6 +125,17 @@ public abstract class BdvUserInterfaceUtils
 
 	public static JButton createBrightnessButton( int[] buttonDimensions,
 												  String name, Bdv bdv,
+												  Integer sourceIndex )
+	{
+		final ArrayList< Integer > indices = new ArrayList<>();
+		indices.add( sourceIndex );
+		return createBrightnessButton( buttonDimensions, name, bdv, indices );
+	}
+
+
+
+	public static JButton createBrightnessButton( int[] buttonDimensions,
+												  String name, Bdv bdv,
 												  ArrayList< Integer > sourceIndices )
 	{
 		JButton button = new JButton( "B" );
@@ -143,6 +158,62 @@ public abstract class BdvUserInterfaceUtils
 		} );
 
 		return button;
+	}
+
+
+	public static JButton createBrightnessButton( int[] buttonDimensions,
+												  String name,
+												  BdvSource bdvSource )
+	{
+		JButton button = new JButton( "B" );
+		button.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
+
+
+		button.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+
+				boolean isLabelsSource = isLabelsSource( bdvSource );
+
+				IJ.log( ""+ isLabelsSource );
+
+				final ArrayList< ConverterSetup > converterSetups = getConverterSetups( bdvSource );
+
+				showBrightnessDialog( name, converterSetups );
+			}
+		} );
+
+		return button;
+	}
+
+	private static boolean isLabelsSource( BdvSource bdvSource )
+	{
+		boolean isLabelsSource = false;
+
+		if ( bdvSource instanceof BdvStackSource )
+		{
+			final SourceAndConverter sourceAndConverter = ( SourceAndConverter ) ( ( BdvStackSource ) bdvSource ).getSources().get( 0 );
+
+			final Source spimSource = sourceAndConverter.getSpimSource();
+
+			if ( spimSource instanceof LabelsSource )
+			{
+				isLabelsSource = true;
+			}
+
+		}
+		return isLabelsSource;
+	}
+
+	private static ArrayList< ConverterSetup > getConverterSetups( BdvSource bdvSource )
+	{
+		bdvSource.setCurrent();
+		final int sourceIndex = bdvSource.getBdvHandle().getViewerPanel().getVisibilityAndGrouping().getCurrentSource();
+		final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
+		converterSetups.add( bdvSource.getBdvHandle().getSetupAssignments().getConverterSetups().get( sourceIndex ) );
+		return converterSetups;
 	}
 
 
