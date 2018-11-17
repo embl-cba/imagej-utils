@@ -3,17 +3,14 @@ package de.embl.cba.bdv.utils;
 import bdv.cache.CacheControl;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.SliderPanelDouble;
-import bdv.util.Bdv;
-import bdv.util.BoundedValueDouble;
-import bdv.util.Prefs;
-import bdv.viewer.Interpolation;
-import bdv.viewer.Source;
-import bdv.viewer.ViewerPanel;
-import bdv.viewer.VisibilityAndGrouping;
+import bdv.tools.transformation.TransformedSource;
+import bdv.util.*;
+import bdv.viewer.*;
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
 import bdv.viewer.state.SourceState;
 import bdv.viewer.state.ViewerState;
+import de.embl.cba.bdv.utils.labels.luts.LabelsSource;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -28,6 +25,7 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.ui.PainterThread;
 import net.imglib2.ui.RenderTarget;
@@ -141,6 +139,17 @@ public abstract class BdvUtils
 	}
 
 
+	public static AffineTransform3D getSourceTransform( BdvStackSource bdvStackSource, int source, int t, int level )
+	{
+		final SourceAndConverter sourceAndConverter = ( SourceAndConverter ) bdvStackSource.getSources().get( source );
+		final Source spimSource = sourceAndConverter.getSpimSource();
+		bdvStackSource.getSources().get( source );
+		AffineTransform3D sourceTransform = new AffineTransform3D();
+		spimSource.getSourceTransform( t, level, sourceTransform );
+		return sourceTransform;
+	}
+
+
 	public static RandomAccessibleInterval< ? > getRandomAccessibleInterval( Bdv bdv, int sourceId )
 	{
 		return bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceId ).getSpimSource().getSource( 0, 0 );
@@ -190,6 +199,26 @@ public abstract class BdvUtils
 		return affineTransform3D;
 	}
 
+
+	public static RandomAccessibleInterval< IntegerType > getIndexImg( BdvStackSource bdvStackSource, int t, int level )
+	{
+		final SourceAndConverter sourceAndConverter = ( SourceAndConverter ) bdvStackSource.getSources().get( 0 );
+
+		final Source spimSource = sourceAndConverter.getSpimSource();
+
+		if ( spimSource instanceof TransformedSource )
+		{
+			final Source wrappedSource = ( ( TransformedSource ) spimSource ).getWrappedSource();
+
+			if ( wrappedSource instanceof LabelsSource )
+			{
+				return ( ( LabelsSource ) wrappedSource ).getIndexImg( t, 0 );
+			}
+		}
+
+		return null; // TODO: throw some type error...
+
+	}
 
 	public static ARGBType asArgbType( Color color )
 	{
@@ -262,5 +291,26 @@ public abstract class BdvUtils
 		}
 
 		return nonOverlaySources;
+	}
+
+	public static boolean isLabelsSource( BdvStackSource bdvStackSource )
+	{
+
+		final SourceAndConverter sourceAndConverter = ( SourceAndConverter )  bdvStackSource.getSources().get( 0 );
+
+		final Source spimSource = sourceAndConverter.getSpimSource();
+
+		if ( spimSource instanceof TransformedSource )
+		{
+			final Source wrappedSource = ( ( TransformedSource ) spimSource ).getWrappedSource();
+
+			if ( wrappedSource instanceof LabelsSource )
+			{
+				return true;
+			}
+		}
+
+		return false;
+
 	}
 }

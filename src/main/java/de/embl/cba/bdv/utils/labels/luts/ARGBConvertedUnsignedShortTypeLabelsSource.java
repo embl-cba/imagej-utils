@@ -15,19 +15,22 @@ import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory
 import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.type.numeric.integer.ShortType;
+import net.imglib2.type.numeric.integer.UnsignedLongType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.*;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBType > {
+public class ARGBConvertedUnsignedShortTypeLabelsSource implements Source< VolatileARGBType >, LabelsSource< UnsignedShortType > {
     private long setupId;
     private SpimData spimData;
-    private AbstractViewerSetupImgLoader< IntType, VolatileIntType > setupImgLoader;
+    private AbstractViewerSetupImgLoader< UnsignedShortType, VolatileUnsignedShortType > setupImgLoader;
 
     final private InterpolatorFactory< VolatileARGBType, RandomAccessible< VolatileARGBType > >[] interpolatorFactories;
     private AffineTransform3D viewRegistration;
     private AffineTransform3D[] mipmapTransforms;
-    private VolatileIntTypeLabelsARGBConverter volatileIntTypeLabelsARGBConverter;
+    private VolatileUnsignedShortTypeLabelsARGBConverter volatileUnsignedShortTypeLabelsARGBConverter;
 
     {
         interpolatorFactories = new InterpolatorFactory[]{
@@ -36,7 +39,7 @@ public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBTyp
         };
     }
 
-    public ARGBConvertedIntTypeLabelsSource( SpimData spimdata, final int setupId )
+    public ARGBConvertedUnsignedShortTypeLabelsSource( SpimData spimdata, final int setupId )
     {
         this.setupId = setupId;
         this.spimData = spimdata;
@@ -45,7 +48,7 @@ public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBTyp
         this.setupImgLoader = ( AbstractViewerSetupImgLoader ) imgLoader.getSetupImgLoader( setupId );
         this.mipmapTransforms = this.setupImgLoader.getMipmapTransforms();
 
-        volatileIntTypeLabelsARGBConverter = new VolatileIntTypeLabelsARGBConverter();
+        volatileUnsignedShortTypeLabelsARGBConverter = new VolatileUnsignedShortTypeLabelsARGBConverter();
 
         try
         {
@@ -75,14 +78,14 @@ public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBTyp
     {
         return Converters.convert(
                         setupImgLoader.getVolatileImage( t, mipMapLevel ),
-                        volatileIntTypeLabelsARGBConverter,
+                        volatileUnsignedShortTypeLabelsARGBConverter,
                         new VolatileARGBType() );
     }
 
     @Override
-    public RealRandomAccessible<VolatileARGBType> getInterpolatedSource(final int t, final int level, final Interpolation method) {
-        final ExtendedRandomAccessibleInterval<VolatileARGBType, RandomAccessibleInterval<VolatileARGBType>> extendedSource =
-                Views.extendValue(getSource(t, level), new VolatileARGBType(0));
+    public RealRandomAccessible< VolatileARGBType > getInterpolatedSource(final int t, final int level, final Interpolation method) {
+        final ExtendedRandomAccessibleInterval< VolatileARGBType, RandomAccessibleInterval< VolatileARGBType > > extendedSource =
+                Views.extendValue( getSource(t, level), new VolatileARGBType(0) );
         switch (method) {
             case NLINEAR:
                 return Views.interpolate(extendedSource, interpolatorFactories[1]);
@@ -94,7 +97,7 @@ public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBTyp
     @Override
     public void getSourceTransform(int t, int level, AffineTransform3D transform)
     {
-        final AffineTransform3D sourceTransform = viewRegistration.copy().preConcatenate( mipmapTransforms[ level ] );
+        final AffineTransform3D sourceTransform = viewRegistration.copy().concatenate( mipmapTransforms[ level ] );
         transform.set( sourceTransform );
     }
 
@@ -117,4 +120,16 @@ public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBTyp
     public int getNumMipmapLevels() {
         return setupImgLoader.getMipmapTransforms().length;
     }
+
+    @Override
+    public void incrementSeed()
+    {
+        volatileUnsignedShortTypeLabelsARGBConverter.incrementSeed();
+    }
+
+	@Override
+	public RandomAccessibleInterval< UnsignedShortType > getIndexImg( int t, int mipMapLevel )
+	{
+		return setupImgLoader.getImage( t, mipMapLevel );
+	}
 }

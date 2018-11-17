@@ -19,7 +19,9 @@ package de.embl.cba.bdv.utils.labels.luts;
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.volatiles.VolatileARGBType;
-import net.imglib2.type.volatiles.VolatileUnsignedLongType;
+import net.imglib2.type.volatiles.VolatileIntType;
+import net.imglib2.type.volatiles.VolatileShortType;
+import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +29,7 @@ import java.util.Map;
 /**
  * Conversion logic adapted from BigCat Viewer.
  */
-public class VolatileUnsignedLongTypeLabelsARGBConverter implements Converter< VolatileUnsignedLongType, VolatileARGBType >
+public class VolatileUnsignedShortTypeLabelsARGBConverter implements Converter< VolatileUnsignedShortType, VolatileARGBType >
 {
     private int alpha = 0x20000000;
     final static private double goldenRatio = 1.0 / ( 0.5 * Math.sqrt( 5 ) + 0.5 );
@@ -47,7 +49,7 @@ public class VolatileUnsignedLongTypeLabelsARGBConverter implements Converter< V
     }
 
 	@Override
-	public void convert( final VolatileUnsignedLongType input, final VolatileARGBType output )
+	public void convert( final VolatileUnsignedShortType input, final VolatileARGBType output )
 	{
 		if ( input.isValid() )
 		{
@@ -103,6 +105,4 @@ public class VolatileUnsignedLongTypeLabelsARGBConverter implements Converter< V
 		seed++;
 		lut = new HashMap<>();
 	}
-
-
 }

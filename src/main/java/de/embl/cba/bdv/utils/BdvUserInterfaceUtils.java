@@ -2,8 +2,8 @@ package de.embl.cba.bdv.utils;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.SliderPanelDouble;
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.Bdv;
-import bdv.util.BdvSource;
 import bdv.util.BdvStackSource;
 import bdv.util.BoundedValueDouble;
 import bdv.viewer.Source;
@@ -11,14 +11,12 @@ import bdv.viewer.SourceAndConverter;
 import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.labels.luts.LabelsSource;
-import ij.IJ;
 import ij.gui.GenericDialog;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,9 +99,20 @@ public abstract class BdvUserInterfaceUtils
 
 	public static JButton createColorButton( JPanel panel,
 											 int[] buttonDimensions,
-											 BdvSource bdvSource )
+											 BdvStackSource bdvStackSource )
 	{
-		JButton colorButton = new JButton( "C" );
+
+		JButton colorButton;
+
+		if ( BdvUtils.isLabelsSource( bdvStackSource ) )
+		{
+			colorButton = new JButton( "S" );
+		}
+		else
+		{
+			colorButton = new JButton( "C" );
+		}
+
 		colorButton.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
 
 		colorButton.addActionListener( new ActionListener()
@@ -111,11 +120,18 @@ public abstract class BdvUserInterfaceUtils
 			@Override
 			public void actionPerformed( ActionEvent e )
 			{
-				Color color = JColorChooser.showDialog( null, "", null );
+				if ( BdvUtils.isLabelsSource( bdvStackSource ) )
+				{
+					incrementLabelColorSeed( bdvStackSource );
+					bdvStackSource.getBdvHandle().getViewerPanel().requestRepaint();
+				}
+				else
+				{
+					Color color = JColorChooser.showDialog( null, "", null );
+					bdvStackSource.setColor( BdvUtils.asArgbType( color ) );
+					panel.setBackground( color );
+				}
 
-				bdvSource.setColor( BdvUtils.asArgbType( color ) );
-
-				panel.setBackground( color );
 			}
 		} );
 
@@ -163,7 +179,7 @@ public abstract class BdvUserInterfaceUtils
 
 	public static JButton createBrightnessButton( int[] buttonDimensions,
 												  String name,
-												  BdvSource bdvSource )
+												  BdvStackSource bdvStackSource )
 	{
 		JButton button = new JButton( "B" );
 		button.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
@@ -174,12 +190,7 @@ public abstract class BdvUserInterfaceUtils
 			@Override
 			public void actionPerformed( ActionEvent e )
 			{
-
-				boolean isLabelsSource = isLabelsSource( bdvSource );
-
-				IJ.log( ""+ isLabelsSource );
-
-				final ArrayList< ConverterSetup > converterSetups = getConverterSetups( bdvSource );
+				final ArrayList< ConverterSetup > converterSetups = getConverterSetups( bdvStackSource );
 
 				showBrightnessDialog( name, converterSetups );
 			}
@@ -188,31 +199,31 @@ public abstract class BdvUserInterfaceUtils
 		return button;
 	}
 
-	private static boolean isLabelsSource( BdvSource bdvSource )
+	public static void incrementLabelColorSeed( BdvStackSource bdvStackSource )
 	{
-		boolean isLabelsSource = false;
+		final SourceAndConverter sourceAndConverter = ( SourceAndConverter ) bdvStackSource.getSources().get( 0 );
 
-		if ( bdvSource instanceof BdvStackSource )
+		final Source spimSource = sourceAndConverter.getSpimSource();
+
+		if ( spimSource instanceof TransformedSource )
 		{
-			final SourceAndConverter sourceAndConverter = ( SourceAndConverter ) ( ( BdvStackSource ) bdvSource ).getSources().get( 0 );
+			final Source wrappedSource = ( ( TransformedSource ) spimSource ).getWrappedSource();
 
-			final Source spimSource = sourceAndConverter.getSpimSource();
-
-			if ( spimSource instanceof LabelsSource )
+			if ( wrappedSource instanceof LabelsSource )
 			{
-				isLabelsSource = true;
+				( ( LabelsSource ) wrappedSource).incrementSeed();
 			}
-
 		}
-		return isLabelsSource;
 	}
 
-	private static ArrayList< ConverterSetup > getConverterSetups( BdvSource bdvSource )
+
+
+	private static ArrayList< ConverterSetup > getConverterSetups( BdvStackSource bdvStackSource )
 	{
-		bdvSource.setCurrent();
-		final int sourceIndex = bdvSource.getBdvHandle().getViewerPanel().getVisibilityAndGrouping().getCurrentSource();
+		bdvStackSource.setCurrent();
+		final int sourceIndex = bdvStackSource.getBdvHandle().getViewerPanel().getVisibilityAndGrouping().getCurrentSource();
 		final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
-		converterSetups.add( bdvSource.getBdvHandle().getSetupAssignments().getConverterSetups().get( sourceIndex ) );
+		converterSetups.add( bdvStackSource.getBdvHandle().getSetupAssignments().getConverterSetups().get( sourceIndex ) );
 		return converterSetups;
 	}
 
@@ -292,7 +303,7 @@ public abstract class BdvUserInterfaceUtils
 	}
 
 
-	public static JButton createToggleButton( int[] buttonDimensions, BdvSource bdvSource )
+	public static JButton createToggleButton( int[] buttonDimensions, BdvStackSource bdvStackSource )
 	{
 		JButton button = new JButton( "T" );
 		button.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
@@ -305,7 +316,7 @@ public abstract class BdvUserInterfaceUtils
 			public void actionPerformed( ActionEvent e )
 			{
 				isActive = ! isActive;
-				bdvSource.setActive( isActive );
+				bdvStackSource.setActive( isActive );
 			}
 		} );
 
