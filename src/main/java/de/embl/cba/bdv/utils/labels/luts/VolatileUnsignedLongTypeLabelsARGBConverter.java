@@ -29,22 +29,10 @@ import java.util.Map;
  */
 public class VolatileUnsignedLongTypeLabelsARGBConverter implements Converter< VolatileUnsignedLongType, VolatileARGBType >
 {
-    private int alpha = 0x20000000;
-    final static private double goldenRatio = 1.0 / ( 0.5 * Math.sqrt( 5 ) + 0.5 );
     private long seed = 50;
-    final static private double[] rs = new double[]{ 1, 1, 0, 0, 0, 1, 1 };
-    final static private double[] gs = new double[]{ 0, 1, 1, 1, 0, 0, 0 };
-    final static private double[] bs = new double[]{ 0, 0, 0, 1, 1, 1, 0 };
-
     private Map< Long, Integer > lut = new HashMap<>();
-
-    private int interpolate( final double[] xs, final int k, final int l, final double u, final double v ){
-        return ( int )( ( v * xs[ k ] + u * xs[ l ] ) * 255.0 + 0.5 );
-    }
-
-    private int calculateARGB( final int r, final int g, final int b, final int alpha ) {
-        return ( ( ( r << 8 ) | g ) << 8 ) | b | alpha;
-    }
+	private boolean isLabelSelected = false;
+	private long selectedLabel;
 
 	@Override
 	public void convert( final VolatileUnsignedLongType input, final VolatileARGBType output )
@@ -54,43 +42,7 @@ public class VolatileUnsignedLongTypeLabelsARGBConverter implements Converter< V
 			double x = input.getRealDouble();
 			long lx = ( long ) x;
 
-			if ( x != 0 )
-			{
-				if ( lut.containsKey( lx ) )
-				{
-					output.setValid( true );
-					output.set( lut.get( lx ) );
-				}
-				else
-				{
-					x = ( x * seed ) * goldenRatio;
-					x = x - ( long ) Math.floor( x );
-					x *= 6.0;
-					final int k = ( int ) x;
-					final int l = k + 1;
-					final double u = x - k;
-					final double v = 1.0 - u;
-					final int red = interpolate( rs, k, l, u, v );
-					final int green = interpolate( gs, k, l, u, v );
-					final int blue = interpolate( bs, k, l, u, v );
-					int argb = calculateARGB( red, green, blue, alpha );
-					final double alpha = ARGBType.alpha( argb );
-					final int aInt = Math.min( 255, ( int ) ( alpha ) );
-					final int rInt = Math.min( 255, ARGBType.red( argb ) );
-					final int gInt = Math.min( 255, ARGBType.green( argb ) );
-					final int bInt = Math.min( 255, ARGBType.blue( argb ) );
-					final int color = ( ( ( ( ( aInt << 8 ) | rInt ) << 8 ) | gInt ) << 8 ) | bInt;
-
-					output.set( color );
-					output.setValid( true );
-
-					lut.put( lx, color );
-				}
-			}
-			else
-			{
-				output.set( 0 );
-			}
+			LabelUtils.setOutput( output, x, lx, isLabelSelected, selectedLabel, lut, seed );
 		}
 		else
 		{
@@ -98,10 +50,22 @@ public class VolatileUnsignedLongTypeLabelsARGBConverter implements Converter< V
 		}
 	}
 
+
 	public void incrementSeed()
 	{
 		seed++;
 		lut = new HashMap<>();
+	}
+
+	public void select( long i )
+	{
+		isLabelSelected = true;
+		selectedLabel = i;
+	}
+
+	public void selectNone()
+	{
+		isLabelSelected = false;
 	}
 
 

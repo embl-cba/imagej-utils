@@ -9,4 +9,8 @@ public interface LabelsSource < T extends AbstractIntegerType >
 	void incrementSeed();
 
 	RandomAccessibleInterval< T > getIndexImg( final int t, final int mipMapLevel );
+
+	void select( long i );
+
+	void selectNone();
 }

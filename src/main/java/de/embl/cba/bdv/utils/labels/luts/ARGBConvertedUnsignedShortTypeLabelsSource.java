@@ -132,4 +132,19 @@ public class ARGBConvertedUnsignedShortTypeLabelsSource implements Source< Volat
 	{
 		return setupImgLoader.getImage( t, mipMapLevel );
 	}
+
+
+	// TODO: replace by getConverter (once I know how to return a generic one)
+
+    @Override
+    public void select( long i )
+    {
+        volatileUnsignedShortTypeLabelsARGBConverter.select( i );
+    }
+
+    @Override
+    public void selectNone()
+    {
+        volatileUnsignedShortTypeLabelsARGBConverter.selectNone();
+    }
 }

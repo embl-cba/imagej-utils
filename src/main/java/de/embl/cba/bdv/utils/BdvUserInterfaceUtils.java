@@ -2,15 +2,11 @@ package de.embl.cba.bdv.utils;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.SliderPanelDouble;
-import bdv.tools.transformation.TransformedSource;
 import bdv.util.Bdv;
 import bdv.util.BdvStackSource;
 import bdv.util.BoundedValueDouble;
-import bdv.viewer.Source;
-import bdv.viewer.SourceAndConverter;
 import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.state.SourceState;
-import de.embl.cba.bdv.utils.labels.luts.LabelsSource;
 import ij.gui.GenericDialog;
 
 import javax.swing.*;
@@ -122,7 +118,7 @@ public abstract class BdvUserInterfaceUtils
 			{
 				if ( BdvUtils.isLabelsSource( bdvStackSource ) )
 				{
-					incrementLabelColorSeed( bdvStackSource );
+					BdvUtils.getLabelsSource( bdvStackSource ).incrementSeed();
 					bdvStackSource.getBdvHandle().getViewerPanel().requestRepaint();
 				}
 				else
@@ -198,24 +194,6 @@ public abstract class BdvUserInterfaceUtils
 
 		return button;
 	}
-
-	public static void incrementLabelColorSeed( BdvStackSource bdvStackSource )
-	{
-		final SourceAndConverter sourceAndConverter = ( SourceAndConverter ) bdvStackSource.getSources().get( 0 );
-
-		final Source spimSource = sourceAndConverter.getSpimSource();
-
-		if ( spimSource instanceof TransformedSource )
-		{
-			final Source wrappedSource = ( ( TransformedSource ) spimSource ).getWrappedSource();
-
-			if ( wrappedSource instanceof LabelsSource )
-			{
-				( ( LabelsSource ) wrappedSource).incrementSeed();
-			}
-		}
-	}
-
 
 
 	private static ArrayList< ConverterSetup > getConverterSetups( BdvStackSource bdvStackSource )
