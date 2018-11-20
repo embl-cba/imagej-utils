@@ -224,11 +224,7 @@ public abstract class BdvUtils
 
 		final RealPoint positionInPixelUnits = new RealPoint( 3 );
 
-		AffineTransform3D sourceTransformWithoutTranslation = sourceTransform.copy();
-
-		sourceTransformWithoutTranslation.setTranslation( new double[]{ 0, 0, 0 } );
-
-		sourceTransformWithoutTranslation.inverse().apply( mousePositionInMicrometerUnits, positionInPixelUnits );
+		sourceTransform.inverse().apply( mousePositionInMicrometerUnits, positionInPixelUnits );
 
 		final long[] longPosition = new long[ 3 ];
 

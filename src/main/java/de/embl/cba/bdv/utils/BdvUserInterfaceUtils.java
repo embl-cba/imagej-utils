@@ -59,7 +59,7 @@ public abstract class BdvUserInterfaceUtils
 		channelPanel.add( jLabel );
 		channelPanel.add( createColorButton( channelPanel, buttonDimensions, bdv, sourceIndexes ) );
 		channelPanel.add( createBrightnessButton( buttonDimensions,  name, bdv, sourceIndexes ) );
-		channelPanel.add( createToggleButton( buttonDimensions,  bdv, sourceIndexes ) );
+		channelPanel.add( createVisibilityCheckbox( buttonDimensions,  bdv, sourceIndexes ) );
 
 		panel.add( channelPanel );
 
@@ -257,14 +257,14 @@ public abstract class BdvUserInterfaceUtils
 		converterSetup.setDisplayRange( converterSetup.getDisplayRangeMin(), ( int ) gd.getNextNumber() );
 	}
 
-	public static JButton createToggleButton( int[] buttonDimensions,
-											  Bdv bdv,
-											  ArrayList< Integer > sourceIndices )
+	public static JCheckBox createVisibilityCheckbox( int[] buttonDimensions,
+													  Bdv bdv,
+													  ArrayList< Integer > sourceIndices )
 	{
-		JButton button = new JButton( "T" );
-		button.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
+		JCheckBox checkBox = new JCheckBox( "Active" );
+		checkBox.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
 
-		button.addActionListener( new ActionListener()
+		checkBox.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( ActionEvent e )
@@ -272,33 +272,34 @@ public abstract class BdvUserInterfaceUtils
 				final VisibilityAndGrouping visibilityAndGrouping = bdv.getBdvHandle().getViewerPanel().getVisibilityAndGrouping();
 				for ( int i : sourceIndices )
 				{
-					visibilityAndGrouping.setSourceActive( i, !visibilityAndGrouping.isSourceActive( i ) );
+					visibilityAndGrouping.setSourceActive( i, ! visibilityAndGrouping.isSourceActive( i ) );
 				}
 			}
 		} );
 
-		return button;
+		return checkBox;
 	}
 
 
-	public static JButton createToggleButton( int[] buttonDimensions, BdvStackSource bdvStackSource )
+	public static JCheckBox createVisibilityCheckbox( int[] buttonDimensions, BdvStackSource bdvStackSource, boolean isVisible )
 	{
-		JButton button = new JButton( "T" );
-		button.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
+		JCheckBox checkBox = new JCheckBox( "" );
+		checkBox.setSelected( isVisible );
+		checkBox.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
 
-		button.addActionListener( new ActionListener()
+//		JButton button = new JButton( "T" );
+//		button.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
+
+		checkBox.addActionListener( new ActionListener()
 		{
-			boolean isActive = true;
-
 			@Override
 			public void actionPerformed( ActionEvent e )
 			{
-				isActive = ! isActive;
-				bdvStackSource.setActive( isActive );
+				bdvStackSource.setActive( checkBox.isSelected() );
 			}
 		} );
 
-		return button;
+		return checkBox;
 	}
 
 	public static void addDisplaySettingsUI( Bdv bdv, JPanel panel )
