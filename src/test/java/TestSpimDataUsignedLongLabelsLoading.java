@@ -3,23 +3,18 @@ import bdv.util.*;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedLabelSource;
+import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeLabelsSource;
 import de.embl.cba.bdv.utils.labels.LabelsSource;
 import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DGoogleMouse;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
-import net.imglib2.RandomAccess;
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
-import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 import org.scijava.ui.behaviour.ClickBehaviour;
-import org.scijava.ui.behaviour.InputTrigger;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
-import javax.swing.*;
 import java.io.File;
 import java.util.Map;
 
@@ -34,11 +29,12 @@ public class TestSpimDataUsignedLongLabelsLoading
 
 		//final File file = new File( "/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/em-segmented-cells-parapodium-labels-test.xml" );
 
-		final File file = new File( "/Users/tischer/Desktop/bdv_test_data/test.xml" );
+		// final File file = new File( "/Users/tischer/Desktop/bdv_test_data/test.xml" );
+		final File file = new File( "/Users/tischer/Desktop/bdv_test_data/bdv_mipmap-labels.xml" );
 
 		SpimData spimData = new XmlIoSpimData().load( file.toString() );
 
-		final Source< VolatileARGBType > labelSource = new ARGBConvertedLabelSource( spimData, 0 );
+		final Source< VolatileARGBType > labelSource = new ARGBConvertedRealTypeLabelsSource( spimData, 0 );
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( labelSource,

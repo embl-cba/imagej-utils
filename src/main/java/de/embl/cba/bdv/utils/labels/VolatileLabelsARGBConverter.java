@@ -17,12 +17,8 @@
 package de.embl.cba.bdv.utils.labels;
 
 import net.imglib2.converter.Converter;
-import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.type.numeric.integer.AbstractIntegerType;
-import net.imglib2.type.volatiles.AbstractVolatileNativeRealType;
 import net.imglib2.type.volatiles.AbstractVolatileRealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
-import net.imglib2.type.volatiles.VolatileUnsignedLongType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,17 +37,17 @@ public class VolatileLabelsARGBConverter< V extends AbstractVolatileRealType >
 
 
 	@Override
-	public void convert( final V input, final VolatileARGBType output )
+	public void convert( final V input, final VolatileARGBType argbType )
 	{
 		if ( input.isValid() )
 		{
-			double x = input.getRealDouble();
+			final double x = input.getRealDouble();
 
-			LabelUtils.setOutput( output, x, selectedLabels, lut, seed );
+			LabelUtils.setColor( argbType, x, selectedLabels, lut, seed );
 		}
 		else
 		{
-			output.setValid( false );
+			argbType.setValid( false );
 		}
 	}
 

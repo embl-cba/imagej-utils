@@ -15,6 +15,7 @@ import ij.plugin.Duplicator;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
@@ -211,7 +212,7 @@ public abstract class BdvUtils
 
 			if ( wrappedSource instanceof LabelsSource )
 			{
-				return ( ( LabelsSource ) wrappedSource ).getWrappedSource( t, 0 );
+				return ( ( LabelsSource ) wrappedSource ).getWrappedSource( t, level );
 			}
 		}
 
@@ -567,6 +568,8 @@ public abstract class BdvUtils
 	public static Map< Integer, Long > selectObjectsInActiveLabelSources( Bdv bdv, RealPoint point )
 	{
 
+
+
 		final HashMap< Integer, Long > sourcesAndSelectedObjects = new HashMap<>();
 
 		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
@@ -580,16 +583,20 @@ public abstract class BdvUtils
 
 			if ( isLabelsSource( source ) )
 			{
+				final AffineTransform3D affineTransform3D = new AffineTransform3D();
+				bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( affineTransform3D );
+				int level = MipmapTransforms.getBestMipMapLevel( affineTransform3D, source, 0 );
 
-				final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( source, 0, 0 );
+				final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( source, 0, level );
 
-				final long[] positionInSourceStack = BdvUtils.getPositionInSourceStack( source, point, 0, 0 );
+				final long[] positionInSourceStack = BdvUtils.getPositionInSourceStack( source, point, 0, level );
 
 				final RandomAccess< IntegerType > access = indexImg.randomAccess();
 
 				try
 				{
 					access.setPosition( positionInSourceStack );
+
 					final long objectIndex = access.get().getIntegerLong();
 
 					if ( objectIndex != 0 )

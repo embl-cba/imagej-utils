@@ -23,7 +23,7 @@ import net.imglib2.type.volatiles.*;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-public class ARGBConvertedLabelSource< R extends RealType< R >, V extends AbstractVolatileRealType< R, V > > implements LabelsSource< R >
+public class ARGBConvertedRealTypeLabelsSource< R extends RealType< R >, V extends AbstractVolatileRealType< R, V > > implements LabelsSource< R >
 {
     private long setupId;
     private SpimData spimData;
@@ -42,7 +42,7 @@ public class ARGBConvertedLabelSource< R extends RealType< R >, V extends Abstra
         };
     }
 
-    public ARGBConvertedLabelSource( SpimData spimdata, final int setupId )
+    public ARGBConvertedRealTypeLabelsSource( SpimData spimdata, final int setupId )
     {
         this.setupId = setupId;
         this.spimData = spimdata;
