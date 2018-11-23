@@ -14,14 +14,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package de.embl.cba.bdv.utils.labels.luts;
+package de.embl.cba.bdv.utils.labels;
 
 import net.imglib2.converter.Converter;
 import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Conversion logic adapted from BigCat Viewer.
@@ -30,8 +32,7 @@ public class VolatileUnsignedShortTypeLabelsARGBConverter implements Converter< 
 {
 	private long seed = 50;
 	private Map< Long, Integer > lut = new HashMap<>();
-	private boolean isLabelSelected;
-	private long selectedLabel;
+	private Set< Long > selectedLabels = new HashSet<>(  );
 
 	@Override
 	public void convert( final VolatileUnsignedShortType input, final VolatileARGBType output )
@@ -41,7 +42,7 @@ public class VolatileUnsignedShortTypeLabelsARGBConverter implements Converter< 
 			double x = input.getRealDouble();
 			long lx = ( long ) x;
 
-			LabelUtils.setOutput( output, x, lx, isLabelSelected, selectedLabel, lut, seed );
+			LabelUtils.setOutput( output, x, selectedLabels, lut, seed );
 		}
 		else
 		{
@@ -56,14 +57,20 @@ public class VolatileUnsignedShortTypeLabelsARGBConverter implements Converter< 
 	}
 
 
-	public void select( long i )
+	public void select( long selectedLabel )
 	{
-		isLabelSelected = true;
-		selectedLabel = i;
+		if ( selectedLabels.contains( selectedLabel ) )
+		{
+			selectedLabels.remove( selectedLabel );
+		}
+		else
+		{
+			selectedLabels.add( selectedLabel );
+		}
 	}
 
 	public void selectNone()
 	{
-		isLabelSelected = false;
+		selectedLabels = new HashSet<>(  );
 	}
 }

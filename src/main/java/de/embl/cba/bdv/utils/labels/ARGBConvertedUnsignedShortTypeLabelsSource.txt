@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.labels.luts;
+package de.embl.cba.bdv.utils.labels;
 
 import bdv.AbstractViewerSetupImgLoader;
 import bdv.ViewerImgLoader;
@@ -14,20 +14,21 @@ import net.imglib2.interpolation.InterpolatorFactory;
 import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory;
 import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.*;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBType > {
+public class ARGBConvertedUnsignedShortTypeLabelsSource implements LabelsSource<UnsignedShortType>
+{
     private long setupId;
     private SpimData spimData;
-    private AbstractViewerSetupImgLoader< IntType, VolatileIntType > setupImgLoader;
+    private AbstractViewerSetupImgLoader< UnsignedShortType, VolatileUnsignedShortType > setupImgLoader;
 
     final private InterpolatorFactory< VolatileARGBType, RandomAccessible< VolatileARGBType > >[] interpolatorFactories;
     private AffineTransform3D viewRegistration;
     private AffineTransform3D[] mipmapTransforms;
-    private VolatileIntTypeLabelsARGBConverter volatileIntTypeLabelsARGBConverter;
+    private VolatileUnsignedShortTypeLabelsARGBConverter volatileUnsignedShortTypeLabelsARGBConverter;
 
     {
         interpolatorFactories = new InterpolatorFactory[]{
@@ -36,7 +37,7 @@ public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBTyp
         };
     }
 
-    public ARGBConvertedIntTypeLabelsSource( SpimData spimdata, final int setupId )
+    public ARGBConvertedUnsignedShortTypeLabelsSource( SpimData spimdata, final int setupId )
     {
         this.setupId = setupId;
         this.spimData = spimdata;
@@ -45,7 +46,7 @@ public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBTyp
         this.setupImgLoader = ( AbstractViewerSetupImgLoader ) imgLoader.getSetupImgLoader( setupId );
         this.mipmapTransforms = this.setupImgLoader.getMipmapTransforms();
 
-        volatileIntTypeLabelsARGBConverter = new VolatileIntTypeLabelsARGBConverter();
+        volatileUnsignedShortTypeLabelsARGBConverter = new VolatileUnsignedShortTypeLabelsARGBConverter();
 
         try
         {
@@ -75,7 +76,7 @@ public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBTyp
     {
         return Converters.convert(
                         setupImgLoader.getVolatileImage( t, mipMapLevel ),
-                        volatileIntTypeLabelsARGBConverter,
+                        volatileUnsignedShortTypeLabelsARGBConverter,
                         new VolatileARGBType() );
     }
 
@@ -116,5 +117,44 @@ public class ARGBConvertedIntTypeLabelsSource implements Source< VolatileARGBTyp
     @Override
     public int getNumMipmapLevels() {
         return setupImgLoader.getMipmapTransforms().length;
+    }
+
+    @Override
+    public void incrementSeed()
+    {
+        volatileUnsignedShortTypeLabelsARGBConverter.incrementSeed();
+    }
+
+    @Override
+    public RandomAccessibleInterval< UnsignedShortType > getWrappedSource( int t, int mipMapLevel )
+    {
+        return null;
+    }
+
+    @Override
+    public void select( UnsignedShortType i )
+    {
+
+    }
+
+    @Override
+	public RandomAccessibleInterval< UnsignedShortType > getWrappedSource( int t, int mipMapLevel )
+	{
+		return setupImgLoader.getImage( t, mipMapLevel );
+	}
+
+
+	// TODO: replace by getConverter (once I know how to return a generic one)
+
+    @Override
+    public void select( long i )
+    {
+        volatileUnsignedShortTypeLabelsARGBConverter.select( i );
+    }
+
+    @Override
+    public void selectNone()
+    {
+        volatileUnsignedShortTypeLabelsARGBConverter.selectNone();
     }
 }

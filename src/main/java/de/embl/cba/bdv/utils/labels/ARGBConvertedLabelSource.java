@@ -1,35 +1,40 @@
-package de.embl.cba.bdv.utils.labels.luts;
+package de.embl.cba.bdv.utils.labels;
 
 import bdv.AbstractViewerSetupImgLoader;
 import bdv.ViewerImgLoader;
 import bdv.viewer.Interpolation;
-import bdv.viewer.Source;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
+import net.imglib2.Volatile;
 import net.imglib2.converter.Converters;
 import net.imglib2.interpolation.InterpolatorFactory;
 import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory;
 import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.type.Type;
 import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.AbstractIntegerType;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import net.imglib2.type.volatiles.*;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-public class ARGBConvertedUnsignedLongTypeLabelsSource implements Source< VolatileARGBType >, LabelsSource< UnsignedLongType > {
+public class ARGBConvertedLabelSource< R extends RealType< R >, V extends AbstractVolatileRealType< R, V > > implements LabelsSource< R >
+{
     private long setupId;
     private SpimData spimData;
-    private AbstractViewerSetupImgLoader< UnsignedLongType, VolatileUnsignedLongType > setupImgLoader;
+
+    private AbstractViewerSetupImgLoader< R, V > setupImgLoader;
+
+    private VolatileLabelsARGBConverter< V > volatileLabelsARGBConverter;
 
     final private InterpolatorFactory< VolatileARGBType, RandomAccessible< VolatileARGBType > >[] interpolatorFactories;
     private AffineTransform3D viewRegistration;
     private AffineTransform3D[] mipmapTransforms;
-    private VolatileUnsignedLongTypeLabelsARGBConverter volatileUnsignedLongTypeLabelsARGBConverter;
-
     {
         interpolatorFactories = new InterpolatorFactory[]{
                 new NearestNeighborInterpolatorFactory< VolatileARGBType >(),
@@ -37,7 +42,7 @@ public class ARGBConvertedUnsignedLongTypeLabelsSource implements Source< Volati
         };
     }
 
-    public ARGBConvertedUnsignedLongTypeLabelsSource( SpimData spimdata, final int setupId )
+    public ARGBConvertedLabelSource( SpimData spimdata, final int setupId )
     {
         this.setupId = setupId;
         this.spimData = spimdata;
@@ -46,21 +51,26 @@ public class ARGBConvertedUnsignedLongTypeLabelsSource implements Source< Volati
         this.setupImgLoader = ( AbstractViewerSetupImgLoader ) imgLoader.getSetupImgLoader( setupId );
         this.mipmapTransforms = this.setupImgLoader.getMipmapTransforms();
 
-        volatileUnsignedLongTypeLabelsARGBConverter = new VolatileUnsignedLongTypeLabelsARGBConverter();
+
+        final Type type = setupImgLoader.getImageType().createVariable();
+
+        final Type volatileType = setupImgLoader.getVolatileImageType().createVariable();
 
         try
         {
-            AbstractVolatileNativeRealType type = setupImgLoader.getVolatileImageType();
-            if (! ( type instanceof VolatileUnsignedByteType
-					|| type instanceof VolatileUnsignedShortType
-                    || type instanceof VolatileUnsignedLongType )) {
-                throw new Exception("Data type not supported for label LUTs: " + type.toString() );
+            if (! ( volatileType instanceof VolatileUnsignedByteType
+                    || volatileType instanceof VolatileUnsignedShortType
+                    || volatileType instanceof VolatileUnsignedLongType )) {
+                throw new Exception("Data type not supported for creating a label source: " + volatileType.toString() );
             }
         }
         catch ( Exception e)
         {
             e.printStackTrace();
         }
+
+
+        volatileLabelsARGBConverter = new VolatileLabelsARGBConverter();
 
     }
 
@@ -76,7 +86,7 @@ public class ARGBConvertedUnsignedLongTypeLabelsSource implements Source< Volati
     {
         return Converters.convert(
                         setupImgLoader.getVolatileImage( t, mipMapLevel ),
-                        volatileUnsignedLongTypeLabelsARGBConverter,
+                        volatileLabelsARGBConverter,
                         new VolatileARGBType() );
     }
 
@@ -122,26 +132,24 @@ public class ARGBConvertedUnsignedLongTypeLabelsSource implements Source< Volati
     @Override
     public void incrementSeed()
     {
-        volatileUnsignedLongTypeLabelsARGBConverter.incrementSeed();
+        volatileLabelsARGBConverter.incrementSeed();
     }
 
     @Override
-    public RandomAccessibleInterval< UnsignedLongType > getIndexImg( int t, int mipMapLevel )
+    public RandomAccessibleInterval< R > getWrappedSource( int t, int mipMapLevel )
     {
         return setupImgLoader.getImage( t, mipMapLevel );
     }
 
-    // TODO: replace by getConverter (once I know how to return a generic one)
-
     @Override
-    public void select( long i )
+    public void select( double r )
     {
-        volatileUnsignedLongTypeLabelsARGBConverter.select( i );
+        volatileLabelsARGBConverter.select( r );
     }
 
     @Override
     public void selectNone()
     {
-        volatileUnsignedLongTypeLabelsARGBConverter.selectNone();
+
     }
 }

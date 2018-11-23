@@ -6,7 +6,7 @@ import bdv.viewer.*;
 import bdv.viewer.animate.AbstractTransformAnimator;
 import bdv.viewer.animate.SimilarityTransformAnimator;
 import bdv.viewer.state.SourceState;
-import de.embl.cba.bdv.utils.labels.luts.LabelsSource;
+import de.embl.cba.bdv.utils.labels.LabelsSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import ij.CompositeImage;
 import ij.IJ;
@@ -211,7 +211,7 @@ public abstract class BdvUtils
 
 			if ( wrappedSource instanceof LabelsSource )
 			{
-				return ( ( LabelsSource ) wrappedSource ).getIndexImg( t, 0 );
+				return ( ( LabelsSource ) wrappedSource ).getWrappedSource( t, 0 );
 			}
 		}
 

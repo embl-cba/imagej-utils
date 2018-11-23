@@ -14,15 +14,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package de.embl.cba.bdv.utils.labels.luts;
+package de.embl.cba.bdv.utils.labels;
 
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.type.numeric.integer.AbstractIntegerType;
-import net.imglib2.type.volatiles.AbstractVolatileNativeRealType;
-import net.imglib2.type.volatiles.AbstractVolatileRealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
-import net.imglib2.type.volatiles.VolatileUnsignedShortType;
+import net.imglib2.type.volatiles.VolatileIntType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,8 +27,7 @@ import java.util.Map;
 /**
  * Conversion logic adapted from BigCat Viewer.
  */
-public class VolatileIntegerTypeLabelsARGBConverter< T extends AbstractIntegerType< T >, V extends AbstractVolatileNativeRealType  >
-		implements Converter< V, VolatileARGBType >
+public class VolatileIntTypeLabelsARGBConverter implements Converter< VolatileIntType, VolatileARGBType >
 {
     private int alpha = 0x20000000;
     final static private double goldenRatio = 1.0 / ( 0.5 * Math.sqrt( 5 ) + 0.5 );
@@ -51,7 +47,7 @@ public class VolatileIntegerTypeLabelsARGBConverter< T extends AbstractIntegerTy
     }
 
 	@Override
-	public void convert( final V input, final VolatileARGBType output )
+	public void convert( final VolatileIntType input, final VolatileARGBType output )
 	{
 		if ( input.isValid() )
 		{
@@ -101,11 +97,4 @@ public class VolatileIntegerTypeLabelsARGBConverter< T extends AbstractIntegerTy
 			output.setValid( false );
 		}
 	}
-
-	public void incrementSeed()
-	{
-		seed++;
-		lut = new HashMap<>();
-	}
-
 }

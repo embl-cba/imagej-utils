@@ -14,35 +14,40 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package de.embl.cba.bdv.utils.labels.luts;
+package de.embl.cba.bdv.utils.labels;
 
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.integer.AbstractIntegerType;
+import net.imglib2.type.volatiles.AbstractVolatileNativeRealType;
+import net.imglib2.type.volatiles.AbstractVolatileRealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.type.volatiles.VolatileUnsignedLongType;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Conversion logic adapted from BigCat Viewer.
  */
-public class VolatileUnsignedLongTypeLabelsARGBConverter implements Converter< VolatileUnsignedLongType, VolatileARGBType >
+public class VolatileLabelsARGBConverter< V extends AbstractVolatileRealType >
+		implements Converter< V, VolatileARGBType >
 {
-    private long seed = 50;
-    private Map< Long, Integer > lut = new HashMap<>();
-	private boolean isLabelSelected = false;
-	private long selectedLabel;
+	private long seed = 50;
+	private Map< Double, Integer > lut = new HashMap<>();
+	private Set< Double > selectedLabels = new HashSet<>(  );
+
 
 	@Override
-	public void convert( final VolatileUnsignedLongType input, final VolatileARGBType output )
+	public void convert( final V input, final VolatileARGBType output )
 	{
 		if ( input.isValid() )
 		{
 			double x = input.getRealDouble();
-			long lx = ( long ) x;
 
-			LabelUtils.setOutput( output, x, lx, isLabelSelected, selectedLabel, lut, seed );
+			LabelUtils.setOutput( output, x, selectedLabels, lut, seed );
 		}
 		else
 		{
@@ -57,15 +62,21 @@ public class VolatileUnsignedLongTypeLabelsARGBConverter implements Converter< V
 		lut = new HashMap<>();
 	}
 
-	public void select( long i )
+	public void select( double selectedLabel )
 	{
-		isLabelSelected = true;
-		selectedLabel = i;
+		if ( selectedLabels.contains( selectedLabel ) )
+		{
+			selectedLabels.remove( selectedLabel );
+		}
+		else
+		{
+			selectedLabels.add( selectedLabel );
+		}
 	}
 
 	public void selectNone()
 	{
-		isLabelSelected = false;
+		selectedLabels = new HashSet<>(  );
 	}
 
 
