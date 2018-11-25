@@ -567,24 +567,6 @@ public abstract class BdvUtils
 
 	}
 
-
-	RandomAccessibleInterval< BitType > extractObject( RandomAccessibleInterval< UnsignedLongType > labelMap, long[] seedPosition )
-	{
-		final RandomAccess< UnsignedLongType > access = labelMap.randomAccess();
-		access.setPosition( seedPosition );
-		final long objectId = access.get().getIntegerLong();
-
-		// perform seeded region growing extracting all pixels that are
-		// (i) connected to seedPosition
-		// (ii) and have value objectId
-		// ...
-
-		// create a binary image of minimal size containing all found pixels
-		// ...
-
-		return smallBinaryRAIofObjectBoundingBoxSize;
-	}
-
 	public static Map< Integer, Long > selectObjectsInActiveLabelSources( Bdv bdv, RealPoint point )
 	{
 
