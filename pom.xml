@@ -9,8 +9,7 @@
 	</parent>
 
 	<artifactId>bdv-utils</artifactId>
-	<!--<version>0.1.0-SNAPSHOT</version>-->
-	<version>0.1.21</version>
+	<version>0.1.22-SNAPSHOT</version>
 
 	<name>BigDataViewer Utilities</name>
 	<description>TODO</description>
@@ -115,6 +114,11 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer_fiji</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>3D_Viewer</artifactId>
 		</dependency>
 
 	</dependencies>

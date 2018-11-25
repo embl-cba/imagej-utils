@@ -6,14 +6,18 @@ import bdv.viewer.*;
 import bdv.viewer.animate.AbstractTransformAnimator;
 import bdv.viewer.animate.SimilarityTransformAnimator;
 import bdv.viewer.state.SourceState;
+import de.embl.cba.bdv.utils.algorithms.RegionExtractor;
 import de.embl.cba.bdv.utils.labels.LabelsSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
+import ij3d.Content;
+import ij3d.Image3DUniverse;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
+import net.imglib2.algorithm.neighborhood.DiamondShape;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -25,6 +29,7 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
+import org.scijava.vecmath.Color3f;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -570,8 +575,6 @@ public abstract class BdvUtils
 	public static Map< Integer, Long > selectObjectsInActiveLabelSources( Bdv bdv, RealPoint point )
 	{
 
-
-
 		final HashMap< Integer, Long > sourcesAndSelectedObjects = new HashMap<>();
 
 		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
@@ -624,6 +627,45 @@ public abstract class BdvUtils
 		return sourcesAndSelectedObjects;
 	}
 
+
+	public static ArrayList< RandomAccessibleInterval< BitType > > extractSelectedObject( Bdv bdv, RealPoint point, int level )
+	{
+
+		final ArrayList< RandomAccessibleInterval< BitType > > masks = new ArrayList<>();
+
+		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+
+		for ( int sourceIndex : visibleSourceIndices )
+		{
+
+			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
+
+			final Source source = sourceState.getSpimSource();
+
+			if ( isLabelsSource( source ) )
+			{
+				final AffineTransform3D affineTransform3D = new AffineTransform3D();
+				bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( affineTransform3D );
+
+				level = level > source.getNumMipmapLevels() ?  source.getNumMipmapLevels() - 1 : level;
+
+				//	int level = MipmapTransforms.getBestMipMapLevel( affineTransform3D, source, 0 );
+
+				final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( source, 0, level );
+
+				final long[] positionInSourceStack = BdvUtils.getPositionInSourceStack( source, point, 0, level );
+
+				final RegionExtractor regionExtractor = new RegionExtractor( indexImg, new DiamondShape( 1 ), 1000 * 1000 * 1000L );
+
+				regionExtractor.run( positionInSourceStack );
+
+				masks.add( regionExtractor.getCroppedRegionMask() );
+
+			}
+		}
+
+		return masks;
+	}
 
 	public static void zoomToInterval( Bdv bdv, FinalRealInterval interval )
 	{

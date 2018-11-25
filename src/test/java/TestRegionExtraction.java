@@ -9,16 +9,18 @@ import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeLabelsSource;
 import de.embl.cba.bdv.utils.labels.LabelsSource;
 import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DGoogleMouse;
 import ij.ImageJ;
+import ij.ImagePlus;
+import ij3d.Content;
+import ij3d.Image3DUniverse;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.neighborhood.DiamondShape;
-import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.volatiles.VolatileARGBType;
-import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
+import org.scijava.vecmath.Color3f;
 
 import java.io.File;
 
@@ -47,24 +49,28 @@ public class TestRegionExtraction
 
 		final RegionExtractor regionExtractor = new RegionExtractor( source, new DiamondShape( 1 ), 1000*1000*1000L );
 
-		regionExtractor.run( new long[]{35,35,58} );
+		regionExtractor.run( new long[]{ 35, 35, 58 } );
 
-		if ( regionExtractor.isMaxRegionSizeReached() )
+		if ( regionExtractor.isMaxRegionSizeReached( ) )
 		{
-			int b = 1;
+			System.out.println( "MaxRegionSizeReached" );
 		}
 
-		RandomAccessibleInterval regionMask = regionExtractor.getMinimalSizeRegionMask();
+		RandomAccessibleInterval regionMask = regionExtractor.getCroppedRegionMask();
 
 		new ImageJ();
 		regionMask = Views.addDimension( regionMask, 0, 0 );
 		regionMask = Views.permute( regionMask, 2,3 );
-		ImageJFunctions.show( regionMask );
+		final ImagePlus regionMaskImp = ImageJFunctions.show( regionMask );
 
 		source = Views.addDimension( source, 0, 0 );
 		source = Views.permute( source, 2,3 );
 		ImageJFunctions.show( source );
 
+		Image3DUniverse univ = new Image3DUniverse( );
+		univ.show( );
+		final Content content = univ.addMesh( regionMaskImp, null, "somename", 250, new boolean[]{ true, true, true }, 2 );
+		content.setColor( new Color3f(0.5f, 0, 0.5f ) );
 
 	}
 }

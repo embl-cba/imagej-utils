@@ -55,10 +55,9 @@ public class RegionExtractor < R extends RealType< R > >
 		initBoundingBox();
 
 		floodFill();
-
 	}
 
-	public RandomAccessibleInterval< BitType > getMinimalSizeRegionMask()
+	public RandomAccessibleInterval< BitType > getCroppedRegionMask()
 	{
 		RandomAccessibleInterval< BitType > croppedMask = Views.interval( regionMask, new FinalInterval( min, max ) );
 
