@@ -18,9 +18,11 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedLongType;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
 
@@ -563,6 +565,24 @@ public abstract class BdvUtils
 
 		bdv.getBdvHandle().getViewerPanel().requestRepaint();
 
+	}
+
+
+	RandomAccessibleInterval< BitType > extractObject( RandomAccessibleInterval< UnsignedLongType > labelMap, long[] seedPosition )
+	{
+		final RandomAccess< UnsignedLongType > access = labelMap.randomAccess();
+		access.setPosition( seedPosition );
+		final long objectId = access.get().getIntegerLong();
+
+		// perform seeded region growing extracting all pixels that are
+		// (i) connected to seedPosition
+		// (ii) and have value objectId
+		// ...
+
+		// create a binary image of minimal size containing all found pixels
+		// ...
+
+		return smallBinaryRAIofObjectBoundingBoxSize;
 	}
 
 	public static Map< Integer, Long > selectObjectsInActiveLabelSources( Bdv bdv, RealPoint point )
