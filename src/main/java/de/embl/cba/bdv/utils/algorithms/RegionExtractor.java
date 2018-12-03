@@ -15,6 +15,7 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Pair;
+import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
 import java.util.ArrayList;
@@ -23,18 +24,21 @@ import java.util.function.Consumer;
 
 public class RegionExtractor < R extends RealType< R > >
 {
+	// input
+	private final RandomAccessibleInterval< R > source;
+	private final Shape shape;
+	private final long maxRegionSize;
 
-	final RandomAccessibleInterval< R > source;
-	final Shape shape;
+	// other
+	private int n;
 	private long[] min;
 	private long[] max;
-	private int n;
 	private double seedValue;
 	private ArrayList< long[] > coordinates;
-	private FinalInterval boundingInterval;
-	final long maxRegionSize;
-	private boolean maxRegionSizeReached;
 	private RandomAccessibleInterval< BitType > regionMask;
+
+	// output
+	private boolean maxRegionSizeReached;
 
 	public RegionExtractor( RandomAccessibleInterval< R > source, Shape shape, long maxRegionSize )
 	{
@@ -75,18 +79,16 @@ public class RegionExtractor < R extends RealType< R > >
 		final RandomAccess< Neighborhood< R > > neighborhoodAccess = neighborhood.randomAccess();
 
 		regionMask = new DiskCachedCellImgFactory<>( new BitType() ).create( source );
-
-		// adjust offset
-		regionMask = Views.translate( regionMask, Intervals.minAsLongArray( source ) );
-
-		final RandomAccess< BitType > maskAccess = regionMask.randomAccess();
+		regionMask = Views.translate( regionMask, Intervals.minAsLongArray( source ) ); // adjust offset
+		final ExtendedRandomAccessibleInterval extendedRegionMask = Views.extendZero( regionMask ); // add oob strategy
+		final RandomAccess< BitType > maskAccess = extendedRegionMask.randomAccess();
 
 		for ( int i = 0; i < coordinates.size(); ++i )
 		{
 			if ( i > maxRegionSize )
 			{
 				maxRegionSizeReached = true;
-				continue;
+				break;
 			}
 
 			neighborhoodAccess.setPosition( coordinates.get( i ) );
@@ -95,7 +97,9 @@ public class RegionExtractor < R extends RealType< R > >
 
 			while ( neighborhoodCursor.hasNext() )
 			{
-				final double value = neighborhoodCursor.next().getRealDouble();
+				neighborhoodCursor.next();
+
+				final double value = neighborhoodCursor.get().getRealDouble();
 
 				if ( value == seedValue )
 				{

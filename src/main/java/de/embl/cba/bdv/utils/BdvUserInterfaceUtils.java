@@ -58,8 +58,8 @@ public abstract class BdvUserInterfaceUtils
 
 		channelPanel.add( jLabel );
 		channelPanel.add( createColorButton( channelPanel, buttonDimensions, bdv, sourceIndexes ) );
-		channelPanel.add( createBrightnessButton( buttonDimensions,  name, bdv, sourceIndexes ) );
-		channelPanel.add( createVisibilityCheckbox( buttonDimensions,  bdv, sourceIndexes ) );
+		channelPanel.add( createBrightnessButton( buttonDimensions, name, bdv, sourceIndexes ) );
+		channelPanel.add( createVisibilityCheckbox( buttonDimensions, bdv, sourceIndexes ) );
 
 		panel.add( channelPanel );
 

@@ -13,23 +13,18 @@ import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
-import ij3d.Content;
-import ij3d.Image3DUniverse;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.algorithm.neighborhood.DiamondShape;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedLongType;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
-import org.scijava.vecmath.Color3f;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -231,17 +226,20 @@ public abstract class BdvUtils
 		return new ARGBType( ARGBType.rgba( color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() ) );
 	}
 
-	public static long[] getPositionInSourceStack( Source source, RealPoint mousePositionInMicrometerUnits, int t, int level )
+	public static long[] getPositionInSource( Source source, RealPoint mousePositionInMicrometerUnits, int t, int level )
 	{
+
+		int n = 3;
+
 		final AffineTransform3D sourceTransform = BdvUtils.getSourceTransform( source, t, level );
 
-		final RealPoint positionInPixelUnits = new RealPoint( 3 );
+		final RealPoint positionInPixelUnits = new RealPoint( n );
 
 		sourceTransform.inverse().apply( mousePositionInMicrometerUnits, positionInPixelUnits );
 
-		final long[] longPosition = new long[ 3 ];
+		final long[] longPosition = new long[ n ];
 
-		for ( int d = 0; d < 3; ++d )
+		for ( int d = 0; d < n; ++d )
 		{
 			longPosition[ d ] = (long) positionInPixelUnits.getFloatPosition( d );
 		}
@@ -501,7 +499,7 @@ public abstract class BdvUtils
 
 	}
 
-	private static boolean isLabelsSource( Source source )
+	public static boolean isLabelsSource( Source source )
 	{
 		if ( source instanceof TransformedSource )
 		{
@@ -572,6 +570,32 @@ public abstract class BdvUtils
 
 	}
 
+	public static < R extends RealType< R > > Map< Integer, Double > getPixelValuesOfActiveSources( Bdv bdv, RealPoint point, int t )
+	{
+
+		final HashMap< Integer, Double > sourceValueMap = new HashMap<>();
+
+		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+
+		for ( int sourceIndex : visibleSourceIndices )
+		{
+			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
+
+			final Source source = sourceState.getSpimSource();
+
+			final RandomAccess< R > sourceAccess = source.getSource( t, 0 ).randomAccess();
+
+			final long[] positionInSource = BdvUtils.getPositionInSource( source, point, 0, 0 );
+
+			sourceAccess.setPosition( positionInSource );
+
+			sourceValueMap.put( sourceIndex, sourceAccess.get().getRealDouble() );
+		}
+
+		return sourceValueMap;
+	}
+
+
 	public static Map< Integer, Long > selectObjectsInActiveLabelSources( Bdv bdv, RealPoint point )
 	{
 
@@ -594,7 +618,7 @@ public abstract class BdvUtils
 
 				final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( source, 0, level );
 
-				final long[] positionInSourceStack = BdvUtils.getPositionInSourceStack( source, point, 0, level );
+				final long[] positionInSourceStack = BdvUtils.getPositionInSource( source, point, 0, level );
 
 				final RandomAccess< IntegerType > access = indexImg.randomAccess();
 
@@ -628,43 +652,54 @@ public abstract class BdvUtils
 	}
 
 
-	public static ArrayList< RandomAccessibleInterval< BitType > > extractSelectedObject( Bdv bdv, RealPoint point, int level )
+	public static void extractSelectedObject(
+			final Bdv bdv,
+			final RealPoint point,
+			int level,
+			final ArrayList< RandomAccessibleInterval< BitType > > masksOutput,
+			final ArrayList< double[] > calibrationsOutput
+	)
 	{
-
-		final ArrayList< RandomAccessibleInterval< BitType > > masks = new ArrayList<>();
 
 		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
 
 		for ( int sourceIndex : visibleSourceIndices )
 		{
-
 			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
 
 			final Source source = sourceState.getSpimSource();
 
 			if ( isLabelsSource( source ) )
 			{
-				final AffineTransform3D affineTransform3D = new AffineTransform3D();
-				bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( affineTransform3D );
-
 				level = level > source.getNumMipmapLevels() ?  source.getNumMipmapLevels() - 1 : level;
 
 				//	int level = MipmapTransforms.getBestMipMapLevel( affineTransform3D, source, 0 );
 
 				final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( source, 0, level );
 
-				final long[] positionInSourceStack = BdvUtils.getPositionInSourceStack( source, point, 0, level );
+				final long[] positionInSourceStack = BdvUtils.getPositionInSource( source, point, 0, level );
 
 				final RegionExtractor regionExtractor = new RegionExtractor( indexImg, new DiamondShape( 1 ), 1000 * 1000 * 1000L );
 
 				regionExtractor.run( positionInSourceStack );
 
-				masks.add( regionExtractor.getCroppedRegionMask() );
+				masksOutput.add( regionExtractor.getCroppedRegionMask() );
 
+				calibrationsOutput.add( getCalibration( source, level ) );
 			}
 		}
+	}
 
-		return masks;
+	public static double[] getCalibration( Source source, int level )
+	{
+		// TODO: is this logic correct?
+		final AffineTransform3D sourceTransform = new AffineTransform3D();
+		source.getSourceTransform( 0, level, sourceTransform );
+		double[] transformedUnitVector = new double[ 3 ];
+		AffineTransform3D transform3D = sourceTransform.copy();
+		transform3D.setTranslation( new double[ 3 ] );
+		transform3D.apply( new double[]{1,1,1}, transformedUnitVector );
+		return transformedUnitVector;
 	}
 
 	public static void zoomToInterval( Bdv bdv, FinalRealInterval interval )
@@ -752,5 +787,26 @@ public abstract class BdvUtils
 		newViewerTransform.translate( centerBdvWindowTranslation );
 
 		return newViewerTransform;
+	}
+
+	public static Source getFirstVisibleLabelsSource( Bdv bdv )
+	{
+		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+
+		Source labelsSource = null;
+
+		for ( int sourceIndex : visibleSourceIndices )
+		{
+			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
+
+			final Source source = sourceState.getSpimSource();
+
+			if ( isLabelsSource( source ) )
+			{
+				labelsSource = source;
+				break;
+			}
+		}
+		return labelsSource;
 	}
 }
