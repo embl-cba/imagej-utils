@@ -5,9 +5,11 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import de.embl.cba.bdv.utils.overlays.BdvGrayValuesOverlay;
 import net.imglib2.RealPoint;
+import net.imglib2.type.numeric.ARGBType;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class BdvMouseMotionListener implements MouseMotionListener
@@ -40,7 +42,17 @@ public class BdvMouseMotionListener implements MouseMotionListener
 
 		final Map< Integer, Double > pixelValuesOfActiveSources = BdvUtils.getPixelValuesOfActiveSources( bdv, realPoint, currentTimepoint );
 
-		bdvGrayValuesOverlay.setValuesAndColors( pixelValuesOfActiveSources.values(), null );
+		ArrayList< Double > values = new ArrayList<>(  );
+		ArrayList< ARGBType > colors = new ArrayList<>(  );
+
+		for ( int sourceId : pixelValuesOfActiveSources.keySet() )
+		{
+			values.add( pixelValuesOfActiveSources.get( sourceId ) );
+			colors.add( BdvUtils.getColor( bdv, sourceId ) );
+		}
+
+		bdvGrayValuesOverlay.setValuesAndColors( values, colors );
 
 	}
+
 }

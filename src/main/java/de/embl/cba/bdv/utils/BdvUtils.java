@@ -809,4 +809,9 @@ public abstract class BdvUtils
 		}
 		return labelsSource;
 	}
+
+	public static ARGBType getColor( Bdv bdv, int sourceId )
+	{
+		return bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( sourceId ).getColor();
+	}
 }

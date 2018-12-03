@@ -41,7 +41,7 @@ public abstract class BdvUserInterfaceUtils
 	public static void addSourcesDisplaySettingsUI( JPanel panel,
 													String name,
 													Bdv bdv,
-													ArrayList< Integer > sourceIndexes,
+													ArrayList< Integer > sourceIndices,
 													Color color )
 	{
 		int[] buttonDimensions = new int[]{ 50, 30 };
@@ -57,9 +57,9 @@ public abstract class BdvUserInterfaceUtils
 		jLabel.setHorizontalAlignment( SwingConstants.CENTER );
 
 		channelPanel.add( jLabel );
-		channelPanel.add( createColorButton( channelPanel, buttonDimensions, bdv, sourceIndexes ) );
-		channelPanel.add( createBrightnessButton( buttonDimensions, name, bdv, sourceIndexes ) );
-		channelPanel.add( createVisibilityCheckbox( buttonDimensions, bdv, sourceIndexes ) );
+		channelPanel.add( createColorButton( channelPanel, buttonDimensions, bdv, sourceIndices ) );
+		channelPanel.add( createBrightnessButton( buttonDimensions, name, bdv, sourceIndices ) );
+		channelPanel.add( createVisibilityCheckbox( buttonDimensions, bdv, sourceIndices ) );
 
 		panel.add( channelPanel );
 
@@ -261,7 +261,8 @@ public abstract class BdvUserInterfaceUtils
 													  Bdv bdv,
 													  ArrayList< Integer > sourceIndices )
 	{
-		JCheckBox checkBox = new JCheckBox( "Active" );
+		JCheckBox checkBox = new JCheckBox( "" );
+		checkBox.setSelected( true );
 		checkBox.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
 
 		checkBox.addActionListener( new ActionListener()
@@ -270,9 +271,9 @@ public abstract class BdvUserInterfaceUtils
 			public void actionPerformed( ActionEvent e )
 			{
 				final VisibilityAndGrouping visibilityAndGrouping = bdv.getBdvHandle().getViewerPanel().getVisibilityAndGrouping();
-				for ( int i : sourceIndices )
+				for ( int sourceIndex : sourceIndices )
 				{
-					visibilityAndGrouping.setSourceActive( i, ! visibilityAndGrouping.isSourceActive( i ) );
+					visibilityAndGrouping.setSourceActive( sourceIndex, checkBox.isSelected() );
 				}
 			}
 		} );
@@ -309,9 +310,10 @@ public abstract class BdvUserInterfaceUtils
 		final List< Integer > nonOverlaySourceIndices = BdvUtils.getNonOverlaySourceIndices( bdv, sources );
 		ArrayList< Color > defaultColors = BdvUtils.getColors( nonOverlaySourceIndices );
 
+		int iColor = 0;
 		for ( int sourceIndex : nonOverlaySourceIndices )
 		{
-			final Color color = defaultColors.get( sourceIndex );
+			final Color color = defaultColors.get( iColor++ );
 
 			converterSetups.get( sourceIndex ).setColor( BdvUtils.asArgbType( color ) );
 

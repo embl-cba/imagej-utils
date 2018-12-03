@@ -3,6 +3,7 @@ package de.embl.cba.bdv.utils.overlays;
 import bdv.util.BdvOverlay;
 import ij.plugin.Colors;
 import net.imglib2.realtransform.AffineTransform2D;
+import net.imglib2.type.numeric.ARGBType;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -10,15 +11,17 @@ import java.util.Collection;
 
 public class BdvGrayValuesOverlay extends BdvOverlay
 {
-	Collection< Double > values;
-	ArrayList< Color > colors;
+	ArrayList< Double > values;
+	ArrayList< ARGBType > colors;
 
 	public BdvGrayValuesOverlay( )
 	{
 		super();
+		values = new ArrayList<>(  );
+		colors = new ArrayList<>(  );
 	}
 
-	public void setValuesAndColors( Collection< Double > values, ArrayList< Color > colors )
+	public void setValuesAndColors( ArrayList< Double > values, ArrayList< ARGBType > colors )
 	{
 		this.values = values;
 		this.colors = colors;
@@ -27,26 +30,18 @@ public class BdvGrayValuesOverlay extends BdvOverlay
 	@Override
 	protected void draw( final Graphics2D g )
 	{
-		g.setColor( Color.WHITE);
 
-		setFont( g, 10 );
+		int fontSize = 20;
+		int[] stringPosition = new int[]{ 10, 20 };
 
-		int[] stringPosition = new int[]{ 10, 10 };
-
-		String text = "";
-		for ( double value : values )
+		for ( int i = 0; i < values.size(); ++i )
 		{
-			text += value + "\n";
+			final int colorIndex = colors.get( i ).get();
+			g.setColor( new Color( ARGBType.red( colorIndex ), ARGBType.green( colorIndex ), ARGBType.blue( colorIndex ) )  );
+			g.setFont( new Font("TimesRoman", Font.PLAIN, fontSize ) );
+			g.drawString( "" + values.get( i ), stringPosition[ 0 ], stringPosition[ 1 ] + fontSize * i + 5);
 		}
 
-		g.drawString( text, stringPosition[ 0 ], stringPosition[ 1 ] );
-	}
-
-
-	private FontMetrics setFont( Graphics2D g, int fontSize )
-	{
-		g.setFont( new Font("TimesRoman", Font.PLAIN, fontSize ) );
-		return g.getFontMetrics( g.getFont() );
 	}
 
 }
