@@ -9,6 +9,8 @@ import net.imglib2.RealPoint;
 import net.imglib2.algorithm.neighborhood.DiamondShape;
 import net.imglib2.type.numeric.IntegerType;
 
+import java.util.ArrayList;
+
 
 public class BdvObjectExtractor
 {
@@ -16,9 +18,8 @@ public class BdvObjectExtractor
 	final RealPoint coordinates;
 	final int timePoint;
 
-	private RandomAccessibleInterval objectMask;
-	private double[] calibration;
-	private boolean isNewLevelAvailable;
+	private ArrayList< RandomAccessibleInterval > objectMasks;
+	private ArrayList<  double[] > calibrations;
 	private boolean isDone;
 
 	public BdvObjectExtractor( Bdv bdv, RealPoint coordinates, int timePoint )
@@ -26,21 +27,31 @@ public class BdvObjectExtractor
 		this.bdv = bdv;
 		this.coordinates = coordinates;
 		this.timePoint = timePoint;
+		this.objectMasks = new ArrayList<>(  );
+		this.calibrations = new ArrayList<>(  );
+		this.isDone = false;
 	}
 
-	public RandomAccessibleInterval getObjectMask()
+	public RandomAccessibleInterval getObjectMask( int level )
 	{
-		return objectMask;
+		return objectMasks.get( level );
 	}
 
-	public double[] getCalibration()
+	public double[] getCalibration( int level )
 	{
-		return calibration;
+		return calibrations.get( level );
 	}
 
-	public boolean isNewLevelAvailable()
+	public boolean isLevelAvailable( int level )
 	{
-		return isNewLevelAvailable;
+		if ( objectMasks.size() > level )
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	public boolean isDone()
@@ -58,8 +69,6 @@ public class BdvObjectExtractor
 
 		for ( int level = numMipmapLevels - 1; level >=0; --level )
 		{
-			isNewLevelAvailable = false;
-
 			final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( labelsSource, timePoint, level );
 
 			final long[] positionInSourceStack = BdvUtils.getPositionInSource( labelsSource, coordinates, timePoint, level );
@@ -68,11 +77,9 @@ public class BdvObjectExtractor
 
 			regionExtractor.run( positionInSourceStack );
 
-			objectMask = regionExtractor.getCroppedRegionMask();
+			objectMasks.add( regionExtractor.getCroppedRegionMask() );
 
-			calibration = BdvUtils.getCalibration( labelsSource, level );
-
-			isNewLevelAvailable = true;
+			calibrations.add( BdvUtils.getCalibration( labelsSource, level ) );
 		}
 
 		isDone = true;

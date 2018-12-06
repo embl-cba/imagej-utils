@@ -10,6 +10,7 @@ import net.imglib2.realtransform.*;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
 
 import java.util.ArrayList;
@@ -284,4 +285,19 @@ public abstract class Transforms< T extends InvertibleRealTransform & Concatenab
 	}
 
 
+	public static double[] getScale( AffineTransform3D sourceTransform )
+	{
+		final double[] calibration = new double[ 3 ];
+		for ( int d = 0; d < 3; ++d )
+		{
+			final double[] vector = new double[ 3 ];
+			for ( int i = 0; i < 3 ; i++ )
+			{
+				vector[ i ] = sourceTransform.get( d, i );
+			}
+
+			calibration[ d ] = LinAlgHelpers.length( vector );
+		}
+		return calibration;
+	}
 }

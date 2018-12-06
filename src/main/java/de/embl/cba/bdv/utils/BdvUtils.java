@@ -9,6 +9,7 @@ import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.algorithms.RegionExtractor;
 import de.embl.cba.bdv.utils.labels.LabelsSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
+import de.embl.cba.bdv.utils.transforms.Transforms;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -228,7 +229,6 @@ public abstract class BdvUtils
 
 	public static long[] getPositionInSource( Source source, RealPoint mousePositionInMicrometerUnits, int t, int level )
 	{
-
 		int n = 3;
 
 		final AffineTransform3D sourceTransform = BdvUtils.getSourceTransform( source, t, level );
@@ -589,7 +589,16 @@ public abstract class BdvUtils
 
 			sourceAccess.setPosition( positionInSource );
 
-			sourceValueMap.put( sourceIndex, sourceAccess.get().getRealDouble() );
+			try
+			{
+				final double realDouble = sourceAccess.get().getRealDouble();
+				sourceValueMap.put( sourceIndex, realDouble );
+			}
+			catch ( Exception e )
+			{
+				// Do nothing, probably the pixel was outside the image bounds;
+			}
+
 		}
 
 		return sourceValueMap;
@@ -692,14 +701,14 @@ public abstract class BdvUtils
 
 	public static double[] getCalibration( Source source, int level )
 	{
-		// TODO: is this logic correct?
 		final AffineTransform3D sourceTransform = new AffineTransform3D();
 		source.getSourceTransform( 0, level, sourceTransform );
-		double[] transformedUnitVector = new double[ 3 ];
-		AffineTransform3D transform3D = sourceTransform.copy();
-		transform3D.setTranslation( new double[ 3 ] );
-		transform3D.apply( new double[]{1,1,1}, transformedUnitVector );
-		return transformedUnitVector;
+
+		// https://math.stackexchange.com/questions/237369/given-this-transformation-matrix-how-do-i-decompose-it-into-translation-rotati
+
+		final double[] calibration = Transforms.getScale( sourceTransform );
+
+		return calibration;
 	}
 
 	public static void zoomToInterval( Bdv bdv, FinalRealInterval interval )

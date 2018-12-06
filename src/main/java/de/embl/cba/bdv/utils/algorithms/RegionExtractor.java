@@ -75,13 +75,15 @@ public class RegionExtractor < R extends RealType< R > >
 
 	private void floodFill()
 	{
-		final RandomAccessible< Neighborhood< R > > neighborhood = shape.neighborhoodsRandomAccessible( source );
-		final RandomAccess< Neighborhood< R > > neighborhoodAccess = neighborhood.randomAccess();
 
 		regionMask = new DiskCachedCellImgFactory<>( new BitType() ).create( source );
 		regionMask = Views.translate( regionMask, Intervals.minAsLongArray( source ) ); // adjust offset
 		final ExtendedRandomAccessibleInterval extendedRegionMask = Views.extendZero( regionMask ); // add oob strategy
-		final RandomAccess< BitType > maskAccess = extendedRegionMask.randomAccess();
+
+		final RandomAccessible< Neighborhood< R > > neighborhood = shape.neighborhoodsRandomAccessible( Views.extendZero( source ) );
+		final RandomAccess< Neighborhood< R > > neighborhoodAccess = neighborhood.randomAccess();
+
+		final RandomAccess< BitType > extendedMaskAccess = extendedRegionMask.randomAccess();
 
 		for ( int i = 0; i < coordinates.size(); ++i )
 		{
@@ -105,11 +107,11 @@ public class RegionExtractor < R extends RealType< R > >
 				{
 					final long[] coordinate = new long[ n ];
 					neighborhoodCursor.localize( coordinate );
-					maskAccess.setPosition( coordinate );
+					extendedMaskAccess.setPosition( coordinate );
 
-					if ( ! maskAccess.get().get() )
+					if ( ! extendedMaskAccess.get().get() )
 					{
-						maskAccess.get().setOne();
+						extendedMaskAccess.get().setOne();
 						coordinates.add( coordinate );
 						updateBoundingBox( coordinate );
 					}
