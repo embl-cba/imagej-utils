@@ -8,12 +8,16 @@ import bdv.viewer.animate.SimilarityTransformAnimator;
 import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.algorithms.RegionExtractor;
 import de.embl.cba.bdv.utils.labels.LabelsSource;
+import de.embl.cba.bdv.utils.objects.BdvObjectExtractor;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import de.embl.cba.bdv.utils.transforms.Transforms;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
+import ij3d.Content;
+import ij3d.Image3DUniverse;
+import ij3d.UniverseListener;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.algorithm.neighborhood.DiamondShape;
@@ -26,6 +30,8 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
+import org.scijava.java3d.View;
+import org.scijava.vecmath.Color3f;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -752,9 +758,11 @@ public abstract class BdvUtils
 		return affineTransform3D;
 	}
 
-	public static void centerBdvViewToPosition(  Bdv bdv, double[] position, double scale )
+
+
+	public static void zoomToPosition( Bdv bdv, double[] xyzt, double scale )
 	{
-		final AffineTransform3D newViewerTransform = getNewViewerTransform( bdv, position, scale );
+		final AffineTransform3D newViewerTransform = getNewViewerTransform( bdv, xyzt, scale );
 
 		final double cX = 0; //- bdv.getBdvHandle().getViewerPanel().getDisplay().getWidth() / 2.0;
 		final double cY = 0; //- bdv.getBdvHandle().getViewerPanel().getDisplay().getHeight() / 2.0;
@@ -762,8 +770,7 @@ public abstract class BdvUtils
 		final AffineTransform3D currentViewerTransform = new AffineTransform3D();
 		bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( currentViewerTransform );
 
-		final SimilarityTransformAnimator similarityTransformAnimator =
-				new SimilarityTransformAnimator( currentViewerTransform, newViewerTransform, cX ,cY, 3000 );
+		final SimilarityTransformAnimator similarityTransformAnimator = new SimilarityTransformAnimator( currentViewerTransform, newViewerTransform, cX ,cY, 3000 );
 
 		bdv.getBdvHandle().getViewerPanel().setTransformAnimator( similarityTransformAnimator );
 		bdv.getBdvHandle().getViewerPanel().transformChanged( currentViewerTransform );

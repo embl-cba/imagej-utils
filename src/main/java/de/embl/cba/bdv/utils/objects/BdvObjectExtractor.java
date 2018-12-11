@@ -18,72 +18,75 @@ public class BdvObjectExtractor
 	final RealPoint coordinates;
 	final int timePoint;
 
-	private ArrayList< RandomAccessibleInterval > objectMasks;
-	private ArrayList<  double[] > calibrations;
+	private RandomAccessibleInterval objectMask;
+	private ArrayList< double[] > calibrations;
+	private long executionTimesMillis;
+
 	private boolean isDone;
+	private boolean isInterrupted;
+
+	private int numMipmapLevels;
+	private final Source labelsSource;
 
 	public BdvObjectExtractor( Bdv bdv, RealPoint coordinates, int timePoint )
 	{
 		this.bdv = bdv;
 		this.coordinates = coordinates;
 		this.timePoint = timePoint;
-		this.objectMasks = new ArrayList<>(  );
 		this.calibrations = new ArrayList<>(  );
 		this.isDone = false;
-	}
+		this.isInterrupted = false;
 
-	public RandomAccessibleInterval getObjectMask( int level )
-	{
-		return objectMasks.get( level );
-	}
+		labelsSource = BdvUtils.getFirstVisibleLabelsSource( bdv );
 
-	public double[] getCalibration( int level )
-	{
-		return calibrations.get( level );
-	}
-
-	public boolean isLevelAvailable( int level )
-	{
-		if ( objectMasks.size() > level )
+		if ( labelsSource == null )
 		{
-			return true;
+			System.out.println("ERROR: no labels sources found in bdv");
+			return;
 		}
-		else
+
+		numMipmapLevels = labelsSource.getNumMipmapLevels();
+
+		for ( int level = 0; level < numMipmapLevels; ++level )
 		{
-			return false;
-		}
-	}
-
-	public boolean isDone()
-	{
-		return isDone;
-	}
-
-	public void run()
-	{
-		isDone = false;
-
-		Source labelsSource = BdvUtils.getFirstVisibleLabelsSource( bdv );
-
-		final int numMipmapLevels = labelsSource.getNumMipmapLevels();
-
-		for ( int level = numMipmapLevels - 1; level >=0; --level )
-		{
-			final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( labelsSource, timePoint, level );
-
-			final long[] positionInSourceStack = BdvUtils.getPositionInSource( labelsSource, coordinates, timePoint, level );
-
-			final RegionExtractor regionExtractor = new RegionExtractor( indexImg, new DiamondShape( 1 ), 1000 * 1000 * 1000L );
-
-			regionExtractor.run( positionInSourceStack );
-
-			objectMasks.add( regionExtractor.getCroppedRegionMask() );
-
 			calibrations.add( BdvUtils.getCalibration( labelsSource, level ) );
 		}
+	}
 
-		isDone = true;
+	public RandomAccessibleInterval extractObjectMask( int level )
+	{
+		final long currentTimeMillis = System.currentTimeMillis();
 
+		final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( labelsSource, timePoint, level );
+
+		final long[] positionInSourceStack = BdvUtils.getPositionInSource( labelsSource, coordinates, timePoint, level );
+
+		final RegionExtractor regionExtractor = new RegionExtractor( indexImg, new DiamondShape( 1 ), 1000 * 1000 * 1000L );
+
+		regionExtractor.run( positionInSourceStack );
+
+		objectMask = regionExtractor.getCroppedRegionMask();
+
+		executionTimesMillis = System.currentTimeMillis() - currentTimeMillis;
+
+		return objectMask;
+
+	}
+
+	public ArrayList< double[] > getCalibrations( )
+	{
+		return calibrations;
+	}
+
+	public long getExecutionTimeMillis( )
+	{
+		return executionTimesMillis;
+	}
+
+
+	public void stop()
+	{
+		isInterrupted = true;
 	}
 
 }
