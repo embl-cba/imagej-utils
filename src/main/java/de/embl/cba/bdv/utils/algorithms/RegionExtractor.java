@@ -33,6 +33,12 @@ public class RegionExtractor < R extends RealType< R > >
 	private int n;
 	private long[] min;
 	private long[] max;
+
+	public double getSeedValue()
+	{
+		return seedValue;
+	}
+
 	private double seedValue;
 	private ArrayList< long[] > coordinates;
 	private RandomAccessibleInterval< BitType > regionMask;

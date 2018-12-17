@@ -24,7 +24,7 @@ import org.scijava.vecmath.Color3f;
 
 import java.io.File;
 
-public class TestRegionExtraction
+public class TestRegionExtractionAnd3DViewer
 {
 
 	public static void main( String[] args ) throws SpimDataException
@@ -49,7 +49,9 @@ public class TestRegionExtraction
 
 		final RegionExtractor regionExtractor = new RegionExtractor( source, new DiamondShape( 1 ), 1000*1000*1000L );
 
+		long startTimeMillis = System.currentTimeMillis();
 		regionExtractor.run( new long[]{ 35, 35, 58 } );
+		System.out.println( "Region extracted in [ms]: " + ( System.currentTimeMillis() - startTimeMillis ) );
 
 		if ( regionExtractor.isMaxRegionSizeReached( ) )
 		{
@@ -67,10 +69,15 @@ public class TestRegionExtraction
 		source = Views.permute( source, 2,3 );
 		ImageJFunctions.show( source );
 
+		startTimeMillis = System.currentTimeMillis();
 		Image3DUniverse univ = new Image3DUniverse( );
 		univ.show( );
+		System.out.println( "New universe created in [ms]: " + ( System.currentTimeMillis() - startTimeMillis ) );
+
+		startTimeMillis = System.currentTimeMillis();
 		final Content content = univ.addMesh( regionMaskImp, null, "somename", 250, new boolean[]{ true, true, true }, 2 );
 		content.setColor( new Color3f(0.5f, 0, 0.5f ) );
+		System.out.println( "Mesh created and displayed in [ms]: " + ( System.currentTimeMillis() - startTimeMillis ) );
 
 	}
 }

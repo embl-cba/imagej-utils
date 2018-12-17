@@ -27,6 +27,7 @@ public class BdvObjectExtractor
 
 	private int numMipmapLevels;
 	private final Source labelsSource;
+	private double objectLabel;
 
 	public BdvObjectExtractor( Bdv bdv, RealPoint coordinates, int timePoint )
 	{
@@ -67,10 +68,11 @@ public class BdvObjectExtractor
 
 		objectMask = regionExtractor.getCroppedRegionMask();
 
+		objectLabel = regionExtractor.getSeedValue();
+
 		executionTimesMillis = System.currentTimeMillis() - currentTimeMillis;
 
 		return objectMask;
-
 	}
 
 	public ArrayList< double[] > getCalibrations( )
@@ -83,6 +85,10 @@ public class BdvObjectExtractor
 		return executionTimesMillis;
 	}
 
+	public double getObjectLabel()
+	{
+		return objectLabel;
+	}
 
 	public void stop()
 	{
