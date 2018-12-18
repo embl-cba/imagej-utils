@@ -114,9 +114,10 @@ public abstract class LabelUtils
 	public static void setColor( VolatileARGBType output,
 								 double x,
 								 Set< Double > selectedLabels,
-								 Map< Double, Integer > lut,
 								 long seed )
 	{
+		// TODO: make this more general, also supporting other coloring modes than selection,
+		// e.g. color objects by a certain other attribute
 		if ( x == 0 || ( selectedLabels.size() > 0 && ! selectedLabels.contains( x ) ) )
 		{
 			output.set( 0 );
@@ -124,14 +125,6 @@ public abstract class LabelUtils
 		}
 		else
 		{
-//			if ( ! lut.containsKey( x ) )
-//			{
-//				final int color = getColorGlasbey( x, seed );
-//				lut.put( x, color );
-//			}
-
-//			output.set( lut.get( x ) );
-
 			output.set( getColorGlasbey( x, seed ) );
 			output.setValid( true );
 		}
@@ -149,16 +142,23 @@ public abstract class LabelUtils
 		return color;
 	}
 
-	private static int getColorGlasbey( double x, long seed )
+	public static int getColorGlasbey( double x, long seed )
 	{
-		int i = get8bitColorIndex( x, seed );
+		if ( x == 0 )
+		{
+			return 0;
+		}
+		else
+		{
+			int i = get8bitColorIndex( x, seed );
 
-		final int color = ARGBType.rgba(
-				GLASBEY_LUT[ i ][ 0 ],
-				GLASBEY_LUT[ i ][ 1 ],
-				GLASBEY_LUT[ i ][ 2 ], 125 );
+			final int color = ARGBType.rgba(
+					GLASBEY_LUT[ i ][ 0 ],
+					GLASBEY_LUT[ i ][ 1 ],
+					GLASBEY_LUT[ i ][ 2 ], 125 );
 
-		return color;
+			return color;
+		}
 	}
 
 	private static int get8bitColorIndex( double x, long seed )

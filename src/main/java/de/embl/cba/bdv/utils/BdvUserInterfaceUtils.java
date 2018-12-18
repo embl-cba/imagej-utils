@@ -93,21 +93,56 @@ public abstract class BdvUserInterfaceUtils
 		return colorButton;
 	}
 
+//	public static JButton createColorButton( JPanel panel,
+//											 int[] buttonDimensions,
+//											 BdvStackSource bdvStackSource )
+//	{
+//
+//		JButton colorButton;
+//
+//		if ( BdvUtils.isLabelsSource( bdvStackSource ) )
+//		{
+//			colorButton = new JButton( "S" );
+//		}
+//		else
+//		{
+//			colorButton = new JButton( "C" );
+//		}
+//
+//		colorButton.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
+//
+//		colorButton.addActionListener( new ActionListener()
+//		{
+//			@Override
+//			public void actionPerformed( ActionEvent e )
+//			{
+//				if ( BdvUtils.isLabelsSource( bdvStackSource ) )
+//				{
+//					BdvUtils.getLabelsSource( bdvStackSource ).incrementSeed();
+//					bdvStackSource.getBdvHandle().getViewerPanel().requestRepaint();
+//				}
+//				else
+//				{
+//					Color color = JColorChooser.showDialog( null, "", null );
+//					bdvStackSource.setColor( BdvUtils.asArgbType( color ) );
+//					panel.setBackground( color );
+//				}
+//
+//			}
+//		} );
+//
+//
+//		return colorButton;
+//	}
+
+
 	public static JButton createColorButton( JPanel panel,
 											 int[] buttonDimensions,
 											 BdvStackSource bdvStackSource )
 	{
 
 		JButton colorButton;
-
-		if ( BdvUtils.isLabelsSource( bdvStackSource ) )
-		{
-			colorButton = new JButton( "S" );
-		}
-		else
-		{
-			colorButton = new JButton( "C" );
-		}
+		colorButton = new JButton( "C" );
 
 		colorButton.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
 
@@ -116,21 +151,11 @@ public abstract class BdvUserInterfaceUtils
 			@Override
 			public void actionPerformed( ActionEvent e )
 			{
-				if ( BdvUtils.isLabelsSource( bdvStackSource ) )
-				{
-					BdvUtils.getLabelsSource( bdvStackSource ).incrementSeed();
-					bdvStackSource.getBdvHandle().getViewerPanel().requestRepaint();
-				}
-				else
-				{
-					Color color = JColorChooser.showDialog( null, "", null );
-					bdvStackSource.setColor( BdvUtils.asArgbType( color ) );
-					panel.setBackground( color );
-				}
-
+				Color color = JColorChooser.showDialog( null, "", null );
+				bdvStackSource.setColor( BdvUtils.asArgbType( color ) );
+				panel.setBackground( color );
 			}
 		} );
-
 
 		return colorButton;
 	}

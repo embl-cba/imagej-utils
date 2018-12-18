@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>23.2.0</version>
+		<version>24.0.0</version>
 	</parent>
 
 	<artifactId>bdv-utils</artifactId>
-	<version>0.1.23</version>
+	<version>0.1.24</version>
 
 	<name>BigDataViewer Utilities</name>
 	<description>TODO</description>

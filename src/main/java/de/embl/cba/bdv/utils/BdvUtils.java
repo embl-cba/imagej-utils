@@ -8,16 +8,12 @@ import bdv.viewer.animate.SimilarityTransformAnimator;
 import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.algorithms.RegionExtractor;
 import de.embl.cba.bdv.utils.labels.LabelsSource;
-import de.embl.cba.bdv.utils.objects.BdvObjectExtractor;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import de.embl.cba.bdv.utils.transforms.Transforms;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
-import ij3d.Content;
-import ij3d.Image3DUniverse;
-import ij3d.UniverseListener;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.algorithm.neighborhood.DiamondShape;
@@ -30,8 +26,6 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
-import org.scijava.java3d.View;
-import org.scijava.vecmath.Color3f;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -552,29 +546,29 @@ public abstract class BdvUtils
 	}
 
 
-	public static void deselectAllObjectsInActiveLabelSources( Bdv bdv )
-	{
-		final HashMap< Integer, Long > sourcesAndSelectedObjects = new HashMap<>();
-
-		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
-
-		for ( int sourceIndex : visibleSourceIndices )
-		{
-
-			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
-
-			final Source source = sourceState.getSpimSource();
-
-			if ( isLabelsSource( source ) )
-			{
-
-				BdvUtils.getLabelsSource( source ).selectNone( );
-			}
-		}
-
-		bdv.getBdvHandle().getViewerPanel().requestRepaint();
-
-	}
+//	public static void deselectAllObjectsInActiveLabelSources( Bdv bdv )
+//	{
+//		final HashMap< Integer, Long > sourcesAndSelectedObjects = new HashMap<>();
+//
+//		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+//
+//		for ( int sourceIndex : visibleSourceIndices )
+//		{
+//
+//			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
+//
+//			final Source source = sourceState.getSpimSource();
+//
+//			if ( isLabelsSource( source ) )
+//			{
+//
+//				BdvUtils.getLabelsSource( source ).showAll( );
+//			}
+//		}
+//
+//		bdv.getBdvHandle().getViewerPanel().requestRepaint();
+//
+//	}
 
 	public static < R extends RealType< R > > Map< Integer, Double > getPixelValuesOfActiveSources( Bdv bdv, RealPoint point, int t )
 	{
@@ -589,82 +583,90 @@ public abstract class BdvUtils
 
 			final Source source = sourceState.getSpimSource();
 
-			final RandomAccess< R > sourceAccess = source.getSource( t, 0 ).randomAccess();
+			final double realDouble = getValueAtGlobalPosition( point, t, source );
 
-			final long[] positionInSource = BdvUtils.getPositionInSource( source, point, 0, 0 );
-
-			sourceAccess.setPosition( positionInSource );
-
-			try
-			{
-				final double realDouble = sourceAccess.get().getRealDouble();
-				sourceValueMap.put( sourceIndex, realDouble );
-			}
-			catch ( Exception e )
-			{
-				// Do nothing, probably the pixel was outside the image bounds;
-			}
+			sourceValueMap.put( sourceIndex, realDouble );
 
 		}
 
 		return sourceValueMap;
 	}
 
-
-	public static Map< Integer, Long > selectObjectsInActiveLabelSources( Bdv bdv, RealPoint point )
+	public static < R extends RealType< R > > double getValueAtGlobalPosition( RealPoint point, int t, LabelsSource source )
 	{
+		final RandomAccess< R > sourceAccess = source.getWrappedSource( t, 0 ).randomAccess();
 
-		final HashMap< Integer, Long > sourcesAndSelectedObjects = new HashMap<>();
+		final long[] positionInSource = BdvUtils.getPositionInSource( source, point, t, 0 );
 
-		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+		sourceAccess.setPosition( positionInSource );
 
-		for ( int sourceIndex : visibleSourceIndices )
-		{
-
-			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
-
-			final Source source = sourceState.getSpimSource();
-
-			if ( isLabelsSource( source ) )
-			{
-				final AffineTransform3D affineTransform3D = new AffineTransform3D();
-				bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( affineTransform3D );
-				int level = MipmapTransforms.getBestMipMapLevel( affineTransform3D, source, 0 );
-
-				final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( source, 0, level );
-
-				final long[] positionInSourceStack = BdvUtils.getPositionInSource( source, point, 0, level );
-
-				final RandomAccess< IntegerType > access = indexImg.randomAccess();
-
-				try
-				{
-					access.setPosition( positionInSourceStack );
-
-					final long objectIndex = access.get().getIntegerLong();
-
-					if ( objectIndex != 0 )
-					{
-						sourcesAndSelectedObjects.put( sourceIndex, objectIndex );
-					}
-
-					BdvUtils.getLabelsSource( source ).select( objectIndex );
-				}
-				catch ( Exception e )
-				{
-					int a = 1;
-					// selected pixel outside image bounds
-				}
-
-
-
-			}
-		}
-
-		bdv.getBdvHandle().getViewerPanel().requestRepaint();
-
-		return sourcesAndSelectedObjects;
+		return sourceAccess.get().getRealDouble();
 	}
+
+
+	public static < R extends RealType< R > > double getValueAtGlobalPosition( RealPoint point, int t, Source source )
+	{
+		final RandomAccess< R > sourceAccess = source.getSource( t, 0 ).randomAccess();
+
+		final long[] positionInSource = BdvUtils.getPositionInSource( source, point, t, 0 );
+
+		sourceAccess.setPosition( positionInSource );
+
+		return sourceAccess.get().getRealDouble();
+	}
+
+
+//	public static Map< Integer, Long > selectObjectsInActiveLabelSources( Bdv bdv, RealPoint point )
+//	{
+//
+//		final HashMap< Integer, Long > sourcesAndSelectedObjects = new HashMap<>();
+//
+//		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+//
+//		for ( int sourceIndex : visibleSourceIndices )
+//		{
+//
+//			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
+//
+//			final Source source = sourceState.getSpimSource();
+//
+//			if ( isLabelsSource( source ) )
+//			{
+//				final AffineTransform3D affineTransform3D = new AffineTransform3D();
+//				bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( affineTransform3D );
+//				int level = MipmapTransforms.getBestMipMapLevel( affineTransform3D, source, 0 );
+//
+//				final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( source, 0, level );
+//
+//				final long[] positionInSourceStack = BdvUtils.getPositionInSource( source, point, 0, level );
+//
+//				final RandomAccess< IntegerType > access = indexImg.randomAccess();
+//
+//				try
+//				{
+//					access.setPosition( positionInSourceStack );
+//
+//					final long objectIndex = access.get().getIntegerLong();
+//
+//					if ( objectIndex != 0 )
+//					{
+//						sourcesAndSelectedObjects.put( sourceIndex, objectIndex );
+//					}
+//
+//					BdvUtils.getLabelsSource( source ).select( objectIndex );
+//				}
+//				catch ( Exception e )
+//				{
+//					int a = 1;
+//					// selected pixel outside image bounds
+//				}
+//			}
+//		}
+//
+//		bdv.getBdvHandle().getViewerPanel().requestRepaint();
+//
+//		return sourcesAndSelectedObjects;
+//	}
 
 
 	public static void extractSelectedObject(

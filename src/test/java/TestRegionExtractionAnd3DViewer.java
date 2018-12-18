@@ -5,8 +5,8 @@ import bdv.util.BdvStackSource;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import de.embl.cba.bdv.utils.algorithms.RegionExtractor;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeLabelsSource;
 import de.embl.cba.bdv.utils.labels.LabelsSource;
+import de.embl.cba.bdv.utils.labels.VolatileSelectedLabelsARGBConverter;
 import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DGoogleMouse;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -23,6 +23,8 @@ import net.imglib2.view.Views;
 import org.scijava.vecmath.Color3f;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TestRegionExtractionAnd3DViewer
 {
@@ -33,7 +35,9 @@ public class TestRegionExtractionAnd3DViewer
 
 		SpimData spimData = new XmlIoSpimData().load( file.toString() );
 
-		final Source< VolatileARGBType > labelSource = new ARGBConvertedRealTypeLabelsSource( spimData, 0 );
+		Set< Double > selectedLabels = new HashSet(  );
+		final VolatileSelectedLabelsARGBConverter volatileSelectedLabelsARGBConverter = new VolatileSelectedLabelsARGBConverter( selectedLabels );
+		final Source< VolatileARGBType > labelSource = new LabelsSource( spimData, 0, volatileSelectedLabelsARGBConverter );
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( labelSource,

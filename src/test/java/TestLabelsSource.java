@@ -3,8 +3,9 @@ import bdv.util.*;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeLabelsSource;
 import de.embl.cba.bdv.utils.labels.LabelsSource;
+import de.embl.cba.bdv.utils.labels.VolatileLabelsARGBConverter;
+import de.embl.cba.bdv.utils.labels.VolatileSelectedLabelsARGBConverter;
 import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DGoogleMouse;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
@@ -16,9 +17,10 @@ import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
 import java.io.File;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
-public class TestSpimDataUsignedLongLabelsLoading
+public class TestLabelsSource
 {
 
 	public static void main( String[] args ) throws SpimDataException
@@ -29,15 +31,19 @@ public class TestSpimDataUsignedLongLabelsLoading
 
 		//final File file = new File( "/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/em-segmented-cells-parapodium-labels-test.xml" );
 
-		// final File file = new File( "/Users/tischer/Desktop/bdv_test_data/test.xml" );
-		final File file = new File( "/Users/tischer/Desktop/bdv_test_data/bdv_mipmap-labels.xml" );
+		final File file = new File( "/Users/tischer/Desktop/bdv_test_data/test.xml" );
+		//final File file = new File( "/Users/tischer/Desktop/bdv_test_data/bdv_mipmap-labels.xml" );
 
 		SpimData spimData = new XmlIoSpimData().load( file.toString() );
 
-		final Source< VolatileARGBType > labelSource = new ARGBConvertedRealTypeLabelsSource( spimData, 0 );
+		Set< Double > selectedLabels = new HashSet();
 
+		final VolatileSelectedLabelsARGBConverter volatileSelectedLabelsARGBConverter = new VolatileSelectedLabelsARGBConverter( selectedLabels );
+		final LabelsSource labelsSource = new LabelsSource( spimData, 0, volatileSelectedLabelsARGBConverter );
+
+		volatileSelectedLabelsARGBConverter.showAll();
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
-				BdvFunctions.show( labelSource,
+				BdvFunctions.show( labelsSource,
 						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DGoogleMouse.BehaviourTransformEventHandler3DFactory() ) );
 
 
@@ -45,21 +51,32 @@ public class TestSpimDataUsignedLongLabelsLoading
 
 		final Behaviours behaviours = new Behaviours( new InputTriggerConfig() );
 		behaviours.install( bdv.getBdvHandle().getTriggerbindings(), "behaviours" );
+
+
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
 			final RealPoint globalMouseCoordinates = BdvUtils.getGlobalMouseCoordinates( bdv );
-			final Map< Integer, Long > integerLongMap = BdvUtils.selectObjectsInActiveLabelSources( bdv, globalMouseCoordinates );
-			for ( int sourceIndex : integerLongMap.keySet())
-			{
-				System.out.println( "Label " + integerLongMap.get( sourceIndex ) + " selected in source #" + sourceIndex );
-			};
-		}, "select object", "button1 double-click"  ) ;
+			final double selectedLabel = BdvUtils.getValueAtGlobalPosition( globalMouseCoordinates, 0, labelsSource );
 
+			if ( selectedLabels.contains( selectedLabel ) )
+			{
+				selectedLabels.remove( selectedLabel );
+			}
+			else
+			{
+				selectedLabels.add( selectedLabel );
+			}
+			volatileSelectedLabelsARGBConverter.setSelectedLabels( selectedLabels );
+			volatileSelectedLabelsARGBConverter.showSelectedOnly();
+			bdv.getBdvHandle().getViewerPanel().requestRepaint();
+		}, "select object", "button1 shift"  ) ;
 
 
 		behaviours.install( bdv.getBdvHandle().getTriggerbindings(), "behaviours" );
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
-			BdvUtils.deselectAllObjectsInActiveLabelSources( bdv );
-		}, "select none", "Q" );
+			volatileSelectedLabelsARGBConverter.showAll();
+			selectedLabels.clear();
+			bdv.getBdvHandle().getViewerPanel().requestRepaint();
+		}, "quit selection", "Q" );
 
 
 		final SourceAndConverter< VolatileARGBType > sourceAndConverter = bdvStackSource.getSources().get( 0 );
