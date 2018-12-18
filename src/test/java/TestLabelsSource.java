@@ -5,7 +5,7 @@ import bdv.viewer.SourceAndConverter;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.labels.LUTs;
-import de.embl.cba.bdv.utils.labels.SelectedVolatileRealToRandomARGBConverter;
+import de.embl.cba.bdv.utils.labels.VolatileRealToRandomARGBConverter;
 import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DGoogleMouse;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
@@ -36,11 +36,9 @@ public class TestLabelsSource
 
 		SpimData spimData = new XmlIoSpimData().load( file.toString() );
 
-		Set< Double > selectedLabels = new HashSet();
-		final SelectedVolatileRealToRandomARGBConverter selectedVolatileRealToRandomARGBConverter = new SelectedVolatileRealToRandomARGBConverter( selectedLabels, LUTs.GLASBEY_LUT );
-		final ARGBConvertedRealSource ARGBConvertedRealSource = new ARGBConvertedRealSource( spimData, 0, selectedVolatileRealToRandomARGBConverter );
+		final VolatileRealToRandomARGBConverter volatileRealToRandomARGBConverter = new VolatileRealToRandomARGBConverter( LUTs.GLASBEY_LUT );
+		final ARGBConvertedRealSource ARGBConvertedRealSource = new ARGBConvertedRealSource( spimData, 0, volatileRealToRandomARGBConverter );
 
-		selectedVolatileRealToRandomARGBConverter.showAll();
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( ARGBConvertedRealSource,
 						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DGoogleMouse.BehaviourTransformEventHandler3DFactory() ) );
@@ -51,6 +49,7 @@ public class TestLabelsSource
 		final Behaviours behaviours = new Behaviours( new InputTriggerConfig() );
 		behaviours.install( bdv.getBdvHandle().getTriggerbindings(), "behaviours" );
 
+		Set< Double > selectedLabels = new HashSet();
 
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
 			final RealPoint globalMouseCoordinates = BdvUtils.getGlobalMouseCoordinates( bdv );
@@ -64,15 +63,14 @@ public class TestLabelsSource
 			{
 				selectedLabels.add( selectedLabel );
 			}
-			selectedVolatileRealToRandomARGBConverter.setSelectedLabels( selectedLabels );
-			selectedVolatileRealToRandomARGBConverter.showSelectedOnly();
+			volatileRealToRandomARGBConverter.setSelectedLabels( selectedLabels );
 			bdv.getBdvHandle().getViewerPanel().requestRepaint();
 		}, "select object", "button1 shift"  ) ;
 
 
 		behaviours.install( bdv.getBdvHandle().getTriggerbindings(), "behaviours" );
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
-			selectedVolatileRealToRandomARGBConverter.showAll();
+			volatileRealToRandomARGBConverter.setSelectedLabels( null );
 			selectedLabels.clear();
 			bdv.getBdvHandle().getViewerPanel().requestRepaint();
 		}, "quit selection", "Q" );

@@ -20,18 +20,41 @@ import net.imglib2.converter.Converter;
 import net.imglib2.type.volatiles.AbstractVolatileRealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Conversion logic adapted from BigCat Viewer.
  */
 public class VolatileRealToRandomARGBConverter< V extends AbstractVolatileRealType > implements Converter< V, VolatileARGBType >
 {
-
+	private byte[][] lut;
 	private long seed = 50;
-	private final byte[][] lut;
+	private Set< Double > selectedLabels;
+	private final Map< Double, Double > map;
 
-	public VolatileRealToRandomARGBConverter( byte[][] lut)
+	public VolatileRealToRandomARGBConverter( byte[][] lut )
 	{
 		this.lut = lut;
+		this.selectedLabels = null;
+		this.map = null;
+	}
+
+	public VolatileRealToRandomARGBConverter( byte[][] lut,
+											  Set< Double > selectedLabels )
+	{
+		this.lut = lut;
+		this.selectedLabels = selectedLabels;
+		this.map = null;
+	}
+
+	public VolatileRealToRandomARGBConverter( byte[][] lut,
+											  Map< Double, Double > map,
+											  Set< Double > selectedLabels )
+	{
+		this.lut = lut;
+		this.selectedLabels = selectedLabels;
+		this.map = map;
 	}
 
 	@Override
@@ -39,9 +62,23 @@ public class VolatileRealToRandomARGBConverter< V extends AbstractVolatileRealTy
 	{
 		if ( input.isValid() )
 		{
-			final double x = input.getRealDouble();
-			output.set( LUTs.getRandomColorFromLut( x, lut, seed  ) );
-			output.setValid( true );
+			double x = input.getRealDouble();
+
+			if ( map != null )
+			{
+				x = map.get( input.getRealDouble() );
+			}
+
+			if ( selectedLabels == null || selectedLabels.contains( x ) )
+			{
+				output.set( LUTs.getRandomColorFromLut( x, lut, seed ) );
+				output.setValid( true );
+			}
+			else
+			{
+				output.set( 0 );
+				output.setValid( true );
+			}
 		}
 		else
 		{
@@ -51,7 +88,14 @@ public class VolatileRealToRandomARGBConverter< V extends AbstractVolatileRealTy
 
 	public void incrementRandomColorGeneratorSeed()
 	{
-		this.seed++;
+		seed++;
 	}
+
+	public void setSelectedLabels( Set< Double > selectedLabels )
+	{
+		this.selectedLabels = selectedLabels;
+	}
+
+
 
 }
