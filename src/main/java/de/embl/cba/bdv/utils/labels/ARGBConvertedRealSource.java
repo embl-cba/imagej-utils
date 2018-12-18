@@ -24,7 +24,7 @@ import net.imglib2.view.Views;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LabelsSource< R extends RealType< R >, V extends AbstractVolatileRealType< R, V > > implements Source< VolatileARGBType >
+public class ARGBConvertedRealSource< R extends RealType< R >, V extends AbstractVolatileRealType< R, V > > implements Source< VolatileARGBType >
 
 {
     private final long setupId;
@@ -42,7 +42,7 @@ public class LabelsSource< R extends RealType< R >, V extends AbstractVolatileRe
         };
     }
 
-    public LabelsSource( SpimData spimdata, final int setupId, Converter< V, VolatileARGBType > volatileARGBConverter )
+    public ARGBConvertedRealSource( SpimData spimdata, final int setupId, Converter< V, VolatileARGBType > volatileARGBConverter )
     {
         this.setupId = setupId;
         this.spimData = spimdata;

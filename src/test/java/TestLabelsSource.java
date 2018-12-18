@@ -3,9 +3,9 @@ import bdv.util.*;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.bdv.utils.labels.LabelsSource;
-import de.embl.cba.bdv.utils.labels.VolatileLabelsARGBConverter;
-import de.embl.cba.bdv.utils.labels.VolatileSelectedLabelsARGBConverter;
+import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.labels.LUTs;
+import de.embl.cba.bdv.utils.labels.SelectedVolatileRealToRandomARGBConverter;
 import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DGoogleMouse;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
@@ -37,13 +37,12 @@ public class TestLabelsSource
 		SpimData spimData = new XmlIoSpimData().load( file.toString() );
 
 		Set< Double > selectedLabels = new HashSet();
+		final SelectedVolatileRealToRandomARGBConverter selectedVolatileRealToRandomARGBConverter = new SelectedVolatileRealToRandomARGBConverter( selectedLabels, LUTs.GLASBEY_LUT );
+		final ARGBConvertedRealSource ARGBConvertedRealSource = new ARGBConvertedRealSource( spimData, 0, selectedVolatileRealToRandomARGBConverter );
 
-		final VolatileSelectedLabelsARGBConverter volatileSelectedLabelsARGBConverter = new VolatileSelectedLabelsARGBConverter( selectedLabels );
-		final LabelsSource labelsSource = new LabelsSource( spimData, 0, volatileSelectedLabelsARGBConverter );
-
-		volatileSelectedLabelsARGBConverter.showAll();
+		selectedVolatileRealToRandomARGBConverter.showAll();
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
-				BdvFunctions.show( labelsSource,
+				BdvFunctions.show( ARGBConvertedRealSource,
 						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DGoogleMouse.BehaviourTransformEventHandler3DFactory() ) );
 
 
@@ -55,7 +54,7 @@ public class TestLabelsSource
 
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
 			final RealPoint globalMouseCoordinates = BdvUtils.getGlobalMouseCoordinates( bdv );
-			final double selectedLabel = BdvUtils.getValueAtGlobalPosition( globalMouseCoordinates, 0, labelsSource );
+			final double selectedLabel = BdvUtils.getValueAtGlobalPosition( globalMouseCoordinates, 0, ARGBConvertedRealSource );
 
 			if ( selectedLabels.contains( selectedLabel ) )
 			{
@@ -65,15 +64,15 @@ public class TestLabelsSource
 			{
 				selectedLabels.add( selectedLabel );
 			}
-			volatileSelectedLabelsARGBConverter.setSelectedLabels( selectedLabels );
-			volatileSelectedLabelsARGBConverter.showSelectedOnly();
+			selectedVolatileRealToRandomARGBConverter.setSelectedLabels( selectedLabels );
+			selectedVolatileRealToRandomARGBConverter.showSelectedOnly();
 			bdv.getBdvHandle().getViewerPanel().requestRepaint();
 		}, "select object", "button1 shift"  ) ;
 
 
 		behaviours.install( bdv.getBdvHandle().getTriggerbindings(), "behaviours" );
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
-			volatileSelectedLabelsARGBConverter.showAll();
+			selectedVolatileRealToRandomARGBConverter.showAll();
 			selectedLabels.clear();
 			bdv.getBdvHandle().getViewerPanel().requestRepaint();
 		}, "quit selection", "Q" );
@@ -87,7 +86,7 @@ public class TestLabelsSource
 		{
 			final Source wrappedSource = ( ( TransformedSource ) spimSource ).getWrappedSource();
 
-			if ( wrappedSource instanceof LabelsSource )
+			if ( wrappedSource instanceof ARGBConvertedRealSource )
 			{
 //				IJ.wait( 5000 );
 //				((LabelsSource)wrappedSource).incrementSeed();

@@ -5,8 +5,9 @@ import bdv.util.BdvStackSource;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import de.embl.cba.bdv.utils.algorithms.RegionExtractor;
-import de.embl.cba.bdv.utils.labels.LabelsSource;
-import de.embl.cba.bdv.utils.labels.VolatileSelectedLabelsARGBConverter;
+import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.labels.LUTs;
+import de.embl.cba.bdv.utils.labels.SelectedVolatileRealToRandomARGBConverter;
 import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DGoogleMouse;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -36,8 +37,8 @@ public class TestRegionExtractionAnd3DViewer
 		SpimData spimData = new XmlIoSpimData().load( file.toString() );
 
 		Set< Double > selectedLabels = new HashSet(  );
-		final VolatileSelectedLabelsARGBConverter volatileSelectedLabelsARGBConverter = new VolatileSelectedLabelsARGBConverter( selectedLabels );
-		final Source< VolatileARGBType > labelSource = new LabelsSource( spimData, 0, volatileSelectedLabelsARGBConverter );
+		final SelectedVolatileRealToRandomARGBConverter selectedVolatileRealToRandomARGBConverter = new SelectedVolatileRealToRandomARGBConverter( selectedLabels, LUTs.GLASBEY_LUT );
+		final Source< VolatileARGBType > labelSource = new ARGBConvertedRealSource( spimData, 0, selectedVolatileRealToRandomARGBConverter );
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( labelSource,
@@ -49,7 +50,7 @@ public class TestRegionExtractionAnd3DViewer
 
 		final Source wrappedSource = ( ( TransformedSource ) spimSource ).getWrappedSource();
 
-		RandomAccessibleInterval source = ( ( LabelsSource ) wrappedSource ).getWrappedSource( 0,0 );
+		RandomAccessibleInterval source = ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedSource( 0,0 );
 
 		final RegionExtractor regionExtractor = new RegionExtractor( source, new DiamondShape( 1 ), 1000*1000*1000L );
 

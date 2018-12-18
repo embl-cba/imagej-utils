@@ -7,7 +7,7 @@ import bdv.viewer.animate.AbstractTransformAnimator;
 import bdv.viewer.animate.SimilarityTransformAnimator;
 import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.algorithms.RegionExtractor;
-import de.embl.cba.bdv.utils.labels.LabelsSource;
+import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import de.embl.cba.bdv.utils.transforms.Transforms;
 import ij.CompositeImage;
@@ -213,9 +213,9 @@ public abstract class BdvUtils
 		{
 			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
 
-			if ( wrappedSource instanceof LabelsSource )
+			if ( wrappedSource instanceof ARGBConvertedRealSource )
 			{
-				return ( ( LabelsSource ) wrappedSource ).getWrappedSource( t, level );
+				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedSource( t, level );
 			}
 		}
 
@@ -505,7 +505,7 @@ public abstract class BdvUtils
 		{
 			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
 
-			if ( wrappedSource instanceof LabelsSource )
+			if ( wrappedSource instanceof ARGBConvertedRealSource )
 			{
 				return true;
 			}
@@ -514,22 +514,22 @@ public abstract class BdvUtils
 		return false;
 	}
 
-	public static LabelsSource getLabelsSource( BdvStackSource bdvStackSource )
+	public static ARGBConvertedRealSource getLabelsSource( BdvStackSource bdvStackSource )
 	{
 		final Source source = getSource( bdvStackSource, 0 );
 
 		return getLabelsSource( source );
 	}
 
-	private static LabelsSource getLabelsSource( Source source )
+	private static ARGBConvertedRealSource getLabelsSource( Source source )
 	{
 		if ( source instanceof TransformedSource )
 		{
 			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
 
-			if ( wrappedSource instanceof LabelsSource )
+			if ( wrappedSource instanceof ARGBConvertedRealSource )
 			{
-				return  ( ( LabelsSource ) wrappedSource) ;
+				return  ( ( ARGBConvertedRealSource ) wrappedSource) ;
 			}
 		}
 
@@ -592,7 +592,7 @@ public abstract class BdvUtils
 		return sourceValueMap;
 	}
 
-	public static < R extends RealType< R > > double getValueAtGlobalPosition( RealPoint point, int t, LabelsSource source )
+	public static < R extends RealType< R > > double getValueAtGlobalPosition( RealPoint point, int t, ARGBConvertedRealSource source )
 	{
 		final RandomAccess< R > sourceAccess = source.getWrappedSource( t, 0 ).randomAccess();
 

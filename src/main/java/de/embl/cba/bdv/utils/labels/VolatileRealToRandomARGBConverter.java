@@ -20,16 +20,19 @@ import net.imglib2.converter.Converter;
 import net.imglib2.type.volatiles.AbstractVolatileRealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Conversion logic adapted from BigCat Viewer.
  */
-public class VolatileLabelsARGBConverter< V extends AbstractVolatileRealType > implements Converter< V, VolatileARGBType >
+public class VolatileRealToRandomARGBConverter< V extends AbstractVolatileRealType > implements Converter< V, VolatileARGBType >
 {
 
 	private long seed = 50;
+	private final byte[][] lut;
+
+	public VolatileRealToRandomARGBConverter( byte[][] lut)
+	{
+		this.lut = lut;
+	}
 
 	@Override
 	public void convert( final V input, final VolatileARGBType output )
@@ -37,8 +40,7 @@ public class VolatileLabelsARGBConverter< V extends AbstractVolatileRealType > i
 		if ( input.isValid() )
 		{
 			final double x = input.getRealDouble();
-
-			output.set( LabelUtils.getColorGlasbey( x, seed ) );
+			output.set( LUTs.getRandomColorFromLut( x, lut, seed  ) );
 			output.setValid( true );
 		}
 		else
