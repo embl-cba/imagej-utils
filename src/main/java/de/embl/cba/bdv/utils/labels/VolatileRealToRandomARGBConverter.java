@@ -33,6 +33,14 @@ public class VolatileRealToRandomARGBConverter< V extends AbstractVolatileRealTy
 	private Set< Double > selectedLabels;
 	private final Map< Double, Double > map;
 
+
+	public VolatileRealToRandomARGBConverter( )
+	{
+		this.lut = LUTs.GLASBEY_LUT;
+		this.selectedLabels = null;
+		this.map = null;
+	}
+
 	public VolatileRealToRandomARGBConverter( byte[][] lut )
 	{
 		this.lut = lut;
@@ -95,7 +103,5 @@ public class VolatileRealToRandomARGBConverter< V extends AbstractVolatileRealTy
 	{
 		this.selectedLabels = selectedLabels;
 	}
-
-
 
 }

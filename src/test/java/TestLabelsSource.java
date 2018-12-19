@@ -6,7 +6,7 @@ import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.labels.LUTs;
 import de.embl.cba.bdv.utils.labels.VolatileRealToRandomARGBConverter;
-import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DGoogleMouse;
+import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DLeftMouseDrag;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
@@ -41,7 +41,7 @@ public class TestLabelsSource
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( ARGBConvertedRealSource,
-						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DGoogleMouse.BehaviourTransformEventHandler3DFactory() ) );
+						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DLeftMouseDrag.BehaviourTransformEventHandler3DFactory() ) );
 
 
 		final Bdv bdv = bdvStackSource.getBdvHandle();

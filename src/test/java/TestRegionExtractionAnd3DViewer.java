@@ -8,7 +8,7 @@ import de.embl.cba.bdv.utils.algorithms.RegionExtractor;
 import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.labels.LUTs;
 import de.embl.cba.bdv.utils.labels.VolatileRealToRandomARGBConverter;
-import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DGoogleMouse;
+import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DLeftMouseDrag;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij3d.Content;
@@ -24,8 +24,6 @@ import net.imglib2.view.Views;
 import org.scijava.vecmath.Color3f;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
 
 public class TestRegionExtractionAnd3DViewer
 {
@@ -41,7 +39,7 @@ public class TestRegionExtractionAnd3DViewer
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( labelSource,
-						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DGoogleMouse.BehaviourTransformEventHandler3DFactory() ) );
+						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DLeftMouseDrag.BehaviourTransformEventHandler3DFactory() ) );
 
 		final SourceAndConverter< VolatileARGBType > sourceAndConverter = bdvStackSource.getSources().get( 0 );
 

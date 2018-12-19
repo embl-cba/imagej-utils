@@ -21,7 +21,7 @@ import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
  * @author Stephan Saalfeld
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
-public class BehaviourTransformEventHandler3DGoogleMouse implements BehaviourTransformEventHandler< AffineTransform3D >
+public class BehaviourTransformEventHandler3DLeftMouseDrag implements BehaviourTransformEventHandler< AffineTransform3D >
 {
 	public static TransformEventHandlerFactory< AffineTransform3D > factory()
 	{
@@ -39,9 +39,9 @@ public class BehaviourTransformEventHandler3DGoogleMouse implements BehaviourTra
 		}
 
 		@Override
-		public BehaviourTransformEventHandler3DGoogleMouse create( final TransformListener< AffineTransform3D > transformListener )
+		public BehaviourTransformEventHandler3DLeftMouseDrag create( final TransformListener< AffineTransform3D > transformListener )
 		{
-			return new BehaviourTransformEventHandler3DGoogleMouse( transformListener, config );
+			return new BehaviourTransformEventHandler3DLeftMouseDrag( transformListener, config );
 		}
 	}
 
@@ -85,7 +85,7 @@ public class BehaviourTransformEventHandler3DGoogleMouse implements BehaviourTra
 
 	protected final Behaviours behaviours;
 
-	public BehaviourTransformEventHandler3DGoogleMouse( final TransformListener< AffineTransform3D > listener, final InputTriggerConfig config )
+	public BehaviourTransformEventHandler3DLeftMouseDrag( final TransformListener< AffineTransform3D > listener, final InputTriggerConfig config )
 	{
 		this.listener = listener;
 
@@ -401,7 +401,7 @@ public class BehaviourTransformEventHandler3DGoogleMouse implements BehaviourTra
 		@Override
 		public void click( final int x, final int y )
 		{
-			BehaviourTransformEventHandler3DGoogleMouse.this.axis = axis;
+			BehaviourTransformEventHandler3DLeftMouseDrag.this.axis = axis;
 		}
 	}
 
