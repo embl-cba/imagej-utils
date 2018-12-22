@@ -85,7 +85,6 @@ public class TestConfigurableLabelsSourceDisplay
 			}
 		}, "shuffle random colors", "shift S" );
 
-		behaviours.install( bdv.getBdvHandle().getTriggerbindings(), "behaviours" );
 
 	}
 }

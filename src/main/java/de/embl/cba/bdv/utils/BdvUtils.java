@@ -6,7 +6,7 @@ import bdv.viewer.*;
 import bdv.viewer.animate.AbstractTransformAnimator;
 import bdv.viewer.animate.SimilarityTransformAnimator;
 import bdv.viewer.state.SourceState;
-import de.embl.cba.bdv.utils.algorithms.RegionExtractor;
+import de.embl.cba.bdv.utils.algorithms.ConnectedComponentExtractor;
 import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import de.embl.cba.bdv.utils.transforms.Transforms;
@@ -696,11 +696,11 @@ public abstract class BdvUtils
 
 				final long[] positionInSourceStack = BdvUtils.getPositionInSource( source, point, 0, level );
 
-				final RegionExtractor regionExtractor = new RegionExtractor( indexImg, new DiamondShape( 1 ), 1000 * 1000 * 1000L );
+				final ConnectedComponentExtractor connectedComponentExtractor = new ConnectedComponentExtractor( indexImg, new DiamondShape( 1 ), 1000 * 1000 * 1000L );
 
-				regionExtractor.run( positionInSourceStack );
+				connectedComponentExtractor.run( positionInSourceStack );
 
-				masksOutput.add( regionExtractor.getCroppedRegionMask() );
+				masksOutput.add( connectedComponentExtractor.getCroppedRegionMask() );
 
 				calibrationsOutput.add( getCalibration( source, level ) );
 			}

@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
-public class RegionExtractor < R extends RealType< R > >
+public class ConnectedComponentExtractor< R extends RealType< R > >
 {
 	// input
 	private final RandomAccessibleInterval< R > source;
@@ -46,7 +46,7 @@ public class RegionExtractor < R extends RealType< R > >
 	// output
 	private boolean maxRegionSizeReached;
 
-	public RegionExtractor( RandomAccessibleInterval< R > source, Shape shape, long maxRegionSize )
+	public ConnectedComponentExtractor( RandomAccessibleInterval< R > source, Shape shape, long maxRegionSize )
 	{
 		this.source = source;
 		this.shape = shape;
