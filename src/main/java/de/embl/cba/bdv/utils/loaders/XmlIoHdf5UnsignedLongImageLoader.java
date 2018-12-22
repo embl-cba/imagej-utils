@@ -18,6 +18,10 @@ import java.util.Map;
 import static mpicbg.spim.data.XmlHelpers.loadPath;
 import static mpicbg.spim.data.XmlKeys.IMGLOADER_FORMAT_ATTRIBUTE_NAME;
 
+
+// Loader class auto-discovery happens here:
+// https://github.com/bigdataviewer/spimdata/blob/master/src/main/java/mpicbg/spim/data/generic/sequence/ImgLoaders.java#L53
+
 @ImgLoaderIo( format = "bdv.hdf5.ulong", type = Hdf5UnsignedLongImageLoader.class )
 public class XmlIoHdf5UnsignedLongImageLoader implements XmlIoBasicImgLoader< Hdf5UnsignedLongImageLoader >
 {

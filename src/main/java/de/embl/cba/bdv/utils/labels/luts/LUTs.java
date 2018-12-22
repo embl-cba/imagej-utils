@@ -1,14 +1,10 @@
-package de.embl.cba.bdv.utils.labels;
-
-import ij.process.LUT;
-import net.imglib2.type.numeric.ARGBType;
-
+package de.embl.cba.bdv.utils.labels.luts;
 import java.awt.*;
 
 public class LUTs
 {
-	public static final byte[][] GOLDEN_ANGLE_LUT = createGoldenAngleLut( 256 );
-	public static final byte[][] GLASBEY_LUT = createGlasbeyLut();
+	public static final int[][] GLASBEY_LUT = createGlasbeyLut();
+	public static final int[][] GOLDEN_ANGLE_LUT = createGoldenAngleLut( 256 );
 
 	/**
 	 * Create lookup table with a  maximally distinct sets of colors (copied
@@ -20,9 +16,9 @@ public class LUTs
 	 *
 	 * @return Glasbey lookup table
 	 */
-	public final static byte[][] createGlasbeyLut() {
+	private final static int[][] createGlasbeyLut() {
 		// initial values (copied from Fiji's Glasbey LUT)
-		int[] r = { 255, 0, 255, 0, 0, 255, 0, 255, 0, 154, 0, 120, 31, 255,
+		int[] r = { 0, 0, 255, 0, 0, 255, 0, 255, 0, 154, 0, 120, 31, 255,
 				177, 241, 254, 221, 32, 114, 118, 2, 200, 136, 255, 133, 161,
 				20, 0, 220, 147, 0, 0, 57, 238, 0, 171, 161, 164, 255, 71, 212,
 				251, 171, 117, 166, 0, 165, 98, 0, 0, 86, 159, 66, 255, 0, 252,
@@ -41,7 +37,7 @@ public class LUTs
 				106, 153, 192, 125, 149, 213, 22, 166, 109, 86, 255, 255, 255,
 				202, 67, 234, 191, 38, 85, 121, 254, 139, 141, 0, 63, 255, 17,
 				154, 149, 126, 58, 189 };
-		int[] g = { 255, 0, 0, 255, 0, 0, 83, 211, 159, 77, 255, 63, 150, 172,
+		int[] g = { 0, 0, 0, 255, 0, 0, 83, 211, 159, 77, 255, 63, 150, 172,
 				204, 8, 143, 0, 26, 0, 108, 173, 255, 108, 183, 133, 3, 249, 71,
 				94, 212, 76, 66, 167, 112, 0, 245, 146, 255, 206, 0, 173, 118,
 				188, 0, 0, 115, 93, 132, 121, 255, 53, 0, 45, 242, 93, 255, 191,
@@ -60,7 +56,7 @@ public class LUTs
 				56, 255, 0, 162, 131, 249, 105, 188, 109, 3, 0, 0, 109, 170,
 				165, 44, 185, 182, 236, 165, 254, 60, 17, 221, 26, 66, 157,
 				130, 6, 117};
-		int[] b = { 255, 255, 0, 0, 51, 182, 0, 0, 255, 66, 190, 193, 152, 253,
+		int[] b = { 0, 255, 0, 0, 51, 182, 0, 0, 255, 66, 190, 193, 152, 253,
 				113, 92, 66, 255, 1, 85, 149, 36, 0, 0, 159, 103, 0, 255, 158,
 				147, 255, 255, 80, 106, 254, 100, 204, 255, 115, 113, 21, 197,
 				111, 0, 215, 154, 254, 174, 2, 168, 131, 0, 63, 66, 187, 67,
@@ -80,58 +76,28 @@ public class LUTs
 				2, 158, 212, 89, 193, 43, 40, 246, 146, 84, 238, 72, 101, 101 };
 
 		// create map
-		byte[][] map = new byte[r.length][3];
+		int[][] map = new int[r.length][3];
 
 		// cast elements
 		for (int i = 0; i < r.length; i++) {
-			map[i][0] = (byte) r[i];
-			map[i][1] = (byte) g[i];
-			map[i][2] = (byte) b[i];
+			map[i][0] = r[i];
+			map[i][1] = g[i];
+			map[i][2] = b[i];
 		}
 
 		return map;
-	}
-
-	static int get8bitColorIndex( double x, long seed )
-	{
-		x = ( x * seed ) * LabelUtils.goldenRatio;
-		x = x - ( long ) Math.floor( x );
-		return (int) ( 255.0 * x );
-	}
-
-	public static LUT getGoldenAngleLUT()
-	{
-		byte[][] bytes = createGoldenAngleLut( 256 );
-		final byte[][] rgb = new byte[ 3 ][ 256 ];
-
-		for ( int c = 0; c < 3; ++c )
-		{
-			rgb[ c ][ 0 ] = 0; // Black background
-		}
-
-		for ( int c = 0; c < 3; ++c )
-		{
-			for ( int i = 1; i < 256; ++i )
-			{
-				rgb[ c ][ i ] = bytes[ i ][ c ];
-			}
-		}
-
-		LUT lut = new LUT( rgb[ 0 ], rgb[ 1 ], rgb[ 2 ] );
-		return lut;
 	}
 
 	/**
 	 * Make lookup table with esthetically pleasing colors based on the golden
 	 * angle
 	 *
-	 * From: MorphoLibJ
-	 * // TODO: properly cite!
+	 * Taken from: MorphoLibJ
 	 *
 	 * @param nColors number of colors to generate
 	 * @return lookup table with golden-angled-based colors
 	 */
-	public final static byte[][] createGoldenAngleLut( int nColors )
+	private final static int[][] createGoldenAngleLut( int nColors )
 	{
 		// hue for assigning new color ([0.0-1.0])
 		float hue = 0.5f;
@@ -157,36 +123,18 @@ public class LUTs
 		}
 
 		// create map
-		byte[][] map = new byte[nColors][3];
+		int[][] map = new int[nColors][3];
 
 		// fill up the color map by converting color array
 		for (int i = 0; i < nColors; i++)
 		{
 			Color color = colors[i];
-			map[i][0] = (byte) color.getRed();
-			map[i][1] = (byte) color.getGreen();
-			map[i][2] = (byte) color.getBlue();
+			map[i][0] = color.getRed();
+			map[i][1] = color.getGreen();
+			map[i][2] = color.getBlue();
 		}
 
 		return map;
 	}
 
-	public static int getRandomColorFromLut( double x, byte[][] lut, long seed )
-	{
-		if ( x == 0 )
-		{
-			return 0;
-		}
-		else
-		{
-			int i = get8bitColorIndex( x, seed );
-
-			final int color = ARGBType.rgba(
-					lut[ i ][ 0 ],
-					lut[ i ][ 1 ],
-					lut[ i ][ 2 ], 125 );
-
-			return color;
-		}
-	}
 }

@@ -6,8 +6,8 @@ import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import de.embl.cba.bdv.utils.algorithms.RegionExtractor;
 import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.labels.LUTs;
-import de.embl.cba.bdv.utils.labels.VolatileRealToRandomARGBConverter;
+import de.embl.cba.bdv.utils.labels.luts.LUTs;
+import de.embl.cba.bdv.utils.labels.ConfigurableVolatileRealVolatileARGBConverter;
 import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DLeftMouseDrag;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -34,8 +34,8 @@ public class TestRegionExtractionAnd3DViewer
 
 		SpimData spimData = new XmlIoSpimData().load( file.toString() );
 
-		final VolatileRealToRandomARGBConverter selectedVolatileRealToRandomARGBConverter = new VolatileRealToRandomARGBConverter( LUTs.GLASBEY_LUT );
-		final Source< VolatileARGBType > labelSource = new ARGBConvertedRealSource( spimData, 0, selectedVolatileRealToRandomARGBConverter );
+		final ConfigurableVolatileRealVolatileARGBConverter selectedConfigurableVolatileRealVolatileARGBConverter = new ConfigurableVolatileRealVolatileARGBConverter( );
+		final Source< VolatileARGBType > labelSource = new ARGBConvertedRealSource( spimData, 0, selectedConfigurableVolatileRealVolatileARGBConverter );
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( labelSource,
