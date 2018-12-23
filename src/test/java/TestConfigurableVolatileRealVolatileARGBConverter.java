@@ -1,10 +1,8 @@
-import bdv.tools.transformation.TransformedSource;
+import bdv.VolatileSpimSource;
 import bdv.util.*;
 import bdv.viewer.Source;
-import bdv.viewer.SourceAndConverter;
 import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.labels.luts.LUTs;
+import de.embl.cba.bdv.utils.labels.ARGBConvertedVolatileRealTypeSource;
 import de.embl.cba.bdv.utils.labels.ConfigurableVolatileRealVolatileARGBConverter;
 import de.embl.cba.bdv.utils.labels.luts.RandomLUTMapper;
 import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DLeftMouseDrag;
@@ -17,27 +15,28 @@ import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-public class TestConfigurableLabelsSourceDisplay
+public class TestConfigurableVolatileRealVolatileARGBConverter
 {
 
 	public static void main( String[] args ) throws SpimDataException
 	{
 
-		final String labelsSource = TestConfigurableLabelsSourceDisplay.class.getResource( "labels.xml" ).getFile();
+		final String labelsSourcePath = TestARGBConvertedRealTypeSpimDataSource.class.getResource( "labels.xml" ).getFile();
 
-		SpimData spimData = new XmlIoSpimData().load( labelsSource );
+		SpimData spimData = new XmlIoSpimData().load( labelsSourcePath );
+
+		final VolatileSpimSource volatileSpimSource = new VolatileSpimSource( spimData, 0, "name" );
 
 		final ConfigurableVolatileRealVolatileARGBConverter converter = new ConfigurableVolatileRealVolatileARGBConverter( );
-		final ARGBConvertedRealSource ARGBConvertedRealSource = new ARGBConvertedRealSource( spimData, 0, converter );
+
+		final Source< VolatileARGBType > labelsSource = new ARGBConvertedVolatileRealTypeSource( volatileSpimSource, "labels", converter );
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
-				BdvFunctions.show( ARGBConvertedRealSource,
+				BdvFunctions.show( labelsSource,
 						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DLeftMouseDrag.BehaviourTransformEventHandler3DFactory() ) );
-
 
 		final Bdv bdv = bdvStackSource.getBdvHandle();
 
@@ -51,7 +50,7 @@ public class TestConfigurableLabelsSourceDisplay
 		//
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
 			final RealPoint globalMouseCoordinates = BdvUtils.getGlobalMouseCoordinates( bdv );
-			final double selectedLabel = BdvUtils.getValueAtGlobalPosition( globalMouseCoordinates, 0, ARGBConvertedRealSource );
+			final double selectedLabel = BdvUtils.getValueAtGlobalCoordinates( labelsSource, globalMouseCoordinates, 0 );
 
 			if ( selectedValues.contains( selectedLabel ) )
 			{

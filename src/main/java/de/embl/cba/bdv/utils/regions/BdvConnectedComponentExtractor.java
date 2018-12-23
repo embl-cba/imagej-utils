@@ -5,7 +5,7 @@ import bdv.util.Bdv;
 import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.algorithms.ConnectedComponentExtractor;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeSpimDataSource;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.neighborhood.DiamondShape;
@@ -83,9 +83,9 @@ public class BdvConnectedComponentExtractor < R extends RealType< R > >
 		{
 			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
 
-			if ( wrappedSource instanceof ARGBConvertedRealSource )
+			if ( wrappedSource instanceof ARGBConvertedRealTypeSpimDataSource )
 			{
-				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedSource( t, level );
+				return ( ( ARGBConvertedRealTypeSpimDataSource ) wrappedSource ).getWrappedRealTypeRandomAccessibleInterval( t, level );
 			}
 		}
 		else if ( source.getType() instanceof RealType )

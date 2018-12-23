@@ -19,24 +19,24 @@ package de.embl.cba.bdv.utils.labels;
 import de.embl.cba.bdv.utils.labels.luts.LUTMapper;
 import de.embl.cba.bdv.utils.labels.luts.LUTs;
 import de.embl.cba.bdv.utils.labels.luts.RandomLUTMapper;
+import net.imglib2.Volatile;
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.AbstractRealType;
 import net.imglib2.type.volatiles.AbstractVolatileRealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
+import net.imglib2.type.volatiles.VolatileRealType;
 
 import java.util.Set;
 
-@Deprecated
-public class ConfigurableVolatileRealVolatileARGBConverter
-		< V extends AbstractVolatileRealType, R extends AbstractRealType< R > >
-		implements Converter< V, VolatileARGBType >
+public class ConfigurableRealTypeVolatileARGBTypeConverter implements Converter< RealType, VolatileARGBType >
 {
 	private int[][] lut;
 	private LUTMapper lutMapper;
 	private Set< Double > selectedValues;
 
-	public ConfigurableVolatileRealVolatileARGBConverter( )
+	public ConfigurableRealTypeVolatileARGBTypeConverter( )
 	{
 		this.lut = LUTs.GLASBEY_LUT;
 		this.selectedValues = null;
@@ -45,34 +45,38 @@ public class ConfigurableVolatileRealVolatileARGBConverter
 
 
 	@Override
-	public void convert( final V input, final VolatileARGBType output )
+	public void convert( final RealType input, final VolatileARGBType output )
 	{
-		if ( input.isValid() )
+
+		if ( input instanceof Volatile )
 		{
-			final double x = input.getRealDouble();
-
-			if ( selectedValues == null || selectedValues.contains( x ) )
+			if ( ! ( ( Volatile ) input ).isValid() )
 			{
-				final int lutIndex = lutMapper.getLUTIndex( x );
-
-				final int color = ARGBType.rgba(
-						lut[ lutIndex ][ 0 ],
-						lut[ lutIndex ][ 1 ],
-						lut[ lutIndex ][ 2 ], 255 );
-
-				output.set( color );
+				output.setValid( false );
+				return;
 			}
-			else
-			{
-				output.set( 0 );
-			}
+		}
 
-			output.setValid( true );
+		final double x = input.getRealDouble();
+
+		if ( selectedValues == null || selectedValues.contains( x ) )
+		{
+			final int lutIndex = lutMapper.getLUTIndex( x );
+
+			final int color = ARGBType.rgba(
+					lut[ lutIndex ][ 0 ],
+					lut[ lutIndex ][ 1 ],
+					lut[ lutIndex ][ 2 ], 255 );
+
+			output.set( color );
 		}
 		else
 		{
-			output.setValid( false );
+			output.set( 0 );
 		}
+
+		output.setValid( true );
+
 	}
 
 	/**

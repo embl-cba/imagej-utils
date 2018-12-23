@@ -15,21 +15,19 @@ import net.imglib2.interpolation.InterpolatorFactory;
 import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory;
 import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.*;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-import java.util.HashSet;
-import java.util.Set;
-
-public class ARGBConvertedRealSource< R extends RealType< R >, V extends AbstractVolatileRealType< R, V > > implements Source< VolatileARGBType >
+@Deprecated
+public class ARGBConvertedRealTypeSpimDataSource< R extends RealType< R >, V extends AbstractVolatileRealType< R, V > > implements Source< VolatileARGBType >
 
 {
-    private final long setupId;
     private final SpimData spimData;
-    private Converter< V, VolatileARGBType > volatileARGBConverter;
+    private final long setupId;
+    private final String name;
+    private Converter< V, VolatileARGBType > converter;
 
     private AbstractViewerSetupImgLoader< R, V > setupImgLoader;
     final private InterpolatorFactory< VolatileARGBType, RandomAccessible< VolatileARGBType > >[] interpolatorFactories;
@@ -42,48 +40,16 @@ public class ARGBConvertedRealSource< R extends RealType< R >, V extends Abstrac
         };
     }
 
-    public ARGBConvertedRealSource( SpimData spimdata, final int setupId, Converter< V, VolatileARGBType > volatileARGBConverter )
+    public ARGBConvertedRealTypeSpimDataSource( SpimData spimdata, String name, final int setupId, Converter< V, VolatileARGBType > converter )
     {
-        this.setupId = setupId;
         this.spimData = spimdata;
-        this.volatileARGBConverter = volatileARGBConverter;
-        this.viewRegistration = spimData.getViewRegistrations().getViewRegistration( 0, 0 ).getModel().copy();
+        this.name = name;
+        this.setupId = setupId;
+        this.converter = converter;
+        this.viewRegistration = spimData.getViewRegistrations().getViewRegistration( 0, setupId ).getModel().copy();
         ViewerImgLoader imgLoader = ( ViewerImgLoader ) this.spimData.getSequenceDescription().getImgLoader();
         this.setupImgLoader = ( AbstractViewerSetupImgLoader ) imgLoader.getSetupImgLoader( setupId );
         this.mipmapTransforms = this.setupImgLoader.getMipmapTransforms();
-
-        final Type type = setupImgLoader.getImageType().createVariable();
-
-        final Type volatileType = setupImgLoader.getVolatileImageType().createVariable();
-
-        try
-        {
-            if (! ( volatileType instanceof VolatileUnsignedByteType
-                    || volatileType instanceof VolatileUnsignedShortType
-                    || volatileType instanceof VolatileUnsignedLongType )) {
-                throw new Exception("Data type not supported for creating a label source: " + volatileType.toString() );
-            }
-        }
-        catch ( Exception e)
-        {
-            e.printStackTrace();
-        }
-
-    }
-
-    public void setVolatileARGBConverter( Converter< V, VolatileARGBType > volatileARGBConverter )
-    {
-        this.volatileARGBConverter = volatileARGBConverter;
-    }
-
-    public Converter< V, VolatileARGBType > getVolatileARGBConverter()
-    {
-        return volatileARGBConverter;
-    }
-
-    public RandomAccessibleInterval< R > getWrappedSource( int t, int mipMapLevel )
-    {
-        return setupImgLoader.getImage( t, mipMapLevel );
     }
 
     @Override
@@ -98,7 +64,7 @@ public class ARGBConvertedRealSource< R extends RealType< R >, V extends Abstrac
     {
         return Converters.convert(
                         setupImgLoader.getVolatileImage( t, mipMapLevel ),
-                        volatileARGBConverter,
+                converter,
                         new VolatileARGBType() );
     }
 
@@ -128,7 +94,7 @@ public class ARGBConvertedRealSource< R extends RealType< R >, V extends Abstrac
 
     @Override
     public String getName() {
-        return "labels";
+        return name;
     }
 
     @Override
@@ -141,5 +107,19 @@ public class ARGBConvertedRealSource< R extends RealType< R >, V extends Abstrac
         return setupImgLoader.getMipmapTransforms().length;
     }
 
+    public void setConverter( Converter< V, VolatileARGBType > converter )
+    {
+        this.converter = converter;
+    }
+
+    public Converter< V, VolatileARGBType > getConverter()
+    {
+        return converter;
+    }
+
+    public RandomAccessibleInterval< R > getWrappedRealTypeRandomAccessibleInterval( int t, int mipMapLevel )
+    {
+        return setupImgLoader.getImage( t, mipMapLevel );
+    }
 
 }

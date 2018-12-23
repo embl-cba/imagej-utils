@@ -287,6 +287,8 @@ public abstract class Transforms< T extends InvertibleRealTransform & Concatenab
 
 	public static double[] getScale( AffineTransform3D sourceTransform )
 	{
+		// https://math.stackexchange.com/questions/237369/given-this-transformation-matrix-how-do-i-decompose-it-into-translation-rotati
+
 		final double[] calibration = new double[ 3 ];
 		for ( int d = 0; d < 3; ++d )
 		{

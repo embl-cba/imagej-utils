@@ -1,13 +1,12 @@
 package de.embl.cba.bdv.utils;
 
-import bdv.tools.transformation.TransformedSource;
 import bdv.util.*;
 import bdv.viewer.*;
 import bdv.viewer.animate.AbstractTransformAnimator;
 import bdv.viewer.animate.SimilarityTransformAnimator;
 import bdv.viewer.state.SourceState;
-import de.embl.cba.bdv.utils.algorithms.ConnectedComponentExtractor;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeSource;
+import de.embl.cba.bdv.utils.labels.ARGBConvertedVolatileRealTypeSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import de.embl.cba.bdv.utils.transforms.Transforms;
 import ij.CompositeImage;
@@ -16,13 +15,10 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
-import net.imglib2.algorithm.neighborhood.DiamondShape;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
@@ -192,13 +188,13 @@ public abstract class BdvUtils
 	}
 
 
-	public static RandomAccessibleInterval< IntegerType > getIndexImg( BdvStackSource bdvStackSource, int t, int level )
-	{
-		final Source source = getSource( bdvStackSource, 0 );
-
-		return getIndexImg( source, t, level );
-
-	}
+//	public static RandomAccessibleInterval< IntegerType > getIndexImg( BdvStackSource bdvStackSource, int t, int level )
+//	{
+//		final Source source = getSource( bdvStackSource, 0 );
+//
+//		return getIndexImg( source, t, level );
+//
+//	}
 
 	public static Source getSource( BdvStackSource bdvStackSource, int i )
 	{
@@ -207,20 +203,20 @@ public abstract class BdvUtils
 		return sourceAndConverter.getSpimSource();
 	}
 
-	public static RandomAccessibleInterval< IntegerType > getIndexImg( Source source, int t, int level )
-	{
-		if ( source instanceof TransformedSource )
-		{
-			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
-
-			if ( wrappedSource instanceof ARGBConvertedRealSource )
-			{
-				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedSource( t, level );
-			}
-		}
-
-		return null; // TODO: throw some type error...
-	}
+//	public static RandomAccessibleInterval< IntegerType > getIndexImg( Source source, int t, int level )
+//	{
+//		if ( source instanceof TransformedSource )
+//		{
+//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
+//
+//			if ( wrappedSource instanceof ARGBConvertedRealSource )
+//			{
+//				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedSource( t, level );
+//			}
+//		}
+//
+//		return null; // TODO: throw some type error...
+//	}
 
 	public static ARGBType asArgbType( Color color )
 	{
@@ -282,7 +278,7 @@ public abstract class BdvUtils
 	}
 
 
-	public static void levelView( Bdv bdv, double[] targetNormalVector )
+	public static void levelCurrentView( Bdv bdv, double[] targetNormalVector )
 	{
 
 		double[] currentNormalVector = BdvUtils.getCurrentViewNormalVector( bdv );
@@ -490,54 +486,51 @@ public abstract class BdvUtils
 		return nonOverlaySources;
 	}
 
-	public static boolean isLabelsSource( BdvStackSource bdvStackSource )
-	{
-
-		final Source source = getSource( bdvStackSource, 0 );
-
-		return isLabelsSource( source );
-
-	}
-
-	public static boolean isLabelsSource( Source source )
-	{
-		if ( source instanceof TransformedSource )
-		{
-			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
-
-			if ( wrappedSource instanceof ARGBConvertedRealSource )
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public static ARGBConvertedRealSource getLabelsSource( BdvStackSource bdvStackSource )
-	{
-		final Source source = getSource( bdvStackSource, 0 );
-
-		return getLabelsSource( source );
-	}
-
-	private static ARGBConvertedRealSource getLabelsSource( Source source )
-	{
-		if ( source instanceof TransformedSource )
-		{
-			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
-
-			if ( wrappedSource instanceof ARGBConvertedRealSource )
-			{
-				return  ( ( ARGBConvertedRealSource ) wrappedSource) ;
-			}
-		}
-
-		return null;
-	}
-
-
-
+//	public static boolean isARGBConvertedRealSource( BdvStackSource bdvStackSource )
+//	{
+//		final Source source = getSource( bdvStackSource, 0 );
+//
+//		return isARGBConvertedRealSource( source );
+//
+//	}
+//
+//	public static boolean isARGBConvertedRealSource( Source source )
+//	{
+//		if ( source instanceof TransformedSource )
+//		{
+//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
+//
+//			if ( wrappedSource instanceof ARGBConvertedRealSource )
+//			{
+//				return true;
+//			}
+//		}
+//
+//		return false;
+//	}
+//
+//	public static ARGBConvertedRealSource getLabelsSource( BdvStackSource bdvStackSource )
+//	{
+//		final Source source = getSource( bdvStackSource, 0 );
+//
+//		return getLabelsSource( source );
+//	}
+//
+//	private static ARGBConvertedRealSource getLabelsSource( Source source )
+//	{
+//		if ( source instanceof TransformedSource )
+//		{
+//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
+//
+//			if ( wrappedSource instanceof ARGBConvertedRealSource )
+//			{
+//				return  ( ( ARGBConvertedRealSource ) wrappedSource) ;
+//			}
+//		}
+//
+//		return null;
+//	}
+//
 	public static RealPoint getGlobalMouseCoordinates( Bdv bdv )
 	{
 		final RealPoint posInBdvInMicrometer = new RealPoint( 3 );
@@ -559,7 +552,7 @@ public abstract class BdvUtils
 //
 //			final Source source = sourceState.getSpimSource();
 //
-//			if ( isLabelsSource( source ) )
+//			if ( isARGBConvertedRealSource( source ) )
 //			{
 //
 //				BdvUtils.getLabelsSource( source ).showAll( );
@@ -583,7 +576,7 @@ public abstract class BdvUtils
 
 			final Source source = sourceState.getSpimSource();
 
-			final double realDouble = getValueAtGlobalPosition( point, t, source );
+			final double realDouble = getValueAtGlobalCoordinates( source, point, t );
 
 			sourceValueMap.put( sourceIndex, realDouble );
 
@@ -592,9 +585,10 @@ public abstract class BdvUtils
 		return sourceValueMap;
 	}
 
-	public static < R extends RealType< R > > double getValueAtGlobalPosition( RealPoint point, int t, ARGBConvertedRealSource source )
+
+	public static double getValueAtGlobalCoordinates( Source source, RealPoint point, int t  )
 	{
-		final RandomAccess< R > sourceAccess = source.getWrappedSource( t, 0 ).randomAccess();
+		final RandomAccess< RealType > sourceAccess = getRealTypeRandomAccess( source, t );
 
 		final long[] positionInSource = BdvUtils.getPositionInSource( source, point, t, 0 );
 
@@ -603,116 +597,65 @@ public abstract class BdvUtils
 		return sourceAccess.get().getRealDouble();
 	}
 
-
-	public static < R extends RealType< R > > double getValueAtGlobalPosition( RealPoint point, int t, Source source )
+	public static RandomAccess< RealType > getRealTypeRandomAccess( Source source, int t )
 	{
-		final RandomAccess< R > sourceAccess = source.getSource( t, 0 ).randomAccess();
+		final RandomAccess< RealType > access;
 
-		final long[] positionInSource = BdvUtils.getPositionInSource( source, point, t, 0 );
+		if ( source instanceof ARGBConvertedRealTypeSource )
+		{
+			access = ( ( ARGBConvertedRealTypeSource ) source).getWrappedSource( t, 0 ).randomAccess();
+		}
+		else
+		{
+			access = source.getSource( t, 0 ).randomAccess();
+		}
 
-		sourceAccess.setPosition( positionInSource );
-
-		return sourceAccess.get().getRealDouble();
+		return access;
 	}
 
 
-//	public static Map< Integer, Long > selectObjectsInActiveLabelSources( Bdv bdv, RealPoint point )
+
+//	public static void extractSelectedObject(
+//			final Bdv bdv,
+//			final RealPoint point,
+//			int level,
+//			final ArrayList< RandomAccessibleInterval< BitType > > masksOutput,
+//			final ArrayList< double[] > calibrationsOutput
+//	)
 //	{
-//
-//		final HashMap< Integer, Long > sourcesAndSelectedObjects = new HashMap<>();
 //
 //		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
 //
 //		for ( int sourceIndex : visibleSourceIndices )
 //		{
-//
 //			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
 //
 //			final Source source = sourceState.getSpimSource();
 //
-//			if ( isLabelsSource( source ) )
+//			if ( isARGBConvertedRealSource( source ) )
 //			{
-//				final AffineTransform3D affineTransform3D = new AffineTransform3D();
-//				bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( affineTransform3D );
-//				int level = MipmapTransforms.getBestMipMapLevel( affineTransform3D, source, 0 );
+//				level = level > source.getNumMipmapLevels() ?  source.getNumMipmapLevels() - 1 : level;
 //
 //				final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( source, 0, level );
 //
 //				final long[] positionInSourceStack = BdvUtils.getPositionInSource( source, point, 0, level );
 //
-//				final RandomAccess< IntegerType > access = indexImg.randomAccess();
+//				final ConnectedComponentExtractor connectedComponentExtractor = new ConnectedComponentExtractor( indexImg, new DiamondShape( 1 ), 1000 * 1000 * 1000L );
 //
-//				try
-//				{
-//					access.setPosition( positionInSourceStack );
+//				connectedComponentExtractor.run( positionInSourceStack );
 //
-//					final long objectIndex = access.get().getIntegerLong();
+//				masksOutput.add( connectedComponentExtractor.getCroppedRegionMask() );
 //
-//					if ( objectIndex != 0 )
-//					{
-//						sourcesAndSelectedObjects.put( sourceIndex, objectIndex );
-//					}
-//
-//					BdvUtils.getLabelsSource( source ).select( objectIndex );
-//				}
-//				catch ( Exception e )
-//				{
-//					int a = 1;
-//					// selected pixel outside image bounds
-//				}
+//				calibrationsOutput.add( getCalibration( source, level ) );
 //			}
 //		}
-//
-//		bdv.getBdvHandle().getViewerPanel().requestRepaint();
-//
-//		return sourcesAndSelectedObjects;
 //	}
-
-
-	public static void extractSelectedObject(
-			final Bdv bdv,
-			final RealPoint point,
-			int level,
-			final ArrayList< RandomAccessibleInterval< BitType > > masksOutput,
-			final ArrayList< double[] > calibrationsOutput
-	)
-	{
-
-		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
-
-		for ( int sourceIndex : visibleSourceIndices )
-		{
-			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
-
-			final Source source = sourceState.getSpimSource();
-
-			if ( isLabelsSource( source ) )
-			{
-				level = level > source.getNumMipmapLevels() ?  source.getNumMipmapLevels() - 1 : level;
-
-				//	int level = MipmapTransforms.getBestMipMapLevel( affineTransform3D, source, 0 );
-
-				final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( source, 0, level );
-
-				final long[] positionInSourceStack = BdvUtils.getPositionInSource( source, point, 0, level );
-
-				final ConnectedComponentExtractor connectedComponentExtractor = new ConnectedComponentExtractor( indexImg, new DiamondShape( 1 ), 1000 * 1000 * 1000L );
-
-				connectedComponentExtractor.run( positionInSourceStack );
-
-				masksOutput.add( connectedComponentExtractor.getCroppedRegionMask() );
-
-				calibrationsOutput.add( getCalibration( source, level ) );
-			}
-		}
-	}
 
 	public static double[] getCalibration( Source source, int level )
 	{
 		final AffineTransform3D sourceTransform = new AffineTransform3D();
-		source.getSourceTransform( 0, level, sourceTransform );
 
-		// https://math.stackexchange.com/questions/237369/given-this-transformation-matrix-how-do-i-decompose-it-into-translation-rotati
+		source.getSourceTransform( 0, level, sourceTransform );
 
 		final double[] calibration = Transforms.getScale( sourceTransform );
 
@@ -764,7 +707,7 @@ public abstract class BdvUtils
 
 	public static void zoomToPosition( Bdv bdv, double[] xyzt, double scale, long durationMillis )
 	{
-		final AffineTransform3D newViewerTransform = getNewViewerTransform( bdv, xyzt, scale );
+		final AffineTransform3D newViewerTransform = getViewerTransform( bdv, xyzt, scale );
 
 		final AffineTransform3D currentViewerTransform = new AffineTransform3D();
 		bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( currentViewerTransform );
@@ -782,9 +725,9 @@ public abstract class BdvUtils
 	}
 
 
-	public static AffineTransform3D getNewViewerTransform( Bdv bdv, double[] position, double scale )
+	public static AffineTransform3D getViewerTransform( Bdv bdv, double[] position, double scale )
 	{
-		final AffineTransform3D newViewerTransform = new AffineTransform3D();
+		final AffineTransform3D viewerTransform = new AffineTransform3D();
 
 		int[] bdvWindowDimensions = new int[ 3 ];
 		bdvWindowDimensions[ 0 ] = bdv.getBdvHandle().getViewerPanel().getWidth();
@@ -796,8 +739,8 @@ public abstract class BdvUtils
 			translation[ d ] = - position[ d ];
 		}
 
-		newViewerTransform.setTranslation( translation );
-		newViewerTransform.scale( scale );
+		viewerTransform.setTranslation( translation );
+		viewerTransform.scale( scale );
 
 		double[] centerBdvWindowTranslation = new double[ 3 ];
 		for( int d = 0; d < 3; ++d )
@@ -805,31 +748,31 @@ public abstract class BdvUtils
 			centerBdvWindowTranslation[ d ] = + bdvWindowDimensions[ d ] / 2.0;
 		}
 
-		newViewerTransform.translate( centerBdvWindowTranslation );
+		viewerTransform.translate( centerBdvWindowTranslation );
 
-		return newViewerTransform;
+		return viewerTransform;
 	}
 
-	public static Source getFirstVisibleLabelsSource( Bdv bdv )
-	{
-		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
-
-		Source labelsSource = null;
-
-		for ( int sourceIndex : visibleSourceIndices )
-		{
-			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
-
-			final Source source = sourceState.getSpimSource();
-
-			if ( isLabelsSource( source ) )
-			{
-				labelsSource = source;
-				break;
-			}
-		}
-		return labelsSource;
-	}
+//	public static Source getFirstVisibleLabelsSource( Bdv bdv )
+//	{
+//		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+//
+//		Source labelsSource = null;
+//
+//		for ( int sourceIndex : visibleSourceIndices )
+//		{
+//			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
+//
+//			final Source source = sourceState.getSpimSource();
+//
+//			if ( isARGBConvertedRealSource( source ) )
+//			{
+//				labelsSource = source;
+//				break;
+//			}
+//		}
+//		return labelsSource;
+//	}
 
 	public static ARGBType getColor( Bdv bdv, int sourceId )
 	{

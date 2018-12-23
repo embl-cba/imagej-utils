@@ -100,7 +100,7 @@ public abstract class BdvUserInterfaceUtils
 //
 //		JButton colorButton;
 //
-//		if ( BdvUtils.isLabelsSource( bdvStackSource ) )
+//		if ( BdvUtils.isARGBConvertedRealSource( bdvStackSource ) )
 //		{
 //			colorButton = new JButton( "S" );
 //		}
@@ -116,7 +116,7 @@ public abstract class BdvUserInterfaceUtils
 //			@Override
 //			public void actionPerformed( ActionEvent e )
 //			{
-//				if ( BdvUtils.isLabelsSource( bdvStackSource ) )
+//				if ( BdvUtils.isARGBConvertedRealSource( bdvStackSource ) )
 //				{
 //					BdvUtils.getLabelsSource( bdvStackSource ).incrementSeed();
 //					bdvStackSource.getBdvHandle().getViewerPanel().requestRepaint();

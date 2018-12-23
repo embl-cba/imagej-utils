@@ -1,6 +1,7 @@
 package de.embl.cba.bdv.utils.labels;
 
 import bdv.util.Bdv;
+import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.labels.luts.RandomLUTMapper;
 import net.imglib2.RealPoint;
@@ -15,6 +16,7 @@ public class BehaviourSelectionAndGroupingHandler
 {
 	final Bdv bdv;
 	final ConfigurableVolatileRealVolatileARGBConverter converter;
+	final Source source;
 	final Set< Double > selectedValues;
 	final String sourceName;
 
@@ -23,10 +25,13 @@ public class BehaviourSelectionAndGroupingHandler
 	private String shuffle = "shift S";;
 
 	public BehaviourSelectionAndGroupingHandler( Bdv bdv,
-												 ConfigurableVolatileRealVolatileARGBConverter converter, String sourceName )
+												 ConfigurableVolatileRealVolatileARGBConverter converter,
+												 Source source,
+												 String sourceName )
 	{
 		this.bdv = bdv;
 		this.converter = converter;
+		this.source = source;
 		this.sourceName = sourceName;
 		selectedValues = new HashSet<>( );
 	}
@@ -58,8 +63,7 @@ public class BehaviourSelectionAndGroupingHandler
 		if( converter.getLUTMapper() instanceof RandomLUTMapper )
 		{
 			final RandomLUTMapper lutMapper = ( RandomLUTMapper ) converter.getLUTMapper();
-			final long seed = lutMapper.getSeed();
-			lutMapper.setSeed( seed + 1 );
+			lutMapper.setSeed( lutMapper.getSeed() + 1 );
 			repaint();
 		}
 		else
@@ -98,7 +102,7 @@ public class BehaviourSelectionAndGroupingHandler
 	{
 		final RealPoint globalMouseCoordinates = BdvUtils.getGlobalMouseCoordinates( bdv );
 
-		final double selectedLabel = BdvUtils.getValueAtGlobalPosition( globalMouseCoordinates, 0, ARGBConvertedRealSource );
+		final double selectedLabel = BdvUtils.getValueAtGlobalCoordinates( source, globalMouseCoordinates, 0 );
 
 		if ( selectedValues.contains( selectedLabel ) )
 		{
@@ -110,6 +114,7 @@ public class BehaviourSelectionAndGroupingHandler
 		}
 
 		converter.onlyShowSelectedValues( selectedValues );
+
 		repaint();
 	}
 }

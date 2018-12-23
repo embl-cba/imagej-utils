@@ -1,12 +1,8 @@
-import bdv.tools.transformation.TransformedSource;
-import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import bdv.viewer.Source;
-import bdv.viewer.SourceAndConverter;
-import de.embl.cba.bdv.utils.algorithms.ConnectedComponentExtractor;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeSpimDataSource;
 import de.embl.cba.bdv.utils.labels.ConfigurableVolatileRealVolatileARGBConverter;
 import de.embl.cba.bdv.utils.regions.BdvConnectedComponentExtractor;
 import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DLeftMouseDrag;
@@ -19,30 +15,27 @@ import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
-import net.imglib2.algorithm.neighborhood.DiamondShape;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.view.Views;
 import org.scijava.vecmath.Color3f;
 
-import java.io.File;
-
-public class TestBdvConnectedComponentExtraction
+public class TestBdvConnectedComponentExtractor
 {
 
 	public static void main( String[] args ) throws SpimDataException
 	{
-		final String labelsSource = TestConfigurableLabelsSourceDisplay.class.getResource( "labels.xml" ).getFile();
+		final String labelsSource = TestConfigurableVolatileRealVolatileARGBConverter.class.getResource( "labels.xml" ).getFile();
 
 		SpimData spimData = new XmlIoSpimData().load( labelsSource );
 
 		final ConfigurableVolatileRealVolatileARGBConverter converter = new ConfigurableVolatileRealVolatileARGBConverter( );
-		final Source< VolatileARGBType > labelSource = new ARGBConvertedRealSource( spimData, 0, converter );
+
+		final Source< VolatileARGBType > labelSource = new ARGBConvertedRealTypeSpimDataSource( spimData, "labels", 0, converter );
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( labelSource,
 						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DLeftMouseDrag.BehaviourTransformEventHandler3DFactory() ) );
-
 
 		final BdvConnectedComponentExtractor bdvConnectedComponentExtractor = new BdvConnectedComponentExtractor(
 				bdvStackSource.getBdvHandle(),
@@ -62,7 +55,7 @@ public class TestBdvConnectedComponentExtraction
 
 	public static void show3D( RandomAccessibleInterval connectedComponentMask )
 	{
-		final ImagePlus regionMaskImp = ImageJFunctions.show( connectedComponentMask );
+		final ImagePlus regionMaskImp = ImageJFunctions.wrap( connectedComponentMask, "" );
 		Image3DUniverse univ = new Image3DUniverse( );
 		univ.show( );
 		final Content content = univ.addMesh( regionMaskImp, null, "somename", 250, new boolean[]{ true, true, true }, 2 );
@@ -72,6 +65,7 @@ public class TestBdvConnectedComponentExtraction
 	public static void show2D( RandomAccessibleInterval connectedComponentMask )
 	{
 		new ImageJ();
+		ImageJFunctions.show( connectedComponentMask, "" );
 	}
 
 	public static RandomAccessibleInterval changeToImageJDimensionConvention( RandomAccessibleInterval connectedComponentMask )
