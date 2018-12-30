@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.transformhandlers;
+package de.embl.cba.bdv.utils.behaviour;
 
 import bdv.BehaviourTransformEventHandler;
 import bdv.BehaviourTransformEventHandlerFactory;
@@ -118,10 +118,10 @@ public class BehaviourTransformEventHandler3DWithoutRotation implements Behaviou
 
 		for ( int s = 0; s < 3; ++s )
 		{
-			//behaviours.behaviour( new Rotate( speed[ s ] ), DRAG_ROTATE + SPEED_NAME[ s ], speedMod[ s ] + "button1" );
+			//behaviour.behaviour( new Rotate( speed[ s ] ), DRAG_ROTATE + SPEED_NAME[ s ], speedMod[ s ] + "button1" );
 			behaviours.behaviour( new TranslateZ( speed[ s ] ), SCROLL_Z + SPEED_NAME[ s ], speedMod[ s ] + "scroll" );
-			//behaviours.behaviour( new KeyRotate( speed[ s ] ), ROTATE_LEFT + SPEED_NAME[ s ], speedMod[ s ] + "LEFT" );
-			//behaviours.behaviour( new KeyRotate( -speed[ s ] ), ROTATE_RIGHT + SPEED_NAME[ s ], speedMod[ s ] + "RIGHT" );
+			//behaviour.behaviour( new KeyRotate( speed[ s ] ), ROTATE_LEFT + SPEED_NAME[ s ], speedMod[ s ] + "LEFT" );
+			//behaviour.behaviour( new KeyRotate( -speed[ s ] ), ROTATE_RIGHT + SPEED_NAME[ s ], speedMod[ s ] + "RIGHT" );
 			behaviours.behaviour( new KeyZoom( speed[ s ] ), KEY_ZOOM_IN + SPEED_NAME[ s ], speedMod[ s ] + "UP" );
 			behaviours.behaviour( new KeyZoom( -speed[ s ] ), KEY_ZOOM_OUT + SPEED_NAME[ s ], speedMod[ s ] + "DOWN" );
 			behaviours.behaviour( new KeyTranslateZ( speed[ s ] ), KEY_FORWARD_Z + SPEED_NAME[ s ], speedMod[ s ] + "COMMA" );

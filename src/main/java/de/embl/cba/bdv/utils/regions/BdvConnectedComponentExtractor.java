@@ -5,12 +5,12 @@ import bdv.util.Bdv;
 import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.algorithms.ConnectedComponentExtractor;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeSpimDataSource;
+import de.embl.cba.bdv.utils.argbconversion.ARGBConvertedRealTypeSpimDataSource;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.neighborhood.DiamondShape;
+import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
-import sun.jvm.hotspot.debugger.cdbg.BitType;
 
 import java.util.ArrayList;
 
@@ -44,7 +44,7 @@ public class BdvConnectedComponentExtractor < R extends RealType< R > >
 
 		if ( this.source == null )
 		{
-			System.out.println("ERROR: no labels sources found in bdv");
+			System.out.println("ERROR: no argbconversion sources found in bdv");
 			return;
 		}
 

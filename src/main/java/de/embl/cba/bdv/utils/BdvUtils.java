@@ -1,14 +1,15 @@
 package de.embl.cba.bdv.utils;
 
+import de.embl.cba.bdv.utils.argbconversion.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
+import de.embl.cba.bdv.utils.transforms.Transforms;
+
 import bdv.util.*;
 import bdv.viewer.*;
 import bdv.viewer.animate.AbstractTransformAnimator;
 import bdv.viewer.animate.SimilarityTransformAnimator;
 import bdv.viewer.state.SourceState;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeSource;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedVolatileRealTypeSource;
-import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
-import de.embl.cba.bdv.utils.transforms.Transforms;
+
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -555,7 +556,7 @@ public abstract class BdvUtils
 //			if ( isARGBConvertedRealSource( source ) )
 //			{
 //
-//				BdvUtils.getLabelsSource( source ).showAll( );
+//				BdvUtils.getLabelsSource( source ).selectNone( );
 //			}
 //		}
 //
@@ -601,9 +602,9 @@ public abstract class BdvUtils
 	{
 		final RandomAccess< RealType > access;
 
-		if ( source instanceof ARGBConvertedRealTypeSource )
+		if ( source instanceof VolatileARGBConvertedRealSource )
 		{
-			access = ( ( ARGBConvertedRealTypeSource ) source).getWrappedSource( t, 0 ).randomAccess();
+			access = ( ( VolatileARGBConvertedRealSource ) source).getWrappedSource( t, 0 ).randomAccess();
 		}
 		else
 		{
@@ -777,5 +778,10 @@ public abstract class BdvUtils
 	public static ARGBType getColor( Bdv bdv, int sourceId )
 	{
 		return bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( sourceId ).getColor();
+	}
+
+	public static void repaint( Bdv bdv )
+	{
+		bdv.getBdvHandle().getViewerPanel().requestRepaint();
 	}
 }

@@ -1,10 +1,15 @@
-package de.embl.cba.bdv.utils.labels.luts;
+package de.embl.cba.bdv.utils.lut;
+import net.imglib2.type.numeric.ARGBType;
+
 import java.awt.*;
 
-public class LUTs
+public class Luts
 {
-	public static final int[][] GLASBEY_LUT = createGlasbeyLut();
-	public static final int[][] GOLDEN_ANGLE_LUT = createGoldenAngleLut( 256 );
+	public static final byte[][] GLASBEY_LUT = createGlasbeyLut();
+	public static final byte[][] GOLDEN_ANGLE_LUT = createGoldenAngleLut();
+	public static final byte[][] GRAYSCALE_LUT = createGrayscaleLut();
+	public static final byte[][] BLUE_WHITE_RED_LUT = createBlueWhiteRedLut();
+
 
 	/**
 	 * Create lookup table with a  maximally distinct sets of colors (copied
@@ -16,7 +21,7 @@ public class LUTs
 	 *
 	 * @return Glasbey lookup table
 	 */
-	private final static int[][] createGlasbeyLut() {
+	private final static byte[][] createGlasbeyLut() {
 		// initial values (copied from Fiji's Glasbey LUT)
 		int[] r = { 0, 0, 255, 0, 0, 255, 0, 255, 0, 154, 0, 120, 31, 255,
 				177, 241, 254, 221, 32, 114, 118, 2, 200, 136, 255, 133, 161,
@@ -76,17 +81,29 @@ public class LUTs
 				2, 158, 212, 89, 193, 43, 40, 246, 146, 84, 238, 72, 101, 101 };
 
 		// create map
-		int[][] map = new int[r.length][3];
+		byte[][] map = new byte[r.length][3];
 
 		// cast elements
 		for (int i = 0; i < r.length; i++) {
-			map[i][0] = r[i];
-			map[i][1] = g[i];
-			map[i][2] = b[i];
+			map[i][0] = (byte) r[i];
+			map[i][1] = (byte) g[i];
+			map[i][2] = (byte) b[i];
 		}
 
 		return map;
 	}
+
+
+	public static int getARGBIndex( final byte lutIndex, final byte[][] lut, double brightness )
+	{
+		final int color = ARGBType.rgba(
+				( lut[ lutIndex & 0xFF ][ 0 ] & 0xFF ) * brightness ,
+				( lut[ lutIndex & 0xFF ][ 1 ] & 0xFF ) * brightness,
+				( lut[ lutIndex & 0xFF ][ 2 ] & 0xFF ) * brightness, 255 );
+
+		return color;
+	}
+
 
 	/**
 	 * Make lookup table with esthetically pleasing colors based on the golden
@@ -94,11 +111,11 @@ public class LUTs
 	 *
 	 * Taken from: MorphoLibJ
 	 *
-	 * @param nColors number of colors to generate
 	 * @return lookup table with golden-angled-based colors
 	 */
-	private final static int[][] createGoldenAngleLut( int nColors )
+	private final static byte[][] createGoldenAngleLut( )
 	{
+
 		// hue for assigning new color ([0.0-1.0])
 		float hue = 0.5f;
 		// saturation for assigning new color ([0.5-1.0])
@@ -106,8 +123,8 @@ public class LUTs
 
 		// create colors recursively by adding golden angle ratio to hue and
 		// saturation of previous color
-		Color[] colors = new Color[nColors];
-		for (int i = 0; i < nColors; i++)
+		Color[] colors = new Color[256];
+		for (int i = 0; i < 256; i++)
 		{
 			// create current color
 			colors[i] = Color.getHSBColor(hue, saturation, 1);
@@ -123,18 +140,66 @@ public class LUTs
 		}
 
 		// create map
-		int[][] map = new int[nColors][3];
+		byte[][] lut = new byte[256][3];
 
 		// fill up the color map by converting color array
-		for (int i = 0; i < nColors; i++)
+		for (int i = 0; i < 256; i++)
 		{
 			Color color = colors[i];
-			map[i][0] = color.getRed();
-			map[i][1] = color.getGreen();
-			map[i][2] = color.getBlue();
+			lut[i][0] = (byte) color.getRed();
+			lut[i][1] = (byte) color.getGreen();
+			lut[i][2] = (byte) color.getBlue();
 		}
 
-		return map;
+		return lut;
 	}
 
+
+	private final static byte[][] createGrayscaleLut( )
+	{
+
+		byte[][] lut = new byte[256][3];
+
+		// fill up the color map by converting color array
+		for (int i = 0; i < 256; i++)
+		{
+			lut[i][0] = (byte) i; // red
+			lut[i][1] = (byte) i; // green
+			lut[i][2] = (byte) i; // blue
+		}
+
+		return lut;
+	}
+
+
+	private final static byte[][] createBlueWhiteRedLut( )
+	{
+
+		byte[][] lut = new byte[256][3];
+
+		int[] blue = new int[]{ 0, 0, 255 };
+		int[] white = new int[]{ 255, 255, 255 };
+		int[] red = new int[]{ 255, 0, 0 };
+
+		final int middle = 256 / 2;
+
+		for ( int i = 0; i < middle; i++)
+		{
+			for ( int j = 0; j < 3; j++ )
+			{
+				lut[ i ][ j ] = ( byte ) ( blue[ j ] + ( 1.0 * i / middle ) * ( white[ j ] - blue[ j ] ) );
+			}
+		}
+
+		for ( int i = middle; i < 256; i++)
+		{
+			for ( int j = 0; j < 3; j++ )
+			{
+				lut[ i ][ j ] = ( byte ) ( white[ j ] + ( 1.0 * ( i - middle ) / middle ) * ( red[ j ] - white[ j ] ) );
+			}
+		}
+
+
+		return lut;
+	}
 }

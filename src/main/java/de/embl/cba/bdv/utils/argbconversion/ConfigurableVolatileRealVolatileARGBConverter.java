@@ -14,13 +14,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package de.embl.cba.bdv.utils.labels;
+package de.embl.cba.bdv.utils.argbconversion;
 
-import de.embl.cba.bdv.utils.labels.luts.LUTMapper;
-import de.embl.cba.bdv.utils.labels.luts.LUTs;
-import de.embl.cba.bdv.utils.labels.luts.RandomLUTMapper;
+import de.embl.cba.bdv.utils.lut.ARGBLut;
+import de.embl.cba.bdv.utils.lut.Luts;
+import de.embl.cba.bdv.utils.lut.RandomARGBLut;
 import net.imglib2.converter.Converter;
-import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.real.AbstractRealType;
 import net.imglib2.type.volatiles.AbstractVolatileRealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
@@ -32,15 +31,15 @@ public class ConfigurableVolatileRealVolatileARGBConverter
 		< V extends AbstractVolatileRealType, R extends AbstractRealType< R > >
 		implements Converter< V, VolatileARGBType >
 {
-	private int[][] lut;
-	private LUTMapper lutMapper;
+	private byte[][] lut;
+	private de.embl.cba.bdv.utils.lut.ARGBLut argbLut;
 	private Set< Double > selectedValues;
 
 	public ConfigurableVolatileRealVolatileARGBConverter( )
 	{
-		this.lut = LUTs.GLASBEY_LUT;
+		this.lut = Luts.GLASBEY_LUT;
 		this.selectedValues = null;
-		this.lutMapper = new RandomLUTMapper();
+		this.argbLut = new RandomARGBLut();
 	}
 
 
@@ -53,14 +52,14 @@ public class ConfigurableVolatileRealVolatileARGBConverter
 
 			if ( selectedValues == null || selectedValues.contains( x ) )
 			{
-				final int lutIndex = lutMapper.getLUTIndex( x );
-
-				final int color = ARGBType.rgba(
-						lut[ lutIndex ][ 0 ],
-						lut[ lutIndex ][ 1 ],
-						lut[ lutIndex ][ 2 ], 255 );
-
-				output.set( color );
+//				final int lutIndex = ARGBLUT.getARGBIndex( x );
+//
+//				final int color = ARGBType.rgba(
+//						lut[ lutIndex ][ 0 ],
+//						lut[ lutIndex ][ 1 ],
+//						lut[ lutIndex ][ 2 ], 255 );
+//
+//				output.set( color );
 			}
 			else
 			{
@@ -90,17 +89,17 @@ public class ConfigurableVolatileRealVolatileARGBConverter
 	 */
 	public void setLUT( int[][] lut )
 	{
-		this.lut = lut;
+		//this.lut = lut;
 	}
 
-	public void setLUTMapper( LUTMapper lutMapper )
+	public void setLUTMapper( ARGBLut argbLut )
 	{
-		this.lutMapper = lutMapper;
+		this.argbLut = argbLut;
 	}
 
-	public LUTMapper getLUTMapper()
+	public ARGBLut getLUTMapper()
 	{
-		return lutMapper;
+		return argbLut;
 	}
 
 

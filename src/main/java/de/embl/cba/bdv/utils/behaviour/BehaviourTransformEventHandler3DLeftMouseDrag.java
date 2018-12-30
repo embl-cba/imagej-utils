@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.transformhandlers;
+package de.embl.cba.bdv.utils.behaviour;
 
 import bdv.BehaviourTransformEventHandler;
 import bdv.BehaviourTransformEventHandlerFactory;

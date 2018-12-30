@@ -1,32 +1,26 @@
 import bdv.VolatileSpimSource;
 import bdv.util.BdvFunctions;
-import bdv.viewer.Source;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeSource;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedVolatileRealTypeSource;
-import de.embl.cba.bdv.utils.labels.ConfigurableRealTypeVolatileARGBTypeConverter;
-import de.embl.cba.bdv.utils.labels.ConfigurableVolatileRealVolatileARGBConverter;
+import de.embl.cba.bdv.utils.argbconversion.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.argbconversion.SelectableRealVolatileARGBConverter;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
-import net.imglib2.type.volatiles.VolatileARGBType;
 
 public class TestARGBConvertedRealTypeSource
 {
 	public static void main( String[] args ) throws SpimDataException
 	{
-		final String labelsSourcePath = TestARGBConvertedRealTypeSpimDataSource.class.getResource( "labels.xml" ).getFile();
+		final String labelsSourcePath = TestARGBConvertedRealTypeSource.class.getResource( "labels.xml" ).getFile();
 
 		SpimData spimData = new XmlIoSpimData().load( labelsSourcePath );
 
 		final VolatileSpimSource volatileSpimSource = new VolatileSpimSource( spimData, 0, "name" );
 
-//		final ConfigurableVolatileRealVolatileARGBConverter converter = new ConfigurableVolatileRealVolatileARGBConverter( );
+		final SelectableRealVolatileARGBConverter converter = new SelectableRealVolatileARGBConverter( );
 
-		final ConfigurableRealTypeVolatileARGBTypeConverter converter = new ConfigurableRealTypeVolatileARGBTypeConverter( );
+		final VolatileARGBConvertedRealSource volatileARGBConvertedRealSource = new VolatileARGBConvertedRealSource( volatileSpimSource, converter );
 
-		final Source< VolatileARGBType > labelsSource = new ARGBConvertedRealTypeSource( volatileSpimSource, "labels", converter );
-
-		BdvFunctions.show( labelsSource );
+		BdvFunctions.show( volatileARGBConvertedRealSource );
 
 	}
 }

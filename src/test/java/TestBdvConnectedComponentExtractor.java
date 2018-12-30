@@ -2,10 +2,10 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import bdv.viewer.Source;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeSpimDataSource;
-import de.embl.cba.bdv.utils.labels.ConfigurableVolatileRealVolatileARGBConverter;
+import de.embl.cba.bdv.utils.argbconversion.ARGBConvertedRealTypeSpimDataSource;
+import de.embl.cba.bdv.utils.argbconversion.ConfigurableVolatileRealVolatileARGBConverter;
 import de.embl.cba.bdv.utils.regions.BdvConnectedComponentExtractor;
-import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DLeftMouseDrag;
+import de.embl.cba.bdv.utils.behaviour.BehaviourTransformEventHandler3DLeftMouseDrag;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij3d.Content;
@@ -25,13 +25,13 @@ public class TestBdvConnectedComponentExtractor
 
 	public static void main( String[] args ) throws SpimDataException
 	{
-		final String labelsSource = TestConfigurableVolatileRealVolatileARGBConverter.class.getResource( "labels.xml" ).getFile();
+		final String labelsSource = TestBdvConnectedComponentExtractor.class.getResource( "labels.xml" ).getFile();
 
 		SpimData spimData = new XmlIoSpimData().load( labelsSource );
 
 		final ConfigurableVolatileRealVolatileARGBConverter converter = new ConfigurableVolatileRealVolatileARGBConverter( );
 
-		final Source< VolatileARGBType > labelSource = new ARGBConvertedRealTypeSpimDataSource( spimData, "labels", 0, converter );
+		final Source< VolatileARGBType > labelSource = new ARGBConvertedRealTypeSpimDataSource( spimData, "argbconversion", 0, converter );
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( labelSource,

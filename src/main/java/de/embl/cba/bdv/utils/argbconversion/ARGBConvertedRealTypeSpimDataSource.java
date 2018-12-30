@@ -1,9 +1,10 @@
-package de.embl.cba.bdv.utils.labels;
+package de.embl.cba.bdv.utils.argbconversion;
 
 import bdv.AbstractViewerSetupImgLoader;
 import bdv.ViewerImgLoader;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
+import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -15,25 +16,22 @@ import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory
 import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.volatiles.AbstractVolatileRealType;
-import net.imglib2.type.volatiles.VolatileARGBType;
+import net.imglib2.type.volatiles.*;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
 @Deprecated
-public class ARGBConvertedVolatileRealTypeSource< R extends RealType< R >, V extends AbstractVolatileRealType< R, V > > implements Source< VolatileARGBType >
+public class ARGBConvertedRealTypeSpimDataSource< R extends RealType< R >, V extends AbstractVolatileRealType< R, V > > implements Source< VolatileARGBType >
 
 {
-    private final Source source;
-    //private final long setupId;
+    private final SpimData spimData;
+    private final long setupId;
     private final String name;
     private Converter< V, VolatileARGBType > converter;
 
-//    private AbstractViewerSetupImgLoader< R, V > setupImgLoader;
+    private AbstractViewerSetupImgLoader< R, V > setupImgLoader;
     final private InterpolatorFactory< VolatileARGBType, RandomAccessible< VolatileARGBType > >[] interpolatorFactories;
-
-    //    private AffineTransform3D viewRegistration;
-
+    private AffineTransform3D viewRegistration;
     private AffineTransform3D[] mipmapTransforms;
     {
         interpolatorFactories = new InterpolatorFactory[]{
@@ -42,37 +40,38 @@ public class ARGBConvertedVolatileRealTypeSource< R extends RealType< R >, V ext
         };
     }
 
-    public ARGBConvertedVolatileRealTypeSource( Source< V > source, String name, Converter< V, VolatileARGBType > converter )
+    public ARGBConvertedRealTypeSpimDataSource( SpimData spimdata, String name, final int setupId, Converter< V, VolatileARGBType > converter )
     {
-        this.source = source;
+        this.spimData = spimdata;
         this.name = name;
+        this.setupId = setupId;
         this.converter = converter;
-        //this.viewRegistration = this.source.getViewRegistrations().getViewRegistration( 0, 0 ).getModel().copy();
-        //ViewerImgLoader imgLoader = ( ViewerImgLoader ) this.source.getSequenceDescription().getImgLoader();
-        //this.setupImgLoader = ( AbstractViewerSetupImgLoader ) imgLoader.getSetupImgLoader( setupId );
-        //this.mipmapTransforms = this.setupImgLoader.getMipmapTransforms();
+        this.viewRegistration = spimData.getViewRegistrations().getViewRegistration( 0, setupId ).getModel().copy();
+        ViewerImgLoader imgLoader = ( ViewerImgLoader ) this.spimData.getSequenceDescription().getImgLoader();
+        this.setupImgLoader = ( AbstractViewerSetupImgLoader ) imgLoader.getSetupImgLoader( setupId );
+        this.mipmapTransforms = this.setupImgLoader.getMipmapTransforms();
     }
 
     @Override
     public boolean isPresent( final int t )
     {
-       return this.source.isPresent( t );
+        boolean flag = t >= 0 && t < this.spimData.getSequenceDescription().getTimePoints().size();
+        return flag;
     }
 
     @Override
     public RandomAccessibleInterval< VolatileARGBType > getSource( final int t, final int mipMapLevel )
     {
         return Converters.convert(
-                        source.getSource( t, mipMapLevel ),
-                        converter,
+                        setupImgLoader.getVolatileImage( t, mipMapLevel ),
+                converter,
                         new VolatileARGBType() );
     }
 
     @Override
-    public RealRandomAccessible< VolatileARGBType > getInterpolatedSource(final int t, final int level, final Interpolation method)
-    {
+    public RealRandomAccessible< VolatileARGBType > getInterpolatedSource(final int t, final int level, final Interpolation method) {
         final ExtendedRandomAccessibleInterval<VolatileARGBType, RandomAccessibleInterval<VolatileARGBType>> extendedSource =
-                Views.extendValue( getSource(t, level), new VolatileARGBType(0));
+                Views.extendValue(getSource(t, level), new VolatileARGBType(0));
         switch (method) {
             case NLINEAR:
                 return Views.interpolate(extendedSource, interpolatorFactories[1]);
@@ -84,9 +83,8 @@ public class ARGBConvertedVolatileRealTypeSource< R extends RealType< R >, V ext
     @Override
     public void getSourceTransform( int t, int level, AffineTransform3D transform )
     {
-        source.getSourceTransform( t, level, transform );
-//        final AffineTransform3D sourceTransform = viewRegistration.copy().concatenate( mipmapTransforms[ level ] );
-//        transform.set( sourceTransform );
+        final AffineTransform3D sourceTransform = viewRegistration.copy().concatenate( mipmapTransforms[ level ] );
+        transform.set( sourceTransform );
     }
 
     @Override
@@ -100,15 +98,13 @@ public class ARGBConvertedVolatileRealTypeSource< R extends RealType< R >, V ext
     }
 
     @Override
-    public VoxelDimensions getVoxelDimensions()
-    {
-        return source.getVoxelDimensions();
+    public VoxelDimensions getVoxelDimensions() {
+        return null;
     }
 
     @Override
-    public int getNumMipmapLevels()
-    {
-        return source.getNumMipmapLevels();
+    public int getNumMipmapLevels() {
+        return setupImgLoader.getMipmapTransforms().length;
     }
 
     public void setConverter( Converter< V, VolatileARGBType > converter )
@@ -121,9 +117,9 @@ public class ARGBConvertedVolatileRealTypeSource< R extends RealType< R >, V ext
         return converter;
     }
 
-    public RandomAccessibleInterval< V > getWrappedSource( int t, int mipMapLevel )
+    public RandomAccessibleInterval< R > getWrappedRealTypeRandomAccessibleInterval( int t, int mipMapLevel )
     {
-        return source.getSource( t, mipMapLevel );
+        return setupImgLoader.getImage( t, mipMapLevel );
     }
 
 }

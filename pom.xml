@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>bdv-utils</artifactId>
-	<version>0.1.24</version>
+	<version>0.1.26</version>
 
 	<name>BigDataViewer Utilities</name>
 	<description>TODO</description>
@@ -104,6 +104,11 @@
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2</artifactId>
 		</dependency>
 
 		<dependency>

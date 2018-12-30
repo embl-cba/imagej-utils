@@ -1,10 +1,7 @@
 import bdv.util.BdvFunctions;
-import bdv.util.BdvOptions;
-import bdv.util.BdvStackSource;
 import bdv.viewer.Source;
-import de.embl.cba.bdv.utils.labels.ARGBConvertedRealTypeSpimDataSource;
-import de.embl.cba.bdv.utils.labels.ConfigurableVolatileRealVolatileARGBConverter;
-import de.embl.cba.bdv.utils.transformhandlers.BehaviourTransformEventHandler3DLeftMouseDrag;
+import de.embl.cba.bdv.utils.argbconversion.ARGBConvertedRealTypeSpimDataSource;
+import de.embl.cba.bdv.utils.argbconversion.ConfigurableVolatileRealVolatileARGBConverter;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
@@ -21,7 +18,7 @@ public class TestARGBConvertedRealTypeSpimDataSource
 
 		final ConfigurableVolatileRealVolatileARGBConverter converter = new ConfigurableVolatileRealVolatileARGBConverter( );
 
-		final Source< VolatileARGBType > labelsSource = new ARGBConvertedRealTypeSpimDataSource( spimData, "labels", 0, converter );
+		final Source< VolatileARGBType > labelsSource = new ARGBConvertedRealTypeSpimDataSource( spimData, "argbconversion", 0, converter );
 
 		BdvFunctions.show( labelsSource );
 

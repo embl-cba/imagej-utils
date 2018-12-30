@@ -1,5 +1,8 @@
 package de.embl.cba.bdv.utils;
 
+import de.embl.cba.bdv.utils.intervals.Intervals;
+import de.embl.cba.bdv.utils.transforms.Transforms;
+
 import bdv.cache.CacheControl;
 import bdv.util.Bdv;
 import bdv.util.Prefs;
@@ -7,8 +10,7 @@ import bdv.viewer.ViewerPanel;
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
 import bdv.viewer.state.ViewerState;
-import de.embl.cba.bdv.utils.intervals.Intervals;
-import de.embl.cba.bdv.utils.transforms.Transforms;
+
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
