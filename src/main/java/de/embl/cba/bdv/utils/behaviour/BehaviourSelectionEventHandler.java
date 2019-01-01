@@ -10,12 +10,8 @@ import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeMap;
 
 public class BehaviourSelectionEventHandler
 {
@@ -106,6 +102,8 @@ public class BehaviourSelectionEventHandler
 
 		final double selectedLabel = BdvUtils.getValueAtGlobalCoordinates( source, globalMouseCoordinates, 0 );
 
+		if ( selectedLabel == 0 ) return; // background
+
 		if ( selectedValues.contains( selectedLabel ) )
 		{
 			selectedValues.remove( selectedLabel );
@@ -122,102 +120,5 @@ public class BehaviourSelectionEventHandler
 	}
 
 
-
-	public static class BdvTableInteractor
-	{
-		final private JTable table;
-		final private String objectLabelColumn;
-		private final Bdv bdv;
-		private final SelectableRealVolatileARGBConverter converter;
-		private TreeMap< Double, Integer > labelRowMap;
-
-		public BdvTableInteractor( Bdv bdv,
-								   SelectableRealVolatileARGBConverter converter,
-								   JTable table,
-								   String objectLabelColumn )
-		{
-			this.bdv = bdv;
-			this.converter = converter;
-			this.table = table;
-			this.objectLabelColumn = objectLabelColumn;
-
-			initTableBdvInteraction();
-		}
-
-		private void initTableBdvInteraction( )
-		{
-			table.getSelectionModel().addListSelectionListener( new ListSelectionListener()
-			{
-				@Override
-				public void valueChanged( ListSelectionEvent e )
-				{
-					if ( e.getValueIsAdjusting() ) return;
-					highlightObjectInBdv();
-				}
-			} );
-		}
-
-		public void highlightObjectInBdv()
-		{
-			final int row = table.convertRowIndexToModel( table.getSelectedRow() );
-
-			if ( table.getModel() instanceof DefaultTableModel )
-			{
-				final Number objectLabel = (Number) table.getModel().getValueAt(
-						row,
-						table.getColumnModel().getColumnIndex( objectLabelColumn ) );
-
-				final HashSet< Double > selectedLabel = new HashSet<>();
-				selectedLabel.add( objectLabel.doubleValue() );
-
-				converter.highlightSelectedValues( selectedLabel );
-
-				BdvUtils.repaint( bdv );
-			}
-		}
-
-		private void highlightRowInTable( double selectedLabel )
-		{
-			new Thread( new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					if ( table != null )
-					{
-						final Integer row = getRowInTable( selectedLabel );
-						table.setRowSelectionInterval( row, row );
-					}
-				}
-			} ).start();
-		}
-
-
-		private void createLabelRowMap()
-		{
-			labelRowMap = new TreeMap();
-
-			final int labelColumnIndex = table.getColumnModel().getColumnIndex( objectLabelColumn );
-
-			final int rowCount = table.getRowCount();
-			for ( int row = 0; row < rowCount; row++ )
-			{
-				labelRowMap.put(
-						( Double ) table.getValueAt( row, labelColumnIndex ),
-						( Integer ) row );
-			}
-		}
-
-		private int getRowInTable( Double objectLabel )
-		{
-			if ( labelRowMap == null )
-			{
-				createLabelRowMap();
-			}
-
-			return labelRowMap.get( objectLabel );
-		}
-
-	}
 }
 
