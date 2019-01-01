@@ -4,12 +4,12 @@ import java.util.Map;
 
 public class LinearMappingARGBLut implements ARGBLut
 {
-	Map< Number, Number > map;
+	Map< Double, Number > map;
 	double min, max;
 
 	byte[][] lut;
 
-	public LinearMappingARGBLut( Map< Number, Number > map, double min, double max )
+	public LinearMappingARGBLut( Map< Double, Number > map, double min, double max )
 	{
 		this.map = map;
 		this.min = min;
@@ -18,7 +18,7 @@ public class LinearMappingARGBLut implements ARGBLut
 		this.lut = Luts.GRAYSCALE;
 	}
 
-	public LinearMappingARGBLut( Map< Number, Number > map, byte[][] lut, double min, double max )
+	public LinearMappingARGBLut( Map< Double, Number > map, byte[][] lut, double min, double max )
 	{
 		this.map = map;
 		this.min = min;
@@ -41,7 +41,7 @@ public class LinearMappingARGBLut implements ARGBLut
 		this.lut = lut;
 	}
 
-	public void setMap( Map< Number, Number > map )
+	public void setMap( Map< Double, Number > map )
 	{
 		this.map = map;
 	}
