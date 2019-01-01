@@ -9,6 +9,11 @@ import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,10 +31,57 @@ public class BehaviourSelectionEventHandler
 	private String selectNoneTrigger = "ctrl Q";
 
 
+	public BehaviourSelectionEventHandler( Bdv bdv,
+										   Source source,
+										   SelectableRealVolatileARGBConverter converter,
+										   JTable table,
+										   String objectLabelColumn )
+	{
+		this( bdv, source, converter );
+
+		initSourceToTableInteraction( table );
+
+		initTableToSourceInteraction( table, objectLabelColumn );
+	}
+
+	private void initTableToSourceInteraction( JTable table, String objectLabelColumn )
+	{
+		table.getSelectionModel().addListSelectionListener( new ListSelectionListener()
+		{
+			@Override
+			public void valueChanged( ListSelectionEvent e )
+			{
+				if ( e.getValueIsAdjusting() ) return;
+
+				final int row = table.convertRowIndexToModel( table.getSelectedRow() );
+
+				if ( table.getModel() instanceof DefaultTableModel )
+				{
+					final Number objectLabel = (Number) table.getModel().getValueAt(
+							row,
+							table.getColumnModel().getColumnIndex( objectLabelColumn ) );
+
+					final HashSet< Double > selectedLabel = new HashSet<>();
+					selectedLabel.add( objectLabel.doubleValue() );
+
+					converter.highlightSelectedValues( selectedLabel );
+
+					BdvUtils.repaint( bdv );
+				}
+
+			}
+		} );
+	}
+
+	private void initSourceToTableInteraction( JTable table )
+	{
+
+	}
+
+
 	/**
 	 * Selection of argbconversion (objects) in a label source.
-	 *  @param bdv Bdv window in which the source is shown.
-	 * @param bdvBehaviours1
+	 * @param bdv Bdv window in which the source is shown.
 	 * @param source Source containing numeric values.
 	 * @param converter Configurable converter, converting numeric values to colors for display.
 	 */
