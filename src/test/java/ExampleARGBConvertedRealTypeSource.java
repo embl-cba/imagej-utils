@@ -6,11 +6,11 @@ import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 
-public class TestARGBConvertedRealTypeSource
+public class ExampleARGBConvertedRealTypeSource
 {
 	public static void main( String[] args ) throws SpimDataException
 	{
-		final String labelsSourcePath = TestARGBConvertedRealTypeSource.class.getResource( "labels.xml" ).getFile();
+		final String labelsSourcePath = ExampleARGBConvertedRealTypeSource.class.getResource( "labels.xml" ).getFile();
 
 		SpimData spimData = new XmlIoSpimData().load( labelsSourcePath );
 

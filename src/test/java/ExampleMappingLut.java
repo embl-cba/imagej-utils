@@ -15,7 +15,7 @@ import net.imglib2.view.Views;
 
 import java.util.TreeMap;
 
-public class TestMappingLut
+public class ExampleMappingLut
 {
 	public static void main( String[] args )
 	{
@@ -40,7 +40,7 @@ public class TestMappingLut
 
 	public static RandomAccessibleIntervalSource getRandomAccessibleIntervalSource()
 	{
-		final ImagePlus imagePlus = IJ.openImage( TestARGBConverted2d16bitTiffImage.class.getResource( "2d-16bit-labelMask.tif" ).getFile() );
+		final ImagePlus imagePlus = IJ.openImage( ExampleARGBConverted2d16bitTiffImage.class.getResource( "2d-16bit-labelMask.tif" ).getFile() );
 
 		RandomAccessibleInterval< RealType > wrap = ImageJFunctions.wrapReal( imagePlus );
 

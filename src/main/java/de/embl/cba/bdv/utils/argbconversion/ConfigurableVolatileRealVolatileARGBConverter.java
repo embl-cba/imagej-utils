@@ -37,7 +37,7 @@ public class ConfigurableVolatileRealVolatileARGBConverter
 
 	public ConfigurableVolatileRealVolatileARGBConverter( )
 	{
-		this.lut = Luts.GLASBEY_LUT;
+		this.lut = Luts.GLASBEY;
 		this.selectedValues = null;
 		this.argbLut = new RandomARGBLut();
 	}

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class BdvConnectedComponentExtractor < R extends RealType< R > >
 {
-	final Bdv bdv;
+	private final Source source;
 	final RealPoint xyz;
 	final int t;
 
@@ -25,22 +25,16 @@ public class BdvConnectedComponentExtractor < R extends RealType< R > >
 	private ArrayList< double[] > calibrations;
 	private long executionTimesMillis;
 
-	private boolean isDone;
-	private boolean isInterrupted;
-
 	private int numMipmapLevels;
-	private final Source source;
 	private double seedValue;
 
-	public BdvConnectedComponentExtractor( Bdv bdv, Source source, RealPoint xyz, int t )
+	public BdvConnectedComponentExtractor( Source source, RealPoint xyz, int t )
 	{
-		this.bdv = bdv;
+		this.source = source;
 		this.xyz = xyz;
 		this.t = t;
+
 		this.calibrations = new ArrayList<>(  );
-		this.isDone = false;
-		this.isInterrupted = false;
-		this.source = source;
 
 		if ( this.source == null )
 		{
@@ -114,11 +108,6 @@ public class BdvConnectedComponentExtractor < R extends RealType< R > >
 	public double getSeedValue()
 	{
 		return seedValue;
-	}
-
-	public void stop()
-	{
-		isInterrupted = true;
 	}
 
 }

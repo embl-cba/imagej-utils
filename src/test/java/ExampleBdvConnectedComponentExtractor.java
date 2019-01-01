@@ -20,12 +20,12 @@ import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.view.Views;
 import org.scijava.vecmath.Color3f;
 
-public class TestBdvConnectedComponentExtractor
+public class ExampleBdvConnectedComponentExtractor
 {
 
 	public static void main( String[] args ) throws SpimDataException
 	{
-		final String labelsSource = TestBdvConnectedComponentExtractor.class.getResource( "labels.xml" ).getFile();
+		final String labelsSource = ExampleBdvConnectedComponentExtractor.class.getResource( "labels.xml" ).getFile();
 
 		SpimData spimData = new XmlIoSpimData().load( labelsSource );
 
@@ -38,7 +38,6 @@ public class TestBdvConnectedComponentExtractor
 						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DLeftMouseDrag.BehaviourTransformEventHandler3DFactory() ) );
 
 		final BdvConnectedComponentExtractor bdvConnectedComponentExtractor = new BdvConnectedComponentExtractor(
-				bdvStackSource.getBdvHandle(),
 				bdvStackSource.getSources().get( 0 ).getSpimSource(),
 				new RealPoint( 35, 35, 8 ),
 				0 );

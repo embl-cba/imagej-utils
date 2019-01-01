@@ -11,11 +11,11 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
-public class TestARGBConverted2d16bitTiffImage
+public class ExampleARGBConverted2d16bitTiffImage
 {
 	public static < T extends RealType< T > > void main ( String[] args )
 	{
-		final ImagePlus imagePlus = IJ.openImage( TestARGBConverted2d16bitTiffImage.class.getResource( "2d-16bit-labelMask.tif" ).getFile() );
+		final ImagePlus imagePlus = IJ.openImage( ExampleARGBConverted2d16bitTiffImage.class.getResource( "2d-16bit-labelMask.tif" ).getFile() );
 
 		RandomAccessibleInterval< T > wrap = ImageJFunctions.wrapReal( imagePlus );
 

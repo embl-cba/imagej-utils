@@ -11,7 +11,7 @@ public class LinearARGBLut implements ARGBLut
 		this.min = min;
 		this.max = max;
 
-		this.lut = Luts.GRAYSCALE_LUT;
+		this.lut = Luts.GRAYSCALE;
 	}
 
 	public LinearARGBLut( byte[][] lut, double min, double max )

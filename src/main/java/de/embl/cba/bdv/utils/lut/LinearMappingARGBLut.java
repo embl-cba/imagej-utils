@@ -15,7 +15,7 @@ public class LinearMappingARGBLut implements ARGBLut
 		this.min = min;
 		this.max = max;
 
-		this.lut = Luts.GRAYSCALE_LUT;
+		this.lut = Luts.GRAYSCALE;
 	}
 
 	public LinearMappingARGBLut( Map< Number, Number > map, byte[][] lut, double min, double max )

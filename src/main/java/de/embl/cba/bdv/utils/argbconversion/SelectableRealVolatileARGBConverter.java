@@ -42,12 +42,7 @@ public class SelectableRealVolatileARGBConverter implements Converter< RealType,
 
 	public SelectableRealVolatileARGBConverter( )
 	{
-		this.argbLut = new RandomARGBLut();
-		this.selectedValues = null;
-		this.brightnessSelected = 1.0;
-		this.brightnessNotSelected = 0.2;
-		this.selectionMode = SelectionMode.Brightness;
-
+		this( new RandomARGBLut() );
 	}
 
 	public SelectableRealVolatileARGBConverter( ARGBLut argbLut )

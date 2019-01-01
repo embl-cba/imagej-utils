@@ -8,11 +8,11 @@ import mpicbg.spim.data.XmlIoSpimData;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
 @Deprecated
-public class TestARGBConvertedRealTypeSpimDataSource
+public class ExampleARGBConvertedRealTypeSpimDataSource
 {
 	public static void main( String[] args ) throws SpimDataException
 	{
-		final String labelsSourcePath = TestARGBConvertedRealTypeSpimDataSource.class.getResource( "labels.xml" ).getFile();
+		final String labelsSourcePath = ExampleARGBConvertedRealTypeSpimDataSource.class.getResource( "labels.xml" ).getFile();
 
 		SpimData spimData = new XmlIoSpimData().load( labelsSourcePath );
 

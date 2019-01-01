@@ -27,7 +27,7 @@ public class TestBlueWhiteRedLut
 
 		final RandomAccessibleIntervalSource source = new RandomAccessibleIntervalSource( img, Util.getTypeFromInterval( img ), "" );
 
-		final SelectableRealVolatileARGBConverter converter = new SelectableRealVolatileARGBConverter( new LinearARGBLut( Luts.BLUE_WHITE_RED_LUT, 0, 255 ) );
+		final SelectableRealVolatileARGBConverter converter = new SelectableRealVolatileARGBConverter( new LinearARGBLut( Luts.BLUE_WHITE_RED, 0, 255 ) );
 
 		final VolatileARGBConvertedRealSource convertedRealSource = new VolatileARGBConvertedRealSource( source, converter );
 

@@ -2,14 +2,12 @@ package de.embl.cba.bdv.utils.lut;
 
 public class RandomARGBLut implements ARGBLut
 {
-	final static public double goldenRatio = 1.0 / ( 0.5 * Math.sqrt( 5 ) + 0.5 );
 	long seed;
 	byte[][] lut;
 
-
 	public RandomARGBLut( )
 	{
-		this.lut = Luts.GLASBEY_LUT;
+		this.lut = Luts.GLASBEY;
 		this.seed = 50;
 	}
 
@@ -20,14 +18,18 @@ public class RandomARGBLut implements ARGBLut
 	}
 
 	@Override
-	public int getARGBIndex( double x, double brightness )
+	public int getARGBIndex( final double x, final double brightness )
 	{
-		x = ( x * seed ) * goldenRatio;
-		x = x - ( long ) Math.floor( x );
+		final double random = LutUtils.getRandomNumberBetweenZeroAndOne( x, seed );
 
-		final int argbColorIndex = Luts.getARGBIndex( ( byte ) ( 255.0 * x ), lut, brightness );
+		final int argbColorIndex = Luts.getARGBIndex( ( byte ) ( 255.0 * random ), lut, brightness );
 
 		return argbColorIndex;
+	}
+
+	public void setLut( byte[][] lut )
+	{
+		this.lut = lut;
 	}
 
 	public long getSeed()

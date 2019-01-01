@@ -5,10 +5,10 @@ import java.awt.*;
 
 public class Luts
 {
-	public static final byte[][] GLASBEY_LUT = createGlasbeyLut();
-	public static final byte[][] GOLDEN_ANGLE_LUT = createGoldenAngleLut();
-	public static final byte[][] GRAYSCALE_LUT = createGrayscaleLut();
-	public static final byte[][] BLUE_WHITE_RED_LUT = createBlueWhiteRedLut();
+	public static final byte[][] GLASBEY = glasbeyLut();
+	public static final byte[][] GOLDEN_ANGLE = goldenAngleLut();
+	public static final byte[][] GRAYSCALE = grayscaleLut();
+	public static final byte[][] BLUE_WHITE_RED = blueWhiteRedLut();
 
 
 	/**
@@ -21,7 +21,7 @@ public class Luts
 	 *
 	 * @return Glasbey lookup table
 	 */
-	private final static byte[][] createGlasbeyLut() {
+	private final static byte[][] glasbeyLut() {
 		// initial values (copied from Fiji's Glasbey LUT)
 		int[] r = { 0, 0, 255, 0, 0, 255, 0, 255, 0, 154, 0, 120, 31, 255,
 				177, 241, 254, 221, 32, 114, 118, 2, 200, 136, 255, 133, 161,
@@ -113,7 +113,7 @@ public class Luts
 	 *
 	 * @return lookup table with golden-angled-based colors
 	 */
-	private final static byte[][] createGoldenAngleLut( )
+	private final static byte[][] goldenAngleLut( )
 	{
 
 		// hue for assigning new color ([0.0-1.0])
@@ -155,7 +155,7 @@ public class Luts
 	}
 
 
-	private final static byte[][] createGrayscaleLut( )
+	private final static byte[][] grayscaleLut( )
 	{
 
 		byte[][] lut = new byte[256][3];
@@ -172,7 +172,7 @@ public class Luts
 	}
 
 
-	private final static byte[][] createBlueWhiteRedLut( )
+	private final static byte[][] blueWhiteRedLut( )
 	{
 
 		byte[][] lut = new byte[256][3];
