@@ -1,8 +1,8 @@
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.argbconversion.VolatileARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.argbconversion.SelectableRealVolatileARGBConverter;
+import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.converters.argb.SelectableVolatileARGBConverter;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
@@ -15,15 +15,7 @@ public class ExampleARGBConverted2d16bitTiffImage
 {
 	public static < T extends RealType< T > > void main ( String[] args )
 	{
-		final ImagePlus imagePlus = IJ.openImage( ExampleARGBConverted2d16bitTiffImage.class.getResource( "2d-16bit-labelMask.tif" ).getFile() );
-
-		RandomAccessibleInterval< T > wrap = ImageJFunctions.wrapReal( imagePlus );
-
-		// needs to be at least 3D
-		wrap = Views.addDimension( wrap, 0, 0);
-
-		final RandomAccessibleIntervalSource raiSource = new RandomAccessibleIntervalSource( wrap, Util.getTypeFromInterval( wrap ), imagePlus.getTitle() );
-
+		final RandomAccessibleIntervalSource raiSource = getRandomAccessibleIntervalSource();
 
 		/**
 		 * Show as gray-scale image
@@ -36,11 +28,23 @@ public class ExampleARGBConverted2d16bitTiffImage
 		 * Show as ARGB image
 		 */
 
-		final SelectableRealVolatileARGBConverter converter = new SelectableRealVolatileARGBConverter();
+		final SelectableVolatileARGBConverter converter = new SelectableVolatileARGBConverter();
 
 		final VolatileARGBConvertedRealSource labelsSource = new VolatileARGBConvertedRealSource( raiSource, converter );
 
 		BdvFunctions.show( labelsSource, BdvOptions.options().is2D() );
 
+	}
+
+	public static < T extends RealType< T > > RandomAccessibleIntervalSource getRandomAccessibleIntervalSource()
+	{
+		final ImagePlus imagePlus = IJ.openImage( ExampleARGBConverted2d16bitTiffImage.class.getResource( "2d-16bit-labelMask.tif" ).getFile() );
+
+		RandomAccessibleInterval< T > wrap = ImageJFunctions.wrapReal( imagePlus );
+
+		// needs to be at least 3D
+		wrap = Views.addDimension( wrap, 0, 0);
+
+		return new RandomAccessibleIntervalSource( wrap, Util.getTypeFromInterval( wrap ), imagePlus.getTitle() );
 	}
 }

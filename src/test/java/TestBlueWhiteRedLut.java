@@ -1,8 +1,9 @@
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.argbconversion.SelectableRealVolatileARGBConverter;
-import de.embl.cba.bdv.utils.argbconversion.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.converters.argb.LinearMappingARGBConverter;
+import de.embl.cba.bdv.utils.converters.argb.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.lut.LinearARGBLut;
 import de.embl.cba.bdv.utils.lut.Luts;
 import net.imglib2.img.array.ArrayCursor;
@@ -27,7 +28,7 @@ public class TestBlueWhiteRedLut
 
 		final RandomAccessibleIntervalSource source = new RandomAccessibleIntervalSource( img, Util.getTypeFromInterval( img ), "" );
 
-		final SelectableRealVolatileARGBConverter converter = new SelectableRealVolatileARGBConverter( new LinearARGBLut( Luts.BLUE_WHITE_RED, 0, 255 ) );
+		final SelectableVolatileARGBConverter converter = new SelectableVolatileARGBConverter( new LinearMappingARGBConverter( Luts.BLUE_WHITE_RED, 0, 255 ) );
 
 		final VolatileARGBConvertedRealSource convertedRealSource = new VolatileARGBConvertedRealSource( source, converter );
 

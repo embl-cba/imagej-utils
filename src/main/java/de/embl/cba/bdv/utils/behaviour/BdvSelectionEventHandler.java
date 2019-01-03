@@ -3,41 +3,27 @@ package de.embl.cba.bdv.utils.behaviour;
 import bdv.util.Bdv;
 import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.*;
-import de.embl.cba.bdv.utils.argbconversion.SelectableRealVolatileARGBConverter;
+import de.embl.cba.bdv.utils.converters.argb.SelectableVolatileARGBConverter;
 import net.imglib2.RealPoint;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
-import javax.swing.*;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-public class BehaviourSelectionEventHandler
+public class BdvSelectionEventHandler
 {
 	final Bdv bdv;
-	final SelectableRealVolatileARGBConverter converter;
+	final SelectableVolatileARGBConverter converter;
 	final Source source;
-	final Set< Double > selectedValues;
 	final String sourceName;
 
 	Behaviours bdvBehaviours;
 
 	private String toggleSelectionTrigger = "ctrl button1";
 	private String selectNoneTrigger = "ctrl Q";
-	private BdvTableInteractor bdvTableInteractor;
-
-
-	public BehaviourSelectionEventHandler( Bdv bdv,
-										   Source source,
-										   SelectableRealVolatileARGBConverter converter,
-										   JTable table,
-										   String objectLabelColumn )
-	{
-		this( bdv, source, converter );
-
-		bdvTableInteractor = new BdvTableInteractor( bdv, converter, table, objectLabelColumn );
-	}
+	private CopyOnWriteArrayList< SelectionEventListener > selectionEventListeners;
 
 
 	/**
@@ -46,28 +32,28 @@ public class BehaviourSelectionEventHandler
 	 * @param source Source containing numeric values.
 	 * @param converter Configurable converter, converting numeric values to colors for display.
 	 */
-	public BehaviourSelectionEventHandler( Bdv bdv,
-										   Source source,
-										   SelectableRealVolatileARGBConverter converter )
+	public BdvSelectionEventHandler( Bdv bdv,
+									 Source source,
+									 SelectableVolatileARGBConverter converter )
 	{
 		this.bdv = bdv;
 		this.converter = converter;
 		this.source = source;
 		this.sourceName = source.getName();
-		this.selectedValues = new HashSet<>( );
+
+		this.selectionEventListeners = new CopyOnWriteArrayList<>(  );
 
 		installBdvBehaviours();
 	}
 
 	public Set< Double > getSelectedValues()
 	{
-		return selectedValues;
+		return converter.getSelections();
 	}
 
 	public void selectNone()
 	{
-		converter.highlightSelectedValues( null );
-		selectedValues.clear();
+		converter.setSelections( null );
 		BdvUtils.repaint( bdv );
 	}
 
@@ -100,23 +86,34 @@ public class BehaviourSelectionEventHandler
 	{
 		final RealPoint globalMouseCoordinates = BdvUtils.getGlobalMouseCoordinates( bdv );
 
-		final double selectedLabel = BdvUtils.getValueAtGlobalCoordinates( source, globalMouseCoordinates, 0 );
+		final double selected = BdvUtils.getValueAtGlobalCoordinates( source, globalMouseCoordinates, 0 );
 
-		if ( selectedLabel == 0 ) return; // background
+		if ( selected == 0 ) return; // background
 
-		if ( selectedValues.contains( selectedLabel ) )
+		if ( converter.getSelections().contains( selected ) )
 		{
-			selectedValues.remove( selectedLabel );
+			converter.removeSelection( selected );
+			BdvUtils.repaint( bdv );
 		}
 		else
 		{
-			selectedValues.add( selectedLabel );
-			if ( bdvTableInteractor != null ) bdvTableInteractor.highlightRowInTable( selectedLabel );
+			addSelection( selected );
 		}
+	}
 
-		converter.highlightSelectedValues( selectedValues );
+	public void addSelection( double selected )
+	{
+		// notify listeners
+		for ( final SelectionEventListener s : selectionEventListeners )
+			s.valueSelected( selected );
 
+		converter.addSelection( selected );
 		BdvUtils.repaint( bdv );
+	}
+
+	public void addSelectionEventListener( SelectionEventListener s )
+	{
+		selectionEventListeners.add( s );
 	}
 
 

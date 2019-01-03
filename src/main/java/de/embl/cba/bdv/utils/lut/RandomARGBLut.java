@@ -1,5 +1,6 @@
 package de.embl.cba.bdv.utils.lut;
 
+@Deprecated
 public class RandomARGBLut implements ARGBLut
 {
 	long seed;
@@ -20,7 +21,7 @@ public class RandomARGBLut implements ARGBLut
 	@Override
 	public int getARGBIndex( final double x, final double brightness )
 	{
-		final double random = LutUtils.getRandomNumberBetweenZeroAndOne( x, seed );
+		final double random = ARGBConverterUtils.getRandomNumberBetweenZeroAndOne( x, seed );
 
 		final int argbColorIndex = Luts.getARGBIndex( ( byte ) ( 255.0 * random ), lut, brightness );
 

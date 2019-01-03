@@ -2,9 +2,9 @@ import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.argbconversion.SelectableRealVolatileARGBConverter;
-import de.embl.cba.bdv.utils.argbconversion.VolatileARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.lut.LinearMappingARGBLut;
+import de.embl.cba.bdv.utils.converters.argb.LinearMappingARGBConverter;
+import de.embl.cba.bdv.utils.converters.argb.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
@@ -15,10 +15,11 @@ import net.imglib2.view.Views;
 
 import java.util.TreeMap;
 
-public class ExampleMappingLut
+public class ExampleMappingConverter
 {
 	public static void main( String[] args )
 	{
+
 		final TreeMap treeMap = new TreeMap();
 
 		treeMap.put( 1.0, 10.0 );
@@ -26,13 +27,13 @@ public class ExampleMappingLut
 		treeMap.put( 3.0, 30.0 );
 		treeMap.put( 4.0, 40.0 );
 
-		final RandomAccessibleIntervalSource raiSource = getRandomAccessibleIntervalSource();
+		final LinearMappingARGBConverter argbConverter = new LinearMappingARGBConverter( treeMap, 0, 50 );
 
-		final LinearMappingARGBLut linearMappingARGBLut = new LinearMappingARGBLut( treeMap, 0, 50 );
+		final SelectableVolatileARGBConverter selectableVolatileARGBConverter = new SelectableVolatileARGBConverter( argbConverter );
 
-		final SelectableRealVolatileARGBConverter argbConverter = new SelectableRealVolatileARGBConverter( linearMappingARGBLut );
+		final RandomAccessibleIntervalSource source = getRandomAccessibleIntervalSource();
 
-		final VolatileARGBConvertedRealSource argbSource = new VolatileARGBConvertedRealSource( raiSource, argbConverter );
+		final VolatileARGBConvertedRealSource argbSource = new VolatileARGBConvertedRealSource( source, selectableVolatileARGBConverter );
 
 		Bdv bdv = BdvFunctions.show( argbSource, BdvOptions.options().is2D() ).getBdvHandle();
 

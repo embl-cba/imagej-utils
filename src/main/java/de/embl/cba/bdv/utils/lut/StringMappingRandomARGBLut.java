@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
+@Deprecated
 public class StringMappingRandomARGBLut implements ARGBLut
 {
 	long seed;
@@ -39,7 +40,7 @@ public class StringMappingRandomARGBLut implements ARGBLut
 		final String string = map.get( x );
 		final int index = uniqueStringList.indexOf( string ) + 1; // +1 not to have zero
 
-		double random = LutUtils.getRandomNumberBetweenZeroAndOne( index, seed );
+		double random = ARGBConverterUtils.getRandomNumberBetweenZeroAndOne( index, seed );
 
 		final int argbColorIndex = Luts.getARGBIndex( ( byte ) ( 255.0 * random ), lut, brightness );
 

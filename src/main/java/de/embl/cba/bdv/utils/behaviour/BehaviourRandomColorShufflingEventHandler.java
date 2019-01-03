@@ -1,6 +1,7 @@
 package de.embl.cba.bdv.utils.behaviour;
 
 import bdv.util.Bdv;
+import de.embl.cba.bdv.utils.converters.argb.RandomARGBConverter;
 import de.embl.cba.bdv.utils.lut.RandomARGBLut;
 import de.embl.cba.bdv.utils.*;
 import org.scijava.ui.behaviour.ClickBehaviour;
@@ -10,17 +11,17 @@ import org.scijava.ui.behaviour.util.Behaviours;
 public class BehaviourRandomColorShufflingEventHandler
 {
 	final Bdv bdv;
-	final RandomARGBLut randomARGBLUT;
+	final RandomARGBConverter randomARGBLUT;
 	final String sourceName;
 
 	private String randomColorShufflingTrigger = "ctrl S";
 
 	private final Behaviours behaviours;
 
-	public BehaviourRandomColorShufflingEventHandler( Bdv bdv, RandomARGBLut randomARGBLUT, String sourceName )
+	public BehaviourRandomColorShufflingEventHandler( Bdv bdv, RandomARGBConverter randomARGBConverter, String sourceName )
 	{
 		this.bdv = bdv;
-		this.randomARGBLUT = randomARGBLUT;
+		this.randomARGBLUT = randomARGBConverter;
 		this.sourceName = sourceName;
 
 		this.behaviours = new Behaviours( new InputTriggerConfig() );

@@ -1,9 +1,9 @@
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.argbconversion.SelectableRealVolatileARGBConverter;
-import de.embl.cba.bdv.utils.argbconversion.VolatileARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.lut.Luts;
+import de.embl.cba.bdv.utils.converters.argb.CategoricalMappingRandomARGBConverter;
+import de.embl.cba.bdv.utils.converters.argb.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.lut.StringMappingRandomARGBLut;
 import ij.IJ;
 import ij.ImagePlus;
@@ -15,7 +15,7 @@ import net.imglib2.view.Views;
 
 import java.util.HashMap;
 
-public class ExampleStringMappingRandomARGBLut
+public class ExampleCategoricalMappingRandomARGBLut
 {
 	public static < T extends RealType< T > > void main ( String[] args )
 	{
@@ -32,7 +32,7 @@ public class ExampleStringMappingRandomARGBLut
 		 */
 
 
-		final ImagePlus imagePlus = IJ.openImage( ExampleStringMappingRandomARGBLut.class.getResource( "2d-16bit-labelMask.tif" ).getFile() );
+		final ImagePlus imagePlus = IJ.openImage( ExampleCategoricalMappingRandomARGBLut.class.getResource( "2d-16bit-labelMask.tif" ).getFile() );
 
 		RandomAccessibleInterval< T > wrap = ImageJFunctions.wrapReal( imagePlus );
 
@@ -41,27 +41,16 @@ public class ExampleStringMappingRandomARGBLut
 
 		final RandomAccessibleIntervalSource raiSource = new RandomAccessibleIntervalSource( wrap, Util.getTypeFromInterval( wrap ), imagePlus.getTitle() );
 
-
-		/**
-		 * Configure string (categorical) mapping random Lut
-		 */
-
 		final HashMap< Double, String > map = new HashMap<>();
 		map.put( 1.0, "GroupA" );
 		map.put( 2.0, "GroupA" );
 		map.put( 3.0, "GroupB" );
 		map.put( 4.0, "GroupB" );
 
-		final StringMappingRandomARGBLut lut = new StringMappingRandomARGBLut( map );
+		final SelectableVolatileARGBConverter selectableVolatileARGBConverter =
+				new SelectableVolatileARGBConverter( new CategoricalMappingRandomARGBConverter( map ) );
 
-
-		/**
-		 * Show as ARGB image, using above Lut
-		 */
-
-		final SelectableRealVolatileARGBConverter converter = new SelectableRealVolatileARGBConverter( lut );
-
-		final VolatileARGBConvertedRealSource labelsSource = new VolatileARGBConvertedRealSource( raiSource, converter );
+		final VolatileARGBConvertedRealSource labelsSource = new VolatileARGBConvertedRealSource( raiSource, selectableVolatileARGBConverter );
 
 		BdvFunctions.show( labelsSource, BdvOptions.options().is2D() );
 	}

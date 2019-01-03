@@ -1,6 +1,6 @@
 package de.embl.cba.bdv.utils.lut;
 
-public class LutUtils
+public class ARGBConverterUtils
 {
 	final static public double goldenRatio = 1.0 / ( 0.5 * Math.sqrt( 5 ) + 0.5 );
 

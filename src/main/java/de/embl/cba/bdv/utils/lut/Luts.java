@@ -104,6 +104,16 @@ public class Luts
 		return color;
 	}
 
+	public static int getARGBIndex( final byte lutIndex, final byte[][] lut )
+	{
+		final int color = ARGBType.rgba(
+				( lut[ lutIndex & 0xFF ][ 0 ] & 0xFF ) ,
+				( lut[ lutIndex & 0xFF ][ 1 ] & 0xFF ),
+				( lut[ lutIndex & 0xFF ][ 2 ] & 0xFF ), 255 );
+
+		return color;
+	}
+
 
 	/**
 	 * Make lookup table with esthetically pleasing colors based on the golden

@@ -2,6 +2,7 @@ package de.embl.cba.bdv.utils.lut;
 
 import java.util.Map;
 
+@Deprecated
 public class LinearMappingARGBLut implements ARGBLut
 {
 	Map< Double, Number > map;

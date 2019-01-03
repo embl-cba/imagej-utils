@@ -1,6 +1,6 @@
 package de.embl.cba.bdv.utils;
 
-import de.embl.cba.bdv.utils.argbconversion.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import de.embl.cba.bdv.utils.transforms.Transforms;
 

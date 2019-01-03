@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.argbconversion;
+package de.embl.cba.bdv.utils.converters.argb;
 
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
@@ -13,16 +13,24 @@ import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory
 import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.volatiles.AbstractVolatileRealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-public class VolatileARGBConvertedRealSource implements Source< VolatileARGBType >
+@Deprecated
+public class ARGBConvertedVolatileRealTypeSource< R extends RealType< R >, V extends AbstractVolatileRealType< R, V > > implements Source< VolatileARGBType >
 
 {
     private final Source source;
-    private Converter< RealType, VolatileARGBType > converter;
+    //private final long setupId;
+    private final String name;
+    private Converter< V, VolatileARGBType > converter;
+
+//    private AbstractViewerSetupImgLoader< R, V > setupImgLoader;
     final private InterpolatorFactory< VolatileARGBType, RandomAccessible< VolatileARGBType > >[] interpolatorFactories;
+
+    //    private AffineTransform3D viewRegistration;
 
     private AffineTransform3D[] mipmapTransforms;
     {
@@ -32,16 +40,15 @@ public class VolatileARGBConvertedRealSource implements Source< VolatileARGBType
         };
     }
 
-	public VolatileARGBConvertedRealSource( Source< RealType > source )
-	{
-		this.source = source;
-		this.converter = new SelectableRealVolatileARGBConverter();
-	}
-
-    public VolatileARGBConvertedRealSource( Source< RealType > source, Converter< RealType, VolatileARGBType > converter )
+    public ARGBConvertedVolatileRealTypeSource( Source< V > source, String name, Converter< V, VolatileARGBType > converter )
     {
         this.source = source;
+        this.name = name;
         this.converter = converter;
+        //this.viewRegistration = this.source.getViewRegistrations().getViewRegistration( 0, 0 ).getModel().copy();
+        //ViewerImgLoader imgLoader = ( ViewerImgLoader ) this.source.getSequenceDescription().getImgLoader();
+        //this.setupImgLoader = ( AbstractViewerSetupImgLoader ) imgLoader.getSetupImgLoader( setupId );
+        //this.mipmapTransforms = this.setupImgLoader.getMipmapTransforms();
     }
 
     @Override
@@ -76,6 +83,8 @@ public class VolatileARGBConvertedRealSource implements Source< VolatileARGBType
     public void getSourceTransform( int t, int level, AffineTransform3D transform )
     {
         source.getSourceTransform( t, level, transform );
+//        final AffineTransform3D sourceTransform = viewRegistration.copy().concatenate( mipmapTransforms[ level ] );
+//        transform.set( sourceTransform );
     }
 
     @Override
@@ -85,7 +94,7 @@ public class VolatileARGBConvertedRealSource implements Source< VolatileARGBType
 
     @Override
     public String getName() {
-        return source.getName();
+        return name;
     }
 
     @Override
@@ -100,17 +109,17 @@ public class VolatileARGBConvertedRealSource implements Source< VolatileARGBType
         return source.getNumMipmapLevels();
     }
 
-    public void setConverter( Converter< RealType, VolatileARGBType > converter )
+    public void setConverter( Converter< V, VolatileARGBType > converter )
     {
         this.converter = converter;
     }
 
-    public Converter< RealType, VolatileARGBType > getConverter()
+    public Converter< V, VolatileARGBType > getConverter()
     {
         return converter;
     }
 
-    public RandomAccessibleInterval< RealType > getWrappedSource( int t, int mipMapLevel )
+    public RandomAccessibleInterval< V > getWrappedSource( int t, int mipMapLevel )
     {
         return source.getSource( t, mipMapLevel );
     }

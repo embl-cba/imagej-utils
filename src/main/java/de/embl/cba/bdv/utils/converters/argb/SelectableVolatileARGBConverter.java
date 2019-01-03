@@ -14,10 +14,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package de.embl.cba.bdv.utils.argbconversion;
+package de.embl.cba.bdv.utils.converters.argb;
 
-import de.embl.cba.bdv.utils.lut.ARGBLut;
-import de.embl.cba.bdv.utils.lut.RandomARGBLut;
 import net.imglib2.Volatile;
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.RealType;
@@ -25,12 +23,11 @@ import net.imglib2.type.volatiles.VolatileARGBType;
 
 import java.util.Set;
 
-public class SelectableRealVolatileARGBConverter implements Converter< RealType, VolatileARGBType >
+public class SelectableVolatileARGBConverter implements Converter< RealType, VolatileARGBType >
 {
-	private ARGBLut argbLut;
+	private Converter< RealType, VolatileARGBType > converter;
 	private Set< Double > selectedValues;
 	private double brightnessNotSelected;
-	private double brightnessSelected;
 	private SelectionMode selectionMode;
 
 	enum SelectionMode
@@ -40,16 +37,16 @@ public class SelectableRealVolatileARGBConverter implements Converter< RealType,
 	}
 
 
-	public SelectableRealVolatileARGBConverter( )
+	public SelectableVolatileARGBConverter( )
 	{
-		this( new RandomARGBLut() );
+		this( new RandomARGBConverter() );
 	}
 
-	public SelectableRealVolatileARGBConverter( ARGBLut argbLut )
+	public SelectableVolatileARGBConverter( Converter< RealType, VolatileARGBType > realARGBConverter )
 	{
-		this.argbLut = argbLut;
+		this.converter = realARGBConverter;
 		this.selectedValues = null;
-		this.brightnessSelected = 1.0;
+
 		this.brightnessNotSelected = 0.2;
 		this.selectionMode = SelectionMode.Brightness;
 	}
@@ -67,67 +64,74 @@ public class SelectableRealVolatileARGBConverter implements Converter< RealType,
 				return;
 			}
 		}
-		else
-		{
-			output.setValid( true );
-		}
 
-		final double x = input.getRealDouble();
-
-		if ( x == 0 )
+		if ( input.getRealDouble() == 0 )
 		{
 			output.set( 0 );
+			output.setValid( true );
 			return;
 		}
-
-		if ( selectionMode.equals( SelectionMode.Brightness ) )
+		else
 		{
-			setColorWithAdaptedBrightness( x, output);
+			if ( selectionMode.equals( SelectionMode.Brightness ) )
+			{
+				setColorWithAdaptedBrightness( input, output);
+				output.setValid( true );
+				return;
+			}
 		}
-
 	}
 
-	public void setColorWithAdaptedBrightness( double x, VolatileARGBType output )
+	public void setColorWithAdaptedBrightness( final RealType input, final VolatileARGBType output )
 	{
 		if ( selectedValues == null )
 		{
-			output.set( argbLut.getARGBIndex( x, brightnessSelected ) );
+			converter.convert( input, output );
 		}
 		else
 		{
-			if ( ! selectedValues.contains( x ) )
+			converter.convert( input, output );
+
+			if ( ! selectedValues.contains( input.getRealDouble() ) )
 			{
-				output.set( argbLut.getARGBIndex( x, brightnessNotSelected ) );
-			}
-			else
-			{
-				output.set( argbLut.getARGBIndex( x, brightnessSelected ) );
+				output.get().mul( brightnessNotSelected);
 			}
 		}
 	}
 
-	/**
-	 *
-	 * @param selectedValues set null for showing all values
-	 */
-	public void highlightSelectedValues( Set< Double > selectedValues )
+	public synchronized void setSelections( Set< Double > selectedValues )
 	{
 		this.selectedValues = selectedValues;
 	}
 
-	public void setBrightnessOfNotHighlightedValues( final double brightnessNotSelected )
+	public synchronized void addSelection( double value )
+	{
+		selectedValues.add( value );
+	}
+
+	public synchronized void removeSelection( double value )
+	{
+		selectedValues.remove( value );
+	}
+
+	public Set< Double > getSelections()
+	{
+		return selectedValues;
+	}
+
+	public void setBrightnessNotSelectedValues( final double brightnessNotSelected )
 	{
 		this.brightnessNotSelected = brightnessNotSelected;
 	}
 
-	public void setARGBLut( ARGBLut argbLut )
+	public void setConverter( Converter< RealType, VolatileARGBType > converter )
 	{
-		this.argbLut = argbLut;
+		this.converter = converter;
 	}
 
-	public ARGBLut getARGBLut()
+	public Converter< RealType, VolatileARGBType > getConverter()
 	{
-		return argbLut;
+		return converter;
 	}
 
 }
