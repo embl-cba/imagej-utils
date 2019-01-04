@@ -25,7 +25,7 @@ import java.util.Set;
 
 public class SelectableVolatileARGBConverter implements Converter< RealType, VolatileARGBType >
 {
-	private Converter< RealType, VolatileARGBType > converter;
+	private Converter< RealType, VolatileARGBType > wrappedConverter;
 	private Set< Double > selectedValues;
 	private double brightnessNotSelected;
 	private SelectionMode selectionMode;
@@ -44,7 +44,7 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 
 	public SelectableVolatileARGBConverter( Converter< RealType, VolatileARGBType > realARGBConverter )
 	{
-		this.converter = realARGBConverter;
+		this.wrappedConverter = realARGBConverter;
 		this.selectedValues = null;
 
 		this.brightnessNotSelected = 0.2;
@@ -86,11 +86,11 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 	{
 		if ( selectedValues == null )
 		{
-			converter.convert( input, output );
+			wrappedConverter.convert( input, output );
 		}
 		else
 		{
-			converter.convert( input, output );
+			wrappedConverter.convert( input, output );
 
 			if ( ! selectedValues.contains( input.getRealDouble() ) )
 			{
@@ -124,14 +124,14 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 		this.brightnessNotSelected = brightnessNotSelected;
 	}
 
-	public void setConverter( Converter< RealType, VolatileARGBType > converter )
+	public void setWrappedConverter( Converter< RealType, VolatileARGBType > converter )
 	{
-		this.converter = converter;
+		this.wrappedConverter = converter;
 	}
 
-	public Converter< RealType, VolatileARGBType > getConverter()
+	public Converter< RealType, VolatileARGBType > getWrappedConverter()
 	{
-		return converter;
+		return wrappedConverter;
 	}
 
 }

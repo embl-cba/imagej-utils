@@ -14,6 +14,7 @@ import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 import java.util.HashMap;
+import java.util.function.Function;
 
 public class ExampleCategoricalMappingRandomARGBLut
 {
@@ -23,12 +24,12 @@ public class ExampleCategoricalMappingRandomARGBLut
 		 * This example shows how an image can be colored based on categorical (String)
 		 * information, which must be available for each value in the image.
 		 *
-		 * To do so one needs to provide a Map< Double, String > whichs maps
+		 * To do so one needs to provide a Map< Double, Object > whichs maps
 		 * the values in the image (e.g. the object label)
-		 * to strings (e.g. categorical object properties).
-		 *
-		 * The map is used to create a StringMappingRandomARGBLut, which converts
-		 * the strings into random colors.
+		 * to categorical object properties, e.g. strings describing
+		 * non-numerical object properties.
+		 * This map is used to create a CategoricalMappingRandomARGBConverter,
+		 * which converts the categorical information into random colors.
 		 */
 
 
@@ -47,12 +48,17 @@ public class ExampleCategoricalMappingRandomARGBLut
 		map.put( 3.0, "GroupB" );
 		map.put( 4.0, "GroupB" );
 
+
 		final SelectableVolatileARGBConverter selectableVolatileARGBConverter =
-				new SelectableVolatileARGBConverter( new CategoricalMappingRandomARGBConverter( map ) );
+				new SelectableVolatileARGBConverter(
+						new CategoricalMappingRandomARGBConverter(
+								d -> map.get( d ) ) );
 
 		final VolatileARGBConvertedRealSource labelsSource = new VolatileARGBConvertedRealSource( raiSource, selectableVolatileARGBConverter );
 
 		BdvFunctions.show( labelsSource, BdvOptions.options().is2D() );
+
+
 	}
 
 }

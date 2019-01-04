@@ -15,6 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class BdvSelectionEventHandler
 {
 	final Bdv bdv;
+
 	final SelectableVolatileARGBConverter converter;
 	final Source source;
 	final String sourceName;
@@ -116,6 +117,15 @@ public class BdvSelectionEventHandler
 		selectionEventListeners.add( s );
 	}
 
+	public Bdv getBdv()
+	{
+		return bdv;
+	}
+
+	public SelectableVolatileARGBConverter getSelectableConverter()
+	{
+		return converter;
+	}
 
 }
 

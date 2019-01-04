@@ -33,7 +33,6 @@ public class ExampleARGBConverted2d16bitTiffImage
 		final VolatileARGBConvertedRealSource labelsSource = new VolatileARGBConvertedRealSource( raiSource, converter );
 
 		BdvFunctions.show( labelsSource, BdvOptions.options().is2D() );
-
 	}
 
 	public static < T extends RealType< T > > RandomAccessibleIntervalSource getRandomAccessibleIntervalSource()

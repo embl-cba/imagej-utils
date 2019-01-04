@@ -15,19 +15,12 @@ import net.imglib2.view.Views;
 
 import java.util.TreeMap;
 
-public class ExampleMappingConverter
+public class ExampleLinearMappingConverter
 {
 	public static void main( String[] args )
 	{
-
-		final TreeMap treeMap = new TreeMap();
-
-		treeMap.put( 1.0, 10.0 );
-		treeMap.put( 2.0, 20.0 );
-		treeMap.put( 3.0, 30.0 );
-		treeMap.put( 4.0, 40.0 );
-
-		final LinearMappingARGBConverter argbConverter = new LinearMappingARGBConverter( treeMap, 0, 50 );
+		final LinearMappingARGBConverter argbConverter =
+				new LinearMappingARGBConverter( d -> 10*d, 0, 50 );
 
 		final SelectableVolatileARGBConverter selectableVolatileARGBConverter = new SelectableVolatileARGBConverter( argbConverter );
 
@@ -36,7 +29,6 @@ public class ExampleMappingConverter
 		final VolatileARGBConvertedRealSource argbSource = new VolatileARGBConvertedRealSource( source, selectableVolatileARGBConverter );
 
 		Bdv bdv = BdvFunctions.show( argbSource, BdvOptions.options().is2D() ).getBdvHandle();
-
 	}
 
 	public static RandomAccessibleIntervalSource getRandomAccessibleIntervalSource()
