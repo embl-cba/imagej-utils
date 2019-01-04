@@ -91,14 +91,14 @@ public class BdvSelectionEventHandler
 
 		if ( selected == 0 ) return; // background
 
-		if ( converter.getSelections().contains( selected ) )
+		if ( converter.getSelections() == null || ! converter.getSelections().contains( selected ) )
 		{
-			converter.removeSelection( selected );
-			BdvUtils.repaint( bdv );
+			addSelection( selected );
 		}
 		else
 		{
-			addSelection( selected );
+			converter.removeSelection( selected );
+			BdvUtils.repaint( bdv );
 		}
 	}
 

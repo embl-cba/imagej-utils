@@ -706,12 +706,20 @@ public abstract class BdvUtils
 
 
 
-	public static void zoomToPosition( Bdv bdv, double[] xyzt, double scale, long durationMillis )
+	public static void zoomToPosition( Bdv bdv, double[] xyzt, Double scale, long durationMillis )
 	{
-		final AffineTransform3D newViewerTransform = getViewerTransform( bdv, xyzt, scale );
-
 		final AffineTransform3D currentViewerTransform = new AffineTransform3D();
 		bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( currentViewerTransform );
+
+		if ( scale == null )
+		{
+			final double[] currentScales = Transforms.getScale( currentViewerTransform );
+			scale = currentScales[ 0 ];
+		}
+
+
+		final AffineTransform3D newViewerTransform = getViewerTransform( bdv, xyzt, scale );
+
 
 		final SimilarityTransformAnimator similarityTransformAnimator =
 				new SimilarityTransformAnimator(

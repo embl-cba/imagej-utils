@@ -21,6 +21,7 @@ import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class SelectableVolatileARGBConverter implements Converter< RealType, VolatileARGBType >
@@ -106,12 +107,22 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 
 	public synchronized void addSelection( double value )
 	{
+		if ( selectedValues == null )
+		{
+			selectedValues = new HashSet<>( );
+		}
+
 		selectedValues.add( value );
 	}
 
 	public synchronized void removeSelection( double value )
 	{
 		selectedValues.remove( value );
+	}
+
+	public synchronized void clearSelections( )
+	{
+		this.selectedValues = null;
 	}
 
 	public Set< Double > getSelections()
