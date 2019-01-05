@@ -224,21 +224,21 @@ public abstract class BdvUtils
 		return new ARGBType( ARGBType.rgba( color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() ) );
 	}
 
-	public static long[] getPositionInSource( Source source, RealPoint mousePositionInMicrometerUnits, int t, int level )
+	public static long[] getPositionInSource( Source source, RealPoint positionInViewerInMicrometerUnits, int t, int level )
 	{
 		int n = 3;
 
 		final AffineTransform3D sourceTransform = BdvUtils.getSourceTransform( source, t, level );
 
-		final RealPoint positionInPixelUnits = new RealPoint( n );
+		final RealPoint positionInSourceInPixelUnits = new RealPoint( n );
 
-		sourceTransform.inverse().apply( mousePositionInMicrometerUnits, positionInPixelUnits );
+		sourceTransform.inverse().apply( positionInViewerInMicrometerUnits, positionInSourceInPixelUnits );
 
 		final long[] longPosition = new long[ n ];
 
 		for ( int d = 0; d < n; ++d )
 		{
-			longPosition[ d ] = (long) positionInPixelUnits.getFloatPosition( d );
+			longPosition[ d ] = (long) positionInSourceInPixelUnits.getFloatPosition( d );
 		}
 
 		return longPosition;
@@ -705,6 +705,42 @@ public abstract class BdvUtils
 	}
 
 
+	public static void moveToPosition( Bdv bdv, double[] xyz, int t, long durationMillis )
+	{
+		bdv.getBdvHandle().getViewerPanel().setTimepoint( t );
+
+		final AffineTransform3D currentViewerTransform = new AffineTransform3D();
+		bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( currentViewerTransform );
+
+		AffineTransform3D newViewerTransform = currentViewerTransform.copy();
+
+		// ViewerTransform
+		// applyInverse: coordinates in viewer => coordinates in image
+		// apply: coordinates in image => coordinates in viewer
+
+		final double[] locationOfTargetCoordinatesInCurrentViewer = new double[ 3 ];
+		currentViewerTransform.apply( xyz, locationOfTargetCoordinatesInCurrentViewer );
+
+		for ( int d = 0; d < 3; d++ )
+		{
+			locationOfTargetCoordinatesInCurrentViewer[ d ] *= -1;
+		}
+
+		newViewerTransform.translate( locationOfTargetCoordinatesInCurrentViewer );
+
+		newViewerTransform.translate( getBdvWindowCenter( bdv ) );
+
+		final SimilarityTransformAnimator similarityTransformAnimator =
+				new SimilarityTransformAnimator(
+						currentViewerTransform,
+						newViewerTransform,
+						0,
+						0,
+						durationMillis );
+
+		bdv.getBdvHandle().getViewerPanel().setTransformAnimator( similarityTransformAnimator );
+		bdv.getBdvHandle().getViewerPanel().transformChanged( currentViewerTransform );
+	}
 
 	public static void zoomToPosition( Bdv bdv, double[] xyzt, Double scale, long durationMillis )
 	{
@@ -717,9 +753,7 @@ public abstract class BdvUtils
 			scale = currentScales[ 0 ];
 		}
 
-
 		final AffineTransform3D newViewerTransform = getViewerTransform( bdv, xyzt, scale );
-
 
 		final SimilarityTransformAnimator similarityTransformAnimator =
 				new SimilarityTransformAnimator(
@@ -731,6 +765,39 @@ public abstract class BdvUtils
 
 		bdv.getBdvHandle().getViewerPanel().setTransformAnimator( similarityTransformAnimator );
 		bdv.getBdvHandle().getViewerPanel().transformChanged( currentViewerTransform );
+	}
+
+	public static AffineTransform3D getTranslatedViewerTransform( Bdv bdv, double[] position, AffineTransform3D currentViewerTransform )
+	{
+		final AffineTransform3D viewerTransform = currentViewerTransform.copy();
+
+		double[] translation = new double[ 3 ];
+		for( int d = 0; d < 3; ++d )
+		{
+			translation[ d ] = - position[ d ];
+		}
+
+		viewerTransform.setTranslation( new double[]{0,0,0} );
+		viewerTransform.translate( translation );
+
+		double[] centerBdvWindowTranslation = getBdvWindowCentre( bdv );
+		viewerTransform.translate( centerBdvWindowTranslation );
+
+		return viewerTransform;
+	}
+
+	public static double[] getBdvWindowCentre( Bdv bdv )
+	{
+		int[] bdvWindowDimensions = new int[ 3 ];
+		bdvWindowDimensions[ 0 ] = bdv.getBdvHandle().getViewerPanel().getWidth();
+		bdvWindowDimensions[ 1 ] = bdv.getBdvHandle().getViewerPanel().getHeight();
+
+		double[] centerBdvWindowTranslation = new double[ 3 ];
+		for( int d = 0; d < 3; ++d )
+		{
+			centerBdvWindowTranslation[ d ] = + bdvWindowDimensions[ d ] / 2.0;
+		}
+		return centerBdvWindowTranslation;
 	}
 
 

@@ -1,5 +1,6 @@
 package de.embl.cba.bdv.utils.algorithms;
 
+import bdv.viewer.SourceAndConverter;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import net.imglib2.*;
@@ -54,13 +55,13 @@ public class ConnectedComponentExtractor< R extends RealType< R > >
 		n = source.numDimensions();
 	}
 
-	public void run( long[] seed )
+	public void run( long[] seedCoordinate )
 	{
 		maxRegionSizeReached = false;
 
-		setSeedValue( seed );
+		setSeedValue( seedCoordinate );
 
-		initCoordinates( seed );
+		initCoordinates( seedCoordinate );
 
 		initBoundingBox();
 
@@ -126,10 +127,10 @@ public class ConnectedComponentExtractor< R extends RealType< R > >
 		}
 	}
 
-	private void initCoordinates( long[] seed )
+	private void initCoordinates( long[] seedCoordinate )
 	{
 		coordinates = new ArrayList<>();
-		coordinates.add( seed );
+		coordinates.add( seedCoordinate );
 	}
 
 	private void setSeedValue( long[] seed )
