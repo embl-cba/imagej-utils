@@ -94,6 +94,10 @@ public class BdvSelectionEventHandler
 		if ( converter.getSelections() == null || ! converter.getSelections().contains( selected ) )
 		{
 			addSelection( selected );
+
+			// notify listeners
+			for ( final SelectionEventListener s : selectionEventListeners )
+				s.valueSelected( selected );
 		}
 		else
 		{
@@ -104,10 +108,6 @@ public class BdvSelectionEventHandler
 
 	public void addSelection( double selected )
 	{
-		// notify listeners
-		for ( final SelectionEventListener s : selectionEventListeners )
-			s.valueSelected( selected );
-
 		converter.addSelection( selected );
 		BdvUtils.repaint( bdv );
 	}
