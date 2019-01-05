@@ -9,6 +9,8 @@ import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -22,10 +24,12 @@ public class BdvSelectionEventHandler
 
 	Behaviours bdvBehaviours;
 
-	private String toggleSelectionTrigger = "ctrl button1";
+	private String selectTrigger = "ctrl button1";
 	private String selectNoneTrigger = "ctrl Q";
-	private CopyOnWriteArrayList< SelectionEventListener > selectionEventListeners;
+	private String iterateSelectionMode = "ctrl S";
 
+	private CopyOnWriteArrayList< SelectionEventListener > selectionEventListeners;
+	private List< SelectableVolatileARGBConverter.SelectionMode > selectionModes;
 
 	/**
 	 * Selection of argbconversion (objects) in a label source.
@@ -43,6 +47,8 @@ public class BdvSelectionEventHandler
 		this.sourceName = source.getName();
 
 		this.selectionEventListeners = new CopyOnWriteArrayList<>(  );
+
+		selectionModes = Arrays.asList( SelectableVolatileARGBConverter.SelectionMode.values() );
 
 		installBdvBehaviours();
 	}
@@ -63,24 +69,32 @@ public class BdvSelectionEventHandler
 		bdvBehaviours = new Behaviours( new InputTriggerConfig() );
 		bdvBehaviours.install( bdv.getBdvHandle().getTriggerbindings(),  sourceName + "-bdv-selection-handler" );
 
-		installSelectionBehaviour( toggleSelectionTrigger );
+		installSelectionBehaviour( );
 
-		installSelectNoneBehaviour( selectNoneTrigger );
+		installSelectNoneBehaviour( );
+
+		installSelectModeIterationBehaviour( );
 	}
 
-	private void installSelectNoneBehaviour( String selectNoneTrigger )
+	private void installSelectModeIterationBehaviour( )
+	{
+		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
+			iterateSelectionMode();
+		}, sourceName + "-iterate-selection", iterateSelectionMode );
+	}
+
+	private void installSelectNoneBehaviour( )
 	{
 		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
 			selectNone();
 		}, sourceName + "-select-none", selectNoneTrigger );
 	}
 
-
-	private void installSelectionBehaviour( String objectSelectionTrigger )
+	private void installSelectionBehaviour()
 	{
 		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
 			toggleSelectionAtMousePosition();
-		}, sourceName+"-toggle-selection", objectSelectionTrigger ) ;
+		}, sourceName+"-toggle-selection", selectTrigger ) ;
 	}
 
 	private void toggleSelectionAtMousePosition()
@@ -125,6 +139,22 @@ public class BdvSelectionEventHandler
 	public SelectableVolatileARGBConverter getSelectableConverter()
 	{
 		return converter;
+	}
+
+	private void iterateSelectionMode()
+	{
+		final int selectionModeIndex = selectionModes.indexOf( converter.getSelectionMode() );
+
+		if ( selectionModeIndex < selectionModes.size() -1 )
+		{
+			converter.setSelectionMode( selectionModes.get( selectionModeIndex + 1 ) );
+		}
+		else
+		{
+			converter.setSelectionMode( selectionModes.get( 0 ) );
+		}
+
+		BdvUtils.repaint( bdv );
 	}
 
 }

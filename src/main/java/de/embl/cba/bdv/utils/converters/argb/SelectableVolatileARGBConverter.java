@@ -18,6 +18,8 @@ package de.embl.cba.bdv.utils.converters.argb;
 
 import net.imglib2.Volatile;
 import net.imglib2.converter.Converter;
+import net.imglib2.display.ScaledARGBConverter;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
@@ -26,17 +28,20 @@ import java.util.Set;
 
 public class SelectableVolatileARGBConverter implements Converter< RealType, VolatileARGBType >
 {
+	public static final ARGBType COLOR_SELECTED = new ARGBType( ARGBType.rgba( 255, 255, 0, 255 ) );
 	private Converter< RealType, VolatileARGBType > wrappedConverter;
 	private Set< Double > selectedValues;
 	private double brightnessNotSelected;
 	private SelectionMode selectionMode;
+	private ARGBType colorSelected;
 
-	enum SelectionMode
+	public static enum SelectionMode
 	{
-		Brightness,
-		Color; // TODO: implement
+		DimNotSelected,
+		OnlyShowSelected,
+		ColorSelectedBrightYellow,
+		ColorSelectedBrightYellowAndDimNotSelected;
 	}
-
 
 	public SelectableVolatileARGBConverter( )
 	{
@@ -49,7 +54,7 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 		this.selectedValues = null;
 
 		this.brightnessNotSelected = 0.2;
-		this.selectionMode = SelectionMode.Brightness;
+		this.selectionMode = SelectionMode.DimNotSelected;
 	}
 
 
@@ -74,16 +79,34 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 		}
 		else
 		{
-			if ( selectionMode.equals( SelectionMode.Brightness ) )
+			switch ( selectionMode )
 			{
-				setColorWithAdaptedBrightness( input, output);
-				output.setValid( true );
-				return;
+				case DimNotSelected:
+					brightnessNotSelected = 0.2;
+					colorSelected = null;
+					break;
+				case OnlyShowSelected:
+					brightnessNotSelected = 0.0;
+					colorSelected = null;
+					break;
+				case ColorSelectedBrightYellow:
+					brightnessNotSelected = 1.0;
+					colorSelected = COLOR_SELECTED;
+					break;
+				case ColorSelectedBrightYellowAndDimNotSelected:
+					brightnessNotSelected = 0.2;
+					colorSelected = COLOR_SELECTED;
+					break;
 			}
+
+			setOutputColor( input, output);
+			output.setValid( true );
+
 		}
 	}
 
-	public void setColorWithAdaptedBrightness( final RealType input, final VolatileARGBType output )
+	public void setOutputColor( final RealType input,
+								final VolatileARGBType output )
 	{
 		if ( selectedValues == null )
 		{
@@ -96,6 +119,10 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 			if ( ! selectedValues.contains( input.getRealDouble() ) )
 			{
 				output.get().mul( brightnessNotSelected);
+			}
+			else if ( colorSelected != null )
+			{
+				output.set( colorSelected.get() );
 			}
 		}
 	}
@@ -144,5 +171,16 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 	{
 		return wrappedConverter;
 	}
+
+	public SelectionMode getSelectionMode()
+	{
+		return selectionMode;
+	}
+
+	public void setSelectionMode( SelectionMode selectionMode )
+	{
+		this.selectionMode = selectionMode;
+	}
+
 
 }

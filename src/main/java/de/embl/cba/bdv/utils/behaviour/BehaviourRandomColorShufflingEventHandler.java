@@ -14,7 +14,7 @@ public class BehaviourRandomColorShufflingEventHandler
 	final RandomARGBConverter randomARGBLUT;
 	final String sourceName;
 
-	private String randomColorShufflingTrigger = "ctrl S";
+	private String randomColorShufflingTrigger = "ctrl shift S";
 
 	private final Behaviours behaviours;
 
