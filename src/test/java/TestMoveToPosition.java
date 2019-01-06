@@ -1,11 +1,9 @@
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
-import bdv.util.BdvStackSource;
 import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 import mpicbg.spim.data.SpimDataException;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.volatiles.VolatileARGBType;
 
 public class TestMoveToPosition
 {

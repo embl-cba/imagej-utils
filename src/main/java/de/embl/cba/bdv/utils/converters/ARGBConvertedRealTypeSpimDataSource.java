@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.converters.argb;
+package de.embl.cba.bdv.utils.converters;
 
 import bdv.AbstractViewerSetupImgLoader;
 import bdv.ViewerImgLoader;

@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.behaviour;
+package de.embl.cba.bdv.utils.selection;
 
 public interface SelectionEventListener
 {

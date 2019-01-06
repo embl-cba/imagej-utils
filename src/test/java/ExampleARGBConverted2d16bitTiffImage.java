@@ -1,8 +1,8 @@
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.converters.argb.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;

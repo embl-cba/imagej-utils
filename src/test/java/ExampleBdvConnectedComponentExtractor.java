@@ -1,7 +1,7 @@
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
-import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.regions.BdvConnectedComponentExtractor;
 import de.embl.cba.bdv.utils.behaviour.BehaviourTransformEventHandler3DLeftMouseDrag;
 import ij.ImageJ;

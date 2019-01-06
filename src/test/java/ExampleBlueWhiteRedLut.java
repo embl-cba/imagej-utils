@@ -1,11 +1,9 @@
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.converters.argb.LinearARGBConverter;
-import de.embl.cba.bdv.utils.converters.argb.LinearMappingARGBConverter;
-import de.embl.cba.bdv.utils.converters.argb.SelectableVolatileARGBConverter;
-import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.lut.LinearARGBLut;
+import de.embl.cba.bdv.utils.converters.LinearARGBConverter;
+import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.lut.Luts;
 import net.imglib2.img.array.ArrayCursor;
 import net.imglib2.img.array.ArrayImg;

@@ -1,9 +1,9 @@
-package de.embl.cba.bdv.utils.behaviour;
+package de.embl.cba.bdv.utils.selection;
 
 import bdv.util.Bdv;
-import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.*;
-import de.embl.cba.bdv.utils.converters.argb.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
 import net.imglib2.RealPoint;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -17,9 +17,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class BdvSelectionEventHandler
 {
 	final Bdv bdv;
-
-	final SelectableVolatileARGBConverter converter;
-	final Source source;
+	final SelectableVolatileARGBConvertedRealSource source;
+	final SelectableVolatileARGBConverter selectableConverter;
 	final String sourceName;
 
 	Behaviours bdvBehaviours;
@@ -34,16 +33,13 @@ public class BdvSelectionEventHandler
 	/**
 	 * Selection of argbconversion (objects) in a label source.
 	 * @param bdv Bdv window in which the source is shown.
-	 * @param source Source containing numeric values.
-	 * @param converter Configurable converter, converting numeric values to colors for display.
 	 */
 	public BdvSelectionEventHandler( Bdv bdv,
-									 Source source,
-									 SelectableVolatileARGBConverter converter )
+									 SelectableVolatileARGBConvertedRealSource selectableSource )
 	{
 		this.bdv = bdv;
-		this.converter = converter;
-		this.source = source;
+		this.source = selectableSource;
+		this.selectableConverter = selectableSource.getSelectableConverter();
 		this.sourceName = source.getName();
 
 		this.selectionEventListeners = new CopyOnWriteArrayList<>(  );
@@ -55,12 +51,12 @@ public class BdvSelectionEventHandler
 
 	public Set< Double > getSelectedValues()
 	{
-		return converter.getSelections();
+		return selectableConverter.getSelections();
 	}
 
 	public void selectNone()
 	{
-		converter.setSelections( null );
+		selectableConverter.setSelections( null );
 		BdvUtils.repaint( bdv );
 	}
 
@@ -70,30 +66,40 @@ public class BdvSelectionEventHandler
 		bdvBehaviours.install( bdv.getBdvHandle().getTriggerbindings(),  sourceName + "-bdv-selection-handler" );
 
 		installSelectionBehaviour( );
-
 		installSelectNoneBehaviour( );
-
 		installSelectModeIterationBehaviour( );
 	}
 
 	private void installSelectModeIterationBehaviour( )
 	{
-		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
-			iterateSelectionMode();
+		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		{
+			if ( BdvUtils.isActive( bdv, source ) )
+			{
+				iterateSelectionMode();
+			}
 		}, sourceName + "-iterate-selection", iterateSelectionMode );
 	}
 
 	private void installSelectNoneBehaviour( )
 	{
-		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
-			selectNone();
+		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		{
+			if ( BdvUtils.isActive( bdv, source ) )
+			{
+				selectNone();
+			}
 		}, sourceName + "-select-none", selectNoneTrigger );
 	}
 
 	private void installSelectionBehaviour()
 	{
-		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
-			toggleSelectionAtMousePosition();
+		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		{
+			if ( BdvUtils.isActive( bdv, source ) )
+			{
+				toggleSelectionAtMousePosition();
+			}
 		}, sourceName+"-toggle-selection", selectTrigger ) ;
 	}
 
@@ -101,28 +107,35 @@ public class BdvSelectionEventHandler
 	{
 		final RealPoint globalMouseCoordinates = BdvUtils.getGlobalMouseCoordinates( bdv );
 
-		final double selected = BdvUtils.getValueAtGlobalCoordinates( source, globalMouseCoordinates, 0 );
+		final double selected = BdvUtils.getValueAtGlobalCoordinates(
+				source.getWrappedRealSource(),
+				globalMouseCoordinates,
+				0 );
 
 		if ( selected == 0 ) return; // background
 
-		if ( converter.getSelections() == null || ! converter.getSelections().contains( selected ) )
+		if ( isNewSelection( selected ) )
 		{
 			addSelection( selected );
 
-			// notify listeners
 			for ( final SelectionEventListener s : selectionEventListeners )
 				s.valueSelected( selected );
 		}
 		else
 		{
-			converter.removeSelection( selected );
+			selectableConverter.removeSelection( selected );
 			BdvUtils.repaint( bdv );
 		}
 	}
 
+	private boolean isNewSelection( double selected )
+	{
+		return selectableConverter.getSelections() == null || ! selectableConverter.getSelections().contains( selected );
+	}
+
 	public void addSelection( double selected )
 	{
-		converter.addSelection( selected );
+		selectableConverter.addSelection( selected );
 		BdvUtils.repaint( bdv );
 	}
 
@@ -138,20 +151,20 @@ public class BdvSelectionEventHandler
 
 	public SelectableVolatileARGBConverter getSelectableConverter()
 	{
-		return converter;
+		return selectableConverter;
 	}
 
 	private void iterateSelectionMode()
 	{
-		final int selectionModeIndex = selectionModes.indexOf( converter.getSelectionMode() );
+		final int selectionModeIndex = selectionModes.indexOf( selectableConverter.getSelectionMode() );
 
 		if ( selectionModeIndex < selectionModes.size() -1 )
 		{
-			converter.setSelectionMode( selectionModes.get( selectionModeIndex + 1 ) );
+			selectableConverter.setSelectionMode( selectionModes.get( selectionModeIndex + 1 ) );
 		}
 		else
 		{
-			converter.setSelectionMode( selectionModes.get( 0 ) );
+			selectableConverter.setSelectionMode( selectionModes.get( 0 ) );
 		}
 
 		BdvUtils.repaint( bdv );

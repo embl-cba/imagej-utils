@@ -1,8 +1,7 @@
 package de.embl.cba.bdv.utils.behaviour;
 
 import bdv.util.Bdv;
-import de.embl.cba.bdv.utils.converters.argb.RandomARGBConverter;
-import de.embl.cba.bdv.utils.lut.RandomARGBLut;
+import de.embl.cba.bdv.utils.converters.RandomARGBConverter;
 import de.embl.cba.bdv.utils.*;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;

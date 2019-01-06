@@ -1,7 +1,8 @@
-package de.embl.cba.bdv.utils.converters.argb;
+package de.embl.cba.bdv.utils.sources;
 
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
+import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -18,7 +19,6 @@ import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
 public class VolatileARGBConvertedRealSource implements Source< VolatileARGBType >
-
 {
     private final Source source;
     private Converter< RealType, VolatileARGBType > converter;
@@ -31,12 +31,6 @@ public class VolatileARGBConvertedRealSource implements Source< VolatileARGBType
                 new ClampingNLinearInterpolatorFactory< VolatileARGBType >()
         };
     }
-
-	public VolatileARGBConvertedRealSource( Source< RealType > source )
-	{
-		this.source = source;
-		this.converter = new SelectableVolatileARGBConverter();
-	}
 
     public VolatileARGBConvertedRealSource( Source< RealType > source, Converter< RealType, VolatileARGBType > converter )
     {
@@ -100,19 +94,36 @@ public class VolatileARGBConvertedRealSource implements Source< VolatileARGBType
         return source.getNumMipmapLevels();
     }
 
-    public void setConverter( Converter< RealType, VolatileARGBType > converter )
+    public void setSelectableVolatileARGBConverter( Converter< RealType, VolatileARGBType > selectableVolatileARGBConverter )
     {
-        this.converter = converter;
+        this.converter = selectableVolatileARGBConverter;
     }
 
-    public Converter< RealType, VolatileARGBType > getConverter()
+    public Converter< RealType, VolatileARGBType > getSelectableVolatileARGBConverter()
     {
         return converter;
     }
 
-    public RandomAccessibleInterval< RealType > getWrappedSource( int t, int mipMapLevel )
+    public SelectableVolatileARGBConverter getSelectableConverter()
+    {
+        if ( converter instanceof SelectableVolatileARGBConverter )
+        {
+            return (SelectableVolatileARGBConverter) converter;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public RandomAccessibleInterval< RealType > getWrappedRealSource( int t, int mipMapLevel )
     {
         return source.getSource( t, mipMapLevel );
+    }
+
+    public Source< RealType > getWrappedRealSource( )
+    {
+        return source;
     }
 
 }

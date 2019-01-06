@@ -3,18 +3,11 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
 import de.embl.cba.bdv.utils.behaviour.BehaviourRandomColorShufflingEventHandler;
-import de.embl.cba.bdv.utils.behaviour.BdvSelectionEventHandler;
-import de.embl.cba.bdv.utils.converters.argb.RandomARGBConverter;
-import de.embl.cba.bdv.utils.converters.argb.SelectableVolatileARGBConverter;
-import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.lut.RandomARGBLut;
-import ij.IJ;
-import ij.ImagePlus;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.util.Util;
-import net.imglib2.view.Views;
+import de.embl.cba.bdv.utils.selection.BdvSelectionEventHandler;
+import de.embl.cba.bdv.utils.converters.RandomARGBConverter;
+import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 
 public class ExampleSelectionAndRandomColorShufflingBehaviour
 {
@@ -24,13 +17,13 @@ public class ExampleSelectionAndRandomColorShufflingBehaviour
 
 		final RandomARGBConverter randomARGBConverter = new RandomARGBConverter();
 
-		final SelectableVolatileARGBConverter argbConverter = new SelectableVolatileARGBConverter( randomARGBConverter );
+		final SelectableVolatileARGBConverter selectableConverter = new SelectableVolatileARGBConverter( randomARGBConverter );
 
-		final VolatileARGBConvertedRealSource argbSource = new VolatileARGBConvertedRealSource( raiSource, argbConverter );
+		final SelectableVolatileARGBConvertedRealSource selectableSource = new SelectableVolatileARGBConvertedRealSource( raiSource, selectableConverter );
 
-		Bdv bdv = BdvFunctions.show( argbSource, BdvOptions.options().is2D() ).getBdvHandle();
+		Bdv bdv = BdvFunctions.show( selectableSource, BdvOptions.options().is2D() ).getBdvHandle();
 
-		new BdvSelectionEventHandler( bdv, argbSource, argbConverter );
+		new BdvSelectionEventHandler( bdv, selectableSource );
 
 		new BehaviourRandomColorShufflingEventHandler( bdv, randomARGBConverter, raiSource.getName() );
 	}

@@ -1,10 +1,9 @@
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.converters.argb.CategoricalMappingRandomARGBConverter;
-import de.embl.cba.bdv.utils.converters.argb.SelectableVolatileARGBConverter;
-import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.lut.StringMappingRandomARGBLut;
+import de.embl.cba.bdv.utils.converters.CategoricalMappingRandomARGBConverter;
+import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
@@ -14,7 +13,6 @@ import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 import java.util.HashMap;
-import java.util.function.Function;
 
 public class ExampleCategoricalMappingRandomARGBLut
 {

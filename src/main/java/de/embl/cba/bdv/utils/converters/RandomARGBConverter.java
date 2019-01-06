@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.converters.argb;
+package de.embl.cba.bdv.utils.converters;
 
 import de.embl.cba.bdv.utils.lut.ARGBConverterUtils;
 import de.embl.cba.bdv.utils.lut.Luts;

@@ -1,6 +1,7 @@
 package de.embl.cba.bdv.utils;
 
-import de.embl.cba.bdv.utils.converters.argb.VolatileARGBConvertedRealSource;
+import bdv.tools.transformation.TransformedSource;
+import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import de.embl.cba.bdv.utils.transforms.Transforms;
 
@@ -208,11 +209,11 @@ public abstract class BdvUtils
 //	{
 //		if ( source instanceof TransformedSource )
 //		{
-//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
+//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedRealSource();
 //
 //			if ( wrappedSource instanceof ARGBConvertedRealSource )
 //			{
-//				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedSource( t, level );
+//				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedRealSource( t, level );
 //			}
 //		}
 //
@@ -499,7 +500,7 @@ public abstract class BdvUtils
 //	{
 //		if ( source instanceof TransformedSource )
 //		{
-//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
+//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedRealSource();
 //
 //			if ( wrappedSource instanceof ARGBConvertedRealSource )
 //			{
@@ -521,7 +522,7 @@ public abstract class BdvUtils
 //	{
 //		if ( source instanceof TransformedSource )
 //		{
-//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
+//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedRealSource();
 //
 //			if ( wrappedSource instanceof ARGBConvertedRealSource )
 //			{
@@ -604,7 +605,7 @@ public abstract class BdvUtils
 
 		if ( source instanceof VolatileARGBConvertedRealSource )
 		{
-			access = ( ( VolatileARGBConvertedRealSource ) source).getWrappedSource( t, 0 ).randomAccess();
+			access = ( ( VolatileARGBConvertedRealSource ) source).getWrappedRealSource( t, 0 ).randomAccess();
 		}
 		else
 		{
@@ -828,28 +829,7 @@ public abstract class BdvUtils
 
 		return viewerTransform;
 	}
-
-//	public static Source getFirstVisibleLabelsSource( Bdv bdv )
-//	{
-//		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
-//
-//		Source labelsSource = null;
-//
-//		for ( int sourceIndex : visibleSourceIndices )
-//		{
-//			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
-//
-//			final Source source = sourceState.getSpimSource();
-//
-//			if ( isARGBConvertedRealSource( source ) )
-//			{
-//				labelsSource = source;
-//				break;
-//			}
-//		}
-//		return labelsSource;
-//	}
-
+	
 	public static ARGBType getColor( Bdv bdv, int sourceId )
 	{
 		return bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( sourceId ).getColor();
@@ -858,5 +838,26 @@ public abstract class BdvUtils
 	public static void repaint( Bdv bdv )
 	{
 		bdv.getBdvHandle().getViewerPanel().requestRepaint();
+	}
+
+	public static boolean isActive( Bdv bdv, Source source )
+	{
+		final List< SourceState< ? > > sources = bdv.getBdvHandle().getViewerPanel().getState().getSources();
+		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+
+		for( Integer i : visibleSourceIndices  )
+		{
+			final Source< ? > spimSource = sources.get( i ).getSpimSource();
+
+			if( spimSource instanceof TransformedSource )
+			{
+				if ( ( ( TransformedSource ) spimSource ).getWrappedSource().equals( source ) )
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

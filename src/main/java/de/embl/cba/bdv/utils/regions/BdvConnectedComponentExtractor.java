@@ -4,7 +4,7 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.algorithms.ConnectedComponentExtractor;
-import de.embl.cba.bdv.utils.converters.argb.ARGBConvertedRealTypeSpimDataSource;
+import de.embl.cba.bdv.utils.converters.ARGBConvertedRealTypeSpimDataSource;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.neighborhood.DiamondShape;

@@ -1,7 +1,7 @@
 import bdv.util.BdvFunctions;
 import bdv.viewer.Source;
-import de.embl.cba.bdv.utils.converters.argb.ARGBConvertedRealTypeSpimDataSource;
-import de.embl.cba.bdv.utils.converters.argb.ConfigurableVolatileRealVolatileARGBConverter;
+import de.embl.cba.bdv.utils.converters.ARGBConvertedRealTypeSpimDataSource;
+import de.embl.cba.bdv.utils.converters.ConfigurableVolatileRealVolatileARGBConverter;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
