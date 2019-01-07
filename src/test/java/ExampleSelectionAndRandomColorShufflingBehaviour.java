@@ -7,7 +7,6 @@ import de.embl.cba.bdv.utils.selection.BdvSelectionEventHandler;
 import de.embl.cba.bdv.utils.converters.RandomARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 
 public class ExampleSelectionAndRandomColorShufflingBehaviour
 {

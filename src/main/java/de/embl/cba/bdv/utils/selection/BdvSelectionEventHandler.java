@@ -3,8 +3,8 @@ package de.embl.cba.bdv.utils.selection;
 import bdv.util.Bdv;
 import de.embl.cba.bdv.utils.*;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.objects3d.ConnectedComponentExtractorAnd3DViewer;
 import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
-import net.imglib2.RealPoint;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -25,10 +25,12 @@ public class BdvSelectionEventHandler
 
 	private String selectTrigger = "ctrl button1";
 	private String selectNoneTrigger = "ctrl Q";
-	private String iterateSelectionMode = "ctrl S";
+	private String iterateSelectionModeTrigger = "ctrl S";
+	private String viewIn3DTrigger = "ctrl shift button1";
 
 	private CopyOnWriteArrayList< SelectionEventListener > selectionEventListeners;
 	private List< SelectableVolatileARGBConverter.SelectionMode > selectionModes;
+	private double resolution3DView;
 
 	/**
 	 * Selection of argbconversion (objects) in a label source.
@@ -43,8 +45,9 @@ public class BdvSelectionEventHandler
 		this.sourceName = source.getName();
 
 		this.selectionEventListeners = new CopyOnWriteArrayList<>(  );
+		this.selectionModes = Arrays.asList( SelectableVolatileARGBConverter.SelectionMode.values() );
 
-		selectionModes = Arrays.asList( SelectableVolatileARGBConverter.SelectionMode.values() );
+		this.resolution3DView = 0.5; // TODO: make configurable
 
 		installBdvBehaviours();
 	}
@@ -54,11 +57,6 @@ public class BdvSelectionEventHandler
 		return selectableConverter.getSelections();
 	}
 
-	public void selectNone()
-	{
-		selectableConverter.setSelections( null );
-		BdvUtils.repaint( bdv );
-	}
 
 	private void installBdvBehaviours()
 	{
@@ -67,10 +65,36 @@ public class BdvSelectionEventHandler
 
 		installSelectionBehaviour( );
 		installSelectNoneBehaviour( );
-		installSelectModeIterationBehaviour( );
+		installSelectionModeIterationBehaviour( );
+		if( is3D() ) install3DViewBehaviour();
+
 	}
 
-	private void installSelectModeIterationBehaviour( )
+	private boolean is3D()
+	{
+		return source.getWrappedRealSource( 0, 0 ).numDimensions() == 3;
+	}
+
+	private void install3DViewBehaviour( )
+	{
+		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		{
+			if ( BdvUtils.isActive( bdv, source ) )
+			{
+				viewIn3D();
+			}
+		}, sourceName + "-view-3d", viewIn3DTrigger );
+	}
+
+	private void viewIn3D()
+	{
+		new ConnectedComponentExtractorAnd3DViewer( source )
+				.extractAndShowIn3D(
+					BdvUtils.getGlobalMouseCoordinates( bdv ),
+					resolution3DView );
+	}
+
+	private void installSelectionModeIterationBehaviour( )
 	{
 		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
@@ -78,7 +102,23 @@ public class BdvSelectionEventHandler
 			{
 				iterateSelectionMode();
 			}
-		}, sourceName + "-iterate-selection", iterateSelectionMode );
+		}, sourceName + "-iterate-selection", iterateSelectionModeTrigger );
+	}
+
+	private void iterateSelectionMode()
+	{
+		final int selectionModeIndex = selectionModes.indexOf( selectableConverter.getSelectionMode() );
+
+		if ( selectionModeIndex < selectionModes.size() -1 )
+		{
+			selectableConverter.setSelectionMode( selectionModes.get( selectionModeIndex + 1 ) );
+		}
+		else
+		{
+			selectableConverter.setSelectionMode( selectionModes.get( 0 ) );
+		}
+
+		BdvUtils.repaint( bdv );
 	}
 
 	private void installSelectNoneBehaviour( )
@@ -90,6 +130,12 @@ public class BdvSelectionEventHandler
 				selectNone();
 			}
 		}, sourceName + "-select-none", selectNoneTrigger );
+	}
+
+	public void selectNone()
+	{
+		selectableConverter.setSelections( null );
+		BdvUtils.repaint( bdv );
 	}
 
 	private void installSelectionBehaviour()
@@ -105,11 +151,10 @@ public class BdvSelectionEventHandler
 
 	private void toggleSelectionAtMousePosition()
 	{
-		final RealPoint globalMouseCoordinates = BdvUtils.getGlobalMouseCoordinates( bdv );
 
 		final double selected = BdvUtils.getValueAtGlobalCoordinates(
 				source.getWrappedRealSource(),
-				globalMouseCoordinates,
+				BdvUtils.getGlobalMouseCoordinates( bdv ),
 				0 );
 
 		if ( selected == 0 ) return; // background
@@ -154,21 +199,6 @@ public class BdvSelectionEventHandler
 		return selectableConverter;
 	}
 
-	private void iterateSelectionMode()
-	{
-		final int selectionModeIndex = selectionModes.indexOf( selectableConverter.getSelectionMode() );
-
-		if ( selectionModeIndex < selectionModes.size() -1 )
-		{
-			selectableConverter.setSelectionMode( selectionModes.get( selectionModeIndex + 1 ) );
-		}
-		else
-		{
-			selectableConverter.setSelectionMode( selectionModes.get( 0 ) );
-		}
-
-		BdvUtils.repaint( bdv );
-	}
 
 }
 

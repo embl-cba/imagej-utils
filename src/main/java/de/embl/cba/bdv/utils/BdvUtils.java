@@ -1,6 +1,7 @@
 package de.embl.cba.bdv.utils;
 
 import bdv.tools.transformation.TransformedSource;
+import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import de.embl.cba.bdv.utils.transforms.Transforms;
@@ -859,5 +860,34 @@ public abstract class BdvUtils
 		}
 
 		return false;
+	}
+
+	public static < R extends RealType< R > & NativeType< R > >
+	RandomAccessibleInterval< R > getRAI( Source source, int t, int level )
+	{
+		if ( source instanceof TransformedSource )
+		{
+			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
+
+			if ( wrappedSource instanceof VolatileARGBConvertedRealSource )
+			{
+				return ( ( VolatileARGBConvertedRealSource ) wrappedSource ).getWrappedRealSource( t, level );
+			}
+		}
+		else if ( source instanceof SelectableVolatileARGBConvertedRealSource )
+		{
+			return ( ( SelectableVolatileARGBConvertedRealSource ) source ).getWrappedRealSource( t, level );
+		}
+		else if ( source.getType() instanceof RealType )
+		{
+			return source.getSource( t, level );
+		}
+		else
+		{
+			return null;
+		}
+
+		return null;
+
 	}
 }

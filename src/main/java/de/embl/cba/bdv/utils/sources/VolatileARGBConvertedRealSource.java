@@ -18,7 +18,7 @@ import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-public class VolatileARGBConvertedRealSource < R extends RealType< R > > implements Source< VolatileARGBType >
+public class VolatileARGBConvertedRealSource< R extends RealType< R > > implements Source< VolatileARGBType >
 {
     private final Source source;
     private Converter< RealType, VolatileARGBType > converter;

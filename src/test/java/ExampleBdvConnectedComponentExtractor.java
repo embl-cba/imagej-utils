@@ -2,7 +2,7 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.regions.BdvConnectedComponentExtractor;
+import de.embl.cba.bdv.utils.objects3d.ConnectedComponentExtractor;
 import de.embl.cba.bdv.utils.behaviour.BehaviourTransformEventHandler3DLeftMouseDrag;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -21,18 +21,18 @@ public class ExampleBdvConnectedComponentExtractor
 
 	public static void main( String[] args ) throws SpimDataException
 	{
-		final VolatileARGBConvertedRealSource labelsSource = ExampleARGBConvertedLabelsSource.getLabelsSource();
+		final VolatileARGBConvertedRealSource labelsSource = Examples.getSelectable3DSource();
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( labelsSource,
 						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DLeftMouseDrag.BehaviourTransformEventHandler3DFactory() ) );
 
-		final BdvConnectedComponentExtractor bdvConnectedComponentExtractor = new BdvConnectedComponentExtractor(
+		final ConnectedComponentExtractor ConnectedComponentExtractor = new ConnectedComponentExtractor(
 				bdvStackSource.getSources().get( 0 ).getSpimSource(),
 				new RealPoint( 35, 35, 8 ),
 				0 );
 
-		RandomAccessibleInterval connectedComponentMask = bdvConnectedComponentExtractor.getConnectedComponentMask( 0 );
+		RandomAccessibleInterval connectedComponentMask = ConnectedComponentExtractor.getConnectedComponentMask( 0 );
 
 		connectedComponentMask = changeToImageJDimensionConvention( connectedComponentMask );
 

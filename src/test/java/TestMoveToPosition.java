@@ -9,7 +9,7 @@ public class TestMoveToPosition
 {
 	public static void main( String[] args ) throws SpimDataException, InterruptedException
 	{
-		final VolatileARGBConvertedRealSource labelsSource = ExampleARGBConvertedLabelsSource.getLabelsSource();
+		final VolatileARGBConvertedRealSource labelsSource = Examples.getSelectable3DSource();
 
 		final Bdv bdv = BdvFunctions.show( labelsSource ).getBdvHandle();
 

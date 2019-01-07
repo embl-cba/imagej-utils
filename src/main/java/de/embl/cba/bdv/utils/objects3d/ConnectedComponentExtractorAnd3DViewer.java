@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.regions;
+package de.embl.cba.bdv.utils.objects3d;
 
 import bdv.viewer.Source;
 import ij.ImagePlus;
@@ -14,27 +14,27 @@ import org.scijava.vecmath.Color3f;
 
 import java.util.ArrayList;
 
-public class ConnectedComponents3DViewer
+public class ConnectedComponentExtractorAnd3DViewer
 {
 	final Source source;
 
 	private boolean isUniverseCreated;
 	private Image3DUniverse universe;
-	private ImagePlus objectMask;
+	private ImagePlus imagePlusObjectMask;
 	private double objectLabel;
 
-	public ConnectedComponents3DViewer( Source source )
+	public ConnectedComponentExtractorAnd3DViewer( Source source )
 	{
 		this.source = source;
 	}
 
-	public void extractAndShow( RealPoint seed, double resolution )
+	public void extractAndShowIn3D( RealPoint seed, double resolution )
 	{
 		createUniverse();
 
-		objectMask = extractObject( seed, resolution );
+		imagePlusObjectMask = extractObjectAsImagePlus( seed, resolution );
 
-		createMeshAndDisplay( objectMask );
+		createMeshAndDisplay( imagePlusObjectMask );
 	}
 
 	private void createMeshAndDisplay( ImagePlus objectMask )
@@ -63,33 +63,36 @@ public class ConnectedComponents3DViewer
 		})).start();
 	}
 
-	public ImagePlus extractObject( RealPoint coordinate, double resolution )
+	private ImagePlus extractObjectAsImagePlus( RealPoint coordinate, double resolution )
 	{
-		final BdvConnectedComponentExtractor cnnExtractor = new BdvConnectedComponentExtractor( source, coordinate, 0 );
+		final ConnectedComponentExtractor cnnExtractor =
+				new ConnectedComponentExtractor( source, coordinate, 0 );
 
 		final ArrayList< double[] > calibrations = cnnExtractor.getSourceCalibrations();
 
-		int level;
+		int level = getLevel( resolution, calibrations );
 
-		for ( level = 0; level < calibrations.size(); level++ )
-		{
-			if ( calibrations.get( level )[ 0 ] > resolution ) break;
-		}
-
-		// duplicate ImagePlus into RAM
 		final ImagePlus objectMask = asImagePlus(
 				cnnExtractor.getConnectedComponentMask( level ),
 				calibrations.get( level ) ).duplicate();
 
 		objectLabel = cnnExtractor.getSeedValue();
 
-		final long executionTimeMillis = cnnExtractor.getExecutionTimeMillis( );
-		System.out.println( "Extracted object at resolution [um] " + calibrations.get( level )[ 0 ]
-				+ " in " + executionTimeMillis + " ms" );
 		return objectMask;
 	}
 
-	public void createUniverse()
+	private int getLevel( double resolution, ArrayList< double[] > calibrations )
+	{
+		int level;
+
+		for ( level = 0; level < calibrations.size(); level++ )
+		{
+			if ( calibrations.get( level )[ 0 ] > resolution ) break;
+		}
+		return level;
+	}
+
+	private void createUniverse()
 	{
 		isUniverseCreated = false;
 
@@ -106,7 +109,7 @@ public class ConnectedComponents3DViewer
 		})).start();
 	}
 
-	public static ImagePlus asImagePlus( RandomAccessibleInterval< BitType > mask, double[] voxelSize )
+	private static ImagePlus asImagePlus( RandomAccessibleInterval< BitType > mask, double[] voxelSize )
 	{
 		RandomAccessibleInterval rai = Views.addDimension( mask, 0, 0 );
 		rai = Views.permute( rai, 2,3 );

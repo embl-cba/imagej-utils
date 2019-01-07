@@ -1,29 +1,18 @@
-package de.embl.cba.bdv.utils.algorithms;
+package de.embl.cba.bdv.utils.objects3d;
 
-import bdv.viewer.SourceAndConverter;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
 import net.imglib2.*;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
 import net.imglib2.algorithm.neighborhood.Shape;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
-import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.basictypeaccess.array.LongArray;
 import net.imglib2.type.logic.BitType;
-import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
-import net.imglib2.util.Pair;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
 import java.util.ArrayList;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
 
-public class ConnectedComponentExtractor< R extends RealType< R > >
+public class FloodFill< R extends RealType< R > >
 {
 	// input
 	private final RandomAccessibleInterval< R > source;
@@ -47,7 +36,9 @@ public class ConnectedComponentExtractor< R extends RealType< R > >
 	// output
 	private boolean maxRegionSizeReached;
 
-	public ConnectedComponentExtractor( RandomAccessibleInterval< R > source, Shape shape, long maxRegionSize )
+	public FloodFill( RandomAccessibleInterval< R > source,
+					  Shape shape,
+					  long maxRegionSize )
 	{
 		this.source = source;
 		this.shape = shape;

@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.algorithms;
+package de.embl.cba.bdv.utils.objects3d;
 
 import java.util.Arrays;
 import java.util.function.BooleanSupplier;
@@ -14,8 +14,6 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.SubsampleIntervalView;
 import net.imglib2.view.Views;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Copied from: https://github.com/saalfeldlab/paintera

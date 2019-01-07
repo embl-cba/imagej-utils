@@ -1,20 +1,19 @@
-package de.embl.cba.bdv.utils.regions;
+package de.embl.cba.bdv.utils.objects3d;
 
-import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.bdv.utils.algorithms.ConnectedComponentExtractor;
-import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.neighborhood.DiamondShape;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 
 import java.util.ArrayList;
 
+import static de.embl.cba.bdv.utils.BdvUtils.getRAI;
 
-public class BdvConnectedComponentExtractor < R extends RealType< R > >
+public class ConnectedComponentExtractor< R extends RealType< R > & NativeType< R > >
 {
 	private final Source source;
 	final RealPoint xyz;
@@ -27,7 +26,7 @@ public class BdvConnectedComponentExtractor < R extends RealType< R > >
 	private int numMipmapLevels;
 	private double seedValue;
 
-	public BdvConnectedComponentExtractor( Source source, RealPoint xyz, int t )
+	public ConnectedComponentExtractor( Source source, RealPoint xyz, int t )
 	{
 		this.source = source;
 		this.xyz = xyz;
@@ -55,47 +54,22 @@ public class BdvConnectedComponentExtractor < R extends RealType< R > >
 
 		final long[] positionInSourceStack = BdvUtils.getPositionInSource( source, xyz, t, level );
 
-		final RandomAccessibleInterval< R > rai = getRAI( t, level );
+		final RandomAccessibleInterval< R > rai = getRAI( source, t, level );
 
-		final ConnectedComponentExtractor connectedComponentExtractor =
-				new ConnectedComponentExtractor(
+		final FloodFill floodFill = new FloodFill(
 						rai,
 						new DiamondShape( 1 ),
 						1000 * 1000 * 1000L );
 
-		connectedComponentExtractor.run( positionInSourceStack );
+		floodFill.run( positionInSourceStack );
 
-		seedValue = connectedComponentExtractor.getSeedValue();
+		seedValue = floodFill.getSeedValue();
 
-		connectedComponentMask = connectedComponentExtractor.getCroppedRegionMask();
+		connectedComponentMask = floodFill.getCroppedRegionMask();
 
 		executionTimesMillis = System.currentTimeMillis() - currentTimeMillis;
 
 		return connectedComponentMask;
-	}
-
-	private RandomAccessibleInterval< R > getRAI( int t, int level )
-	{
-		if ( source instanceof TransformedSource )
-		{
-			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
-
-			if ( wrappedSource instanceof VolatileARGBConvertedRealSource )
-			{
-				return ( ( VolatileARGBConvertedRealSource ) wrappedSource ).getWrappedRealSource( t, level );
-			}
-		}
-		else if ( source.getType() instanceof RealType )
-		{
-			return source.getSource( t, level );
-		}
-		else
-		{
-			return null;
-		}
-
-		return null;
-
 	}
 
 	public ArrayList< double[] > getSourceCalibrations( )
