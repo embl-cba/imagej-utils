@@ -16,8 +16,11 @@
  */
 package de.embl.cba.bdv.utils.converters;
 
+import ij.ImagePlus;
 import net.imglib2.Volatile;
 import net.imglib2.converter.Converter;
+import net.imglib2.img.VirtualStackAdapter;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
@@ -54,6 +57,8 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 
 		this.brightnessNotSelected = 0.2;
 		this.selectionMode = SelectionMode.DimNotSelected;
+
+		VirtualStackAdapter.wrap( new ImagePlus(  ));
 	}
 
 

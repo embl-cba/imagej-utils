@@ -8,7 +8,7 @@ import net.imglib2.type.volatiles.VolatileARGBType;
 import java.util.ArrayList;
 import java.util.function.Function;
 
-public class CategoricalMappingRandomARGBConverter implements Converter< RealType, VolatileARGBType >
+public class CategoricalMappingARGBConverter implements Converter< RealType, VolatileARGBType >
 {
 	long seed;
 	final Function< Double, ? extends Object > labelToObjectFn;
@@ -16,12 +16,12 @@ public class CategoricalMappingRandomARGBConverter implements Converter< RealTyp
 	byte[][] lut;
 	final private ArrayList< Object > uniqueObjectsList;
 
-	public CategoricalMappingRandomARGBConverter( Function< Double, ? extends Object > labelToObjectFn )
+	public CategoricalMappingARGBConverter( Function< Double, ? extends Object > labelToObjectFn )
 	{
 		this( labelToObjectFn, Luts.GLASBEY );
 	}
 
-	public CategoricalMappingRandomARGBConverter( Function< Double, ? extends Object > labelToObjectFn, byte[][] lut )
+	public CategoricalMappingARGBConverter( Function< Double, ? extends Object > labelToObjectFn, byte[][] lut )
 	{
 		this.labelToObjectFn = labelToObjectFn;
 		this.lut = lut;

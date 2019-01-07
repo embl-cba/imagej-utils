@@ -17,17 +17,6 @@ public class ExampleARGBConverted2d16bitTiffImage
 	{
 		final RandomAccessibleIntervalSource raiSource = getRandomAccessibleIntervalSource();
 
-		/**
-		 * Show as gray-scale image
-		 */
-
-//		BdvFunctions.show( raiSource, BdvOptions.options().is2D() ).setDisplayRange( 0, 3 );
-
-
-		/**
-		 * Show as ARGB image
-		 */
-
 		final SelectableVolatileARGBConverter converter = new SelectableVolatileARGBConverter();
 
 		final VolatileARGBConvertedRealSource labelsSource = new VolatileARGBConvertedRealSource( raiSource, converter );

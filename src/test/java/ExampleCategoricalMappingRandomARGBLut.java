@@ -1,7 +1,7 @@
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.converters.CategoricalMappingRandomARGBConverter;
+import de.embl.cba.bdv.utils.converters.CategoricalMappingARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 import ij.IJ;
@@ -49,7 +49,7 @@ public class ExampleCategoricalMappingRandomARGBLut
 
 		final SelectableVolatileARGBConverter selectableVolatileARGBConverter =
 				new SelectableVolatileARGBConverter(
-						new CategoricalMappingRandomARGBConverter(
+						new CategoricalMappingARGBConverter(
 								d -> map.get( d ) ) );
 
 		final VolatileARGBConvertedRealSource labelsSource = new VolatileARGBConvertedRealSource( raiSource, selectableVolatileARGBConverter );

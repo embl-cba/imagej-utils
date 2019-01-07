@@ -829,7 +829,7 @@ public abstract class BdvUtils
 
 		return viewerTransform;
 	}
-	
+
 	public static ARGBType getColor( Bdv bdv, int sourceId )
 	{
 		return bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( sourceId ).getColor();

@@ -4,7 +4,7 @@ import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.algorithms.ConnectedComponentExtractor;
-import de.embl.cba.bdv.utils.converters.ARGBConvertedRealTypeSpimDataSource;
+import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.neighborhood.DiamondShape;
@@ -57,7 +57,11 @@ public class BdvConnectedComponentExtractor < R extends RealType< R > >
 
 		final RandomAccessibleInterval< R > rai = getRAI( t, level );
 
-		final ConnectedComponentExtractor connectedComponentExtractor = new ConnectedComponentExtractor( rai, new DiamondShape( 1 ), 1000 * 1000 * 1000L );
+		final ConnectedComponentExtractor connectedComponentExtractor =
+				new ConnectedComponentExtractor(
+						rai,
+						new DiamondShape( 1 ),
+						1000 * 1000 * 1000L );
 
 		connectedComponentExtractor.run( positionInSourceStack );
 
@@ -76,9 +80,9 @@ public class BdvConnectedComponentExtractor < R extends RealType< R > >
 		{
 			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
 
-			if ( wrappedSource instanceof ARGBConvertedRealTypeSpimDataSource )
+			if ( wrappedSource instanceof VolatileARGBConvertedRealSource )
 			{
-				return ( ( ARGBConvertedRealTypeSpimDataSource ) wrappedSource ).getWrappedRealTypeRandomAccessibleInterval( t, level );
+				return ( ( VolatileARGBConvertedRealSource ) wrappedSource ).getWrappedRealSource( t, level );
 			}
 		}
 		else if ( source.getType() instanceof RealType )

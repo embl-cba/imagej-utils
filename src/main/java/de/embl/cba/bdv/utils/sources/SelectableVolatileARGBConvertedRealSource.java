@@ -31,7 +31,14 @@ public class SelectableVolatileARGBConvertedRealSource extends VolatileARGBConve
         };
     }
 
-    public SelectableVolatileARGBConvertedRealSource( Source< RealType > source, SelectableVolatileARGBConverter selectableVolatileARGBConverter )
+    public SelectableVolatileARGBConvertedRealSource( Source< RealType > source )
+    {
+        super( source, new SelectableVolatileARGBConverter(  ) );
+    }
+
+    public SelectableVolatileARGBConvertedRealSource(
+            Source< RealType > source,
+            SelectableVolatileARGBConverter selectableVolatileARGBConverter )
     {
         super( source, selectableVolatileARGBConverter );
         this.selectableVolatileARGBConverter = selectableVolatileARGBConverter;
