@@ -65,7 +65,6 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 	@Override
 	public void convert( final RealType input, final VolatileARGBType output )
 	{
-
 		if ( input instanceof Volatile )
 		{
 			if ( ! ( ( Volatile ) input ).isValid() )

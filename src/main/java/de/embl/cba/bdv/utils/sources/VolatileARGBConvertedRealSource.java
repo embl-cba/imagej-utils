@@ -121,7 +121,7 @@ public class VolatileARGBConvertedRealSource< R extends RealType< R > > implemen
         return source.getSource( t, mipMapLevel );
     }
 
-    public Source< RealType > getWrappedRealSource( )
+    public Source< RealType > getWrappedRealSource()
     {
         return source;
     }

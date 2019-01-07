@@ -5,6 +5,7 @@ import de.embl.cba.bdv.utils.*;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import de.embl.cba.bdv.utils.objects3d.ConnectedComponentExtractorAnd3DViewer;
 import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
+import net.imglib2.type.numeric.real.DoubleType;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -47,16 +48,20 @@ public class BdvSelectionEventHandler
 		this.selectionEventListeners = new CopyOnWriteArrayList<>(  );
 		this.selectionModes = Arrays.asList( SelectableVolatileARGBConverter.SelectionMode.values() );
 
-		this.resolution3DView = 0.5; // TODO: make configurable
+		this.resolution3DView = 0.2;
 
 		installBdvBehaviours();
+	}
+
+	public void set3DObjectViewResolution( double resolution3DView )
+	{
+		this.resolution3DView = resolution3DView;
 	}
 
 	public Set< Double > getSelectedValues()
 	{
 		return selectableConverter.getSelections();
 	}
-
 
 	private void installBdvBehaviours()
 	{
@@ -88,10 +93,17 @@ public class BdvSelectionEventHandler
 
 	private void viewIn3D()
 	{
-		new ConnectedComponentExtractorAnd3DViewer( source )
-				.extractAndShowIn3D(
-					BdvUtils.getGlobalMouseCoordinates( bdv ),
-					resolution3DView );
+		new Thread( new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				new ConnectedComponentExtractorAnd3DViewer( source )
+						.extractAndShowIn3D(
+								BdvUtils.getGlobalMouseCoordinates( bdv ),
+								resolution3DView );
+			}
+		} ).start();
 	}
 
 	private void installSelectionModeIterationBehaviour( )
@@ -151,9 +163,8 @@ public class BdvSelectionEventHandler
 
 	private void toggleSelectionAtMousePosition()
 	{
-
 		final double selected = BdvUtils.getValueAtGlobalCoordinates(
-				source.getWrappedRealSource(),
+				source,
 				BdvUtils.getGlobalMouseCoordinates( bdv ),
 				0 );
 

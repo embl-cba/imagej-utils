@@ -1,5 +1,6 @@
 package de.embl.cba.bdv.utils;
 
+import bdv.VolatileSpimSource;
 import bdv.tools.transformation.TransformedSource;
 import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
@@ -568,7 +569,6 @@ public abstract class BdvUtils
 
 	public static < R extends RealType< R > > Map< Integer, Double > getPixelValuesOfActiveSources( Bdv bdv, RealPoint point, int t )
 	{
-
 		final HashMap< Integer, Double > sourceValueMap = new HashMap<>();
 
 		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
@@ -582,16 +582,14 @@ public abstract class BdvUtils
 			final double realDouble = getValueAtGlobalCoordinates( source, point, t );
 
 			sourceValueMap.put( sourceIndex, realDouble );
-
 		}
 
 		return sourceValueMap;
 	}
 
-
 	public static double getValueAtGlobalCoordinates( Source source, RealPoint point, int t  )
 	{
-		final RandomAccess< RealType > sourceAccess = getRealTypeRandomAccess( source, t );
+		final RandomAccess< RealType > sourceAccess = getRealTypeNonVolatileRandomAccess( source, t );
 
 		final long[] positionInSource = BdvUtils.getPositionInSource( source, point, t, 0 );
 
@@ -600,13 +598,22 @@ public abstract class BdvUtils
 		return sourceAccess.get().getRealDouble();
 	}
 
-	public static RandomAccess< RealType > getRealTypeRandomAccess( Source source, int t )
+	public static RandomAccess< RealType > getRealTypeNonVolatileRandomAccess( Source source, int t )
 	{
 		final RandomAccess< RealType > access;
 
-		if ( source instanceof VolatileARGBConvertedRealSource )
+		if ( source instanceof VolatileARGBConvertedRealSource  )
 		{
-			access = ( ( VolatileARGBConvertedRealSource ) source).getWrappedRealSource( t, 0 ).randomAccess();
+			final Source wrappedRealSource = ( ( VolatileARGBConvertedRealSource ) source ).getWrappedRealSource();
+
+			if ( wrappedRealSource instanceof VolatileSpimSource )
+			{
+				access = ( ( VolatileSpimSource ) wrappedRealSource ).nonVolatile().getSource( t, 0 ).randomAccess();
+			}
+			else
+			{
+				access = wrappedRealSource.getSource( t, 0 ).randomAccess();
+			}
 		}
 		else
 		{
