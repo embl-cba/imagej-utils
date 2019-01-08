@@ -49,6 +49,12 @@ public class CategoricalMappingARGBConverter implements Converter< RealType, Vol
 	{
 		Object object = labelToObjectFn.apply( realType.getRealDouble() );
 
+		if ( object == null )
+		{
+			volatileARGBType.set( 0 );
+			return;
+		}
+
 		if( ! uniqueObjectsList.contains( object ) )
 		{
 			uniqueObjectsList.add( object );

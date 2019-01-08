@@ -1,6 +1,7 @@
 package de.embl.cba.bdv.utils.converters;
 
 import de.embl.cba.bdv.utils.lut.Luts;
+import ij.IJ;
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -32,11 +33,20 @@ public class LinearMappingARGBConverter implements Converter< RealType, Volatile
 	@Override
 	public void convert( RealType realType, VolatileARGBType volatileARGBType )
 	{
-		final byte lutIndex = (byte) ( 255.0 * ( getMappedValue( realType ) - min ) / ( max - min ) );
+		final Double mappedValue = getMappedValue( realType );
+
+		if ( mappedValue == null )
+		{
+			volatileARGBType.set( 0 );
+			return;
+		}
+
+		final byte lutIndex = (byte) ( 255.0 * ( mappedValue - min ) / ( max - min ) );
+
 		volatileARGBType.set( Luts.getARGBIndex( lutIndex, lut ) );
 	}
 
-	public double getMappedValue( RealType realType )
+	public Double getMappedValue( RealType realType )
 	{
 		return mappingFunction.apply( realType.getRealDouble() );
 	}

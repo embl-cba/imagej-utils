@@ -26,6 +26,7 @@ public class SelectableVolatileARGBConvertedRealSource extends VolatileARGBConve
     public SelectableVolatileARGBConvertedRealSource( Source< RealType > source )
     {
         super( source, new SelectableVolatileARGBConverter(  ) );
+        this.selectableVolatileARGBConverter = ( SelectableVolatileARGBConverter ) super.getConverter();
     }
 
     public SelectableVolatileARGBConvertedRealSource(
@@ -36,12 +37,12 @@ public class SelectableVolatileARGBConvertedRealSource extends VolatileARGBConve
         this.selectableVolatileARGBConverter = selectableVolatileARGBConverter;
     }
 
-    public void setSelectableVolatileARGBConverter( SelectableVolatileARGBConverter selectableVolatileARGBConverter )
+    public void setSelectableConverter( SelectableVolatileARGBConverter selectableVolatileARGBConverter )
     {
         this.selectableVolatileARGBConverter = selectableVolatileARGBConverter;
     }
 
-    public SelectableVolatileARGBConverter getSelectableVolatileARGBConverter()
+    public SelectableVolatileARGBConverter getSelectableConverter()
     {
         return selectableVolatileARGBConverter;
     }

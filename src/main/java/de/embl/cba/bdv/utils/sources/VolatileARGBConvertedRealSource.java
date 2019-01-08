@@ -94,26 +94,14 @@ public class VolatileARGBConvertedRealSource< R extends RealType< R > > implemen
         return source.getNumMipmapLevels();
     }
 
-    public void setSelectableVolatileARGBConverter( Converter< RealType, VolatileARGBType > selectableVolatileARGBConverter )
+    public void setConverter( Converter< RealType, VolatileARGBType > volatileARGBConverter )
     {
-        this.converter = selectableVolatileARGBConverter;
+        this.converter = volatileARGBConverter;
     }
 
-    public Converter< RealType, VolatileARGBType > getSelectableVolatileARGBConverter()
+    public Converter< RealType, VolatileARGBType > getConverter()
     {
         return converter;
-    }
-
-    public SelectableVolatileARGBConverter getSelectableConverter()
-    {
-        if ( converter instanceof SelectableVolatileARGBConverter )
-        {
-            return (SelectableVolatileARGBConverter) converter;
-        }
-        else
-        {
-            return null;
-        }
     }
 
     public RandomAccessibleInterval< RealType > getWrappedRealSource( int t, int mipMapLevel )

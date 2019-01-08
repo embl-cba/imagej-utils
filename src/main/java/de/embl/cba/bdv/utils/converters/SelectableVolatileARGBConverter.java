@@ -103,12 +103,13 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 			}
 
 			setOutputColor( input, output);
+
 			output.setValid( true );
 
 		}
 	}
 
-	public void setOutputColor( final RealType input,
+	private void setOutputColor( final RealType input,
 								final VolatileARGBType output )
 	{
 		if ( selectedValues == null )
