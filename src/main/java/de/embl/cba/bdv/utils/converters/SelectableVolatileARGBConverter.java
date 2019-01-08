@@ -37,7 +37,7 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 	private SelectionMode selectionMode;
 	private ARGBType colorSelected;
 
-	public static enum SelectionMode
+	public enum SelectionMode
 	{
 		DimNotSelected,
 		OnlyShowSelected,
@@ -54,11 +54,7 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 	{
 		this.wrappedConverter = realARGBConverter;
 		this.selectedValues = null;
-
-		this.brightnessNotSelected = 0.2;
 		this.selectionMode = SelectionMode.DimNotSelected;
-
-		VirtualStackAdapter.wrap( new ImagePlus(  ));
 	}
 
 

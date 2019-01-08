@@ -7,6 +7,7 @@ import bdv.util.BdvStackSource;
 import bdv.util.BoundedValueDouble;
 import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.state.SourceState;
+import de.embl.cba.bdv.utils.converters.LinearARGBConverter;
 import ij.gui.GenericDialog;
 
 import javax.swing.*;
@@ -241,7 +242,6 @@ public abstract class BdvUserInterfaceUtils
 
 	public static void showBrightnessDialog( String name, ArrayList< ConverterSetup > converterSetups )
 	{
-
 		JFrame frame = new JFrame( name );
 
 		frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
@@ -259,6 +259,60 @@ public abstract class BdvUserInterfaceUtils
 
 		min.setUpdateListener( brightnessUpdateListener );
 		max.setUpdateListener( brightnessUpdateListener );
+
+		panel.add( minSlider );
+		panel.add( maxSlider );
+
+		frame.setContentPane( panel );
+
+		//Display the window.
+		frame.setBounds( MouseInfo.getPointerInfo().getLocation().x,
+				MouseInfo.getPointerInfo().getLocation().y,
+				120, 10);
+		frame.pack();
+		frame.setVisible( true );
+
+	}
+
+	public static void showBrightnessDialog(
+			Bdv bdv,
+			String name,
+			LinearARGBConverter linearARGBConverter )
+	{
+		JFrame frame = new JFrame( name );
+
+		frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+
+		final BoundedValueDouble min = new BoundedValueDouble(
+				linearARGBConverter.getMin(),
+				linearARGBConverter.getMax(),
+				linearARGBConverter.getMin() );
+
+		final BoundedValueDouble max = new BoundedValueDouble(
+				linearARGBConverter.getMin(),
+				linearARGBConverter.getMax(),
+				linearARGBConverter.getMax() );
+
+		JPanel panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.PAGE_AXIS ) );
+		final SliderPanelDouble minSlider = new SliderPanelDouble( "Min", min, 1 );
+		final SliderPanelDouble maxSlider = new SliderPanelDouble( "Max", max, 1 );
+
+		class UpdateListener implements BoundedValueDouble.UpdateListener
+		{
+			@Override
+			public void update()
+			{
+				linearARGBConverter.setMin( min.getCurrentValue() );
+				linearARGBConverter.setMax( max.getCurrentValue() );
+				BdvUtils.repaint( bdv );
+			}
+		}
+
+		final UpdateListener updateListener = new UpdateListener();
+
+		min.setUpdateListener( updateListener );
+		max.setUpdateListener( updateListener );
 
 		panel.add( minSlider );
 		panel.add( maxSlider );

@@ -20,7 +20,7 @@ public class ExampleLargeLabelsSource
 				"/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/em-segmented-cells-labels.xml" );
 
 		final LinearMappingARGBConverter linearMappingARGBConverter =
-				new LinearMappingARGBConverter( d -> d + 1, 0, 50, Luts.BLUE_WHITE_RED  );
+				new LinearMappingARGBConverter(0, 50, Luts.BLUE_WHITE_RED, d -> d );
 
 		final SelectableVolatileARGBConverter selectableVolatileARGBConverter =
 				new SelectableVolatileARGBConverter( linearMappingARGBConverter );

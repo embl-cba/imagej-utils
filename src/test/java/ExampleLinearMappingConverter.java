@@ -2,6 +2,8 @@ import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
+import de.embl.cba.bdv.utils.BdvUserInterfaceUtils;
+import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.converters.LinearMappingARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
@@ -17,16 +19,20 @@ public class ExampleLinearMappingConverter
 {
 	public static void main( String[] args )
 	{
-		final LinearMappingARGBConverter argbConverter =
-				new LinearMappingARGBConverter( d -> 10*d, 0, 50 );
+		final LinearMappingARGBConverter linearConverter =
+				new LinearMappingARGBConverter( 0, 4, d -> d );
 
-		final SelectableVolatileARGBConverter selectableVolatileARGBConverter = new SelectableVolatileARGBConverter( argbConverter );
+		final SelectableVolatileARGBConverter selectableVolatileARGBConverter =
+				new SelectableVolatileARGBConverter( linearConverter );
 
 		final RandomAccessibleIntervalSource source = getRandomAccessibleIntervalSource();
 
-		final VolatileARGBConvertedRealSource argbSource = new VolatileARGBConvertedRealSource( source, selectableVolatileARGBConverter );
+		final VolatileARGBConvertedRealSource argbSource =
+				new VolatileARGBConvertedRealSource( source, selectableVolatileARGBConverter );
 
 		Bdv bdv = BdvFunctions.show( argbSource, BdvOptions.options().is2D() ).getBdvHandle();
+
+		BdvUserInterfaceUtils.showBrightnessDialog( bdv,"test", linearConverter );
 	}
 
 	public static RandomAccessibleIntervalSource getRandomAccessibleIntervalSource()

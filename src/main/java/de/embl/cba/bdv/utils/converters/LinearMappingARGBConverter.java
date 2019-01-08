@@ -9,61 +9,39 @@ import net.imglib2.type.volatiles.VolatileARGBType;
 
 import java.util.function.Function;
 
-public class LinearMappingARGBConverter implements Converter< RealType, VolatileARGBType >
+public class LinearMappingARGBConverter extends LinearARGBConverter
 {
 	final Function< Double, Double > mappingFunction;
 
-	double min, max;
-
-	byte[][] lut;
-
-	public LinearMappingARGBConverter( Function< Double, Double > mappingFunction, double min, double max )
+	public LinearMappingARGBConverter( double min, double max, Function< Double, Double > mappingFunction )
 	{
-		this( mappingFunction, min, max, Luts.GRAYSCALE );
+		this( min, max, Luts.GRAYSCALE, mappingFunction );
 	}
 
-	public LinearMappingARGBConverter( Function< Double, Double > mappingFunction, double min, double max, byte[][] lut )
+	public LinearMappingARGBConverter(
+			double min,
+			double max,
+			byte[][] lut,
+			Function< Double, Double > mappingFunction )
 	{
+		super( min, max, lut );
 		this.mappingFunction = mappingFunction;
-		this.min = min;
-		this.max = max;
-		this.lut = lut;
 	}
 
 	@Override
 	public void convert( RealType realType, VolatileARGBType volatileARGBType )
 	{
-		final Double mappedValue = getMappedValue( realType );
+		final Double mappedValue = mappingFunction.apply( realType.getRealDouble() );
 
 		if ( mappedValue == null )
 		{
 			volatileARGBType.set( 0 );
 			return;
 		}
-
-		final byte lutIndex = (byte) ( 255.0 * ( mappedValue - min ) / ( max - min ) );
+		
+		final byte lutIndex = (byte) ( 255.0 * Math.max( Math.min( ( mappedValue - min ) / ( max - min ), 1.0 ), 0.0 ) );
 
 		volatileARGBType.set( Luts.getARGBIndex( lutIndex, lut ) );
-	}
-
-	public Double getMappedValue( RealType realType )
-	{
-		return mappingFunction.apply( realType.getRealDouble() );
-	}
-
-	public void setMin( double min )
-	{
-		this.min = min;
-	}
-
-	public void setMax( double max )
-	{
-		this.max = max;
-	}
-
-	public void setLut( byte[][] lut )
-	{
-		this.lut = lut;
 	}
 
 }
