@@ -3,8 +3,7 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
 import de.embl.cba.bdv.utils.BdvUserInterfaceUtils;
-import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.bdv.utils.converters.LinearMappingARGBConverter;
+import de.embl.cba.bdv.utils.converters.MappingLinearARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
 import ij.IJ;
@@ -19,8 +18,8 @@ public class ExampleLinearMappingConverter
 {
 	public static void main( String[] args )
 	{
-		final LinearMappingARGBConverter linearConverter =
-				new LinearMappingARGBConverter( 0, 4, d -> d );
+		final MappingLinearARGBConverter linearConverter =
+				new MappingLinearARGBConverter( 0, 4, d -> d );
 
 		final SelectableVolatileARGBConverter selectableVolatileARGBConverter =
 				new SelectableVolatileARGBConverter( linearConverter );
