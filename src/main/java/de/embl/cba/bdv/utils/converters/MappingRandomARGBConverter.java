@@ -2,7 +2,6 @@ package de.embl.cba.bdv.utils.converters;
 
 import de.embl.cba.bdv.utils.lut.ARGBConverterUtils;
 import de.embl.cba.bdv.utils.lut.Luts;
-import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
@@ -11,25 +10,25 @@ import java.util.function.Function;
 
 public class MappingRandomARGBConverter extends RandomARGBConverter
 {
-	final Function< Double, ? extends Object > labelToObjectFn;
+	final Function< Double, ? extends Object > mappingFn;
 	final private ArrayList< Object > uniqueObjectsList;
 
-	public MappingRandomARGBConverter( Function< Double, ? extends Object > labelToObjectFn )
+	public MappingRandomARGBConverter( Function< Double, ? extends Object > mappingFn )
 	{
-		this( labelToObjectFn, Luts.GLASBEY );
+		this( mappingFn, Luts.GLASBEY );
 	}
 
-	public MappingRandomARGBConverter( Function< Double, ? extends Object > labelToObjectFn, byte[][] lut )
+	public MappingRandomARGBConverter( Function< Double, ? extends Object > mappingFn, byte[][] lut )
 	{
 		super( lut );
-		this.labelToObjectFn = labelToObjectFn;
+		this.mappingFn = mappingFn;
 		this.uniqueObjectsList = new ArrayList<>(  );
 	}
 
 	@Override
 	public void convert( RealType realType, VolatileARGBType volatileARGBType )
 	{
-		Object object = labelToObjectFn.apply( realType.getRealDouble() );
+		Object object = mappingFn.apply( realType.getRealDouble() );
 
 		if ( object == null )
 		{
@@ -44,9 +43,14 @@ public class MappingRandomARGBConverter extends RandomARGBConverter
 
 //		final double numberBetweenZeroAndOneExcludingZero = ( uniqueObjectsList.indexOf( object ) + 1.0 ) / uniqueObjectsList.size();
 
-		final double random = ARGBConverterUtils.getRandomNumberBetweenZeroAndOne( uniqueObjectsList.indexOf( object ), seed );
+		final double random = ARGBConverterUtils.getRandomNumberBetweenZeroAndOne( uniqueObjectsList.indexOf( object ) + 1, seed );
 		final byte lutIndex = (byte) ( 255.0 * random );
 		volatileARGBType.set( Luts.getARGBIndex( lutIndex, lut ) );
+	}
+
+	public Function< Double, ? extends Object > getMappingFn()
+	{
+		return mappingFn;
 	}
 
 }

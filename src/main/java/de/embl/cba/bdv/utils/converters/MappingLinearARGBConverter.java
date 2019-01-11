@@ -8,27 +8,27 @@ import java.util.function.Function;
 
 public class MappingLinearARGBConverter extends LinearARGBConverter
 {
-	final Function< Double, Double > mappingFunction;
+	final Function< Double, Double > mappingFn;
 
-	public MappingLinearARGBConverter( double min, double max, Function< Double, Double > mappingFunction )
+	public MappingLinearARGBConverter( double min, double max, Function< Double, Double > mappingFn )
 	{
-		this( min, max, Luts.GRAYSCALE, mappingFunction );
+		this( min, max, Luts.GRAYSCALE, mappingFn );
 	}
 
 	public MappingLinearARGBConverter(
 			double min,
 			double max,
 			byte[][] lut,
-			Function< Double, Double > mappingFunction )
+			Function< Double, Double > mappingFn )
 	{
 		super( min, max, lut );
-		this.mappingFunction = mappingFunction;
+		this.mappingFn = mappingFn;
 	}
 
 	@Override
 	public void convert( RealType realType, VolatileARGBType volatileARGBType )
 	{
-		final Double mappedValue = mappingFunction.apply( realType.getRealDouble() );
+		final Double mappedValue = mappingFn.apply( realType.getRealDouble() );
 
 		if ( mappedValue == null )
 		{
@@ -39,6 +39,11 @@ public class MappingLinearARGBConverter extends LinearARGBConverter
 		final byte lutIndex = (byte) ( 255.0 * Math.max( Math.min( ( mappedValue - min ) / ( max - min ), 1.0 ), 0.0 ) );
 
 		volatileARGBType.set( Luts.getARGBIndex( lutIndex, lut ) );
+	}
+
+	public Function< Double, Double > getMappingFn()
+	{
+		return mappingFn;
 	}
 
 }

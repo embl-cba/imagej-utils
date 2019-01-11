@@ -180,8 +180,9 @@ public class BdvSelectionEventHandler
 		else
 		{
 			selectableConverter.removeSelection( selected );
-			BdvUtils.repaint( bdv );
 		}
+
+		requestRepaint();
 	}
 
 	private boolean isNewSelection( double selected )
@@ -192,7 +193,6 @@ public class BdvSelectionEventHandler
 	public void addSelection( double selected )
 	{
 		selectableConverter.addSelection( selected );
-		BdvUtils.repaint( bdv );
 	}
 
 	public void addSelectionEventListener( SelectionEventListener s )
@@ -210,6 +210,10 @@ public class BdvSelectionEventHandler
 		return selectableConverter;
 	}
 
+	public void requestRepaint()
+	{
+		BdvUtils.repaint( bdv );
+	}
 
 }
 
