@@ -1,7 +1,7 @@
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import mpicbg.spim.data.SpimDataException;
 import net.imglib2.realtransform.AffineTransform3D;
 
@@ -9,7 +9,7 @@ public class TestMoveToPosition
 {
 	public static void main( String[] args ) throws SpimDataException, InterruptedException
 	{
-		final VolatileARGBConvertedRealSource labelsSource = Examples.getSelectable3DSource();
+		final ARGBConvertedRealSource labelsSource = Examples.getSelectable3DSource();
 
 		final Bdv bdv = BdvFunctions.show( labelsSource ).getBdvHandle();
 

@@ -3,7 +3,7 @@ import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
 import de.embl.cba.bdv.utils.converters.MappingRandomARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
-import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
@@ -52,7 +52,7 @@ public class ExampleCategoricalMappingRandomARGBLut
 						new MappingRandomARGBConverter(
 								d -> map.get( d ) ) );
 
-		final VolatileARGBConvertedRealSource labelsSource = new VolatileARGBConvertedRealSource( raiSource, selectableVolatileARGBConverter );
+		final ARGBConvertedRealSource labelsSource = new ARGBConvertedRealSource( raiSource, selectableVolatileARGBConverter );
 
 		BdvFunctions.show( labelsSource, BdvOptions.options().is2D() );
 

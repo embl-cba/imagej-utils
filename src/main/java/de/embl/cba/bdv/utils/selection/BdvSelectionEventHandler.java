@@ -2,10 +2,11 @@ package de.embl.cba.bdv.utils.selection;
 
 import bdv.util.Bdv;
 import de.embl.cba.bdv.utils.*;
+import de.embl.cba.bdv.utils.behaviour.BehaviourRandomColorShufflingEventHandler;
+import de.embl.cba.bdv.utils.converters.RandomARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import de.embl.cba.bdv.utils.objects3d.ConnectedComponentExtractorAnd3DViewer;
-import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
-import net.imglib2.type.numeric.real.DoubleType;
+import de.embl.cba.bdv.utils.sources.SelectableARGBConvertedRealSource;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -18,11 +19,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class BdvSelectionEventHandler
 {
 	final Bdv bdv;
-	final SelectableVolatileARGBConvertedRealSource source;
+	final SelectableARGBConvertedRealSource source;
 	final SelectableVolatileARGBConverter selectableConverter;
 	final String sourceName;
 
-	Behaviours bdvBehaviours;
+	Behaviours behaviours;
 
 	private String selectTrigger = "ctrl button1";
 	private String selectNoneTrigger = "ctrl Q";
@@ -38,7 +39,7 @@ public class BdvSelectionEventHandler
 	 * @param bdv Bdv window in which the source is shown.
 	 */
 	public BdvSelectionEventHandler( Bdv bdv,
-									 SelectableVolatileARGBConvertedRealSource selectableSource )
+									 SelectableARGBConvertedRealSource selectableSource )
 	{
 		this.bdv = bdv;
 		this.source = selectableSource;
@@ -65,14 +66,27 @@ public class BdvSelectionEventHandler
 
 	private void installBdvBehaviours()
 	{
-		bdvBehaviours = new Behaviours( new InputTriggerConfig() );
-		bdvBehaviours.install( bdv.getBdvHandle().getTriggerbindings(),  sourceName + "-bdv-selection-handler" );
+		behaviours = new Behaviours( new InputTriggerConfig() );
+		behaviours.install( bdv.getBdvHandle().getTriggerbindings(),  sourceName + "-bdv-selection-handler" );
 
 		installSelectionBehaviour( );
 		installSelectNoneBehaviour( );
 		installSelectionModeIterationBehaviour( );
+		installRandomColorShufflingBehaviour();
+
 		if( is3D() ) install3DViewBehaviour();
 
+	}
+
+	private void installRandomColorShufflingBehaviour()
+	{
+		if ( selectableConverter.getWrappedConverter() instanceof RandomARGBConverter )
+		{
+			new BehaviourRandomColorShufflingEventHandler(
+					bdv,
+					( RandomARGBConverter ) selectableConverter.getWrappedConverter(),
+					sourceName );
+		}
 	}
 
 	private boolean is3D()
@@ -82,7 +96,7 @@ public class BdvSelectionEventHandler
 
 	private void install3DViewBehaviour( )
 	{
-		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
 			if ( BdvUtils.isActive( bdv, source ) )
 			{
@@ -108,7 +122,7 @@ public class BdvSelectionEventHandler
 
 	private void installSelectionModeIterationBehaviour( )
 	{
-		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
 			if ( BdvUtils.isActive( bdv, source ) )
 			{
@@ -135,7 +149,7 @@ public class BdvSelectionEventHandler
 
 	private void installSelectNoneBehaviour( )
 	{
-		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
 			if ( BdvUtils.isActive( bdv, source ) )
 			{
@@ -152,7 +166,7 @@ public class BdvSelectionEventHandler
 
 	private void installSelectionBehaviour()
 	{
-		bdvBehaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
 			if ( BdvUtils.isActive( bdv, source ) )
 			{
@@ -214,6 +228,7 @@ public class BdvSelectionEventHandler
 	{
 		BdvUtils.repaint( bdv );
 	}
+
 
 }
 

@@ -36,7 +36,7 @@ public class MappingLinearARGBConverter extends LinearARGBConverter
 			return;
 		}
 
-		final byte lutIndex = (byte) ( 255.0 * Math.max( Math.min( ( mappedValue - min ) / ( max - min ), 1.0 ), 0.0 ) );
+		final byte lutIndex = computeLutIndex( mappedValue );
 
 		volatileARGBType.set( Luts.getARGBIndex( lutIndex, lut ) );
 	}

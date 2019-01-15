@@ -5,7 +5,7 @@ import bdv.util.BdvOptions;
 import de.embl.cba.bdv.utils.converters.MappingLinearARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import de.embl.cba.bdv.utils.lut.Luts;
-import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.SelectableARGBConvertedRealSource;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
@@ -25,8 +25,8 @@ public class ExampleLargeLabelsSource
 
 		final VolatileSpimSource volatileSpimSource = new VolatileSpimSource( labels, 0, "name" );
 
-		final SelectableVolatileARGBConvertedRealSource convertedSource =
-				new SelectableVolatileARGBConvertedRealSource(
+		final SelectableARGBConvertedRealSource convertedSource =
+				new SelectableARGBConvertedRealSource(
 						volatileSpimSource,
 						selectableVolatileARGBConverter );
 

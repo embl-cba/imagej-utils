@@ -1,13 +1,9 @@
 package de.embl.cba.bdv.utils.converters;
 
-import bdv.util.BoundedValueDouble;
-import bdv.viewer.RequestRepaint;
 import de.embl.cba.bdv.utils.lut.Luts;
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
-
-import java.util.Map;
 
 public class LinearARGBConverter implements Converter< RealType, VolatileARGBType >
 {
@@ -30,7 +26,7 @@ public class LinearARGBConverter implements Converter< RealType, VolatileARGBTyp
 	@Override
 	public void convert( RealType realType, VolatileARGBType volatileARGBType )
 	{
-		final byte lutIndex = (byte) ( 255.0 * ( realType.getRealDouble() - min ) / ( max - min ) );
+		final byte lutIndex = computeLutIndex( realType.getRealDouble() );
 
 		volatileARGBType.set( Luts.getARGBIndex( lutIndex, lut ) );
 	}
@@ -58,6 +54,11 @@ public class LinearARGBConverter implements Converter< RealType, VolatileARGBTyp
 	public void setLut( byte[][] lut )
 	{
 		this.lut = lut;
+	}
+
+	public byte computeLutIndex( final Double value )
+	{
+		return (byte) ( 255.0 * Math.max( Math.min( ( value - min ) / ( max - min ), 1.0 ), 0.0 ) );
 	}
 
 }

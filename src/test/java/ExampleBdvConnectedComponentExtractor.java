@@ -1,7 +1,7 @@
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
-import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.objects3d.ConnectedComponentExtractor;
 import de.embl.cba.bdv.utils.behaviour.BehaviourTransformEventHandler3DLeftMouseDrag;
 import ij.ImageJ;
@@ -21,7 +21,7 @@ public class ExampleBdvConnectedComponentExtractor
 
 	public static void main( String[] args ) throws SpimDataException
 	{
-		final VolatileARGBConvertedRealSource labelsSource = Examples.getSelectable3DSource();
+		final ARGBConvertedRealSource labelsSource = Examples.getSelectable3DSource();
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
 				BdvFunctions.show( labelsSource,

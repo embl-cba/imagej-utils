@@ -10,7 +10,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
-public class SelectableVolatileARGBConvertedRealSource extends VolatileARGBConvertedRealSource
+public class SelectableARGBConvertedRealSource < R extends RealType< R > >  extends ARGBConvertedRealSource
 {
     private SelectableVolatileARGBConverter selectableVolatileARGBConverter;
     final private InterpolatorFactory< VolatileARGBType, RandomAccessible< VolatileARGBType > >[] interpolatorFactories;
@@ -23,14 +23,14 @@ public class SelectableVolatileARGBConvertedRealSource extends VolatileARGBConve
         };
     }
 
-    public SelectableVolatileARGBConvertedRealSource( Source< RealType > source )
+    public SelectableARGBConvertedRealSource( Source< R > source )
     {
         super( source, new SelectableVolatileARGBConverter(  ) );
         this.selectableVolatileARGBConverter = ( SelectableVolatileARGBConverter ) super.getConverter();
     }
 
-    public SelectableVolatileARGBConvertedRealSource(
-            Source< RealType > source,
+    public SelectableARGBConvertedRealSource(
+            Source< R > source,
             SelectableVolatileARGBConverter selectableVolatileARGBConverter )
     {
         super( source, selectableVolatileARGBConverter );

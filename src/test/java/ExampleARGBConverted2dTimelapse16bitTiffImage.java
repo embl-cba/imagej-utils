@@ -26,7 +26,6 @@ public class ExampleARGBConverted2dTimelapse16bitTiffImage
 						Util.getTypeFromInterval( wrap ),
 						imagePlus.getTitle() );
 
-
 		final boolean present = raiSource.isPresent( 0 );
 		final boolean present1 = raiSource.isPresent( 1 );
 		final boolean present2 = raiSource.isPresent( 2 );

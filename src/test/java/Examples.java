@@ -1,12 +1,12 @@
 import bdv.VolatileSpimSource;
-import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.SelectableARGBConvertedRealSource;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 
 public class Examples
 {
-	public static SelectableVolatileARGBConvertedRealSource getSelectable3DSource() throws SpimDataException
+	public static SelectableARGBConvertedRealSource getSelectable3DSource() throws SpimDataException
 	{
 		final String labelsSourcePath = ExampleARGBConvertedLabelsSource.class.getResource( "labels.xml" ).getFile();
 
@@ -14,6 +14,6 @@ public class Examples
 
 		final VolatileSpimSource volatileSpimSource = new VolatileSpimSource( spimData, 0, "name" );
 
-		return new SelectableVolatileARGBConvertedRealSource( volatileSpimSource );
+		return new SelectableARGBConvertedRealSource( volatileSpimSource );
 	}
 }

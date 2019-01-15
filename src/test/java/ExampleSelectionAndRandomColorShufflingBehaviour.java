@@ -6,7 +6,7 @@ import de.embl.cba.bdv.utils.behaviour.BehaviourRandomColorShufflingEventHandler
 import de.embl.cba.bdv.utils.selection.BdvSelectionEventHandler;
 import de.embl.cba.bdv.utils.converters.RandomARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
-import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.SelectableARGBConvertedRealSource;
 
 public class ExampleSelectionAndRandomColorShufflingBehaviour
 {
@@ -18,7 +18,7 @@ public class ExampleSelectionAndRandomColorShufflingBehaviour
 
 		final SelectableVolatileARGBConverter selectableConverter = new SelectableVolatileARGBConverter( randomARGBConverter );
 
-		final SelectableVolatileARGBConvertedRealSource selectableSource = new SelectableVolatileARGBConvertedRealSource( raiSource, selectableConverter );
+		final SelectableARGBConvertedRealSource selectableSource = new SelectableARGBConvertedRealSource( raiSource, selectableConverter );
 
 		Bdv bdv = BdvFunctions.show( selectableSource, BdvOptions.options().is2D() ).getBdvHandle();
 

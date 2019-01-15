@@ -3,7 +3,7 @@ import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
 import de.embl.cba.bdv.utils.converters.LinearARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
-import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.lut.Luts;
 import net.imglib2.img.array.ArrayCursor;
 import net.imglib2.img.array.ArrayImg;
@@ -29,7 +29,7 @@ public class ExampleBlueWhiteRedLut
 
 		final SelectableVolatileARGBConverter converter = new SelectableVolatileARGBConverter( new LinearARGBConverter( 0, 255,  Luts.BLUE_WHITE_RED ) );
 
-		final VolatileARGBConvertedRealSource convertedRealSource = new VolatileARGBConvertedRealSource( source, converter );
+		final ARGBConvertedRealSource convertedRealSource = new ARGBConvertedRealSource( source, converter );
 
 		BdvFunctions.show( convertedRealSource, BdvOptions.options().is2D() );
 	}

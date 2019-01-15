@@ -1,6 +1,5 @@
 package de.embl.cba.bdv.utils.converters;
 
-import de.embl.cba.bdv.utils.lut.ARGBConverterUtils;
 import de.embl.cba.bdv.utils.lut.Luts;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
@@ -36,14 +35,10 @@ public class MappingRandomARGBConverter extends RandomARGBConverter
 			return;
 		}
 
-		if( ! uniqueObjectsList.contains( object ) )
-		{
-			uniqueObjectsList.add( object );
-		}
+		if( ! uniqueObjectsList.contains( object ) ) uniqueObjectsList.add( object );
 
-//		final double numberBetweenZeroAndOneExcludingZero = ( uniqueObjectsList.indexOf( object ) + 1.0 ) / uniqueObjectsList.size();
 
-		final double random = ARGBConverterUtils.getRandomNumberBetweenZeroAndOne( uniqueObjectsList.indexOf( object ) + 1, seed );
+		final double random = createRandom( uniqueObjectsList.indexOf( object ) + 1 );
 		final byte lutIndex = (byte) ( 255.0 * random );
 		volatileARGBType.set( Luts.getARGBIndex( lutIndex, lut ) );
 	}

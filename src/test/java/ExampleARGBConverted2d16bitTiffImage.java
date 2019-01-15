@@ -1,7 +1,7 @@
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import ij.IJ;
 import ij.ImagePlus;
@@ -19,7 +19,7 @@ public class ExampleARGBConverted2d16bitTiffImage
 
 		final SelectableVolatileARGBConverter converter = new SelectableVolatileARGBConverter();
 
-		final VolatileARGBConvertedRealSource labelsSource = new VolatileARGBConvertedRealSource( raiSource, converter );
+		final ARGBConvertedRealSource labelsSource = new ARGBConvertedRealSource( raiSource, converter );
 
 		BdvFunctions.show( labelsSource, BdvOptions.options().is2D() );
 	}

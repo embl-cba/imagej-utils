@@ -2,8 +2,8 @@ package de.embl.cba.bdv.utils;
 
 import bdv.VolatileSpimSource;
 import bdv.tools.transformation.TransformedSource;
-import de.embl.cba.bdv.utils.sources.SelectableVolatileARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.sources.VolatileARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.SelectableARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 import de.embl.cba.bdv.utils.transforms.Transforms;
 
@@ -25,6 +25,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.LinAlgHelpers;
+import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 import java.awt.*;
@@ -602,9 +603,9 @@ public abstract class BdvUtils
 	{
 		final RandomAccess< RealType > access;
 
-		if ( source instanceof VolatileARGBConvertedRealSource  )
+		if ( source instanceof ARGBConvertedRealSource )
 		{
-			final Source wrappedRealSource = ( ( VolatileARGBConvertedRealSource ) source ).getWrappedRealSource();
+			final Source wrappedRealSource = ( ( ARGBConvertedRealSource ) source ).getWrappedRealSource();
 
 			if ( wrappedRealSource instanceof VolatileSpimSource )
 			{
@@ -876,14 +877,14 @@ public abstract class BdvUtils
 		{
 			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
 
-			if ( wrappedSource instanceof VolatileARGBConvertedRealSource )
+			if ( wrappedSource instanceof ARGBConvertedRealSource )
 			{
-				return ( ( VolatileARGBConvertedRealSource ) wrappedSource ).getWrappedRealSource( t, level );
+				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedRealSource( t, level );
 			}
 		}
-		else if ( source instanceof SelectableVolatileARGBConvertedRealSource )
+		else if ( source instanceof SelectableARGBConvertedRealSource )
 		{
-			return ( ( SelectableVolatileARGBConvertedRealSource ) source ).getWrappedRealSource( t, level );
+			return ( ( SelectableARGBConvertedRealSource ) source ).getWrappedRealSource( t, level );
 		}
 		else if ( source.getType() instanceof RealType )
 		{
@@ -897,4 +898,22 @@ public abstract class BdvUtils
 		return null;
 
 	}
+
+	public static  < R extends RealType< R > & NativeType< R > >
+	RandomAccessibleIntervalSource4D< R > createSourceFrom2DFrameList(
+			ArrayList< RandomAccessibleInterval< R > > frames2D,
+			String name )
+	{
+		RandomAccessibleIntervalSource4D< R > source =
+				new RandomAccessibleIntervalSource4D(
+						Views.permute(
+								Views.addDimension(
+										Views.stack( frames2D ), 0, 0 ),
+								2, 3 ),
+						Util.getTypeFromInterval( Views.stack( frames2D ) ),
+						name );
+
+		return source;
+	}
+
 }
