@@ -24,8 +24,7 @@ public class Wraps
 
 		for ( int c = 0; c < imagePlus.getNChannels(); c++ )
 		{
-			RandomAccessibleInterval< R > channel = Views.dropSingletonDimensions(
-					Views.hyperSlice( wrap, 2, c ) );
+			RandomAccessibleInterval< R > channel = Views.hyperSlice( wrap, 2, c );
 
 			final RandomAccessibleIntervalSource4D source4D = new RandomAccessibleIntervalSource4D(
 					channel,

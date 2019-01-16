@@ -2,7 +2,7 @@ package de.embl.cba.bdv.utils.selection;
 
 import bdv.util.Bdv;
 import de.embl.cba.bdv.utils.*;
-import de.embl.cba.bdv.utils.behaviour.BehaviourRandomColorShufflingEventHandler;
+import de.embl.cba.bdv.utils.behaviour.BehaviourRandomColorLutSeedChangeEventHandler;
 import de.embl.cba.bdv.utils.converters.RandomARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import de.embl.cba.bdv.utils.objects3d.ConnectedComponentExtractorAnd3DViewer;
@@ -13,6 +13,7 @@ import org.scijava.ui.behaviour.util.Behaviours;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -33,6 +34,7 @@ public class BdvSelectionEventHandler
 	private CopyOnWriteArrayList< SelectionEventListener > selectionEventListeners;
 	private List< SelectableVolatileARGBConverter.SelectionMode > selectionModes;
 	private double resolution3DView;
+	private static final int BACKGROUND = 0;
 
 	/**
 	 * Selection of argbconversion (objects) in a label source.
@@ -59,11 +61,6 @@ public class BdvSelectionEventHandler
 		this.resolution3DView = resolution3DView;
 	}
 
-	public Set< Double > getSelectedValues()
-	{
-		return selectableConverter.getSelections();
-	}
-
 	private void installBdvBehaviours()
 	{
 		behaviours = new Behaviours( new InputTriggerConfig() );
@@ -75,14 +72,13 @@ public class BdvSelectionEventHandler
 		installRandomColorShufflingBehaviour();
 
 		if( is3D() ) install3DViewBehaviour();
-
 	}
 
 	private void installRandomColorShufflingBehaviour()
 	{
 		if ( selectableConverter.getWrappedConverter() instanceof RandomARGBConverter )
 		{
-			new BehaviourRandomColorShufflingEventHandler(
+			new BehaviourRandomColorLutSeedChangeEventHandler(
 					bdv,
 					( RandomARGBConverter ) selectableConverter.getWrappedConverter(),
 					sourceName );
@@ -160,7 +156,21 @@ public class BdvSelectionEventHandler
 
 	public void selectNone()
 	{
-		selectableConverter.setSelections( null );
+		final Map< Integer, Set< Double > > selections = selectableConverter.getSelections();
+
+		for ( final SelectionEventListener s : selectionEventListeners )
+		{
+			for ( int timepoint : selections.keySet() )
+			{
+				for ( Double selection : selections.get( timepoint ) )
+				{
+					s.valueUnselected( selection, timepoint );
+				}
+			}
+		}
+
+		selectableConverter.clearSelections( );
+
 		BdvUtils.repaint( bdv );
 	}
 
@@ -180,33 +190,57 @@ public class BdvSelectionEventHandler
 		final double selected = BdvUtils.getValueAtGlobalCoordinates(
 				source,
 				BdvUtils.getGlobalMouseCoordinates( bdv ),
-				0 );
+				getCurrentTimepoint() );
 
-		if ( selected == 0 ) return; // background
+		if ( selected == BACKGROUND ) return;
 
-		if ( isNewSelection( selected ) )
+		final int currentTimepoint = getCurrentTimepoint();
+
+		if ( isNewSelection( selected, currentTimepoint ) )
 		{
-			addSelection( selected );
-
-			for ( final SelectionEventListener s : selectionEventListeners )
-				s.valueSelected( selected );
+			addSelectionAndNotifyListeners( selected, currentTimepoint );
 		}
 		else
 		{
-			selectableConverter.removeSelection( selected );
+			removeSelectionAndNotifyListeners( selected, currentTimepoint );
 		}
 
 		requestRepaint();
 	}
 
-	private boolean isNewSelection( double selected )
+	private void removeSelectionAndNotifyListeners( double selected, int currentTimepoint )
 	{
-		return selectableConverter.getSelections() == null || ! selectableConverter.getSelections().contains( selected );
+		selectableConverter.removeSelection( selected, currentTimepoint );
+
+		for ( final SelectionEventListener s : selectionEventListeners )
+			s.valueUnselected( selected, currentTimepoint );
 	}
 
-	public void addSelection( double selected )
+	private void addSelectionAndNotifyListeners( double selected, int currentTimepoint )
 	{
-		selectableConverter.addSelection( selected );
+		addSelection( selected, currentTimepoint );
+
+		for ( final SelectionEventListener s : selectionEventListeners )
+			s.valueSelected( selected, currentTimepoint );
+	}
+
+	private int getCurrentTimepoint()
+	{
+		return bdv.getBdvHandle().getViewerPanel().getState().getCurrentTimepoint();
+	}
+
+	private boolean isNewSelection( double selected, int timepoint )
+	{
+		if ( selectableConverter.getSelections() == null ) return true;
+
+		if ( selectableConverter.getSelections().get( timepoint ) == null ) return true;
+
+		return false;
+	}
+
+	public void addSelection( double selected , int timepoint )
+	{
+		selectableConverter.addSelection( selected, timepoint );
 	}
 
 	public void addSelectionEventListener( SelectionEventListener s )

@@ -2,7 +2,7 @@ import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.behaviour.BehaviourRandomColorShufflingEventHandler;
+import de.embl.cba.bdv.utils.behaviour.BehaviourRandomColorLutSeedChangeEventHandler;
 import de.embl.cba.bdv.utils.selection.BdvSelectionEventHandler;
 import de.embl.cba.bdv.utils.converters.RandomARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
@@ -24,7 +24,7 @@ public class ExampleSelectionAndRandomColorShufflingBehaviour
 
 		new BdvSelectionEventHandler( bdv, selectableSource );
 
-		new BehaviourRandomColorShufflingEventHandler( bdv, randomARGBConverter, raiSource.getName() );
+		new BehaviourRandomColorLutSeedChangeEventHandler( bdv, randomARGBConverter, raiSource.getName() );
 	}
 
 }

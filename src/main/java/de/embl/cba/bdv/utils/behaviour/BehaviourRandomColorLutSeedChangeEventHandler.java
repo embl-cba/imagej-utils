@@ -7,17 +7,17 @@ import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
-public class BehaviourRandomColorShufflingEventHandler
+public class BehaviourRandomColorLutSeedChangeEventHandler
 {
 	final Bdv bdv;
 	final RandomARGBConverter randomARGBLUT;
 	final String sourceName;
 
-	private String randomColorShufflingTrigger = "ctrl shift S";
+	private String trigger = "ctrl L";
 
 	private final Behaviours behaviours;
 
-	public BehaviourRandomColorShufflingEventHandler( Bdv bdv, RandomARGBConverter randomARGBConverter, String sourceName )
+	public BehaviourRandomColorLutSeedChangeEventHandler( Bdv bdv, RandomARGBConverter randomARGBConverter, String sourceName )
 	{
 		this.bdv = bdv;
 		this.randomARGBLUT = randomARGBConverter;
@@ -35,7 +35,7 @@ public class BehaviourRandomColorShufflingEventHandler
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
 			shuffleRandomLUT();
-		}, sourceName + "-shuffle-random-colors", randomColorShufflingTrigger );
+		}, sourceName + "-shuffle-random-colors", trigger );
 	}
 
 

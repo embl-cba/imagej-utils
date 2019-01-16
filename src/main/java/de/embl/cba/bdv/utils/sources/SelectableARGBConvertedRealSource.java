@@ -10,7 +10,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
-public class SelectableARGBConvertedRealSource < R extends RealType< R > >  extends ARGBConvertedRealSource
+public class SelectableARGBConvertedRealSource < R extends RealType< R > > extends ARGBConvertedRealSource
 {
     private SelectableVolatileARGBConverter selectableVolatileARGBConverter;
     final private InterpolatorFactory< VolatileARGBType, RandomAccessible< VolatileARGBType > >[] interpolatorFactories;

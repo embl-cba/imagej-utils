@@ -16,6 +16,8 @@
  */
 package de.embl.cba.bdv.utils.converters;
 
+import bdv.util.Bdv;
+import bdv.viewer.TimePointListener;
 import ij.ImagePlus;
 import net.imglib2.Volatile;
 import net.imglib2.converter.Converter;
@@ -25,17 +27,18 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-public class SelectableVolatileARGBConverter implements Converter< RealType, VolatileARGBType >
+public class SelectableVolatileARGBConverter implements
+		Converter< RealType, VolatileARGBType >, TimePointListener
 {
 	public static final ARGBType COLOR_SELECTED = new ARGBType( ARGBType.rgba( 255, 255, 0, 255 ) );
 	private Converter< RealType, VolatileARGBType > wrappedConverter;
-	private Set< Double > selectedValues;
+	private Map< Integer, Set< Double > > selectedValues; // timepoint map
 	private double brightnessNotSelected;
 	private SelectionMode selectionMode;
 	private ARGBType colorSelected;
+	private int currentTimePoint;
 
 	public enum SelectionMode
 	{
@@ -55,8 +58,8 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 		this.wrappedConverter = realARGBConverter;
 		this.selectedValues = null;
 		this.selectionMode = SelectionMode.DimNotSelected;
+		this.currentTimePoint = 0;
 	}
-
 
 	@Override
 	public void convert( final RealType input, final VolatileARGBType output )
@@ -106,9 +109,10 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 	}
 
 	private void setOutputColor( final RealType input,
-								final VolatileARGBType output )
+								 final VolatileARGBType output )
 	{
-		if ( selectedValues == null )
+
+		if ( selectedValues == null || selectedValues.get( currentTimePoint ) == null )
 		{
 			wrappedConverter.convert( input, output );
 		}
@@ -116,7 +120,7 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 		{
 			wrappedConverter.convert( input, output );
 
-			if ( ! selectedValues.contains( input.getRealDouble() ) )
+			if ( ! selectedValues.get( currentTimePoint ).contains( input.getRealDouble() ) )
 			{
 				output.get().mul( brightnessNotSelected);
 			}
@@ -127,24 +131,20 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 		}
 	}
 
-	public synchronized void setSelections( Set< Double > selectedValues )
-	{
-		this.selectedValues = selectedValues;
-	}
-
-	public synchronized void addSelection( double value )
+	public synchronized void addSelection( double value, int timepoint )
 	{
 		if ( selectedValues == null )
-		{
-			selectedValues = new HashSet<>( );
-		}
+			selectedValues = new HashMap<>( );
 
-		selectedValues.add( value );
+		if ( selectedValues.get( timepoint ) == null )
+			selectedValues.put( timepoint,  new HashSet<>( ) );
+
+		selectedValues.get( timepoint ).add( value );
 	}
 
-	public synchronized void removeSelection( double value )
+	public synchronized void removeSelection( double value, int timepoint )
 	{
-		selectedValues.remove( value );
+		selectedValues.get( timepoint ).remove( value );
 	}
 
 	public synchronized void clearSelections( )
@@ -152,7 +152,7 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 		this.selectedValues = null;
 	}
 
-	public Set< Double > getSelections()
+	public Map< Integer, Set< Double > > getSelections()
 	{
 		return selectedValues;
 	}
@@ -182,5 +182,9 @@ public class SelectableVolatileARGBConverter implements Converter< RealType, Vol
 		this.selectionMode = selectionMode;
 	}
 
-
+	@Override
+	public void timePointChanged( int timePointIndex )
+	{
+		currentTimePoint = timePointIndex;
+	}
 }
