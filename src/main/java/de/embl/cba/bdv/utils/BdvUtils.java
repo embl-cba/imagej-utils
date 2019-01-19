@@ -19,6 +19,7 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
@@ -544,30 +545,6 @@ public abstract class BdvUtils
 	}
 
 
-//	public static void deselectAllObjectsInActiveLabelSources( Bdv bdv )
-//	{
-//		final HashMap< Integer, Long > sourcesAndSelectedObjects = new HashMap<>();
-//
-//		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
-//
-//		for ( int sourceIndex : visibleSourceIndices )
-//		{
-//
-//			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
-//
-//			final Source source = sourceState.getSpimSource();
-//
-//			if ( isARGBConvertedRealSource( source ) )
-//			{
-//
-//				BdvUtils.getLabelsSource( source ).selectNone( );
-//			}
-//		}
-//
-//		bdv.getBdvHandle().getViewerPanel().requestRepaint();
-//
-//	}
-
 	public static < R extends RealType< R > > Map< Integer, Double > getPixelValuesOfActiveSources( Bdv bdv, RealPoint point, int t )
 	{
 		final HashMap< Integer, Double > sourceValueMap = new HashMap<>();
@@ -580,15 +557,16 @@ public abstract class BdvUtils
 
 			final Source source = sourceState.getSpimSource();
 
-			final double realDouble = getValueAtGlobalCoordinates( source, point, t );
+			final Double realDouble = getValueAtGlobalCoordinates( source, point, t );
 
-			sourceValueMap.put( sourceIndex, realDouble );
+			if ( realDouble != null )
+				sourceValueMap.put( sourceIndex, realDouble );
 		}
 
 		return sourceValueMap;
 	}
 
-	public static double getValueAtGlobalCoordinates( Source source, RealPoint point, int t  )
+	public static Double getValueAtGlobalCoordinates( Source source, RealPoint point, int t  )
 	{
 		final RandomAccess< RealType > sourceAccess = getRealTypeNonVolatileRandomAccess( source, t );
 
@@ -596,12 +574,28 @@ public abstract class BdvUtils
 
 		sourceAccess.setPosition( positionInSource );
 
-		return sourceAccess.get().getRealDouble();
+		Double value = null;
+		try
+		{
+			value = sourceAccess.get().getRealDouble();
+		}
+		catch ( ArrayIndexOutOfBoundsException e )
+		{
+			value = null;
+		}
+
+		return value;
+
 	}
 
 	public static RandomAccess< RealType > getRealTypeNonVolatileRandomAccess( Source source, int t )
 	{
 		final RandomAccess< RealType > access;
+
+		if ( source instanceof TransformedSource )
+		{
+			source = ( ( TransformedSource ) source ).getWrappedSource();
+		}
 
 		if ( source instanceof ARGBConvertedRealSource )
 		{

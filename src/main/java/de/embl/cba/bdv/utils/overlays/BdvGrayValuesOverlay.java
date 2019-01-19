@@ -51,7 +51,7 @@ public class BdvGrayValuesOverlay extends BdvOverlay implements MouseMotionListe
 	protected void draw( final Graphics2D g )
 	{
 
-		int[] stringPosition = new int[]{ 10, 20 };
+		int[] stringPosition = new int[]{ 10, 20 + fontSize };
 
 		for ( int i = 0; i < values.size(); ++i )
 		{
@@ -76,7 +76,8 @@ public class BdvGrayValuesOverlay extends BdvOverlay implements MouseMotionListe
 		bdv.getBdvHandle().getViewerPanel().getGlobalMouseCoordinates( realPoint );
 		final int currentTimepoint = bdv.getBdvHandle().getViewerPanel().getState().getCurrentTimepoint();
 
-		final Map< Integer, Double > pixelValuesOfActiveSources = BdvUtils.getPixelValuesOfActiveSources( bdv, realPoint, currentTimepoint );
+		final Map< Integer, Double > pixelValuesOfActiveSources =
+				BdvUtils.getPixelValuesOfActiveSources( bdv, realPoint, currentTimepoint );
 
 		ArrayList< Double > values = new ArrayList<>(  );
 		ArrayList< ARGBType > colors = new ArrayList<>(  );
@@ -84,7 +85,13 @@ public class BdvGrayValuesOverlay extends BdvOverlay implements MouseMotionListe
 		for ( int sourceId : pixelValuesOfActiveSources.keySet() )
 		{
 			values.add( pixelValuesOfActiveSources.get( sourceId ) );
-			colors.add( BdvUtils.getColor( bdv, sourceId ) );
+			final ARGBType color = BdvUtils.getColor( bdv, sourceId );
+			final int colorIndex = color.get();
+			if ( colorIndex == 0 )
+				colors.add( new ARGBType( ARGBType.rgba( 255, 255, 255, 255 ) ) );
+			else
+				colors.add( color );
+
 		}
 
 		setValuesAndColors( values, colors );
