@@ -38,7 +38,8 @@ public class Wraps
 
 	}
 
-	public static < R extends RealType< R > & NativeType< R > > RandomAccessibleInterval< R > wrapXYCZT( ImagePlus imagePlus )
+	public static < R extends RealType< R > & NativeType< R > >
+	RandomAccessibleInterval< R > wrapXYCZT( ImagePlus imagePlus )
 	{
 		RandomAccessibleInterval< R > wrap = ImageJFunctions.wrapReal( imagePlus );
 
@@ -59,6 +60,32 @@ public class Wraps
 			wrap = Views.permute( wrap, wrap.numDimensions() - 1, wrap.numDimensions() - 2 );
 			wrap = Views.permute( wrap, wrap.numDimensions() - 2, wrap.numDimensions() - 3 );
 		}
+		return wrap;
+	}
+
+	public static < R extends RealType< R > & NativeType< R > >
+	RandomAccessibleInterval< R > wrapXYZCT( ImagePlus imagePlus )
+	{
+		RandomAccessibleInterval< R > wrap = ImageJFunctions.wrapReal( imagePlus );
+
+		if ( imagePlus.getNFrames() == 1 )
+		{
+			wrap = Views.addDimension( wrap, 0, 0 );
+		}
+
+		if ( imagePlus.getNChannels() == 1 )
+		{
+			wrap = Views.addDimension( wrap, 0, 0 );
+			wrap = Views.permute( wrap, wrap.numDimensions() - 1, wrap.numDimensions() - 2 );
+		}
+
+		if ( imagePlus.getNSlices() == 1 )
+		{
+			wrap = Views.addDimension( wrap, 0, 0 );
+			wrap = Views.permute( wrap, wrap.numDimensions() - 1, wrap.numDimensions() - 2 );
+			wrap = Views.permute( wrap, wrap.numDimensions() - 2, wrap.numDimensions() - 3 );
+		}
+
 		return wrap;
 	}
 }

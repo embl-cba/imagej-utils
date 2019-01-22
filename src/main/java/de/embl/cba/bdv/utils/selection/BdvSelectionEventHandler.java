@@ -235,7 +235,9 @@ public class BdvSelectionEventHandler
 
 		if ( selectableConverter.getSelections().get( timepoint ) == null ) return true;
 
-		return false;
+		if ( selectableConverter.getSelections().get( timepoint ).contains( selected ) ) return false;
+
+		return true;
 	}
 
 	public void addSelection( double selected , int timepoint )

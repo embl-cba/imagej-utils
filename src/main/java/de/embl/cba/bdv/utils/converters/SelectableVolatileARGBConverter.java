@@ -33,6 +33,7 @@ public class SelectableVolatileARGBConverter implements
 		Converter< RealType, VolatileARGBType >, TimePointListener
 {
 	public static final ARGBType COLOR_SELECTED = new ARGBType( ARGBType.rgba( 255, 255, 0, 255 ) );
+	public static final int BACKGROUND = 0;
 	private Converter< RealType, VolatileARGBType > wrappedConverter;
 	private Map< Integer, Set< Double > > selectedValues; // timepoint map
 	private double brightnessNotSelected;
@@ -53,12 +54,14 @@ public class SelectableVolatileARGBConverter implements
 		this( new RandomARGBConverter() );
 	}
 
-	public SelectableVolatileARGBConverter( Converter< RealType, VolatileARGBType > realARGBConverter )
+	public SelectableVolatileARGBConverter(
+			Converter< RealType, VolatileARGBType > realARGBConverter )
 	{
-		this.wrappedConverter = realARGBConverter;
-		this.selectedValues = null;
-		this.selectionMode = SelectionMode.DimNotSelected;
-		this.currentTimePoint = 0;
+		wrappedConverter = realARGBConverter;
+		selectedValues = null;
+		currentTimePoint = 0;
+
+		setSelectionMode( SelectionMode.DimNotSelected );
 	}
 
 	@Override
@@ -73,63 +76,47 @@ public class SelectableVolatileARGBConverter implements
 			}
 		}
 
-		if ( input.getRealDouble() == 0 )
-		{
-			output.set( 0 );
-			output.setValid( true );
-			return;
-		}
-		else
-		{
-			switch ( selectionMode )
-			{
-				case DimNotSelected:
-					brightnessNotSelected = 0.2;
-					colorSelected = null;
-					break;
-				case OnlyShowSelected:
-					brightnessNotSelected = 0.0;
-					colorSelected = null;
-					break;
-				case ColorSelectedBrightYellow:
-					brightnessNotSelected = 1.0;
-					colorSelected = COLOR_SELECTED;
-					break;
-				case ColorSelectedBrightYellowAndDimNotSelected:
-					brightnessNotSelected = 0.2;
-					colorSelected = COLOR_SELECTED;
-					break;
-			}
+		setOutputColor( input, output);
 
-			setOutputColor( input, output);
-
-			output.setValid( true );
-
-		}
+		output.setValid( true );
 	}
 
 	private void setOutputColor( final RealType input,
 								 final VolatileARGBType output )
 	{
 
-		if ( selectedValues == null || selectedValues.get( currentTimePoint ) == null )
+		if ( input.getRealDouble() == BACKGROUND )
 		{
-			wrappedConverter.convert( input, output );
+			output.set( 0 );
+			return;
+		}
+
+		wrappedConverter.convert( input, output );
+
+		if ( isSelected( input ) &&  colorSelected != null )
+		{
+			output.set( colorSelected.get() );
 		}
 		else
 		{
-			wrappedConverter.convert( input, output );
-
-			if ( ! selectedValues.get( currentTimePoint ).contains( input.getRealDouble() ) )
-			{
-				output.get().mul( brightnessNotSelected);
-			}
-			else if ( colorSelected != null )
-			{
-				output.set( colorSelected.get() );
-			}
+			output.get().mul( brightnessNotSelected);
 		}
+
 	}
+
+	private boolean isSelected( final RealType input )
+	{
+
+		if ( selectedValues == null ) return true;
+
+		if ( selectedValues.get( currentTimePoint ) == null ) return true;
+
+		if ( selectedValues.get( currentTimePoint ).contains( input.getRealDouble() ) ) return true;
+
+		return false;
+
+	}
+
 
 	public synchronized void addSelection( double value, int timepoint )
 	{
@@ -180,6 +167,27 @@ public class SelectableVolatileARGBConverter implements
 	public void setSelectionMode( SelectionMode selectionMode )
 	{
 		this.selectionMode = selectionMode;
+
+		switch ( selectionMode )
+		{
+			case DimNotSelected:
+				brightnessNotSelected = 0.2;
+				colorSelected = null;
+				break;
+			case OnlyShowSelected:
+				brightnessNotSelected = 0.0;
+				colorSelected = null;
+				break;
+			case ColorSelectedBrightYellow:
+				brightnessNotSelected = 1.0;
+				colorSelected = COLOR_SELECTED;
+				break;
+			case ColorSelectedBrightYellowAndDimNotSelected:
+				brightnessNotSelected = 0.2;
+				colorSelected = COLOR_SELECTED;
+				break;
+		}
+
 	}
 
 	@Override
