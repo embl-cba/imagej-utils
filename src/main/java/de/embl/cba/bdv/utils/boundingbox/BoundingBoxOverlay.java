@@ -14,7 +14,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 
-import static de.embl.cba.bdv.utils.boundingbox.BoundingBoxOverlay.BoxDisplayMode.FULL;
+import static de.embl.cba.bdv.utils.boundingbox.BoxDisplayMode.FULL;
 
 
 public class BoundingBoxOverlay implements OverlayRenderer, TransformListener< AffineTransform3D >
@@ -22,11 +22,6 @@ public class BoundingBoxOverlay implements OverlayRenderer, TransformListener< A
 	private static final double DISTANCE_TOLERANCE = 20.;
 
 	private static final double HANDLE_RADIUS = DISTANCE_TOLERANCE / 2.;
-
-	public enum BoxDisplayMode
-	{
-		FULL, SECTION;
-	}
 
 	public interface BoundingBoxOverlaySource
 	{
@@ -145,7 +140,7 @@ public class BoundingBoxOverlay implements OverlayRenderer, TransformListener< A
 		final GeneralPath intersection = new GeneralPath();
 
 		final RealInterval bbInterval = bbSource.getInterval();
-		final RealInterval interval = enlarge( bbInterval );
+		final RealInterval interval = bbInterval; // enlarge( bbInterval );
 		final double ox = canvasWidth / 2;
 		final double oy = canvasHeight / 2;
 		synchronized ( viewerTransform )

@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static de.embl.cba.bdv.utils.boundingbox.BoundingBoxOverlay.BoxDisplayMode.FULL;
+import static de.embl.cba.bdv.utils.boundingbox.BoxDisplayMode.FULL;
 
 
 /**
@@ -147,12 +147,12 @@ public class BoundingBoxEditor
 			boxSource.removeFromViewer();
 	}
 
-	public BoundingBoxOverlay.BoxDisplayMode getBoxDisplayMode()
+	public BoxDisplayMode getBoxDisplayMode()
 	{
 		return boxOverlay.getDisplayMode();
 	}
 
-	public void setBoxDisplayMode( final BoundingBoxOverlay.BoxDisplayMode mode )
+	public void setBoxDisplayMode( final BoxDisplayMode mode )
 	{
 		boxOverlay.setDisplayMode( mode );
 		viewer.requestRepaint();

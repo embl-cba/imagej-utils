@@ -1,20 +1,18 @@
 package explore;
 
-import bdv.tools.ToggleDialogAction;
-import bdv.tools.boundingbox.BoxSelectionPanel;
-import bdv.util.*;
-import de.embl.cba.bdv.utils.boundingbox.BoundingBoxEditor;
-import de.embl.cba.bdv.utils.boundingbox.BoxModePanel;
-import de.embl.cba.bdv.utils.boundingbox.DefaultBoundingBoxModel;
+import bdv.util.BdvFunctions;
+import bdv.util.BdvHandle;
+import bdv.util.BdvOptions;
+import de.embl.cba.bdv.utils.boundingbox.*;
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
+import net.imglib2.FinalRealInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.view.Views;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
-import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
 
 import javax.swing.*;
@@ -23,19 +21,35 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Random;
 
-public class BoundingBoxMastodon
+public class RealBoundingBoxMastodon
 {
 	public static void main( String[] args )
 	{
 
 		final int sourceSize = 100;
 
+		final double[] calibration = new double[]{0.1,0.1,0.1};
+
+
 		final AffineTransform3D transform = new AffineTransform3D();
 		for ( int d = 0; d < 3; d++ )
 		{
-			transform.set( 0.1, d, d );
+			transform.set( calibration[ d ], d, d );
 		}
 
+		double[] initialMin = new double[]{ 30, 30, 30 };
+		double[] initialMax = new double[]{ 80, 80, 80 };
+
+		double[] rangeMin = new double[]{ 0, 0, 0 };
+		double[] rangeMax = new double[]{ sourceSize, sourceSize, sourceSize };
+
+		transform.apply( initialMin, initialMin );
+		transform.apply( initialMax, initialMax );
+		transform.apply( rangeMin, rangeMin );
+		transform.apply( rangeMax, rangeMax );
+
+		final FinalRealInterval initialSelection = new FinalRealInterval( initialMin, initialMax );
+		final FinalRealInterval selectionRange = new FinalRealInterval( rangeMin, rangeMax );
 
 		final RandomAccessibleInterval< IntType > image = createRandomImage( sourceSize );
 		final BdvHandle bdv = BdvFunctions.show( image, "",
@@ -44,10 +58,9 @@ public class BoundingBoxMastodon
 		/*
 		 * Initialize bounding box model from the computed interval.
 		 */
-		final FinalInterval interval = new FinalInterval( new long[]{ 30, 30, 30 }, new long[]{ 80, 80, 80 } );
 
-		final DefaultBoundingBoxModel model = new DefaultBoundingBoxModel(
-				new ModifiableInterval( interval ),
+		final RealBoundingBoxModel model = new RealBoundingBoxModel(
+				new ModifiableRealInterval( initialSelection ),
 				transform );
 
 		/*
@@ -73,10 +86,10 @@ public class BoundingBoxMastodon
 		 */
 
 		final JDialog dialog = new JDialog( new JFrame(  ), "Bounding-box" );
-		final BoxSelectionPanel boxSelectionPanel =
-				new BoxSelectionPanel( model, image );
+		final RealBoxSelectionPanel realBoxSelectionPanel =
+				new RealBoxSelectionPanel( model, selectionRange );
 		final BoxModePanel boxModePanel = new BoxModePanel();
-		dialog.getContentPane().add( boxSelectionPanel, BorderLayout.NORTH );
+		dialog.getContentPane().add( realBoxSelectionPanel, BorderLayout.NORTH );
 		dialog.getContentPane().add( boxModePanel, BorderLayout.SOUTH );
 		dialog.pack();
 		dialog.setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE );
@@ -98,7 +111,7 @@ public class BoundingBoxMastodon
 		boxModePanel.modeChangeListeners().add( () -> boxEditor.setBoxDisplayMode( boxModePanel.getBoxDisplayMode() ) );
 
 		model.intervalChangedListeners().add( () -> {
-			boxSelectionPanel.updateSliders( model.getInterval() );
+			realBoxSelectionPanel.updateSliders( model.getInterval() );
 			bdv.getViewerPanel().getDisplay().repaint();
 		});
 

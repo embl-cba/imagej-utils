@@ -4,8 +4,8 @@ package de.embl.cba.bdv.utils.boundingbox;
 import javax.swing.*;
 import java.awt.*;
 
-import static de.embl.cba.bdv.utils.boundingbox.BoundingBoxOverlay.BoxDisplayMode.FULL;
-import static de.embl.cba.bdv.utils.boundingbox.BoundingBoxOverlay.BoxDisplayMode.SECTION;
+import static de.embl.cba.bdv.utils.boundingbox.BoxDisplayMode.FULL;
+import static de.embl.cba.bdv.utils.boundingbox.BoxDisplayMode.SECTION;
 
 /**
  * Panel with radio-buttons to switch between {@link BoxDisplayMode}s.
@@ -24,7 +24,7 @@ public class BoxModePanel extends JPanel
 
 	private final Listeners.List< ModeChangeListener > listeners;
 
-	private BoundingBoxOverlay.BoxDisplayMode mode;
+	private BoxDisplayMode mode;
 
 	public BoxModePanel()
 	{
@@ -63,7 +63,7 @@ public class BoxModePanel extends JPanel
 		group.add( section );
 	}
 
-	private void setBoxDisplayMode( final BoundingBoxOverlay.BoxDisplayMode mode )
+	private void setBoxDisplayMode( final BoxDisplayMode mode )
 	{
 		this.mode = mode;
 		listeners.list.forEach( ModeChangeListener::boxDisplayModeChanged );
@@ -77,7 +77,7 @@ public class BoxModePanel extends JPanel
 			c.setEnabled( b );
 	}
 
-	public BoundingBoxOverlay.BoxDisplayMode getBoxDisplayMode()
+	public BoxDisplayMode getBoxDisplayMode()
 	{
 		return mode;
 	}
