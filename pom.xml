@@ -90,10 +90,15 @@
 			<id>imagej.public</id>
 			<url>https://maven.imagej.net/content/groups/public</url>
 		</repository>
+		<!--<repository>-->
+			<!--<id>bintray-embl-cba-snapshots</id>-->
+			<!--<name>bintray-snapshots</name>-->
+			<!--<url>https://api.bintray.com/maven/embl-cba/snapshots/clearclij/;publish=1</url>-->
+		<!--</repository>-->
 		<repository>
-			<id>bintray-embl-cba-snapshots</id>
-			<name>bintray-snapshots</name>
-			<url>https://api.bintray.com/maven/embl-cba/snapshots/clearclij/;publish=1</url>
+			<id>bintray-tischi-snapshots</id>
+			<name>bintray</name>
+			<url>https://dl.bintray.com/tischi/snapshots</url>
 		</repository>
 	</repositories>
 
@@ -143,9 +148,9 @@
 		<dependency>
 			<groupId>de.embl.cba</groupId>
 			<artifactId>transforms-utils</artifactId>
-			<version>0.1.01</version>
+			<version>0.1.02</version>
+			<!--<type>pom</type>-->
 		</dependency>
-
 
 	</dependencies>
 

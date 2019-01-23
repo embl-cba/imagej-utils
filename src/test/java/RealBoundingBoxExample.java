@@ -2,6 +2,7 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import de.embl.cba.bdv.utils.boundingbox.*;
+import de.embl.cba.transforms.utils.Transforms;
 import net.imglib2.*;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -11,8 +12,6 @@ import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.view.Views;
 
 import java.util.Random;
-
-import static de.embl.cba.transforms.utils.Transforms.rotationAroundIntervalCenterTransform;
 
 public class RealBoundingBoxExample
 {
@@ -67,7 +66,8 @@ public class RealBoundingBoxExample
 
 		AffineTransform3D bbTransform = new AffineTransform3D();
 
-		bbTransform = rotationAroundIntervalCenterTransform(
+
+		bbTransform = Transforms.rotationAroundIntervalCenterTransform(
 				45,
 				2,
 				initialSelection
