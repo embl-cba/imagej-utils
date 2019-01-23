@@ -85,16 +85,19 @@
 
 
 	<repositories>
+
 		<!-- NB: for SciJava dependencies -->
 		<repository>
 			<id>imagej.public</id>
 			<url>https://maven.imagej.net/content/groups/public</url>
 		</repository>
+
 		<repository>
 			<id>bintray-tischi-snapshots</id>
 			<name>bintray</name>
 			<url>https://dl.bintray.com/tischi/snapshots</url>
 		</repository>
+
 	</repositories>
 
 	<dependencies>
@@ -143,7 +146,7 @@
 		<dependency>
 			<groupId>de.embl.cba</groupId>
 			<artifactId>transforms-utils</artifactId>
-			<version>0.1.02</version>
+			<version>0.1.03</version>
 			<!--<type>pom</type>-->
 		</dependency>
 

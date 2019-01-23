@@ -5,7 +5,6 @@ import bdv.tools.transformation.TransformedSource;
 import de.embl.cba.bdv.utils.sources.SelectableARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
-import de.embl.cba.bdv.utils.transforms.Transforms;
 
 import bdv.util.*;
 import bdv.viewer.*;
@@ -13,6 +12,7 @@ import bdv.viewer.animate.AbstractTransformAnimator;
 import bdv.viewer.animate.SimilarityTransformAnimator;
 import bdv.viewer.state.SourceState;
 
+import de.embl.cba.transforms.utils.Transforms;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -36,7 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.DoubleStream;
 
-import static de.embl.cba.bdv.utils.transforms.Transforms.createBoundingIntervalAfterTransformation;
+import static de.embl.cba.transforms.utils.Transforms.createBoundingIntervalAfterTransformation;
+
 
 public abstract class BdvUtils
 {
