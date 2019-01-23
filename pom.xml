@@ -90,11 +90,6 @@
 			<id>imagej.public</id>
 			<url>https://maven.imagej.net/content/groups/public</url>
 		</repository>
-		<!--<repository>-->
-			<!--<id>bintray-embl-cba-snapshots</id>-->
-			<!--<name>bintray-snapshots</name>-->
-			<!--<url>https://api.bintray.com/maven/embl-cba/snapshots/clearclij/;publish=1</url>-->
-		<!--</repository>-->
 		<repository>
 			<id>bintray-tischi-snapshots</id>
 			<name>bintray</name>
