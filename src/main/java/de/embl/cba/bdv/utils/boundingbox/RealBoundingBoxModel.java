@@ -58,7 +58,7 @@ public class RealBoundingBoxModel implements
 	@Override
 	public void getTransform( final AffineTransform3D t )
 	{
-		t.set( new AffineTransform3D() ); // TODO
+		t.set( transform );
 	}
 
 	public Listeners< IntervalChangedListener > intervalChangedListeners()
