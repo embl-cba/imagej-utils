@@ -17,29 +17,25 @@
 package de.embl.cba.bdv.utils.converters;
 
 import bdv.viewer.TimePointListener;
-import de.embl.cba.bdv.utils.selection.Segment;
 import net.imglib2.Volatile;
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-public class SelectableVolatileARGBConverter
-		implements
-		Converter< RealType, VolatileARGBType >,
-		TimePointListener
+public class SelectableVolatileARGBConverter implements
+		Converter< RealType, VolatileARGBType >, TimePointListener
 {
 	public static final ARGBType COLOR_SELECTED = new ARGBType( ARGBType.rgba( 255, 255, 0, 255 ) );
 	public static final int BACKGROUND = 0;
 	private Converter< RealType, VolatileARGBType > wrappedConverter;
+	private Map< Integer, Collection< Double > > selected; // timepoint map
 	private double brightnessNotSelected;
 	private SelectionMode selectionMode;
 	private ARGBType selectionColor;
 	private int currentTimePoint;
-	private Set< ? extends Segment > selected;
 
 	public enum SelectionMode
 	{
@@ -49,7 +45,7 @@ public class SelectableVolatileARGBConverter
 		ColorSelectedBrightYellowAndDimNotSelected;
 	}
 
-	public SelectableVolatileARGBConverter()
+	public SelectableVolatileARGBConverter( )
 	{
 		this( new RandomARGBConverter() );
 	}
@@ -58,8 +54,9 @@ public class SelectableVolatileARGBConverter
 			Converter< RealType, VolatileARGBType > realARGBConverter )
 	{
 		wrappedConverter = realARGBConverter;
+		selected = null;
 		currentTimePoint = 0;
-		selected = new HashSet<>( );
+
 		setSelectionMode( SelectionMode.DimNotSelected );
 	}
 
@@ -107,25 +104,45 @@ public class SelectableVolatileARGBConverter
 
 	private boolean isSelected( final RealType input )
 	{
-		final double label = input.getRealDouble();
 
-		if ( selected.size() == 0 ) return true; // TODO: Does this make sense?
+		if ( selected == null ) return true;
 
-		for ( Segment segment : selected )
-		{
-			if ( segment.getTimePoint() == currentTimePoint
-					&& segment.getLabel() == label )
-			{
-				return true;
-			}
-		}
+		if ( selected.get( currentTimePoint ) == null ) return true;
+
+		if ( selected.get( currentTimePoint ).contains( input.getRealDouble() ) ) return true;
 
 		return false;
+
 	}
 
-	public void setSelected( Set< ? extends Segment > selected )
+	// TODO: just give this guy the whole selection list.
+	// Do not let it manage it itself
+	public synchronized void selectionChanged( double value, int timepoint, boolean selected )
 	{
-		this.selected = selected;
+		if ( selected )
+		{
+			if ( this.selected == null )
+				this.selected = new HashMap<>();
+
+			if ( this.selected.get( timepoint ) == null )
+				this.selected.put( timepoint, new HashSet<>() );
+
+			this.selected.get( timepoint ).add( value );
+		}
+		else
+		{
+			this.selected.get( timepoint ).remove( value );
+		}
+	}
+
+	public synchronized void clearSelections( )
+	{
+		this.selected = null;
+	}
+
+	public Map< Integer, Collection< Double > > getSelections()
+	{
+		return selected;
 	}
 
 	public void setBrightnessNotSelectedValues( final double brightnessNotSelected )
@@ -173,6 +190,27 @@ public class SelectableVolatileARGBConverter
 		}
 
 	}
+
+	/**
+	 * Sets the selected state of a collection of objects.
+	 *
+	 * @param labels
+	 *            the object collection.
+	 * @param selected
+	 *            selected state to set for specified object collection.
+	 * @return {@code true} if the selection was changed by this call.
+	 */
+	public void setSelected( final int timePoint, final Collection< Double > labels )
+	{
+		if ( selected == null )
+			selected = new HashMap<>();
+
+		if ( selected.get( timePoint ) == null )
+			selected.put( timePoint, labels );
+
+	};
+
+
 
 	@Override
 	public void timePointChanged( int timePointIndex )

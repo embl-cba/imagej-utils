@@ -10,7 +10,7 @@
 
 	<groupId>de.embl.cba</groupId>
 	<artifactId>bdv-utils</artifactId>
-	<version>0.1.27</version>
+	<version>0.1.28</version>
 
 	<name>BigDataViewer Utilities</name>
 	<description>TODO</description>

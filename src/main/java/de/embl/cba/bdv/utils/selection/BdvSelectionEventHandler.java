@@ -1,6 +1,8 @@
 package de.embl.cba.bdv.utils.selection;
 
 import bdv.util.Bdv;
+import bdv.util.BdvFunctions;
+import bdv.util.BdvOptions;
 import de.embl.cba.bdv.utils.*;
 import de.embl.cba.bdv.utils.behaviour.BehaviourRandomColorLutSeedChangeEventHandler;
 import de.embl.cba.bdv.utils.converters.RandomARGBConverter;
@@ -11,10 +13,7 @@ import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class BdvSelectionEventHandler
@@ -31,7 +30,7 @@ public class BdvSelectionEventHandler
 	private String iterateSelectionModeTrigger = "ctrl S";
 	private String viewIn3DTrigger = "ctrl shift button1";
 
-	private CopyOnWriteArrayList< SelectionEventListener > selectionEventListeners;
+	private CopyOnWriteArrayList< BdvLabelSourceSelectionListener > bdvLabelSourceSelectionListeners;
 	private List< SelectableVolatileARGBConverter.SelectionMode > selectionModes;
 	private double resolution3DView;
 	private static final int BACKGROUND = 0;
@@ -48,7 +47,7 @@ public class BdvSelectionEventHandler
 		this.selectableConverter = selectableSource.getSelectableConverter();
 		this.sourceName = source.getName();
 
-		this.selectionEventListeners = new CopyOnWriteArrayList<>(  );
+		this.bdvLabelSourceSelectionListeners = new CopyOnWriteArrayList<>(  );
 		this.selectionModes = Arrays.asList( SelectableVolatileARGBConverter.SelectionMode.values() );
 
 		this.resolution3DView = 0.2;
@@ -82,6 +81,7 @@ public class BdvSelectionEventHandler
 					bdv,
 					( RandomARGBConverter ) selectableConverter.getWrappedConverter(),
 					sourceName );
+
 		}
 	}
 
@@ -156,20 +156,20 @@ public class BdvSelectionEventHandler
 
 	public void selectNone()
 	{
-		final Map< Integer, Set< Double > > selections = selectableConverter.getSelections();
+//		final Map< Integer, Collection< Double > > selections = selectableConverter.getSelections();
+//
+//		for ( final BdvLabelSourceSelectionListener s : bdvLabelSourceSelectionListeners )
+//		{
+//			for ( int timePoint : selections.keySet() )
+//			{
+//				for ( Double selection : selections.get( timePoint ) )
+//				{
+//					s.selectionChanged( selection, timePoint, false );
+//				}
+//			}
+//		}
 
-		for ( final SelectionEventListener s : selectionEventListeners )
-		{
-			for ( int timepoint : selections.keySet() )
-			{
-				for ( Double selection : selections.get( timepoint ) )
-				{
-					s.valueUnselected( selection, timepoint );
-				}
-			}
-		}
-
-		selectableConverter.clearSelections( );
+		//selectableConverter.clearSelections( );
 
 		BdvUtils.repaint( bdv );
 	}
@@ -210,18 +210,18 @@ public class BdvSelectionEventHandler
 
 	private void removeSelectionAndNotifyListeners( double selected, int currentTimepoint )
 	{
-		selectableConverter.removeSelection( selected, currentTimepoint );
-
-		for ( final SelectionEventListener s : selectionEventListeners )
-			s.valueUnselected( selected, currentTimepoint );
+//		selectableConverter.selectionChanged( selected, currentTimepoint, false );
+//
+//		for ( final BdvLabelSourceSelectionListener s : bdvLabelSourceSelectionListeners )
+//			s.selectionChanged( selected, currentTimepoint, false );
 	}
 
 	private void addSelectionAndNotifyListeners( double selected, int currentTimepoint )
 	{
-		addSelection( selected, currentTimepoint );
+		selectionChanged( selected, currentTimepoint, true );
 
-		for ( final SelectionEventListener s : selectionEventListeners )
-			s.valueSelected( selected, currentTimepoint );
+		for ( final BdvLabelSourceSelectionListener s : bdvLabelSourceSelectionListeners )
+			s.selectionChanged( selected, currentTimepoint, true );
 	}
 
 	private int getCurrentTimepoint()
@@ -231,23 +231,26 @@ public class BdvSelectionEventHandler
 
 	private boolean isNewSelection( double selected, int timepoint )
 	{
-		if ( selectableConverter.getSelections() == null ) return true;
-
-		if ( selectableConverter.getSelections().get( timepoint ) == null ) return true;
-
-		if ( selectableConverter.getSelections().get( timepoint ).contains( selected ) ) return false;
+//		if ( selectableConverter.getSelections() == null ) return true;
+//
+//		if ( selectableConverter.getSelections().get( timepoint ) == null ) return true;
+//
+//		if ( selectableConverter.getSelections().get( timepoint ).contains( selected ) ) return false;
 
 		return true;
 	}
 
-	public void addSelection( double selected , int timepoint )
+	public void selectionChanged( double label, int timepoint, boolean selected )
 	{
-		selectableConverter.addSelection( selected, timepoint );
+		if ( isNewSelection( label, timepoint  ) )
+		{
+//			selectableConverter.selectionChanged( label, timepoint, true );
+		}
 	}
 
-	public void addSelectionEventListener( SelectionEventListener s )
+	public void addSelectionEventListener( BdvLabelSourceSelectionListener s )
 	{
-		selectionEventListeners.add( s );
+		bdvLabelSourceSelectionListeners.add( s );
 	}
 
 	public Bdv getBdv()
