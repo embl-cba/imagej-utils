@@ -86,16 +86,14 @@ public class GlasbeyARGBLut implements ARGBLut
 				89, 34, 223, 204, 69, 97, 78, 81, 248, 73, 35, 18, 173, 0, 51,
 				2, 158, 212, 89, 193, 43, 40, 246, 146, 84, 238, 72, 101, 101 };
 
-
-
 		int[] argbIndicies = new int[ r.length ];
 
 		for (int i = 0; i < r.length; i++)
 		{
 			argbIndicies[ i ] = ARGBType.rgba(
-					( byte ) r[ i ],
-					( byte ) g[ i ],
-					( byte ) b[ i ],
+					r[ i ],
+					g[ i ],
+					b[ i ],
 					255 );
 		}
 
