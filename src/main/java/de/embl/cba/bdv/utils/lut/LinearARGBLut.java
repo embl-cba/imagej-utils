@@ -1,6 +1,6 @@
 package de.embl.cba.bdv.utils.lut;
 
-public class LinearARGBLut implements ARGBLut
+public class LinearARGBLut implements AdjustableARGBLut
 {
 	double min, max;
 
