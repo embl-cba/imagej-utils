@@ -8,5 +8,5 @@ public interface ARGBLut
 	 * 			value between zero and one to specify the color
 	 * @return ARGB color index
 	 */
-	int getARGBIndex( double x );
+	int getARGB( double x );
 }

@@ -4,17 +4,18 @@ import net.imglib2.type.numeric.ARGBType;
 
 public class GlasbeyARGBLut implements ARGBLut
 {
-	private final int[] indicies;
+	public static final int NUM_COLORS = 255;
+	private final int[] indices;
 
 	public GlasbeyARGBLut()
 	{
-		indicies = this.argbGlasbeyIndicies();
+		indices = this.argbGlasbeyIndices();
 	}
 
 	@Override
-	public int getARGBIndex( double x )
+	public int getARGB( double x )
 	{
-		return indicies[ (int) ( x * 255) ];
+		return indices[ (int) ( x * NUM_COLORS ) ];
 	}
 
 	/**
@@ -27,7 +28,7 @@ public class GlasbeyARGBLut implements ARGBLut
 	 *
 	 * @return Glasbey lookup table
 	 */
-	public final static int[] argbGlasbeyIndicies()
+	public final static int[] argbGlasbeyIndices()
 	{
 		int[] r = { 0, 0, 255, 0, 0, 255, 0, 255, 0, 154, 0, 120, 31, 255,
 				177, 241, 254, 221, 32, 114, 118, 2, 200, 136, 255, 133, 161,
@@ -86,18 +87,18 @@ public class GlasbeyARGBLut implements ARGBLut
 				89, 34, 223, 204, 69, 97, 78, 81, 248, 73, 35, 18, 173, 0, 51,
 				2, 158, 212, 89, 193, 43, 40, 246, 146, 84, 238, 72, 101, 101 };
 
-		int[] argbIndicies = new int[ r.length ];
+		int[] argbIndices = new int[ r.length ];
 
 		for (int i = 0; i < r.length; i++)
 		{
-			argbIndicies[ i ] = ARGBType.rgba(
+			argbIndices[ i ] = ARGBType.rgba(
 					r[ i ],
 					g[ i ],
 					b[ i ],
 					255 );
 		}
 
-		return argbIndicies;
+		return argbIndices;
 	}
 
 }
