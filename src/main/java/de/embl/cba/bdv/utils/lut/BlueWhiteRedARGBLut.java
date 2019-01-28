@@ -31,7 +31,6 @@ public class BlueWhiteRedARGBLut implements ARGBLut
 	 */
 	private final static int[] blueWhiteRedARGBIndices( int numColors )
 	{
-
 		int[][] lut = new int[ 3 ][ numColors ];
 
 		int[] blue = new int[]{ 0, 0, 255 };
@@ -56,18 +55,18 @@ public class BlueWhiteRedARGBLut implements ARGBLut
 			}
 		}
 
-		int[] argbIndicies = new int[ numColors ];
+		int[] argbIndices = new int[ numColors ];
 
 		for (int i = 0; i < numColors; i++)
 		{
-			argbIndicies[ i ] = ARGBType.rgba(
+			argbIndices[ i ] = ARGBType.rgba(
 					lut[ 0 ][ i ],
 					lut[ 1 ][ i ],
 					lut[ 2 ][ i ],
 					255 );
 		}
 
-		return argbIndicies;
+		return argbIndices;
 	}
 
 }

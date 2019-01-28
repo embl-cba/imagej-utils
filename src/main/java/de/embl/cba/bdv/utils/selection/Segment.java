@@ -5,13 +5,13 @@ import net.imglib2.RealInterval;
 
 public interface Segment
 {
-	String getImageId();
+	String imageId();
 
-	double getLabel();
+	double label();
 
-	int getTimePoint();
+	int timePoint();
 
-	double[] getPosition();
+	double[] position();
 
-	FinalInterval getBoundingBox();
+	FinalInterval boundingBox();
 }

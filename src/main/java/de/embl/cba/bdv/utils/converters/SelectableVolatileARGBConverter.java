@@ -113,8 +113,8 @@ public class SelectableVolatileARGBConverter
 
 		for ( Segment segment : selected )
 		{
-			if ( segment.getTimePoint() == currentTimePoint
-					&& segment.getLabel() == label )
+			if ( segment.timePoint() == currentTimePoint
+					&& segment.label() == label )
 			{
 				return true;
 			}
