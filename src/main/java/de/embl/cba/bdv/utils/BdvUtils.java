@@ -1,6 +1,7 @@
 package de.embl.cba.bdv.utils;
 
 import bdv.VolatileSpimSource;
+import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
 import de.embl.cba.bdv.utils.sources.SelectableARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
@@ -894,7 +895,20 @@ public abstract class BdvUtils
 
 	}
 
-	public static  < R extends RealType< R > & NativeType< R > >
+	private static < R extends RealType< R > & NativeType< R > >
+	void removeSource( BdvHandle bdv, BdvStackSource< R > bdvStackSource )
+	{
+		for ( SourceAndConverter< R > sourceAndConverter : bdvStackSource.getSources() )
+		{
+			final int sourceIndex = BdvUtils.getSourceIndex( bdv, sourceAndConverter.getSpimSource() );
+			final ConverterSetup converterSetup = bdv.getSetupAssignments().getConverterSetups().get( sourceIndex );
+			bdv.getSetupAssignments().removeSetup( converterSetup );
+
+			bdv.getViewerPanel().removeSource( sourceAndConverter.getSpimSource() );
+		}
+	}
+
+	public static < R extends RealType< R > & NativeType< R > >
 	RandomAccessibleIntervalSource4D< R > createSourceFrom2DFrameList(
 			ArrayList< RandomAccessibleInterval< R > > frames2D,
 			String name )
