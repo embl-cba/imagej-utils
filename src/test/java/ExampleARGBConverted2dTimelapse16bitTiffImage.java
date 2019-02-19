@@ -38,8 +38,16 @@ public class ExampleARGBConverted2dTimelapse16bitTiffImage
 		// https://github.com/bigdataviewer/bigdataviewer-vistools/blob/master/src/main/java/bdv/util/BdvFunctions.java#L173
 		// add issue:
 		//
-		BdvFunctions.show( raiSource, BdvOptions.options().is2D() ).setDisplayRange( 0, 3 );
+		final BdvStackSource show = BdvFunctions.show(
+				raiSource,
+				2,
+				BdvOptions.options().is2D() );
 
+		show.setDisplayRange( 0, 3 );
+
+		final int numTimepoints = show.getBdvHandle().getViewerPanel().getState().getNumTimepoints();
+
+		int a = 1;
 
 		/**
 		 * Show as ARGB image

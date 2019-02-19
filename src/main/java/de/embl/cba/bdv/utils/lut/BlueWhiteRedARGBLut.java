@@ -16,7 +16,12 @@ public class BlueWhiteRedARGBLut implements ARGBLut
 	@Override
 	public int getARGB( double x )
 	{
-		return indices[ (int) ( x * (numColors - 1) ) ];
+		final int index = ( int ) ( x * ( numColors - 1 ) );
+		if ( index < 0 || index > indices.length -1 )
+		{
+			return indices[ 0 ];
+		}
+		return indices[ index ];
 	}
 
 

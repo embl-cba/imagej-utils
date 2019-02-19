@@ -1,5 +1,6 @@
 package de.embl.cba.bdv.utils.wrap;
 
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.RandomAccessibleIntervalSource4D;
 import ij.IJ;
 import ij.ImagePlus;

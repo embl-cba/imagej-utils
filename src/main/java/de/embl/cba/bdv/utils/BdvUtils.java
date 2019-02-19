@@ -895,7 +895,7 @@ public abstract class BdvUtils
 
 	}
 
-	private static < R extends RealType< R > & NativeType< R > >
+	public static < R extends RealType< R > & NativeType< R > >
 	void removeSource( BdvHandle bdv, BdvStackSource< R > bdvStackSource )
 	{
 		for ( SourceAndConverter< R > sourceAndConverter : bdvStackSource.getSources() )
