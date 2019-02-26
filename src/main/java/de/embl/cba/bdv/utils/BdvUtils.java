@@ -547,15 +547,19 @@ public abstract class BdvUtils
 	}
 
 
-	public static < R extends RealType< R > > Map< Integer, Double > getPixelValuesOfActiveSources( Bdv bdv, RealPoint point, int t )
+	public static < R extends RealType< R > > Map< Integer, Double >
+	getPixelValuesOfActiveSources( Bdv bdv, RealPoint point, int t )
 	{
 		final HashMap< Integer, Double > sourceValueMap = new HashMap<>();
 
-		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+		final List< Integer > visibleSourceIndices =
+				bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
 
 		for ( int sourceIndex : visibleSourceIndices )
 		{
-			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
+			final SourceState< ? > sourceState =
+					bdv.getBdvHandle().getViewerPanel()
+							.getState().getSources().get( sourceIndex );
 
 			final Source source = sourceState.getSpimSource();
 
@@ -568,15 +572,18 @@ public abstract class BdvUtils
 		return sourceValueMap;
 	}
 
-	public static Double getValueAtGlobalCoordinates( Source source, RealPoint point, int t  )
+	public static Double getValueAtGlobalCoordinates(
+			Source source, RealPoint point, int t  )
 	{
-		final RandomAccess< RealType > sourceAccess = getRealTypeNonVolatileRandomAccess( source, t );
+		final RandomAccess< RealType > sourceAccess =
+				getRealTypeNonVolatileRandomAccess( source, t );
 
-		final long[] positionInSource = BdvUtils.getPositionInSource( source, point, t, 0 );
+		final long[] positionInSource =
+				BdvUtils.getPositionInSource( source, point, t, 0 );
 
 		sourceAccess.setPosition( positionInSource );
 
-		Double value = null;
+		Double value;
 		try
 		{
 			value = sourceAccess.get().getRealDouble();
@@ -590,7 +597,8 @@ public abstract class BdvUtils
 
 	}
 
-	public static RandomAccess< RealType > getRealTypeNonVolatileRandomAccess( Source source, int t )
+	public static RandomAccess< RealType >
+	getRealTypeNonVolatileRandomAccess( Source source, int t )
 	{
 		final RandomAccess< RealType > access;
 
@@ -601,11 +609,13 @@ public abstract class BdvUtils
 
 		if ( source instanceof ARGBConvertedRealSource )
 		{
-			final Source wrappedRealSource = ( ( ARGBConvertedRealSource ) source ).getWrappedRealSource();
+			final Source wrappedRealSource =
+					( ( ARGBConvertedRealSource ) source ).getWrappedRealSource();
 
 			if ( wrappedRealSource instanceof VolatileSpimSource )
 			{
-				access = ( ( VolatileSpimSource ) wrappedRealSource ).nonVolatile().getSource( t, 0 ).randomAccess();
+				access = ( ( VolatileSpimSource ) wrappedRealSource )
+						.nonVolatile().getSource( t, 0 ).randomAccess();
 			}
 			else
 			{

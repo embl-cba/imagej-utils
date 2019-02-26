@@ -1,9 +1,6 @@
 package de.embl.cba.bdv.utils.overlays;
 
-import bdv.util.Bdv;
-import bdv.util.BdvFunctions;
-import bdv.util.BdvOptions;
-import bdv.util.BdvOverlay;
+import bdv.util.*;
 import de.embl.cba.bdv.utils.BdvUtils;
 import net.imglib2.RealPoint;
 import net.imglib2.type.numeric.ARGBType;
@@ -21,6 +18,7 @@ public class BdvGrayValuesOverlay extends BdvOverlay implements MouseMotionListe
 
 	ArrayList< Double > values;
 	ArrayList< ARGBType > colors;
+	private final BdvOverlaySource< BdvGrayValuesOverlay > bdvOverlaySource;
 
 	public BdvGrayValuesOverlay( Bdv bdv, int fontSize )
 	{
@@ -28,20 +26,26 @@ public class BdvGrayValuesOverlay extends BdvOverlay implements MouseMotionListe
 
 		this.bdv = bdv;
 
-		bdv.getBdvHandle().getViewerPanel().getDisplay().addMouseMotionListener( this );
+		bdv.getBdvHandle().getViewerPanel()
+				.getDisplay().addMouseMotionListener( this );
 
 		this.fontSize = fontSize;
 
 		values = new ArrayList<>(  );
 		colors = new ArrayList<>(  );
 
-		BdvFunctions.showOverlay( this,
-				"gray values - overlay",
-				BdvOptions.options().addTo( bdv ) );
-
+		bdvOverlaySource = BdvFunctions.showOverlay( this,
+			"gray values - overlay",
+			BdvOptions.options().addTo( bdv ) );
 	}
 
-	public void setValuesAndColors( ArrayList< Double > values, ArrayList< ARGBType > colors )
+	public BdvOverlaySource< BdvGrayValuesOverlay > getBdvOverlaySource()
+	{
+		return bdvOverlaySource;
+	}
+
+	public void setValuesAndColors(
+			ArrayList< Double > values, ArrayList< ARGBType > colors )
 	{
 		this.values = values;
 		this.colors = colors;
@@ -51,16 +55,28 @@ public class BdvGrayValuesOverlay extends BdvOverlay implements MouseMotionListe
 	protected void draw( final Graphics2D g )
 	{
 
-		int[] stringPosition = new int[]{ 10, 20 + fontSize };
+		int[] stringPosition = getTextPosition();
 
 		for ( int i = 0; i < values.size(); ++i )
 		{
 			final int colorIndex = colors.get( i ).get();
-			g.setColor( new Color( ARGBType.red( colorIndex ), ARGBType.green( colorIndex ), ARGBType.blue( colorIndex ) )  );
+			g.setColor( new Color(
+					ARGBType.red( colorIndex ),
+					ARGBType.green( colorIndex ),
+					ARGBType.blue( colorIndex ) )  );
 			g.setFont( new Font("TimesRoman", Font.PLAIN, fontSize ) );
-			g.drawString( "" + values.get( i ), stringPosition[ 0 ], stringPosition[ 1 ] + fontSize * i + 5);
+			g.drawString( "" + values.get( i ),
+					stringPosition[ 0 ],
+					stringPosition[ 1 ] + fontSize * i + 5);
 		}
 
+	}
+
+	private int[] getTextPosition()
+	{
+		final int height = bdv.getBdvHandle().getViewerPanel().getDisplay().getHeight();
+
+		return new int[]{ 10, height - ( values.size() + 1 ) * fontSize  };
 	}
 
 	@Override
@@ -74,10 +90,13 @@ public class BdvGrayValuesOverlay extends BdvOverlay implements MouseMotionListe
 	{
 		final RealPoint realPoint = new RealPoint( 3 );
 		bdv.getBdvHandle().getViewerPanel().getGlobalMouseCoordinates( realPoint );
-		final int currentTimepoint = bdv.getBdvHandle().getViewerPanel().getState().getCurrentTimepoint();
+
+		final int currentTimepoint =
+				bdv.getBdvHandle().getViewerPanel().getState().getCurrentTimepoint();
 
 		final Map< Integer, Double > pixelValuesOfActiveSources =
-				BdvUtils.getPixelValuesOfActiveSources( bdv, realPoint, currentTimepoint );
+				BdvUtils.getPixelValuesOfActiveSources(
+						bdv, realPoint, currentTimepoint );
 
 		ArrayList< Double > values = new ArrayList<>(  );
 		ArrayList< ARGBType > colors = new ArrayList<>(  );
