@@ -10,7 +10,8 @@
 
 	<groupId>de.embl.cba</groupId>
 	<artifactId>bdv-utils</artifactId>
-	<version>0.2.02</version>
+	<url>https://github.com/tischi/bdv-utils</url>
+	<version>0.2.04</version>
 
 	<name>BigDataViewer Utilities</name>
 	<description>TODO</description>
@@ -80,7 +81,6 @@
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>EMBL</license.copyrightOwners>
 		<imagej.app.directory>/Applications/Fiji.app/</imagej.app.directory>
-		<enforcer.skip>true</enforcer.skip>
 	</properties>
 
 
@@ -146,8 +146,7 @@
 		<dependency>
 			<groupId>de.embl.cba</groupId>
 			<artifactId>transforms-utils</artifactId>
-			<version>0.1.03</version>
-			<!--<type>pom</type>-->
+			<version>0.2.00</version>
 		</dependency>
 
 	</dependencies>
