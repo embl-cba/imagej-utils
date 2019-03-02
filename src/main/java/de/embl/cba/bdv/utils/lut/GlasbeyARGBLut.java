@@ -15,7 +15,10 @@ public class GlasbeyARGBLut implements ARGBLut
 	@Override
 	public int getARGB( double x )
 	{
-		return indices[ (int) ( x * NUM_COLORS ) ];
+		// convert to index > 0, unless x = 0.0D;
+		// (index 0 is the black color)
+		final int index = ( int ) Math.ceil( x * NUM_COLORS );
+		return indices[ index ];
 	}
 
 	/**

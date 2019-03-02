@@ -136,26 +136,27 @@ public class BdvWriter
 		final long planeSizeInBytes = imp.getWidth() * imp.getHeight() * imp.getBytesPerPixel();
 		final long ijMaxMemory = IJ.maxMemory();
 		final int numCellCreatorThreads = Math.max( 1, PluginHelper.numThreads() - 1 );
-		final WriteSequenceToHdf5.LoopbackHeuristic loopbackHeuristic = new WriteSequenceToHdf5.LoopbackHeuristic()
-		{
-			@Override
-			public boolean decide( final RandomAccessibleInterval< ? > originalImg, final int[] factorsToOriginalImg, final int previousLevel, final int[] factorsToPreviousLevel, final int[] chunkSize )
-			{
-				if ( previousLevel < 0 )
-					return false;
-
-				if ( WriteSequenceToHdf5.numElements( factorsToOriginalImg ) / WriteSequenceToHdf5.numElements( factorsToPreviousLevel ) >= 8 )
-					return true;
-
-				if ( isVirtual )
+		final WriteSequenceToHdf5.LoopbackHeuristic loopbackHeuristic =
+				( originalImg,
+				  factorsToOriginalImg,
+				  previousLevel,
+				  factorsToPreviousLevel,
+				  chunkSize ) ->
 				{
-					final long requiredCacheSize = planeSizeInBytes * factorsToOriginalImg[ 2 ] * chunkSize[ 2 ];
-					if ( requiredCacheSize > ijMaxMemory / 4 )
-						return true;
-				}
-
+			if ( previousLevel < 0 )
 				return false;
+
+			if ( WriteSequenceToHdf5.numElements( factorsToOriginalImg ) / WriteSequenceToHdf5.numElements( factorsToPreviousLevel ) >= 8 )
+				return true;
+
+			if ( isVirtual )
+			{
+				final long requiredCacheSize = planeSizeInBytes * factorsToOriginalImg[ 2 ] * chunkSize[ 2 ];
+				if ( requiredCacheSize > ijMaxMemory / 4 )
+					return true;
 			}
+
+			return false;
 		};
 
 		final WriteSequenceToHdf5.AfterEachPlane afterEachPlane = new WriteSequenceToHdf5.AfterEachPlane()
