@@ -37,6 +37,7 @@ public class BdvGrayValuesOverlay extends BdvOverlay implements MouseMotionListe
 		bdvOverlaySource = BdvFunctions.showOverlay( this,
 			"gray values - overlay",
 			BdvOptions.options().addTo( bdv ) );
+
 	}
 
 	public BdvOverlaySource< BdvGrayValuesOverlay > getBdvOverlaySource()
@@ -107,10 +108,14 @@ public class BdvGrayValuesOverlay extends BdvOverlay implements MouseMotionListe
 			final ARGBType color = BdvUtils.getColor( bdv, sourceId );
 			final int colorIndex = color.get();
 			if ( colorIndex == 0 )
-				colors.add( new ARGBType( ARGBType.rgba( 255, 255, 255, 255 ) ) );
+			{
+				colors.add( new ARGBType(
+						ARGBType.rgba( 255, 255, 255, 255 ) ) );
+			}
 			else
+			{
 				colors.add( color );
-
+			}
 		}
 
 		setValuesAndColors( values, colors );

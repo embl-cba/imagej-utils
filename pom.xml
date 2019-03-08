@@ -11,7 +11,7 @@
 	<groupId>de.embl.cba</groupId>
 	<artifactId>bdv-utils</artifactId>
 	<url>https://github.com/tischi/bdv-utils</url>
-	<version>0.2.04</version>
+	<version>0.2.08</version>
 
 	<name>BigDataViewer Utilities</name>
 	<description>TODO</description>

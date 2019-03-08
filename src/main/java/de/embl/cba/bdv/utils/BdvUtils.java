@@ -3,6 +3,7 @@ package de.embl.cba.bdv.utils;
 import bdv.VolatileSpimSource;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
+import de.embl.cba.bdv.utils.sources.LazySpimSource;
 import de.embl.cba.bdv.utils.sources.SelectableARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.DoubleStream;
 
 import static de.embl.cba.transforms.utils.Transforms.createBoundingIntervalAfterTransformation;
@@ -231,15 +233,19 @@ public abstract class BdvUtils
 		return new ARGBType( ARGBType.rgba( color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() ) );
 	}
 
-	public static long[] getPositionInSource( Source source, RealPoint positionInViewerInMicrometerUnits, int t, int level )
+	public static long[] getPositionInSource(
+			Source source,
+			RealPoint positionInViewerInMicrometerUnits, int t, int level )
 	{
 		int n = 3;
 
-		final AffineTransform3D sourceTransform = BdvUtils.getSourceTransform( source, t, level );
+		final AffineTransform3D sourceTransform =
+				BdvUtils.getSourceTransform( source, t, level );
 
 		final RealPoint positionInSourceInPixelUnits = new RealPoint( n );
 
-		sourceTransform.inverse().apply( positionInViewerInMicrometerUnits, positionInSourceInPixelUnits );
+		sourceTransform.inverse().apply(
+				positionInViewerInMicrometerUnits, positionInSourceInPixelUnits );
 
 		final long[] longPosition = new long[ n ];
 
@@ -542,18 +548,21 @@ public abstract class BdvUtils
 	public static RealPoint getGlobalMouseCoordinates( Bdv bdv )
 	{
 		final RealPoint posInBdvInMicrometer = new RealPoint( 3 );
-		bdv.getBdvHandle().getViewerPanel().getGlobalMouseCoordinates( posInBdvInMicrometer );
+		bdv.getBdvHandle().getViewerPanel()
+				.getGlobalMouseCoordinates( posInBdvInMicrometer );
 		return posInBdvInMicrometer;
 	}
 
 
-	public static < R extends RealType< R > > Map< Integer, Double >
+	public static < R extends RealType< R > >
+	Map< Integer, Double >
 	getPixelValuesOfActiveSources( Bdv bdv, RealPoint point, int t )
 	{
-		final HashMap< Integer, Double > sourceValueMap = new HashMap<>();
+		final HashMap< Integer, Double > sourceIndexToPixelValue = new HashMap<>();
 
 		final List< Integer > visibleSourceIndices =
-				bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+				bdv.getBdvHandle().getViewerPanel()
+						.getState().getVisibleSourceIndices();
 
 		for ( int sourceIndex : visibleSourceIndices )
 		{
@@ -566,10 +575,10 @@ public abstract class BdvUtils
 			final Double realDouble = getValueAtGlobalCoordinates( source, point, t );
 
 			if ( realDouble != null )
-				sourceValueMap.put( sourceIndex, realDouble );
+				sourceIndexToPixelValue.put( sourceIndex, realDouble );
 		}
 
-		return sourceValueMap;
+		return sourceIndexToPixelValue;
 	}
 
 	public static Double getValueAtGlobalCoordinates(
@@ -578,22 +587,21 @@ public abstract class BdvUtils
 		final RandomAccess< RealType > sourceAccess =
 				getRealTypeNonVolatileRandomAccess( source, t );
 
+		if ( sourceAccess == null ) return null;
+
 		final long[] positionInSource =
 				BdvUtils.getPositionInSource( source, point, t, 0 );
 
 		sourceAccess.setPosition( positionInSource );
 
-		Double value;
 		try
 		{
-			value = sourceAccess.get().getRealDouble();
+			return sourceAccess.get().getRealDouble();
 		}
-		catch ( ArrayIndexOutOfBoundsException e )
+		catch ( Exception e )
 		{
-			value = null;
+			return null;
 		}
-
-		return value;
 
 	}
 
@@ -602,6 +610,11 @@ public abstract class BdvUtils
 	{
 		final RandomAccess< RealType > access;
 
+		if ( source instanceof LazySpimSource )
+		{
+			source = ( ( LazySpimSource ) source ).wrappedSource();
+		}
+
 		if ( source instanceof TransformedSource )
 		{
 			source = ( ( TransformedSource ) source ).getWrappedSource();
@@ -609,18 +622,13 @@ public abstract class BdvUtils
 
 		if ( source instanceof ARGBConvertedRealSource )
 		{
-			final Source wrappedRealSource =
-					( ( ARGBConvertedRealSource ) source ).getWrappedRealSource();
+			source = ( ( ARGBConvertedRealSource ) source ).getWrappedRealSource();
+		}
 
-			if ( wrappedRealSource instanceof VolatileSpimSource )
-			{
-				access = ( ( VolatileSpimSource ) wrappedRealSource )
-						.nonVolatile().getSource( t, 0 ).randomAccess();
-			}
-			else
-			{
-				access = wrappedRealSource.getSource( t, 0 ).randomAccess();
-			}
+		if ( source instanceof VolatileSpimSource )
+		{
+			access = ( ( VolatileSpimSource ) source )
+					.nonVolatile().getSource( t, 0 ).randomAccess();
 		}
 		else
 		{
