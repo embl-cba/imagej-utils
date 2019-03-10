@@ -27,7 +27,7 @@ public class ExampleBdvRaiUnsignedShortTypeVolumeExport
 
 		export.export( rai,
 				filePathWithoutExtension,
-				new double[]{1,1,50},
+				new double[]{1,1,5},
 				"pixel",
 				new double[]{0,0,0}
 				);
@@ -48,7 +48,7 @@ public class ExampleBdvRaiUnsignedShortTypeVolumeExport
 	public static RandomAccessibleInterval< UnsignedShortType > getRandomImage()
 	{
 		final RandomAccessibleInterval< UnsignedShortType > rai
-				= ArrayImgs.unsignedShorts( 100, 100, 1 );
+				= ArrayImgs.unsignedShorts( 100, 100, 100 );
 
 		final Cursor< UnsignedShortType > cursor = Views.iterable( rai ).cursor();
 		final Random random = new Random();

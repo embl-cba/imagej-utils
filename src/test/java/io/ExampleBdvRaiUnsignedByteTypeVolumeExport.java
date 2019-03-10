@@ -27,7 +27,7 @@ public class ExampleBdvRaiUnsignedByteTypeVolumeExport
 
 		export.export( rai,
 				filePathWithoutExtension,
-				new double[]{1,1,50},
+				new double[]{1,1,5},
 				"pixel",
 				new double[]{0,0,0}
 				);
@@ -36,23 +36,28 @@ public class ExampleBdvRaiUnsignedByteTypeVolumeExport
 
 	}
 
-	public static void showImage( String filePathWithoutExtension ) throws SpimDataException
+	public static void showImage( String filePathWithoutExtension )
+			throws SpimDataException
 	{
 		final SpimData spimData = new XmlIoSpimData().load(
 				filePathWithoutExtension + ".xml" );
 
-		final List< BdvStackSource< ? > > show = BdvFunctions.show( spimData );
+		final List< BdvStackSource< ? > > show =
+				BdvFunctions.show( spimData );
 		show.get( 0 ).setDisplayRange( 0, 255 );
 	}
 
-	public static RandomAccessibleInterval< UnsignedByteType > getRandomImage()
+	public static
+	RandomAccessibleInterval< UnsignedByteType > getRandomImage()
 	{
 		final RandomAccessibleInterval< UnsignedByteType > rai
-				= ArrayImgs.unsignedBytes( 100, 100, 1 );
+				= ArrayImgs.unsignedBytes( 100, 100, 100 );
 
-		final Cursor< UnsignedByteType > cursor = Views.iterable( rai ).cursor();
+		final Cursor< UnsignedByteType > cursor =
+				Views.iterable( rai ).cursor();
 		final Random random = new Random();
-		while (cursor.hasNext() ) cursor.next().set( random.nextInt( 255 ) );
+		while (cursor.hasNext() )
+			cursor.next().set( random.nextInt( 255 ) );
 		return rai;
 	}
 

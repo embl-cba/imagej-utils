@@ -40,7 +40,8 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 			String filePathWithoutExtension,
 			double[] calibration,
 			String calibrationUnit,
-			double[] translation )
+			double[] translation // TODO: replace by AffineTransform3D
+	)
 	{
 
 		final File hdf5File = new File( filePathWithoutExtension + ".h5" );
