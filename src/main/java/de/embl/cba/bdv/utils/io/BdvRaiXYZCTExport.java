@@ -285,10 +285,9 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 				{
 
 					final RandomAccessibleInterval< ? > raiXYZ
-							= Views.dropSingletonDimensions(
-							Views.hyperSlice(
+							= Views.hyperSlice(
 									Views.hyperSlice( raiXYZCT, TIME_DIM, timepointId ),
-										CHANNEL_DIM, setupId ) );
+										CHANNEL_DIM, setupId );
 
 
 					if ( Util.getTypeFromInterval( raiXYZ ) instanceof UnsignedShortType )

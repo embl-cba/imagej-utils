@@ -50,7 +50,7 @@ public class ExampleBdvRaiUnsignedShortType5DExport
 	public static RandomAccessibleInterval< UnsignedShortType > getRandomImage()
 	{
 		final RandomAccessibleInterval< UnsignedShortType > rai
-				= ArrayImgs.unsignedShorts( 100, 100, 100, 3, 10 );
+				= ArrayImgs.unsignedShorts( 100, 100, 1, 3, 10 );
 
 		final Cursor< UnsignedShortType > cursor = Views.iterable( rai ).cursor();
 		final Random random = new Random();
