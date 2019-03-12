@@ -67,7 +67,7 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 		final ProgressWriter progressWriter = new ProgressWriterBdv();
 		progressWriter.out().println( "starting export..." );
 
-		final BasicImgLoader imgLoader = new RaiImgLoader( raiXYZCT, calibration, calibrationUnit );
+		final BasicImgLoader imgLoader = new RaiXYZCTLoader( raiXYZCT, calibration, calibrationUnit );
 
 		final int numTimePoints = (int) raiXYZCT.dimension( TIME_DIM );
 		final int numChannels = (int) raiXYZCT.dimension( CHANNEL_DIM );
@@ -210,15 +210,15 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 		return new FinalDimensions( dimensions );
 	}
 
-	class RaiImgLoader implements BasicImgLoader
+	class RaiXYZCTLoader implements BasicImgLoader
 	{
 		final RandomAccessibleInterval< ? > raiXYZCT;
 		final double[] calibration;
 		final String calibrationUnit;
 
-		public RaiImgLoader( RandomAccessibleInterval< ? > raiXYZCT,
-							 double[] calibration,
-							 String calibrationUnit )
+		public RaiXYZCTLoader( RandomAccessibleInterval< ? > raiXYZCT,
+							   double[] calibration,
+							   String calibrationUnit )
 		{
 			this.raiXYZCT = raiXYZCT;
 			this.calibration = calibration;

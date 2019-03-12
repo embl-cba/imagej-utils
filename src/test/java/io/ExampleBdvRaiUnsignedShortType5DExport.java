@@ -3,6 +3,7 @@ package io;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvStackSource;
 import de.embl.cba.bdv.utils.io.BdvRaiVolumeExport;
+import de.embl.cba.bdv.utils.io.BdvRaiXYZCTExport;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
@@ -21,9 +22,9 @@ public class ExampleBdvRaiUnsignedShortType5DExport
 	{
 		final RandomAccessibleInterval< UnsignedShortType > rai = getRandomImage();
 
-		final BdvRaiVolumeExport export = new BdvRaiVolumeExport();
+		final BdvRaiXYZCTExport export = new BdvRaiXYZCTExport();
 
-		final String filePathWithoutExtension = "/Users/tischer/Desktop/hello";
+		final String filePathWithoutExtension = "/Users/tischer/Desktop/image5D";
 
 		export.export( rai,
 				"5D-image",
