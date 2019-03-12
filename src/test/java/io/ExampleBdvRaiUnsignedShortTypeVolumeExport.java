@@ -26,6 +26,7 @@ public class ExampleBdvRaiUnsignedShortTypeVolumeExport
 		final String filePathWithoutExtension = "/Users/tischer/Desktop/hello";
 
 		export.export( rai,
+				"test",
 				filePathWithoutExtension,
 				new double[]{1,1,5},
 				"pixel",

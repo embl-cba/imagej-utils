@@ -32,14 +32,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
+public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 {
 
 	public static final int CHANNEL_DIM = 3;
 	public static final int TIME_DIM = 4;
 
 	public void export(
-			RandomAccessibleInterval< T > rai,
+			RandomAccessibleInterval< T > raiXYZCT,
 			String name,
 			String filePathWithoutExtension,
 			double[] calibration,
@@ -48,7 +48,7 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 	)
 	{
 
-		rai = Views.zeroMin( rai ); // below code does not save pixels at negative coordinates....
+		raiXYZCT = Views.zeroMin( raiXYZCT ); // below code does not save pixels at negative coordinates....
 
 		final File hdf5File = new File( filePathWithoutExtension + ".h5" );
 		final File xmlFile = new File( filePathWithoutExtension + ".xml" );
@@ -56,7 +56,7 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 		// set up calibration
 		String pixelUnit = getPixelUnit( calibrationUnit );
 		final FinalVoxelDimensions voxelSize = new FinalVoxelDimensions( pixelUnit, calibration );
-		final FinalDimensions imageSize = getFinalDimensions( rai );
+		final FinalDimensions imageSize = getFinalDimensions( raiXYZCT );
 
 		// propose reasonable mipmap settings
 		final ExportMipmapInfo autoMipmapSettings =
@@ -67,10 +67,10 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 		final ProgressWriter progressWriter = new ProgressWriterBdv();
 		progressWriter.out().println( "starting export..." );
 
-		final BasicImgLoader imgLoader = new RaiImgLoader( rai, calibration, calibrationUnit );
+		final BasicImgLoader imgLoader = new RaiImgLoader( raiXYZCT, calibration, calibrationUnit );
 
-		final int numTimePoints = (int) rai.dimension( TIME_DIM );
-		final int numChannels = (int) rai.dimension( CHANNEL_DIM );
+		final int numTimePoints = (int) raiXYZCT.dimension( TIME_DIM );
+		final int numChannels = (int) raiXYZCT.dimension( CHANNEL_DIM );
 
 		final AffineTransform3D sourceTransform =
 				getSourceTransform3D( calibration, translation );
@@ -212,15 +212,15 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 
 	class RaiImgLoader implements BasicImgLoader
 	{
-		final RandomAccessibleInterval< ? > rai;
+		final RandomAccessibleInterval< ? > raiXYZCT;
 		final double[] calibration;
 		final String calibrationUnit;
 
-		public RaiImgLoader( RandomAccessibleInterval< ? > rai,
+		public RaiImgLoader( RandomAccessibleInterval< ? > raiXYZCT,
 							 double[] calibration,
 							 String calibrationUnit )
 		{
-			this.rai = rai;
+			this.raiXYZCT = raiXYZCT;
 			this.calibration = calibration;
 			this.calibrationUnit = calibrationUnit;
 		}
@@ -242,9 +242,9 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 				public Dimensions getImageSize( int timepointId )
 				{
 					return new FinalDimensions(
-									rai.dimension( 0 ),
-									rai.dimension( 1 ),
-									rai.dimension( 2 ) );
+									raiXYZCT.dimension( 0 ),
+									raiXYZCT.dimension( 1 ),
+									raiXYZCT.dimension( 2 ) );
 				}
 
 				@Override
@@ -283,19 +283,29 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 				public RandomAccessibleInterval< UnsignedShortType >
 				getImage( int timepointId, ImgLoaderHint... hints )
 				{
-					if ( Util.getTypeFromInterval( rai ) instanceof UnsignedShortType )
-						return (RandomAccessibleInterval) rai;
 
-					if ( Util.getTypeFromInterval( rai ) instanceof UnsignedByteType )
+					final RandomAccessibleInterval< ? > raiXYZ
+							= Views.dropSingletonDimensions(
+							Views.hyperSlice(
+									Views.hyperSlice( raiXYZCT, TIME_DIM, timepointId ),
+										CHANNEL_DIM, setupId ) );
+
+
+					if ( Util.getTypeFromInterval( raiXYZ ) instanceof UnsignedShortType )
+					{
+						return (RandomAccessibleInterval) raiXYZ;
+					}
+					else if ( Util.getTypeFromInterval( raiXYZ ) instanceof UnsignedByteType )
 					{
 						return Converters.convert(
-								rai,
+								raiXYZ,
 								( i, o ) -> o.setInteger( ((UnsignedByteType) i).get() ),
 								new UnsignedShortType( ) );
 					}
-
-					return null;
-
+					else
+					{
+						return null;
+					}
 				}
 
 				@Override

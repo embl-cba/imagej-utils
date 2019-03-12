@@ -5,23 +5,12 @@ import de.embl.cba.imaris.ImarisWriter;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.loops.LoopBuilder;
-import net.imglib2.ops.parse.token.Real;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.ShortType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.util.Intervals;
-import net.imglib2.util.Util;
-import net.imglib2.view.Views;
 
 public class BdvExportBenchmarking
 {
@@ -54,6 +43,7 @@ public class BdvExportBenchmarking
 		BdvRaiVolumeExport export = new BdvRaiVolumeExport();
 		export.export(
 				wrap,
+				"test",
 				"/Users/tischer/Desktop/bdv-benchmark/bdv-wrapped-8bit",
 				new double[]{1,1,1},
 				"pixel",
@@ -68,6 +58,7 @@ public class BdvExportBenchmarking
 		export = new BdvRaiVolumeExport();
 		export.export(
 				shorts,
+				"test",
 				"/Users/tischer/Desktop/bdv-benchmark/bdv-native-16bit",
 				new double[]{1,1,1},
 				"pixel",
@@ -82,6 +73,7 @@ public class BdvExportBenchmarking
 		export = new BdvRaiVolumeExport();
 		export.export(
 				shorts,
+				"test",
 				"/Users/tischer/Desktop/bdv-benchmark/bdv-native-8bit",
 				new double[]{1,1,1},
 				"pixel",

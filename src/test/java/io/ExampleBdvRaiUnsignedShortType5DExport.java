@@ -9,24 +9,24 @@ import mpicbg.spim.data.XmlIoSpimData;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.view.Views;
 
 import java.util.List;
 import java.util.Random;
 
-public class ExampleBdvRaiUnsignedByteTypeVolumeExport
+public class ExampleBdvRaiUnsignedShortType5DExport
 {
 	public static void main( String[] args ) throws SpimDataException
 	{
-		final RandomAccessibleInterval< UnsignedByteType > rai = getRandomImage();
+		final RandomAccessibleInterval< UnsignedShortType > rai = getRandomImage();
 
 		final BdvRaiVolumeExport export = new BdvRaiVolumeExport();
 
 		final String filePathWithoutExtension = "/Users/tischer/Desktop/hello";
 
 		export.export( rai,
-				"test",
+				"5D-image",
 				filePathWithoutExtension,
 				new double[]{1,1,5},
 				"pixel",
@@ -37,28 +37,23 @@ public class ExampleBdvRaiUnsignedByteTypeVolumeExport
 
 	}
 
-	public static void showImage( String filePathWithoutExtension )
-			throws SpimDataException
+	public static void showImage( String filePathWithoutExtension ) throws SpimDataException
 	{
 		final SpimData spimData = new XmlIoSpimData().load(
 				filePathWithoutExtension + ".xml" );
 
-		final List< BdvStackSource< ? > > show =
-				BdvFunctions.show( spimData );
-		show.get( 0 ).setDisplayRange( 0, 255 );
+		final List< BdvStackSource< ? > > show = BdvFunctions.show( spimData );
+		show.get( 0 ).setDisplayRange( 0, 65535 );
 	}
 
-	public static
-	RandomAccessibleInterval< UnsignedByteType > getRandomImage()
+	public static RandomAccessibleInterval< UnsignedShortType > getRandomImage()
 	{
-		final RandomAccessibleInterval< UnsignedByteType > rai
-				= ArrayImgs.unsignedBytes( 100, 100, 100 );
+		final RandomAccessibleInterval< UnsignedShortType > rai
+				= ArrayImgs.unsignedShorts( 100, 100, 100, 3, 10 );
 
-		final Cursor< UnsignedByteType > cursor =
-				Views.iterable( rai ).cursor();
+		final Cursor< UnsignedShortType > cursor = Views.iterable( rai ).cursor();
 		final Random random = new Random();
-		while (cursor.hasNext() )
-			cursor.next().set( random.nextInt( 255 ) );
+		while (cursor.hasNext() ) cursor.next().set( random.nextInt( 65535 ) );
 		return rai;
 	}
 
