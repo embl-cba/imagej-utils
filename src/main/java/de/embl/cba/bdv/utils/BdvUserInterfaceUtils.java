@@ -74,68 +74,23 @@ public abstract class BdvUserInterfaceUtils
 		JButton colorButton = new JButton( "C" );
 		colorButton.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
 
-		colorButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( ActionEvent e )
+		colorButton.addActionListener( e -> {
+
+			Color color = JColorChooser.showDialog( null, "", null );
+			if ( color == null ) return;
+
+			for ( int i : sourceIndices )
 			{
-				Color color = JColorChooser.showDialog( null, "", null );
-
-				for ( int i : sourceIndices )
-				{
-					bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( i ).setColor( BdvUtils.asArgbType( color ) );
-				}
-
-				panel.setBackground( color );
+				bdv.getBdvHandle().getSetupAssignments()
+						.getConverterSetups().get( i ).setColor( BdvUtils.asArgbType( color ) );
 			}
+
+			panel.setBackground( color );
 		} );
 
 
 		return colorButton;
 	}
-
-//	public static JButton createColorButton( JPanel panel,
-//											 int[] buttonDimensions,
-//											 BdvStackSource bdvStackSource )
-//	{
-//
-//		JButton colorButton;
-//
-//		if ( BdvUtils.isARGBConvertedRealSource( bdvStackSource ) )
-//		{
-//			colorButton = new JButton( "S" );
-//		}
-//		else
-//		{
-//			colorButton = new JButton( "C" );
-//		}
-//
-//		colorButton.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
-//
-//		colorButton.addActionListener( new ActionListener()
-//		{
-//			@Override
-//			public void actionPerformed( ActionEvent e )
-//			{
-//				if ( BdvUtils.isARGBConvertedRealSource( bdvStackSource ) )
-//				{
-//					BdvUtils.getLabelsSource( bdvStackSource ).incrementSeed();
-//					bdvStackSource.getBdvHandle().getViewerPanel().requestRepaint();
-//				}
-//				else
-//				{
-//					Color color = JColorChooser.showDialog( null, "", null );
-//					bdvStackSource.setColor( BdvUtils.asArgbType( color ) );
-//					panel.setBackground( color );
-//				}
-//
-//			}
-//		} );
-//
-//
-//		return colorButton;
-//	}
-
 
 	public static JButton createColorButton( JPanel panel,
 											 int[] buttonDimensions,
@@ -147,15 +102,11 @@ public abstract class BdvUserInterfaceUtils
 
 		colorButton.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
 
-		colorButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( ActionEvent e )
-			{
-				Color color = JColorChooser.showDialog( null, "", null );
-				bdvStackSource.setColor( BdvUtils.asArgbType( color ) );
-				panel.setBackground( color );
-			}
+		colorButton.addActionListener( e -> {
+			Color color = JColorChooser.showDialog( null, "", null );
+			if ( color == null ) return;
+			bdvStackSource.setColor( BdvUtils.asArgbType( color ) );
+			panel.setBackground( color );
 		} );
 
 		return colorButton;
@@ -179,20 +130,15 @@ public abstract class BdvUserInterfaceUtils
 		JButton button = new JButton( "B" );
 		button.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
 
-		button.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( ActionEvent e )
+		button.addActionListener( e -> {
+			final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
+
+			for ( int i : sourceIndices )
 			{
-				final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
-
-				for ( int i : sourceIndices )
-				{
-					converterSetups.add( bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( i ) );
-				}
-
-				showBrightnessDialog( name, converterSetups );
+				converterSetups.add( bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( i ) );
 			}
+
+			showBrightnessDialog( name, converterSetups );
 		} );
 
 		return button;
@@ -246,8 +192,13 @@ public abstract class BdvUserInterfaceUtils
 
 		frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 
-		final BoundedValueDouble min = new BoundedValueDouble( 0, 65535, ( int ) converterSetups.get(0).getDisplayRangeMin() );
-		final BoundedValueDouble max = new BoundedValueDouble( 0, 65535, ( int ) converterSetups.get(0).getDisplayRangeMax() );
+		final double currentRangeMin = converterSetups.get( 0 ).getDisplayRangeMin();
+		final double currentRangeMax = converterSetups.get( 0 ).getDisplayRangeMax();
+
+		final BoundedValueDouble min =
+				new BoundedValueDouble( 0, 3 * currentRangeMax, currentRangeMin );
+		final BoundedValueDouble max =
+				new BoundedValueDouble( 0, 3 * currentRangeMax, currentRangeMax );
 
 		JPanel panel = new JPanel();
 		panel.setLayout( new BoxLayout( panel, BoxLayout.PAGE_AXIS ) );
@@ -255,7 +206,7 @@ public abstract class BdvUserInterfaceUtils
 		final SliderPanelDouble maxSlider = new SliderPanelDouble( "Max", max, 1 );
 
 		final BrightnessUpdateListener brightnessUpdateListener =
-				new BrightnessUpdateListener( min, max, converterSetups );
+				new BrightnessUpdateListener( min, max, minSlider, maxSlider, converterSetups );
 
 		min.setUpdateListener( brightnessUpdateListener );
 		max.setUpdateListener( brightnessUpdateListener );
@@ -269,6 +220,7 @@ public abstract class BdvUserInterfaceUtils
 		frame.setBounds( MouseInfo.getPointerInfo().getLocation().x,
 				MouseInfo.getPointerInfo().getLocation().y,
 				120, 10);
+		frame.setResizable( false );
 		frame.pack();
 		frame.setVisible( true );
 
@@ -323,6 +275,7 @@ public abstract class BdvUserInterfaceUtils
 		frame.setBounds( MouseInfo.getPointerInfo().getLocation().x,
 				MouseInfo.getPointerInfo().getLocation().y,
 				120, 10);
+		frame.setResizable( false );
 		frame.pack();
 		frame.setVisible( true );
 

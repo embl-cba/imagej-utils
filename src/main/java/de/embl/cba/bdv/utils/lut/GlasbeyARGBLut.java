@@ -5,10 +5,18 @@ import net.imglib2.type.numeric.ARGBType;
 public class GlasbeyARGBLut implements ARGBLut
 {
 	public static final int NUM_COLORS = 255;
+	private static int alpha;
 	private final int[] indices;
 
 	public GlasbeyARGBLut()
 	{
+		alpha = 255;
+		indices = this.argbGlasbeyIndices();
+	}
+
+	public GlasbeyARGBLut( int alpha )
+	{
+		this.alpha = alpha;
 		indices = this.argbGlasbeyIndices();
 	}
 
@@ -94,11 +102,12 @@ public class GlasbeyARGBLut implements ARGBLut
 
 		for (int i = 0; i < r.length; i++)
 		{
+
 			argbIndices[ i ] = ARGBType.rgba(
 					r[ i ],
 					g[ i ],
 					b[ i ],
-					255 );
+					alpha );
 		}
 
 		return argbIndices;

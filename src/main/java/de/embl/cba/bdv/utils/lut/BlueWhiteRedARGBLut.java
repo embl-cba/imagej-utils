@@ -4,12 +4,21 @@ import net.imglib2.type.numeric.ARGBType;
 
 public class BlueWhiteRedARGBLut implements ARGBLut
 {
+	private static int alpha;
 	private final int[] indices;
 	private final int numColors;
 
 	public BlueWhiteRedARGBLut( int numColors )
 	{
 		this.numColors = numColors;
+		alpha = 255;
+		indices = this.blueWhiteRedARGBIndices( numColors );
+	}
+
+	public BlueWhiteRedARGBLut( int numColors, int alpha )
+	{
+		this.numColors = numColors;
+		this.alpha = alpha;
 		indices = this.blueWhiteRedARGBIndices( numColors );
 	}
 
@@ -68,7 +77,7 @@ public class BlueWhiteRedARGBLut implements ARGBLut
 					lut[ 0 ][ i ],
 					lut[ 1 ][ i ],
 					lut[ 2 ][ i ],
-					255 );
+					alpha );
 		}
 
 		return argbIndices;
