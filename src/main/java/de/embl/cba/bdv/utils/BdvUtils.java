@@ -855,7 +855,8 @@ public abstract class BdvUtils
 
 	public static ARGBType getColor( Bdv bdv, int sourceId )
 	{
-		return bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( sourceId ).getColor();
+		return bdv.getBdvHandle().getSetupAssignments()
+				.getConverterSetups().get( sourceId ).getColor();
 	}
 
 	public static void repaint( Bdv bdv )
@@ -865,20 +866,21 @@ public abstract class BdvUtils
 
 	public static boolean isActive( Bdv bdv, Source source )
 	{
-		final List< SourceState< ? > > sources = bdv.getBdvHandle().getViewerPanel().getState().getSources();
-		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+		final List< SourceState< ? > > sources
+				= bdv.getBdvHandle().getViewerPanel().getState().getSources();
+
+		final List< Integer > visibleSourceIndices
+				= bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
 
 		for( Integer i : visibleSourceIndices  )
 		{
-			final Source< ? > spimSource = sources.get( i ).getSpimSource();
+			final Source< ? > visibleSource = sources.get( i ).getSpimSource();
 
-			if( spimSource instanceof TransformedSource )
-			{
-				if ( ( ( TransformedSource ) spimSource ).getWrappedSource().equals( source ) )
-				{
+			if ( visibleSource.equals( source ) ) return true;
+
+			if( visibleSource instanceof TransformedSource )
+				if ( ( ( TransformedSource ) visibleSource ).getWrappedSource().equals( source ) )
 					return true;
-				}
-			}
 		}
 
 		return false;

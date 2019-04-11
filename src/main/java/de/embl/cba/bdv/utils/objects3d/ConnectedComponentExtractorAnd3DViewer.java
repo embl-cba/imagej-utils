@@ -58,7 +58,7 @@ public class ConnectedComponentExtractorAnd3DViewer
 
 				long start = System.currentTimeMillis();
 				final Content content = universe.addMesh( objectMask, new Color3f( 1.0f, 1.0f, 1.0f ), "object", 250, new boolean[]{ true, true, true }, 1 );
-				System.out.println( "Computed mesh and created 3D display in [ms]: " + (System.currentTimeMillis() - start) );
+				// System.out.println( "Computed mesh and created 3D display in [ms]: " + (System.currentTimeMillis() - start) );
 			}
 		})).start();
 	}
@@ -104,7 +104,7 @@ public class ConnectedComponentExtractorAnd3DViewer
 				universe = new Image3DUniverse();
 				universe.show();
 				isUniverseCreated = true;
-				System.out.println( "Universe created in [ms]: " + (System.currentTimeMillis() - start) );
+//				System.out.println( "Universe created in [ms]: " + (System.currentTimeMillis() - start) );
 			}
 		})).start();
 	}

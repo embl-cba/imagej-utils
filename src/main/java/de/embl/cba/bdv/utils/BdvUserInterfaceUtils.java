@@ -15,6 +15,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class BdvUserInterfaceUtils
@@ -39,11 +40,11 @@ public abstract class BdvUserInterfaceUtils
 
 	}
 
-	public static void addSourcesDisplaySettingsUI( JPanel panel,
-													String name,
-													Bdv bdv,
-													ArrayList< Integer > sourceIndices,
-													Color color )
+	public static JPanel addSourcesDisplaySettingsUI( JPanel panel,
+													  String name,
+													  Bdv bdv,
+													  ArrayList< Integer > sourceIndices,
+													  Color color )
 	{
 		int[] buttonDimensions = new int[]{ 50, 30 };
 
@@ -63,6 +64,8 @@ public abstract class BdvUserInterfaceUtils
 		channelPanel.add( createVisibilityCheckbox( buttonDimensions, bdv, sourceIndices ) );
 
 		panel.add( channelPanel );
+
+		return channelPanel;
 
 	}
 
@@ -337,10 +340,15 @@ public abstract class BdvUserInterfaceUtils
 
 	public static void addDisplaySettingsUI( Bdv bdv, JPanel panel )
 	{
-		final java.util.List< ConverterSetup > converterSetups = bdv.getBdvHandle().getSetupAssignments().getConverterSetups();
-		final java.util.List< SourceState< ? > > sources = bdv.getBdvHandle().getViewerPanel().getState().getSources();
-		final List< Integer > nonOverlaySourceIndices = BdvUtils.getNonOverlaySourceIndices( bdv, sources );
+		final java.util.List< ConverterSetup > converterSetups =
+				bdv.getBdvHandle().getSetupAssignments().getConverterSetups();
+		final java.util.List< SourceState< ? > > sources =
+				bdv.getBdvHandle().getViewerPanel().getState().getSources();
+		final List< Integer > nonOverlaySourceIndices =
+				BdvUtils.getNonOverlaySourceIndices( bdv, sources );
 		ArrayList< Color > defaultColors = BdvUtils.getColors( nonOverlaySourceIndices );
+
+		final HashMap< String, JPanel > nameToDisplayPanel = new HashMap<>();
 
 		int iColor = 0;
 		for ( int sourceIndex : nonOverlaySourceIndices )
@@ -354,7 +362,7 @@ public abstract class BdvUserInterfaceUtils
 
 			String name = BdvUtils.getName( bdv, sourceIndex );
 
-			addSourcesDisplaySettingsUI( panel, name, bdv, indices, color );
+			final JPanel panel1 = addSourcesDisplaySettingsUI( panel, name, bdv, indices, color );
 		}
 
 	}
