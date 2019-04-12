@@ -48,6 +48,7 @@ public class ExampleBdvConnectedComponentExtractor
 		Image3DUniverse univ = new Image3DUniverse( );
 		univ.show( );
 		final Content content = univ.addMesh( regionMaskImp, null, "somename", 250, new boolean[]{ true, true, true }, 2 );
+
 		content.setColor( new Color3f(0.5f, 0, 0.5f ) );
 	}
 
