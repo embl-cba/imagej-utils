@@ -39,28 +39,29 @@ public class ConnectedComponentExtractorAnd3DViewer
 
 	private void createMeshAndDisplay( ImagePlus objectMask )
 	{
-		(new Thread(new Runnable()
-		{
-			public void run()
+		(new Thread( () -> {
+			while ( ! isUniverseCreated )
 			{
-				while ( ! isUniverseCreated )
+				try
 				{
-					try
-					{
-						Thread.sleep( 100 );
-					} catch ( InterruptedException e )
-					{
-						e.printStackTrace();
-					}
+					Thread.sleep( 100 );
+				} catch ( InterruptedException e )
+				{
+					e.printStackTrace();
 				}
-
-				//univ.addUniverseListener( new UniverseListener( bdvObjectExtractor ) );
-
-				long start = System.currentTimeMillis();
-				final Content content = universe.addMesh( objectMask, new Color3f( 1.0f, 1.0f, 1.0f ), "object", 250, new boolean[]{ true, true, true }, 1 );
-				// System.out.println( "Computed mesh and created 3D display in [ms]: " + (System.currentTimeMillis() - start) );
 			}
-		})).start();
+
+			//univ.addUniverseListener( new UniverseListener( bdvObjectExtractor ) );
+
+			universe.addMesh(
+					objectMask,
+					new Color3f( 1.0f, 1.0f, 1.0f ),
+					"object",
+					250,
+					new boolean[]{ true, true, true },
+					1 );
+
+		} )).start();
 	}
 
 	private ImagePlus extractObjectAsImagePlus( RealPoint coordinate, double resolution )

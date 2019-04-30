@@ -21,7 +21,6 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
-import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
@@ -36,7 +35,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.DoubleStream;
 
 import static de.embl.cba.transforms.utils.Transforms.createBoundingIntervalAfterTransformation;
@@ -217,11 +215,11 @@ public abstract class BdvUtils
 //	{
 //		if ( source instanceof TransformedSource )
 //		{
-//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedRealSource();
+//			final Source wrappedVolatileSource = ( ( TransformedSource ) source ).getWrappedRealSource();
 //
-//			if ( wrappedSource instanceof ARGBConvertedRealSource )
+//			if ( wrappedVolatileSource instanceof ARGBConvertedRealSource )
 //			{
-//				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedRealSource( t, level );
+//				return ( ( ARGBConvertedRealSource ) wrappedVolatileSource ).getWrappedRealSource( t, level );
 //			}
 //		}
 //
@@ -512,9 +510,9 @@ public abstract class BdvUtils
 //	{
 //		if ( source instanceof TransformedSource )
 //		{
-//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedRealSource();
+//			final Source wrappedVolatileSource = ( ( TransformedSource ) source ).getWrappedRealSource();
 //
-//			if ( wrappedSource instanceof ARGBConvertedRealSource )
+//			if ( wrappedVolatileSource instanceof ARGBConvertedRealSource )
 //			{
 //				return true;
 //			}
@@ -534,11 +532,11 @@ public abstract class BdvUtils
 //	{
 //		if ( source instanceof TransformedSource )
 //		{
-//			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedRealSource();
+//			final Source wrappedVolatileSource = ( ( TransformedSource ) source ).getWrappedRealSource();
 //
-//			if ( wrappedSource instanceof ARGBConvertedRealSource )
+//			if ( wrappedVolatileSource instanceof ARGBConvertedRealSource )
 //			{
-//				return  ( ( ARGBConvertedRealSource ) wrappedSource) ;
+//				return  ( ( ARGBConvertedRealSource ) wrappedVolatileSource) ;
 //			}
 //		}
 //
@@ -584,8 +582,8 @@ public abstract class BdvUtils
 	public static Double getValueAtGlobalCoordinates(
 			Source source, RealPoint point, int t  )
 	{
-		final RandomAccess< RealType > sourceAccess =
-				getRealTypeNonVolatileRandomAccess( source, t );
+		final RandomAccess< ? extends RealType< ? > > sourceAccess =
+				getRealTypeNonVolatileRandomAccess( source, t, 0 );
 
 		if ( sourceAccess == null ) return null;
 
@@ -605,37 +603,39 @@ public abstract class BdvUtils
 
 	}
 
-	public static RandomAccess< RealType >
-	getRealTypeNonVolatileRandomAccess( Source source, int t )
+	public static RandomAccess< ? extends RealType< ? >  >
+	getRealTypeNonVolatileRandomAccess( Source source, int t, int level )
 	{
-		final RandomAccess< RealType > access;
+		return getRealTypeNonVolatileRandomAccessibleInterval( source, t, level ).randomAccess();
+	}
 
-		if ( source instanceof LazySpimSource )
-		{
-			source = ( ( LazySpimSource ) source ).wrappedSource();
-		}
+	/**
+	 * Recursively go through the wrapped sources until the actual source is found.
+	 *
+	 * @param source
+	 * @param t
+	 * @param level
+	 * @return
+	 */
+	public static RandomAccessibleInterval< ? extends RealType< ? > >
+	getRealTypeNonVolatileRandomAccessibleInterval( Source source, int t, int level )
+	{
 
 		if ( source instanceof TransformedSource )
-		{
-			source = ( ( TransformedSource ) source ).getWrappedSource();
-		}
+			return getRealTypeNonVolatileRandomAccessibleInterval(
+					( ( TransformedSource ) source ).getWrappedSource(), t, level );
 
 		if ( source instanceof ARGBConvertedRealSource )
-		{
-			source = ( ( ARGBConvertedRealSource ) source ).getWrappedRealSource();
-		}
+			return getRealTypeNonVolatileRandomAccessibleInterval(
+					( ( ARGBConvertedRealSource ) source ).getWrappedRealSource(), t, level );
 
-		if ( source instanceof VolatileSpimSource )
-		{
-			access = ( ( VolatileSpimSource ) source )
-					.nonVolatile().getSource( t, 0 ).randomAccess();
-		}
+		if ( source instanceof LazySpimSource )
+			return ( ( LazySpimSource ) source ).getNonVolatileSource( t, level );
+		else if ( source instanceof VolatileSpimSource )
+			return  ( ( VolatileSpimSource ) source )
+					.nonVolatile().getSource( t, 0 );
 		else
-		{
-			access = source.getSource( t, 0 ).randomAccess();
-		}
-
-		return access;
+			return source.getSource( t, 0 );
 	}
 
 
