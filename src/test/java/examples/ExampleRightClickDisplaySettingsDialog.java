@@ -2,85 +2,75 @@ package examples;
 
 import bdv.util.*;
 import de.embl.cba.bdv.utils.BdvDialogs;
-import de.embl.cba.bdv.utils.BdvUtils;
-import net.imglib2.RealPoint;
 import net.imglib2.img.array.ArrayCursor;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.IntArray;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
+import net.imglib2.view.IntervalView;
+import net.imglib2.view.Views;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.ArrayList;
-
-import static de.embl.cba.bdv.utils.BdvUtils.getSourceIndicesAtSelectedPoint;
 
 public class ExampleRightClickDisplaySettingsDialog
 {
 	public static void main( String[] args )
 	{
-		// create first source
-		final ArrayImg< UnsignedIntType, IntArray > img
-				= ArrayImgs.unsignedInts( 256, 256, 1 );
-		final ArrayCursor< UnsignedIntType > cursor = img.cursor();
-		while ( cursor.hasNext() )
-			cursor.next().set( cursor.getIntPosition( 0 ) );
-
-		// show first sources
-		final BdvStackSource stackSource = BdvFunctions.show(
-				img, "image 1",
+		/**
+		 * show first image
+		 */
+		final ArrayImg< UnsignedIntType, IntArray > img0 = getImage();
+		final BdvStackSource stackSource0 = BdvFunctions.show(
+				img0, "image 0",
 				BdvOptions.options().is2D() );
-
-		stackSource.setDisplayRange( 0, 300 );
+		stackSource0.setDisplayRange( 0, 300 );
 
 		// get the bdvHandle
-		final BdvHandle bdv = stackSource.getBdvHandle();
+		final BdvHandle bdv = stackSource0.getBdvHandle();
 
-		// install right click behaviour
+		/**
+		 * add second image
+		 */
+		final ArrayImg< UnsignedIntType, IntArray > img1 = getImage();
+
+		// shift location
+		final IntervalView< UnsignedIntType > translated
+				= Views.translate( img1, new long[]{ 100, 100, 0 } );
+
+		final BdvStackSource stackSource1 = BdvFunctions.show(
+				translated, "image 1",
+				BdvOptions.options().is2D().addTo( bdv ) );
+		stackSource1.setDisplayRange( 0, 300 );
+
+
+		/**
+		 * install right click behaviour
+		 */
 		Behaviours behaviours = new Behaviours( new InputTriggerConfig() );
 		behaviours.install( bdv.getTriggerbindings(), "" );
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
-			final RealPoint point = BdvUtils.getGlobalMouseCoordinates( bdv );
-			final ArrayList< Integer > indices =
-					getSourceIndicesAtSelectedPoint( bdv, point );
-
-			if ( indices.size() == 0 ) return;
-
-			JPanel panel = new JPanel();
-			panel.setLayout( new BoxLayout( panel, BoxLayout.PAGE_AXIS ) );
-
-			for ( int index : indices )
-			{
-				final JPanel settingsPanel = BdvDialogs.getSourceDisplaySettingsPanel(
-						bdv,
-						index,
-						0.0,
-						65535.0 );
-
-				panel.add( settingsPanel );
-			}
-
-			// display the window at current mouse coordinates
-			JFrame frame = new JFrame( "Adjust Display Settings" );
-			frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-			frame.setContentPane( panel );
-			frame.setBounds(
-					MouseInfo.getPointerInfo().getLocation().x,
-					MouseInfo.getPointerInfo().getLocation().y,
-					120,
-					10);
-			frame.setResizable( false );
-			frame.pack();
-			frame.setVisible( true );
-
-		}, "", "ctrl button1" ) ;
-
+			BdvDialogs.showDisplaySettingsDialogForSourcesAtMousePosition(
+					bdv, false );
+		}, "display settings dialog", "D" ) ;
 
 
 	}
+
+	public static ArrayImg< UnsignedIntType, IntArray > getImage()
+	{
+		ArrayImg< UnsignedIntType, IntArray > img
+				= ArrayImgs.unsignedInts( 256, 256, 1 );
+		paintPixelValues( img );
+		return img;
+	}
+
+	public static void paintPixelValues( ArrayImg< UnsignedIntType, IntArray > img )
+	{
+		ArrayCursor< UnsignedIntType > cursor = img.cursor();
+		while ( cursor.hasNext() )
+			cursor.next().set( cursor.getIntPosition( 0 ) );
+	}
+
 }

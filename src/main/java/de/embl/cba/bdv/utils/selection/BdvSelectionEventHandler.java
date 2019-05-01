@@ -1,8 +1,6 @@
 package de.embl.cba.bdv.utils.selection;
 
 import bdv.util.Bdv;
-import bdv.util.BdvFunctions;
-import bdv.util.BdvOptions;
 import de.embl.cba.bdv.utils.*;
 import de.embl.cba.bdv.utils.behaviour.BehaviourRandomColorLutSeedChangeEventHandler;
 import de.embl.cba.bdv.utils.converters.RandomARGBConverter;

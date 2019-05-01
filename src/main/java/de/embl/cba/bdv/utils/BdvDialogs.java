@@ -3,25 +3,29 @@ package de.embl.cba.bdv.utils;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.SliderPanelDouble;
 import bdv.util.Bdv;
+import bdv.util.BdvHandle;
 import bdv.util.BdvStackSource;
 import bdv.util.BoundedValueDouble;
 import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.converters.LinearARGBConverter;
 import ij.gui.GenericDialog;
+import net.imglib2.RealPoint;
 import net.imglib2.type.numeric.ARGBType;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static de.embl.cba.bdv.utils.BdvUtils.getSourceIndicesAtSelectedPoint;
+
 public abstract class BdvDialogs
 {
 
+
+	private static JFrame displaySettingsFrame;
 
 	public static void addSourceDisplaySettingsUI( JPanel panel,
 												   String name,
@@ -434,20 +438,20 @@ public abstract class BdvDialogs
 													  ArrayList< Integer > sourceIndices )
 	{
 		JCheckBox checkBox = new JCheckBox( "" );
-		checkBox.setSelected( true );
-		checkBox.setPreferredSize( new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
+		checkBox.setSelected( BdvUtils.isActive( bdv, sourceIndices.get( 0 ) ) );
+		checkBox.setPreferredSize(
+				new Dimension(
+						buttonDimensions[ 0 ],
+						buttonDimensions[ 1 ] ) );
 
-		checkBox.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( ActionEvent e )
-			{
-				final VisibilityAndGrouping visibilityAndGrouping = bdv.getBdvHandle().getViewerPanel().getVisibilityAndGrouping();
-				for ( int sourceIndex : sourceIndices )
-				{
-					visibilityAndGrouping.setSourceActive( sourceIndex, checkBox.isSelected() );
-				}
-			}
+		checkBox.addActionListener( e -> {
+
+			final VisibilityAndGrouping visibilityAndGrouping
+					= bdv.getBdvHandle().getViewerPanel().getVisibilityAndGrouping();
+
+			for ( int sourceIndex : sourceIndices )
+				visibilityAndGrouping.setSourceActive( sourceIndex, checkBox.isSelected() );
+
 		} );
 
 		return checkBox;
@@ -496,5 +500,59 @@ public abstract class BdvDialogs
 			addSourcesDisplaySettingsUI( panel, name, bdv, indices, color, 0.0, 65535.0 );
 		}
 
+	}
+
+	public static void showDisplaySettingsDialogForSourcesAtMousePosition(
+			BdvHandle bdv,
+			boolean allowMultipleDialogs )
+	{
+		final RealPoint point = BdvUtils.getGlobalMouseCoordinates( bdv );
+		final ArrayList< Integer > indices =
+				getSourceIndicesAtSelectedPoint( bdv, point );
+
+		if ( indices.size() == 0 ) return;
+
+		JPanel panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.PAGE_AXIS ) );
+
+		for ( int index : indices )
+		{
+			final JPanel settingsPanel = getSourceDisplaySettingsPanel(
+					bdv,
+					index,
+					0.0,  // TODO: how to set?
+					65535.0 // TODO: how to set?
+			);
+
+			panel.add( settingsPanel );
+		}
+
+
+		JFrame frame = getDisplaySettingsFrame( allowMultipleDialogs );
+
+		frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+		frame.setContentPane( panel );
+		frame.setBounds(
+				MouseInfo.getPointerInfo().getLocation().x,
+				MouseInfo.getPointerInfo().getLocation().y,
+				120,
+				10 );
+		frame.setResizable( false );
+		frame.pack();
+		frame.setVisible( true );
+	}
+
+	public static JFrame getDisplaySettingsFrame( boolean allowMultipleDialogs )
+	{
+		if ( allowMultipleDialogs )
+			return new JFrame( "Adjust Display Settings" );
+		else
+		{
+			if ( displaySettingsFrame != null )
+				displaySettingsFrame.dispose();
+
+			displaySettingsFrame = new JFrame( "Adjust Display Settings" );
+			return displaySettingsFrame;
+		}
 	}
 }

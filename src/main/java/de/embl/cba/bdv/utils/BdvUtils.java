@@ -910,6 +910,7 @@ public abstract class BdvUtils
 		bdv.getBdvHandle().getViewerPanel().requestRepaint();
 	}
 
+
 	public static boolean isActive( Bdv bdv, Source source )
 	{
 		final List< SourceState< ? > > sources
@@ -931,6 +932,17 @@ public abstract class BdvUtils
 
 		return false;
 	}
+
+	public static boolean isActive( Bdv bdv, int sourceIndex )
+	{
+		final List< Integer > visibleSourceIndices
+				= bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+
+		if ( visibleSourceIndices.contains( sourceIndex ) ) return true;
+
+		return false;
+	}
+
 
 	public static < R extends RealType< R > & NativeType< R > >
 	RandomAccessibleInterval< R > getRAI( Source source, int t, int level )
