@@ -21,6 +21,7 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
+import net.imglib2.Point;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
@@ -616,9 +617,11 @@ public abstract class BdvUtils
 
 			final long[] positionInSource = getPositionInSource( source, point, 0, 0 );
 
-			if ( Intervals.contains( source.getSource( 0, 0 ), point ) )
-				sourceIndicesAtSelectedPoint.add( sourceIndex );
+			final RandomAccessibleInterval< ? > interval = source.getSource( 0, 0 );
+			final Point contained = new Point( positionInSource );
 
+			if ( Intervals.contains( interval, contained ) )
+				sourceIndicesAtSelectedPoint.add( sourceIndex );
 		}
 
 		return sourceIndicesAtSelectedPoint;
