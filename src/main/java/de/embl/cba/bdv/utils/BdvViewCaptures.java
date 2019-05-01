@@ -2,7 +2,9 @@ package de.embl.cba.bdv.utils;
 
 import bdv.cache.CacheControl;
 import bdv.util.Bdv;
+import bdv.util.BdvHandle;
 import bdv.util.Prefs;
+import bdv.viewer.Source;
 import bdv.viewer.ViewerPanel;
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
@@ -15,6 +17,7 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
+import net.imglib2.Point;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.array.ArrayRandomAccess;
@@ -34,6 +37,7 @@ import net.imglib2.view.Views;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
 
 import static de.embl.cba.bdv.utils.BdvUtils.*;
 
@@ -56,11 +60,11 @@ public abstract class BdvViewCaptures
 
 		for ( int sourceIndex = 0; sourceIndex < n; ++sourceIndex )
 		{
-			final Interval interval = getSourceInterval( bdv, sourceIndex );
+			final Interval interval = getSourceGlobalBoundingInterval( bdv, sourceIndex );
 
 			final Interval viewerInterval =
 					Intervals.largestContainedInterval(
-						getCurrentViewerInterval( bdv ) );
+						getViewerGlobalBoundingInterval( bdv ) );
 
 			final boolean intersects = ! Intervals.isEmpty(
 					Intervals.intersect( interval, viewerInterval ) );
@@ -95,9 +99,18 @@ public abstract class BdvViewCaptures
 
 	}
 
-
+	/**
+	 * TODO:
+	 * - make it optional to capture an interpolated view
+	 *
+	 *
+	 *
+	 * @param bdv
+	 * @param resolution
+	 * @param <R>
+	 */
 	public static < R extends RealType< R > & NativeType< R > >
-	void captureView2( Bdv bdv, double resolution )
+	void captureView2( BdvHandle bdv, double resolution )
 	{
 
 		double[] scalingFactors = new double[ 3 ];
@@ -105,51 +118,73 @@ public abstract class BdvViewCaptures
 		scalingFactors[ 1 ] = 1 / resolution;
 		scalingFactors[ 2 ] = 1.0;
 
-		int n = bdv.getBdvHandle().getViewerPanel().getState().getSources().size();
-
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
-		bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( viewerTransform );
+		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
 
 		final int w = getBdvWindowWidth( bdv );
 		final int h = getBdvWindowHeight( bdv );
 
-		final ArrayImg< UnsignedShortType, ShortArray > img = ArrayImgs.unsignedShorts( w, h );
+		final ArrayList< RandomAccessibleInterval< UnsignedShortType > > rais
+				= new ArrayList<>();
 
-		final ArrayRandomAccess< UnsignedShortType > access = img.randomAccess();
+		final List< Integer > sourceIndices = getVisibleSourceIndices( bdv );
 
-		final double[] canvasPosition = new double[ 3 ];
-		final double[] globalPosition = new double[ 3 ];
-
-		for ( double x = 0; x < w; x++ )
-			for ( double y = 0; y < h; y++ )
+		for ( int sourceIndex : sourceIndices )
+		{
+			if ( BdvUtils.isSourceIntersectingCurrentView( bdv, sourceIndex ) )
 			{
-				canvasPosition[ 0 ] = x;
-				canvasPosition[ 1 ] = y;
 
-				viewerTransform.applyInverse( globalPosition, canvasPosition );
+				final RandomAccessibleInterval< UnsignedShortType > rai
+						= ArrayImgs.unsignedShorts( w, h );
 
-				final Double pixelValue = getPixelValue(
-						bdv, 0, new RealPoint( globalPosition ), 0 );
+				final Source< ? > source = getSource( bdv, sourceIndex );
+				final RandomAccess< ? extends RealType< ? > > sourceAccess =
+						getRealTypeNonVolatileRandomAccess( source, 0, 0 );
+				final AffineTransform3D sourceTransform =
+						BdvUtils.getSourceTransform( source, 0,0  );
+				final RandomAccessibleInterval< ? > sourceRai = source.getSource( 0, 0 );
 
-				if ( pixelValue != null )
-				{
-					access.setPosition( ( int ) x, 0 );
-					access.setPosition( ( int ) y, 1 );
-					access.get().setReal( pixelValue );
-					if ( pixelValue != 0 )
+				AffineTransform3D viewerToSourceTransform = new AffineTransform3D();
+
+				viewerToSourceTransform.preConcatenate( viewerTransform.inverse() );
+				viewerToSourceTransform.preConcatenate( sourceTransform.inverse() );
+
+				final RandomAccess< UnsignedShortType > access = rai.randomAccess();
+
+				final double[] canvasPosition = new double[ 3 ];
+				final double[] globalPosition = new double[ 3 ];
+				final double[] sourceRealPosition = new double[ 3 ];
+				final long[] sourcePosition = new long[ 3 ];
+
+				for ( double x = 0; x < w; x++ )
+					for ( double y = 0; y < h; y++ )
 					{
-						int b = 1;
+						canvasPosition[ 0 ] = x;
+						canvasPosition[ 1 ] = y;
+
+						viewerToSourceTransform.apply( canvasPosition, sourceRealPosition );
+
+						// TODO: make work with real interpolated access
+						for ( int d = 0; d < 3; d++ )
+							sourcePosition[ d ] = (long) sourceRealPosition[ d ];
+
+
+						if ( Intervals.contains( sourceRai, new Point( sourcePosition ) ) )
+						{
+							sourceAccess.setPosition( sourcePosition );
+							Double pixelValue = sourceAccess.get().getRealDouble();
+							access.setPosition( ( int ) x, 0 );
+							access.setPosition( ( int ) y, 1 );
+							access.get().setReal( pixelValue );
+						}
 					}
-				}
-				else
-				{
-					int a = 1;
-				}
 
+				rais.add( rai );
 			}
+		}
 
-		ImageJFunctions.show( img, "capture" );
-
+		ImageJFunctions.show( rais.get(0), "" );
+		//showAsIJ1MultiColorImage( bdv, 1.0, rais );
 	}
 
 	public static BufferedImage captureView( Bdv bdv, int size )
@@ -226,9 +261,9 @@ public abstract class BdvViewCaptures
 	void showAsIJ1MultiColorImage(
 			Bdv bdv,
 			double voxelSpacing,
-			ArrayList< RandomAccessibleInterval< T > > randomAccessibleIntervals )
+			ArrayList< RandomAccessibleInterval< T > > rais )
 	{
-		final RandomAccessibleInterval< T > stack = Views.stack( randomAccessibleIntervals );
+		final RandomAccessibleInterval< T > stack = Views.stack( rais );
 
 		final ImagePlus imp = ImageJFunctions.wrap( stack, "capture" );
 		// duplicate: otherwise it is virtual and cannot be modified
@@ -237,7 +272,7 @@ public abstract class BdvViewCaptures
 		VoxelDimensions voxelDimensions = getVoxelDimensions( bdv, 0 );
 		IJ.run( dup,
 				"Properties...",
-				"channels="+randomAccessibleIntervals.size()
+				"channels="+rais.size()
 						+" slices=1 frames=1 unit="+voxelDimensions.unit()
 						+" pixel_width="+voxelSpacing
 						+" pixel_height="+voxelSpacing+" voxel_depth=1.0");

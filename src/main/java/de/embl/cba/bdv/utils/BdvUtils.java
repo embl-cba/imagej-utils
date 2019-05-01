@@ -48,7 +48,7 @@ public abstract class BdvUtils
 	public static final String OVERLAY = "overlay";
 
 
-	public static Interval getSourceInterval( Bdv bdv, int sourceId )
+	public static Interval getSourceGlobalBoundingInterval( Bdv bdv, int sourceId )
 	{
 		final AffineTransform3D sourceTransform =
 				getSourceTransform( bdv, sourceId );
@@ -78,7 +78,7 @@ public abstract class BdvUtils
 		return createBoundingIntervalAfterTransformation( rai, sourceTransform );
 	}
 
-	public static FinalRealInterval getCurrentViewerInterval( Bdv bdv )
+	public static FinalRealInterval getViewerGlobalBoundingInterval( Bdv bdv )
 	{
 		AffineTransform3D viewerTransform = new AffineTransform3D();
 		bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( viewerTransform );
@@ -601,9 +601,7 @@ public abstract class BdvUtils
 	{
 		final HashMap< Integer, Double > sourceIndexToPixelValue = new HashMap<>();
 
-		final List< Integer > visibleSourceIndices =
-				bdv.getBdvHandle().getViewerPanel()
-						.getState().getVisibleSourceIndices();
+		final List< Integer > visibleSourceIndices = getVisibleSourceIndices( bdv );
 
 		for ( int sourceIndex : visibleSourceIndices )
 		{
@@ -614,6 +612,12 @@ public abstract class BdvUtils
 		}
 
 		return sourceIndexToPixelValue;
+	}
+
+	public static List< Integer > getVisibleSourceIndices( Bdv bdv )
+	{
+		return bdv.getBdvHandle().getViewerPanel()
+				.getState().getVisibleSourceIndices();
 	}
 
 	public static Double getPixelValue( Bdv bdv, int sourceIndex, RealPoint point, int t )
@@ -950,8 +954,7 @@ public abstract class BdvUtils
 		final List< SourceState< ? > > sources
 				= bdv.getBdvHandle().getViewerPanel().getState().getSources();
 
-		final List< Integer > visibleSourceIndices
-				= bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+		final List< Integer > visibleSourceIndices = getVisibleSourceIndices( bdv );
 
 		for( Integer i : visibleSourceIndices  )
 		{
@@ -969,8 +972,7 @@ public abstract class BdvUtils
 
 	public static boolean isActive( Bdv bdv, int sourceIndex )
 	{
-		final List< Integer > visibleSourceIndices
-				= bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
+		final List< Integer > visibleSourceIndices = getVisibleSourceIndices( bdv );
 
 		if ( visibleSourceIndices.contains( sourceIndex ) ) return true;
 
@@ -1037,4 +1039,17 @@ public abstract class BdvUtils
 		return source;
 	}
 
+	public static boolean isSourceIntersectingCurrentView( BdvHandle bdv, int sourceIndex )
+	{
+		final Interval interval = getSourceGlobalBoundingInterval( bdv, sourceIndex );
+
+		final Interval viewerInterval =
+				Intervals.largestContainedInterval(
+						getViewerGlobalBoundingInterval( bdv ) );
+
+		final boolean intersects = ! Intervals.isEmpty(
+				Intervals.intersect( interval, viewerInterval ) );
+
+		return intersects;
+	}
 }
