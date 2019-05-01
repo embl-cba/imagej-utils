@@ -15,7 +15,7 @@ public class ExampleLargeLabelsSource
 	public static void main( String[] args ) throws SpimDataException
 	{
 		SpimData labels = new XmlIoSpimData().load(
-				"/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/em-segmented-cells-labels.xml" );
+				"/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/em-segmented-cells-labels-ulong.xml" );
 
 		final MappingLinearARGBConverter mappingLinearARGBConverter =
 				new MappingLinearARGBConverter(0, 50, Luts.BLUE_WHITE_RED, d -> d );

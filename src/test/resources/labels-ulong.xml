@@ -2,7 +2,7 @@
   <BasePath type="relative">.</BasePath>
   <SequenceDescription>
     <ImageLoader format="bdv.hdf5.ulong">
-      <hdf5 type="relative">labels.h5</hdf5>
+      <hdf5 type="relative">labels-ulong.h5</hdf5>
     </ImageLoader>
     <ViewSetups>
       <Attributes name="channel">

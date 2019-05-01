@@ -8,7 +8,7 @@ public class Examples
 {
 	public static SelectableARGBConvertedRealSource getSelectable3DSource() throws SpimDataException
 	{
-		final String labelsSourcePath = ExampleARGBConvertedLabelsSource.class.getResource( "labels.xml" ).getFile();
+		final String labelsSourcePath = ExampleARGBConvertedLabelsSource.class.getResource( "labels-ulong.xml" ).getFile();
 
 		SpimData spimData = new XmlIoSpimData().load( labelsSourcePath );
 

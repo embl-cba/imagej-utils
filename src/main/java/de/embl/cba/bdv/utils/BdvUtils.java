@@ -48,11 +48,15 @@ public abstract class BdvUtils
 	public static final String OVERLAY = "overlay";
 
 
-	public static FinalInterval getCurrentlyVisibleInterval( Bdv bdv, int sourceId )
+	public static Interval getSourceInterval( Bdv bdv, int sourceId )
 	{
-		final AffineTransform3D sourceTransform = getSourceTransform( bdv, sourceId );
-		final RandomAccessibleInterval< ? > rai = getRandomAccessibleInterval( bdv, sourceId );
-		return createBoundingIntervalAfterTransformation( rai, sourceTransform );
+		final AffineTransform3D sourceTransform =
+				getSourceTransform( bdv, sourceId );
+		final RandomAccessibleInterval< ? > rai =
+				getRandomAccessibleInterval( bdv, sourceId );
+		final Interval interval =
+				Intervals.largestContainedInterval( sourceTransform.estimateBounds( rai ) );
+		return interval;
 	}
 
 	public static void zoomToSource( Bdv bdv, String sourceName )
@@ -83,12 +87,15 @@ public abstract class BdvUtils
 		final long[] max = new long[ 3 ];
 		max[ 0 ] = bdv.getBdvHandle().getViewerPanel().getWidth();
 		max[ 1 ] = bdv.getBdvHandle().getViewerPanel().getHeight();
-		return viewerTransform.estimateBounds( new FinalInterval( min, max ) );
+		final FinalRealInterval realInterval
+				= viewerTransform.estimateBounds( new FinalInterval( min, max ) );
+		return realInterval;
 	}
 
 	public static int getSourceIndex( Bdv bdv, Source< ? > source )
 	{
-		final List< SourceState< ? > > sources = bdv.getBdvHandle().getViewerPanel().getState().getSources();
+		final List< SourceState< ? > > sources =
+				bdv.getBdvHandle().getViewerPanel().getState().getSources();
 
 		for ( int i = 0; i < sources.size(); ++i )
 		{
@@ -99,6 +106,14 @@ public abstract class BdvUtils
 		}
 
 		return -1;
+	}
+
+	public static Source< ? > getSource( Bdv bdv, int sourceIndex )
+	{
+		final List< SourceState< ? > > sources =
+				bdv.getBdvHandle().getViewerPanel().getState().getSources();
+
+		return sources.get( sourceIndex ).getSpimSource();
 	}
 
 
@@ -367,6 +382,16 @@ public abstract class BdvUtils
 		return centre;
 	}
 
+	public static int getBdvWindowWidth( Bdv bdv )
+	{
+		return bdv.getBdvHandle().getViewerPanel().getDisplay().getWidth();
+	}
+
+
+	public static int getBdvWindowHeight( Bdv bdv )
+	{
+		return bdv.getBdvHandle().getViewerPanel().getDisplay().getHeight();
+	}
 
 	public static AffineTransform3D quaternionToAffineTransform3D( double[] rotationQuaternion )
 	{
@@ -582,13 +607,7 @@ public abstract class BdvUtils
 
 		for ( int sourceIndex : visibleSourceIndices )
 		{
-			final SourceState< ? > sourceState =
-					bdv.getBdvHandle().getViewerPanel()
-							.getState().getSources().get( sourceIndex );
-
-			final Source source = sourceState.getSpimSource();
-
-			final Double realDouble = getValueAtGlobalCoordinates( source, point, t );
+			final Double realDouble = getPixelValue( bdv, sourceIndex, point, t );
 
 			if ( realDouble != null )
 				sourceIndexToPixelValue.put( sourceIndex, realDouble );
@@ -597,10 +616,21 @@ public abstract class BdvUtils
 		return sourceIndexToPixelValue;
 	}
 
+	public static Double getPixelValue( Bdv bdv, int sourceIndex, RealPoint point, int t )
+	{
+		final SourceState< ? > sourceState =
+				bdv.getBdvHandle().getViewerPanel()
+						.getState().getSources().get( sourceIndex );
+
+		final Source source = sourceState.getSpimSource();
+
+		return getPixelValue( source, point, t );
+	}
+
 
 	public static
 	ArrayList< Integer >
-	getSourceIndicesAtSelectedPoint( Bdv bdv, RealPoint point )
+	getSourceIndicesAtSelectedPoint( Bdv bdv, RealPoint selectedPoint )
 	{
 		final ArrayList< Integer > sourceIndicesAtSelectedPoint = new ArrayList<>();
 
@@ -615,12 +645,12 @@ public abstract class BdvUtils
 
 			final Source< ? > source = sourceState.getSpimSource();
 
-			final long[] positionInSource = getPositionInSource( source, point, 0, 0 );
+			final long[] positionInSource = getPositionInSource( source, selectedPoint, 0, 0 );
 
 			final RandomAccessibleInterval< ? > interval = source.getSource( 0, 0 );
-			final Point contained = new Point( positionInSource );
+			final Point point = new Point( positionInSource );
 
-			if ( Intervals.contains( interval, contained ) )
+			if ( Intervals.contains( interval, point ) )
 				sourceIndicesAtSelectedPoint.add( sourceIndex );
 		}
 
@@ -628,7 +658,8 @@ public abstract class BdvUtils
 	}
 
 
-	public static Double getValueAtGlobalCoordinates(
+
+	public static Double getPixelValue(
 			Source source, RealPoint point, int t  )
 	{
 		final RandomAccess< ? extends RealType< ? > > sourceAccess =

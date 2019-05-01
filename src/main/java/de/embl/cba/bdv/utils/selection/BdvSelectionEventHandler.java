@@ -185,7 +185,7 @@ public class BdvSelectionEventHandler
 
 	private void toggleSelectionAtMousePosition()
 	{
-		final double selected = BdvUtils.getValueAtGlobalCoordinates(
+		final double selected = BdvUtils.getPixelValue(
 				source,
 				BdvUtils.getGlobalMouseCoordinates( bdv ),
 				getCurrentTimepoint() );

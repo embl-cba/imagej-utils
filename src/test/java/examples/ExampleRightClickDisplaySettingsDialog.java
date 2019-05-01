@@ -45,7 +45,7 @@ public class ExampleRightClickDisplaySettingsDialog
 
 
 		/**
-		 * install right click behaviour
+		 * install display settings behaviour
 		 */
 		Behaviours behaviours = new Behaviours( new InputTriggerConfig() );
 		behaviours.install( bdv.getTriggerbindings(), "" );

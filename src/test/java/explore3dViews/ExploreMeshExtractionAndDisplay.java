@@ -25,7 +25,7 @@ public class ExploreMeshExtractionAndDisplay
 	public static < T extends RealType< T > > void main( String[] args ) throws SpimDataException
 	{
 
-		final String labelsSourcePath = ExploreMeshExtractionAndDisplay.class.getResource( "../labels.xml" ).getFile();
+		final String labelsSourcePath = ExploreMeshExtractionAndDisplay.class.getResource( "../labels-ulong.xml" ).getFile();
 
 		SpimData spimData = new XmlIoSpimData().load( labelsSourcePath );
 		final RandomAccessibleInterval< T > image = (RandomAccessibleInterval<T> ) spimData.getSequenceDescription()

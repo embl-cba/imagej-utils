@@ -1,7 +1,5 @@
 package de.embl.cba.bdv.utils;
 
-import de.embl.cba.bdv.utils.intervals.Intervals;
-
 import bdv.cache.CacheControl;
 import bdv.util.Bdv;
 import bdv.util.Prefs;
@@ -17,14 +15,20 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
+import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.array.ArrayRandomAccess;
+import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.realtransform.Scale;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.ui.PainterThread;
 import net.imglib2.ui.RenderTarget;
+import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
 import java.awt.*;
@@ -32,12 +36,12 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import static de.embl.cba.bdv.utils.BdvUtils.*;
-import static de.embl.cba.bdv.utils.intervals.Intervals.asIntegerInterval;
 
 public abstract class BdvViewCaptures
 {
 
-	public static < T extends RealType< T > & NativeType< T > > void captureView( Bdv bdv, double resolution )
+	public static < R extends RealType< R > & NativeType< R > >
+	void captureView( Bdv bdv, double resolution )
 	{
 
 		double[] scalingFactors = new double[ 3 ];
@@ -47,31 +51,42 @@ public abstract class BdvViewCaptures
 
 		int n = bdv.getBdvHandle().getViewerPanel().getState().getSources().size();
 
-		final ArrayList< RandomAccessibleInterval< T > > randomAccessibleIntervals = new ArrayList<>();
+		final ArrayList< RandomAccessibleInterval< R > > randomAccessibleIntervals
+				= new ArrayList<>();
 
 		for ( int sourceIndex = 0; sourceIndex < n; ++sourceIndex )
 		{
-			final FinalInterval interval = getCurrentlyVisibleInterval( bdv, sourceIndex );
+			final Interval interval = getSourceInterval( bdv, sourceIndex );
 
-			final FinalRealInterval viewerRealInterval = getCurrentViewerInterval( bdv );
+			final Interval viewerInterval =
+					Intervals.largestContainedInterval(
+						getCurrentViewerInterval( bdv ) );
 
-			final boolean intersecting = Intervals.intersecting( interval, viewerRealInterval );
+			final boolean intersects = ! Intervals.isEmpty(
+					Intervals.intersect( interval, viewerInterval ) );
 
-			if ( intersecting )
+			if ( intersects )
 			{
-				RealRandomAccessible< T > rra = ( RealRandomAccessible ) getRealRandomAccessible( bdv, sourceIndex );
-				final AffineTransform3D sourceTransform = getSourceTransform( bdv, sourceIndex );
+				RealRandomAccessible< R > rra =
+						( RealRandomAccessible ) getRealRandomAccessible( bdv, sourceIndex );
+
+				final AffineTransform3D sourceTransform =
+						getSourceTransform( bdv, sourceIndex );
+
 				rra = RealViews.transform( rra, sourceTransform );
 
 				Scale scale = new Scale( scalingFactors );
-				RealRandomAccessible< T > rescaledRRA = RealViews.transform( rra, scale );
-				final RandomAccessible< T > rastered = Views.raster( rescaledRRA );
+				RealRandomAccessible< R > rescaledRRA = RealViews.transform( rra, scale );
+				final RandomAccessible< R > rastered = Views.raster( rescaledRRA );
 
-				final FinalInterval scaledInterval = Transforms.scaleIntervalInXY( asIntegerInterval( viewerRealInterval ), scale );
+				final FinalInterval scaledInterval =
+						Transforms.scaleIntervalInXY(
+								viewerInterval, scale );
 
-				final RandomAccessibleInterval< T > cropped = Views.interval( rastered, scaledInterval );
+				final RandomAccessibleInterval< R > cropped =
+						Views.interval( rastered, scaledInterval );
 
-				randomAccessibleIntervals.add( cropped  );
+				randomAccessibleIntervals.add( Views.dropSingletonDimensions( cropped )  );
 			}
 
 		}
@@ -80,6 +95,62 @@ public abstract class BdvViewCaptures
 
 	}
 
+
+	public static < R extends RealType< R > & NativeType< R > >
+	void captureView2( Bdv bdv, double resolution )
+	{
+
+		double[] scalingFactors = new double[ 3 ];
+		scalingFactors[ 0 ] = 1 / resolution;
+		scalingFactors[ 1 ] = 1 / resolution;
+		scalingFactors[ 2 ] = 1.0;
+
+		int n = bdv.getBdvHandle().getViewerPanel().getState().getSources().size();
+
+		final AffineTransform3D viewerTransform = new AffineTransform3D();
+		bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( viewerTransform );
+
+		final int w = getBdvWindowWidth( bdv );
+		final int h = getBdvWindowHeight( bdv );
+
+		final ArrayImg< UnsignedShortType, ShortArray > img = ArrayImgs.unsignedShorts( w, h );
+
+		final ArrayRandomAccess< UnsignedShortType > access = img.randomAccess();
+
+		final double[] canvasPosition = new double[ 3 ];
+		final double[] globalPosition = new double[ 3 ];
+
+		for ( double x = 0; x < w; x++ )
+			for ( double y = 0; y < h; y++ )
+			{
+				canvasPosition[ 0 ] = x;
+				canvasPosition[ 1 ] = y;
+
+				viewerTransform.applyInverse( globalPosition, canvasPosition );
+
+				final Double pixelValue = getPixelValue(
+						bdv, 0, new RealPoint( globalPosition ), 0 );
+
+				if ( pixelValue != null )
+				{
+					access.setPosition( ( int ) x, 0 );
+					access.setPosition( ( int ) y, 1 );
+					access.get().setReal( pixelValue );
+					if ( pixelValue != 0 )
+					{
+						int b = 1;
+					}
+				}
+				else
+				{
+					int a = 1;
+				}
+
+			}
+
+		ImageJFunctions.show( img, "capture" );
+
+	}
 
 	public static BufferedImage captureView( Bdv bdv, int size )
 	{
@@ -100,7 +171,8 @@ public abstract class BdvViewCaptures
 		affine.set( affine.get( 1, 3 ) + height / 2, 1, 3 );
 		renderState.setViewerTransform( affine );
 
-		final ScaleBarOverlayRenderer scalebar = Prefs.showScaleBarInMovie() ? new ScaleBarOverlayRenderer() : null;
+		final ScaleBarOverlayRenderer scalebar =
+				Prefs.showScaleBarInMovie() ? new ScaleBarOverlayRenderer() : null;
 
 		class MyTarget implements RenderTarget
 		{
@@ -125,6 +197,7 @@ public abstract class BdvViewCaptures
 				return height;
 			}
 		}
+
 		final MyTarget target = new MyTarget();
 		final MultiResolutionRenderer renderer = new MultiResolutionRenderer(
 				target, new PainterThread( null ), new double[] { 1 }, 0, false, 1, null, false,
@@ -149,27 +222,44 @@ public abstract class BdvViewCaptures
 	}
 
 
-	public static < T extends RealType< T > & NativeType< T > > void showAsIJ1MultiColorImage( Bdv bdv, double resolution, ArrayList< RandomAccessibleInterval< T > > randomAccessibleIntervals )
+	public static < T extends RealType< T > & NativeType< T > >
+	void showAsIJ1MultiColorImage(
+			Bdv bdv,
+			double voxelSpacing,
+			ArrayList< RandomAccessibleInterval< T > > randomAccessibleIntervals )
 	{
-		final ImagePlus imp = ImageJFunctions.wrap( Views.stack( randomAccessibleIntervals ), "capture" );
-		final ImagePlus dup = new Duplicator().run( imp ); // otherwise it is virtual and cannot be modified
+		final RandomAccessibleInterval< T > stack = Views.stack( randomAccessibleIntervals );
+
+		final ImagePlus imp = ImageJFunctions.wrap( stack, "capture" );
+		// duplicate: otherwise it is virtual and cannot be modified
+		final ImagePlus dup = new Duplicator().run( imp );
 		IJ.run( dup, "Subtract...", "value=32768 slice");
 		VoxelDimensions voxelDimensions = getVoxelDimensions( bdv, 0 );
-		IJ.run( dup, "Properties...", "channels="+randomAccessibleIntervals.size()+" slices=1 frames=1 unit="+voxelDimensions.unit()+" pixel_width="+resolution+" pixel_height="+resolution+" voxel_depth=1.0");
+		IJ.run( dup,
+				"Properties...",
+				"channels="+randomAccessibleIntervals.size()
+						+" slices=1 frames=1 unit="+voxelDimensions.unit()
+						+" pixel_width="+voxelSpacing
+						+" pixel_height="+voxelSpacing+" voxel_depth=1.0");
 		final CompositeImage compositeImage = new CompositeImage( dup );
 		for ( int channel = 1; channel <= compositeImage.getNChannels(); ++channel )
 		{
 			compositeImage.setC( channel );
 			switch ( channel )
 			{
-				case 1: // tomogram
-					compositeImage.setChannelLut( compositeImage.createLutFromColor( Color.GRAY ) );
+				case 1:
+					compositeImage.setChannelLut(
+							compositeImage.createLutFromColor( Color.GRAY ) );
 					compositeImage.setDisplayRange( 0, 1000 ); // TODO: get from bdv
 					break;
-				case 2: compositeImage.setChannelLut( compositeImage.createLutFromColor( Color.GRAY ) ); break;
-				case 3: compositeImage.setChannelLut( compositeImage.createLutFromColor( Color.RED ) ); break;
-				case 4: compositeImage.setChannelLut( compositeImage.createLutFromColor( Color.GREEN ) ); break;
-				default: compositeImage.setChannelLut( compositeImage.createLutFromColor( Color.BLUE ) ); break;
+				case 2: compositeImage.setChannelLut(
+						compositeImage.createLutFromColor( Color.GRAY ) ); break;
+				case 3: compositeImage.setChannelLut(
+						compositeImage.createLutFromColor( Color.RED ) ); break;
+				case 4: compositeImage.setChannelLut(
+						compositeImage.createLutFromColor( Color.GREEN ) ); break;
+				default: compositeImage.setChannelLut(
+						compositeImage.createLutFromColor( Color.BLUE ) ); break;
 			}
 		}
 		compositeImage.show();
