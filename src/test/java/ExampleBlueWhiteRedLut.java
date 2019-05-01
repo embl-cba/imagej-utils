@@ -21,9 +21,7 @@ public class ExampleBlueWhiteRedLut
 		final ArrayCursor< UnsignedIntType > cursor = img.cursor();
 
 		while ( cursor.hasNext() )
-		{
 			cursor.next().set( cursor.getIntPosition( 0 ) );
-		}
 
 		final RandomAccessibleIntervalSource source = new RandomAccessibleIntervalSource( img, Util.getTypeFromInterval( img ), "" );
 

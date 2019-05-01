@@ -9,6 +9,7 @@ import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.converters.LinearARGBConverter;
 import ij.gui.GenericDialog;
+import net.imglib2.type.numeric.ARGBType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,15 +19,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public abstract class BdvUserInterfaceUtils
+public abstract class BdvDialogs
 {
 
 
-	public static void addSourcesDisplaySettingsUI( JPanel panel,
-													String name,
-													Bdv bdv,
-													Integer sourceIndex,
-													Color color )
+	public static void addSourceDisplaySettingsUI( JPanel panel,
+												   String name,
+												   Bdv bdv,
+												   Integer sourceIndex,
+												   Color color )
 	{
 
 		final ArrayList< Integer > indices = new ArrayList<>();
@@ -40,40 +41,127 @@ public abstract class BdvUserInterfaceUtils
 
 	}
 
-	public static JPanel addSourcesDisplaySettingsUI( JPanel panel,
+	public static JPanel getSourceDisplaySettingsPanel(
+			Bdv bdv,
+			String name,
+			Integer sourceIndex,
+			Color color,
+			double rangeMin,
+			double rangeMax )
+	{
+
+		final ArrayList< Integer > indices = new ArrayList<>();
+		indices.add( sourceIndex );
+
+		final JPanel panel = getSourcesDisplaySettingsPanel(
+				bdv,
+				name,
+				indices,
+				color,
+				rangeMin,
+				rangeMax );
+
+		return panel;
+	}
+
+	public static JPanel getSourceDisplaySettingsPanel(
+			Bdv bdv,
+			String name,
+			Integer sourceIndex,
+			ARGBType color,
+			double rangeMin,
+			double rangeMax )
+	{
+
+		final ArrayList< Integer > indices = new ArrayList<>();
+		indices.add( sourceIndex );
+
+		final JPanel panel = getSourcesDisplaySettingsPanel(
+				bdv,
+				name,
+				indices,
+				new Color( color.get() ),
+				rangeMin,
+				rangeMax );
+
+		return panel;
+	}
+
+	public static JPanel getSourceDisplaySettingsPanel(
+			Bdv bdv,
+			Integer sourceIndex,
+			double rangeMin,
+			double rangeMax )
+	{
+
+		final JPanel panel = getSourceDisplaySettingsPanel(
+				bdv,
+				BdvUtils.getSourceName( bdv, sourceIndex ),
+				sourceIndex,
+				BdvUtils.getSourceColor( bdv, sourceIndex ),
+				rangeMin,
+				rangeMax );
+
+		return panel;
+	}
+
+	public static JPanel addSourcesDisplaySettingsUI( JPanel parentPanel,
 													  String name,
 													  Bdv bdv,
 													  ArrayList< Integer > sourceIndices,
-													  Color color, double rangeMin, double rangeMax )
+													  Color color,
+													  double rangeMin,
+													  double rangeMax )
 	{
-		int[] buttonDimensions = new int[]{ 50, 30 };
 
-		JPanel channelPanel = new JPanel();
-		channelPanel.setLayout( new BoxLayout( channelPanel, BoxLayout.LINE_AXIS ) );
-		channelPanel.setBorder( BorderFactory.createEmptyBorder(
+		JPanel panel =
+				getSourcesDisplaySettingsPanel(
+						bdv,
+						name,
+						sourceIndices,
+						color,
+						rangeMin,
+						rangeMax );
+
+		parentPanel.add( panel );
+
+		return panel;
+
+	}
+
+	public static JPanel getSourcesDisplaySettingsPanel(
+			Bdv bdv,
+			String name,
+			ArrayList< Integer > sourceIndices,
+			Color color,
+			double rangeMin,
+			double rangeMax )
+	{
+		JPanel panel = new JPanel();
+
+		panel.setLayout( new BoxLayout( panel, BoxLayout.LINE_AXIS ) );
+		panel.setBorder( BorderFactory.createEmptyBorder(
 				0,10,0,10) );
-		channelPanel.add( Box.createHorizontalGlue() );
-		channelPanel.setOpaque( true );
-		channelPanel.setBackground( color );
+		panel.add( Box.createHorizontalGlue() );
+		panel.setOpaque( true );
+		panel.setBackground( color );
 
 		JLabel jLabel = new JLabel( name );
 		jLabel.setHorizontalAlignment( SwingConstants.CENTER );
 
-		channelPanel.add( jLabel );
+		panel.add( jLabel );
 
-		channelPanel.add( createColorButton( channelPanel, buttonDimensions,
+		int[] buttonDimensions = new int[]{ 50, 30 };
+
+		panel.add( createColorButton( panel, buttonDimensions,
 				bdv, sourceIndices ) );
 
-		channelPanel.add( createBrightnessButton( buttonDimensions, name,
+		panel.add( createBrightnessButton( buttonDimensions, name,
 				bdv, sourceIndices, rangeMin, rangeMax ) );
 
-		channelPanel.add( createVisibilityCheckbox( buttonDimensions, bdv,
+		panel.add( createVisibilityCheckbox( buttonDimensions, bdv,
 				sourceIndices ) );
-
-		panel.add( channelPanel );
-
-		return channelPanel;
-
+		return panel;
 	}
 
 	public static JButton createColorButton( JPanel panel,
@@ -232,7 +320,6 @@ public abstract class BdvUserInterfaceUtils
 			double rangeMax )
 	{
 		JFrame frame = new JFrame( name );
-
 		frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 
 		final double currentRangeMin = converterSetups.get( 0 ).getDisplayRangeMin();
@@ -404,9 +491,9 @@ public abstract class BdvUserInterfaceUtils
 			final ArrayList< Integer > indices = new ArrayList<>( );
 			indices.add( sourceIndex );
 
-			String name = BdvUtils.getName( bdv, sourceIndex );
+			String name = BdvUtils.getSourceName( bdv, sourceIndex );
 
-			final JPanel panel1 = addSourcesDisplaySettingsUI( panel, name, bdv, indices, color, 0.0, 65535.0 );
+			addSourcesDisplaySettingsUI( panel, name, bdv, indices, color, 0.0, 65535.0 );
 		}
 
 	}

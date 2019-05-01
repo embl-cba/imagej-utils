@@ -26,18 +26,11 @@ public class ExampleARGBConverted2dTimelapse16bitTiffImage
 						Util.getTypeFromInterval( wrap ),
 						imagePlus.getTitle() );
 
-		final boolean present = raiSource.isPresent( 0 );
-		final boolean present1 = raiSource.isPresent( 1 );
-		final boolean present2 = raiSource.isPresent( 2 );
 
 		/**
 		 * Show the gray-scale image
 		 */
 
-		// TODO: it does not show the timepoints..
-		// https://github.com/bigdataviewer/bigdataviewer-vistools/blob/master/src/main/java/bdv/util/BdvFunctions.java#L173
-		// add issue:
-		//
 		final BdvStackSource show = BdvFunctions.show(
 				raiSource,
 				2,
@@ -45,19 +38,11 @@ public class ExampleARGBConverted2dTimelapse16bitTiffImage
 
 		show.setDisplayRange( 0, 3 );
 
-		final int numTimepoints = show.getBdvHandle().getViewerPanel().getState().getNumTimepoints();
+		final int numTimepoints =
+				show.getBdvHandle().getViewerPanel().getState().getNumTimepoints();
 
 		int a = 1;
 
-		/**
-		 * Show as ARGB image
-		 */
 
-//		final ConfigurableRealVolatileARGBConverter converter = new ConfigurableRealVolatileARGBConverter();
-//
-//		final VolatileARGBConvertedRealSource labelsSource = new VolatileARGBConvertedRealSource( raiSource, "test", converter );
-//
-//		BdvFunctions.show( labelsSource,
-//				BdvOptions.options().is2D() );
 	}
 }

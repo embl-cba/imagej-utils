@@ -105,7 +105,7 @@ public class BdvGrayValuesOverlay extends BdvOverlay implements MouseMotionListe
 		for ( int sourceId : pixelValuesOfActiveSources.keySet() )
 		{
 			values.add( pixelValuesOfActiveSources.get( sourceId ) );
-			final ARGBType color = BdvUtils.getColor( bdv, sourceId );
+			final ARGBType color = BdvUtils.getSourceColor( bdv, sourceId );
 			final int colorIndex = color.get();
 			if ( colorIndex == 0 )
 			{

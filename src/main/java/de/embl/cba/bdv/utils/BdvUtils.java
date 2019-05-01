@@ -26,6 +26,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Intervals;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
@@ -99,9 +100,12 @@ public abstract class BdvUtils
 		return -1;
 	}
 
-	public static String getName( Bdv bdv, int sourceId )
+
+
+	public static String getSourceName( Bdv bdv, int sourceId )
 	{
-		return bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceId ).getSpimSource().getName();
+		return bdv.getBdvHandle().getViewerPanel()
+				.getState().getSources().get( sourceId ).getSpimSource().getName();
 	}
 
 	public static ArrayList< String > getSourceNames( Bdv bdv )
@@ -121,6 +125,7 @@ public abstract class BdvUtils
 
 	public static int getSourceIndex( Bdv bdv, String sourceName )
 	{
+
 		return getSourceNames( bdv ).indexOf( sourceName );
 	}
 
@@ -228,12 +233,24 @@ public abstract class BdvUtils
 
 	public static ARGBType asArgbType( Color color )
 	{
-		return new ARGBType( ARGBType.rgba( color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() ) );
+		return new ARGBType(
+						ARGBType.rgba(
+							color.getRed(),
+							color.getGreen(),
+							color.getBlue(),
+							color.getAlpha() ) );
+	}
+
+	public static Color asColor( ARGBType argbType )
+	{
+		return new Color( argbType.get() );
 	}
 
 	public static long[] getPositionInSource(
 			Source source,
-			RealPoint positionInViewerInMicrometerUnits, int t, int level )
+			RealPoint positionInViewer,
+			int t,
+			int level )
 	{
 		int n = 3;
 
@@ -243,7 +260,7 @@ public abstract class BdvUtils
 		final RealPoint positionInSourceInPixelUnits = new RealPoint( n );
 
 		sourceTransform.inverse().apply(
-				positionInViewerInMicrometerUnits, positionInSourceInPixelUnits );
+				positionInViewer, positionInSourceInPixelUnits );
 
 		final long[] longPosition = new long[ n ];
 
@@ -488,7 +505,7 @@ public abstract class BdvUtils
 
 		for ( int sourceIndex = 0; sourceIndex < sources.size(); ++sourceIndex )
 		{
-			String name = getName( bdv, sourceIndex );
+			String name = getSourceName( bdv, sourceIndex );
 			if ( ! name.contains( OVERLAY ) )
 			{
 				nonOverlaySources.add( sourceIndex );
@@ -578,6 +595,35 @@ public abstract class BdvUtils
 
 		return sourceIndexToPixelValue;
 	}
+
+
+	public static
+	ArrayList< Integer >
+	getSourceIndicesAtSelectedPoint( Bdv bdv, RealPoint point )
+	{
+		final ArrayList< Integer > sourceIndicesAtSelectedPoint = new ArrayList<>();
+
+		final int numSources = bdv.getBdvHandle().getViewerPanel()
+				.getState().getSources().size();
+
+		for ( int sourceIndex = 0; sourceIndex < numSources; sourceIndex++ )
+		{
+			final SourceState< ? > sourceState =
+					bdv.getBdvHandle().getViewerPanel()
+							.getState().getSources().get( sourceIndex );
+
+			final Source< ? > source = sourceState.getSpimSource();
+
+			final long[] positionInSource = getPositionInSource( source, point, 0, 0 );
+
+			if ( Intervals.contains( source.getSource( 0, 0 ), point ) )
+				sourceIndicesAtSelectedPoint.add( sourceIndex );
+
+		}
+
+		return sourceIndicesAtSelectedPoint;
+	}
+
 
 	public static Double getValueAtGlobalCoordinates(
 			Source source, RealPoint point, int t  )
@@ -853,7 +899,7 @@ public abstract class BdvUtils
 		return viewerTransform;
 	}
 
-	public static ARGBType getColor( Bdv bdv, int sourceId )
+	public static ARGBType getSourceColor( Bdv bdv, int sourceId )
 	{
 		return bdv.getBdvHandle().getSetupAssignments()
 				.getConverterSetups().get( sourceId ).getColor();

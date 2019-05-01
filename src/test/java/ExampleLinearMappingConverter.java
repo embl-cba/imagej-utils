@@ -2,7 +2,7 @@ import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
-import de.embl.cba.bdv.utils.BdvUserInterfaceUtils;
+import de.embl.cba.bdv.utils.BdvDialogs;
 import de.embl.cba.bdv.utils.converters.MappingLinearARGBConverter;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
@@ -31,7 +31,7 @@ public class ExampleLinearMappingConverter
 
 		Bdv bdv = BdvFunctions.show( argbSource, BdvOptions.options().is2D() ).getBdvHandle();
 
-		BdvUserInterfaceUtils.showBrightnessDialog( bdv,"test", linearConverter );
+		BdvDialogs.showBrightnessDialog( bdv,"test", linearConverter );
 	}
 
 	public static RandomAccessibleIntervalSource getRandomAccessibleIntervalSource()
