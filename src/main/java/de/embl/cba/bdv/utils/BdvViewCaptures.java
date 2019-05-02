@@ -15,6 +15,7 @@ import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
+import ij.process.LUT;
 import net.imglib2.*;
 import net.imglib2.Point;
 import net.imglib2.img.array.ArrayImgs;
@@ -23,6 +24,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.realtransform.Scale;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.ui.PainterThread;
@@ -126,6 +128,9 @@ public abstract class BdvViewCaptures
 
 		final ArrayList< RandomAccessibleInterval< UnsignedShortType > > rais
 				= new ArrayList<>();
+		final ArrayList< ARGBType > colors
+				= new ArrayList<>();
+
 
 		final List< Integer > sourceIndices = getVisibleSourceIndices( bdv );
 
@@ -152,7 +157,6 @@ public abstract class BdvViewCaptures
 				final RandomAccess< UnsignedShortType > access = rai.randomAccess();
 
 				final double[] canvasPosition = new double[ 3 ];
-				final double[] globalPosition = new double[ 3 ];
 				final double[] sourceRealPosition = new double[ 3 ];
 				final long[] sourcePosition = new long[ 3 ];
 
@@ -179,17 +183,19 @@ public abstract class BdvViewCaptures
 					}
 
 				rais.add( rai );
+				colors.add( getSourceColor( bdv, sourceIndex ) );
 			}
 		}
 
-		showAsCompositeImage( viewerVoxelSpacing, voxelUnits, rais );
+		showAsCompositeImage( viewerVoxelSpacing, voxelUnits, rais, colors );
 	}
 
 	public static
 	void showAsCompositeImage(
 			double[] voxelSpacing,
 			String voxelUnit,
-			ArrayList< RandomAccessibleInterval< UnsignedShortType > > rais )
+			ArrayList< RandomAccessibleInterval< UnsignedShortType > > rais,
+			ArrayList< ARGBType > colors )
 	{
 		final RandomAccessibleInterval< UnsignedShortType > stack = Views.stack( rais );
 
@@ -207,28 +213,19 @@ public abstract class BdvViewCaptures
 						+" voxel_depth=" + voxelSpacing[ 2 ] );
 
 		final CompositeImage compositeImage = new CompositeImage( dup );
+
 		for ( int channel = 1; channel <= compositeImage.getNChannels(); ++channel )
 		{
+			final Color color = new Color( colors.get( channel - 1 ).get() );
+			final LUT lut = compositeImage.createLutFromColor( color );
 			compositeImage.setC( channel );
-			switch ( channel )
-			{
-				// TODO: get from bdv
-				case 1:
-					compositeImage.setChannelLut(
-							compositeImage.createLutFromColor( Color.GRAY ) );
-					compositeImage.setDisplayRange( 0, 1000 ); break;
-				case 2: compositeImage.setChannelLut(
-						compositeImage.createLutFromColor( Color.GREEN ) ); break;
-				case 3: compositeImage.setChannelLut(
-						compositeImage.createLutFromColor( Color.MAGENTA ) ); break;
-				case 4: compositeImage.setChannelLut(
-						compositeImage.createLutFromColor( Color.CYAN ) ); break;
-				default: compositeImage.setChannelLut(
-						compositeImage.createLutFromColor( Color.ORANGE ) ); break;
-			}
+			compositeImage.setChannelLut( lut );
+			IJ.run(compositeImage, "Enhance Contrast", "saturated=0.0");
 		}
+
 		compositeImage.show();
-		compositeImage.setTitle( "capture" );
+		compositeImage.setTitle( "Bdv View Capture" );
 		IJ.run(compositeImage, "Make Composite", "");
+
 	}
 }
