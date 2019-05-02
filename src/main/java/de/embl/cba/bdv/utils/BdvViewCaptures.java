@@ -14,6 +14,7 @@ import de.embl.cba.transforms.utils.Transforms;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Overlay;
 import ij.plugin.Duplicator;
 import ij.process.LUT;
 import net.imglib2.*;
@@ -130,6 +131,8 @@ public abstract class BdvViewCaptures
 				= new ArrayList<>();
 		final ArrayList< ARGBType > colors
 				= new ArrayList<>();
+		final ArrayList< double[] > displayRanges
+				= new ArrayList<>();
 
 
 		final List< Integer > sourceIndices = getVisibleSourceIndices( bdv );
@@ -184,10 +187,12 @@ public abstract class BdvViewCaptures
 
 				rais.add( rai );
 				colors.add( getSourceColor( bdv, sourceIndex ) );
+
+				displayRanges.add( BdvUtils.getDisplayRange( bdv, sourceIndex) );
 			}
 		}
 
-		showAsCompositeImage( viewerVoxelSpacing, voxelUnits, rais, colors );
+		showAsCompositeImage( viewerVoxelSpacing, voxelUnits, rais, colors, displayRanges );
 	}
 
 	public static
@@ -195,7 +200,8 @@ public abstract class BdvViewCaptures
 			double[] voxelSpacing,
 			String voxelUnit,
 			ArrayList< RandomAccessibleInterval< UnsignedShortType > > rais,
-			ArrayList< ARGBType > colors )
+			ArrayList< ARGBType > colors,
+			ArrayList< double[] > displayRanges )
 	{
 		final RandomAccessibleInterval< UnsignedShortType > stack = Views.stack( rais );
 
@@ -220,7 +226,8 @@ public abstract class BdvViewCaptures
 			final LUT lut = compositeImage.createLutFromColor( color );
 			compositeImage.setC( channel );
 			compositeImage.setChannelLut( lut );
-			IJ.run(compositeImage, "Enhance Contrast", "saturated=0.0");
+			final double[] range = displayRanges.get( channel - 1 );
+			compositeImage.setDisplayRange( range[ 0 ], range[ 1 ] );
 		}
 
 		compositeImage.show();

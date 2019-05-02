@@ -970,6 +970,15 @@ public abstract class BdvUtils
 				.getConverterSetups().get( sourceId ).getColor();
 	}
 
+	public static double[] getDisplayRange( Bdv bdv, int sourceId )
+	{
+		final double displayRangeMin = bdv.getBdvHandle().getSetupAssignments()
+				.getConverterSetups().get( sourceId ).getDisplayRangeMin();
+		final double displayRangeMax = bdv.getBdvHandle().getSetupAssignments()
+				.getConverterSetups().get( sourceId ).getDisplayRangeMax();
+
+		return new double[]{ displayRangeMin, displayRangeMax };
+	}
 	public static void repaint( Bdv bdv )
 	{
 		bdv.getBdvHandle().getViewerPanel().requestRepaint();
