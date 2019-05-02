@@ -15,13 +15,9 @@ import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
-import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.Point;
-import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.array.ArrayRandomAccess;
-import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
@@ -44,8 +40,9 @@ import static de.embl.cba.bdv.utils.BdvUtils.*;
 public abstract class BdvViewCaptures
 {
 
+	@Deprecated
 	public static < R extends RealType< R > & NativeType< R > >
-	void captureView( Bdv bdv, double resolution )
+	void captureViewOld( Bdv bdv, double resolution )
 	{
 
 		double[] scalingFactors = new double[ 3 ];
@@ -95,7 +92,7 @@ public abstract class BdvViewCaptures
 
 		}
 
-		showAsIJ1MultiColorImage( bdv, resolution, randomAccessibleIntervals );
+		// showAsCompositeImage( bdv, resolution, randomAccessibleIntervals );
 
 	}
 
@@ -107,12 +104,13 @@ public abstract class BdvViewCaptures
 	 *
 	 * @param bdv
 	 * @param resolution
-	 * @param <R>
+	 * @param voxelUnits
+	 *
 	 */
-	public static < R extends RealType< R > & NativeType< R > >
-	void captureView2( BdvHandle bdv, double resolution )
+	public static void captureView( BdvHandle bdv, double resolution, String voxelUnits )
 	{
 
+		// TODO:
 		double[] scalingFactors = new double[ 3 ];
 		scalingFactors[ 0 ] = 1 / resolution;
 		scalingFactors[ 1 ] = 1 / resolution;
@@ -120,6 +118,8 @@ public abstract class BdvViewCaptures
 
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
 		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
+
+		final double[] viewerVoxelSpacing = getViewerVoxelSpacing( bdv );
 
 		final int w = getBdvWindowWidth( bdv );
 		final int h = getBdvWindowHeight( bdv );
@@ -168,7 +168,6 @@ public abstract class BdvViewCaptures
 						for ( int d = 0; d < 3; d++ )
 							sourcePosition[ d ] = (long) sourceRealPosition[ d ];
 
-
 						if ( Intervals.contains( sourceRai, new Point( sourcePosition ) ) )
 						{
 							sourceAccess.setPosition( sourcePosition );
@@ -183,118 +182,49 @@ public abstract class BdvViewCaptures
 			}
 		}
 
-		ImageJFunctions.show( rais.get(0), "" );
-		//showAsIJ1MultiColorImage( bdv, 1.0, rais );
+		showAsCompositeImage( viewerVoxelSpacing, voxelUnits, rais );
 	}
 
-	public static BufferedImage captureView( Bdv bdv, int size )
+	public static
+	void showAsCompositeImage(
+			double[] voxelSpacing,
+			String voxelUnit,
+			ArrayList< RandomAccessibleInterval< UnsignedShortType > > rais )
 	{
-		int width = size;
-		int height = size;
+		final RandomAccessibleInterval< UnsignedShortType > stack = Views.stack( rais );
 
-		final ViewerPanel viewer = bdv.getBdvHandle().getViewerPanel();
-		final ViewerState renderState = viewer.getState();
-		final int canvasW = viewer.getDisplay().getWidth();
-		final int canvasH = viewer.getDisplay().getHeight();
+		final ImagePlus imp = ImageJFunctions.wrap( stack, "Bdv View Capture" );
 
-		final AffineTransform3D affine = new AffineTransform3D();
-		renderState.getViewerTransform( affine );
-		affine.set( affine.get( 0, 3 ) - canvasW / 2, 0, 3 );
-		affine.set( affine.get( 1, 3 ) - canvasH / 2, 1, 3 );
-		affine.scale( ( double ) width / canvasW );
-		affine.set( affine.get( 0, 3 ) + width / 2, 0, 3 );
-		affine.set( affine.get( 1, 3 ) + height / 2, 1, 3 );
-		renderState.setViewerTransform( affine );
-
-		final ScaleBarOverlayRenderer scalebar =
-				Prefs.showScaleBarInMovie() ? new ScaleBarOverlayRenderer() : null;
-
-		class MyTarget implements RenderTarget
-		{
-			BufferedImage bi;
-
-			@Override
-			public BufferedImage setBufferedImage( final BufferedImage bufferedImage )
-			{
-				bi = bufferedImage;
-				return null;
-			}
-
-			@Override
-			public int getWidth()
-			{
-				return width;
-			}
-
-			@Override
-			public int getHeight()
-			{
-				return height;
-			}
-		}
-
-		final MyTarget target = new MyTarget();
-		final MultiResolutionRenderer renderer = new MultiResolutionRenderer(
-				target, new PainterThread( null ), new double[] { 1 }, 0, false, 1, null, false,
-				viewer.getOptionValues().getAccumulateProjectorFactory(), new CacheControl.Dummy() );
-
-
-		int timepoint = 0;
-		renderState.setCurrentTimepoint( timepoint );
-		renderer.requestRepaint();
-		renderer.paint( renderState );
-
-		if ( Prefs.showScaleBarInMovie() )
-		{
-			final Graphics2D g2 = target.bi.createGraphics();
-			g2.setClip( 0, 0, width, height );
-			scalebar.setViewerState( renderState );
-			scalebar.paint( g2 );
-		}
-
-		return target.bi;
-
-	}
-
-
-	public static < T extends RealType< T > & NativeType< T > >
-	void showAsIJ1MultiColorImage(
-			Bdv bdv,
-			double voxelSpacing,
-			ArrayList< RandomAccessibleInterval< T > > rais )
-	{
-		final RandomAccessibleInterval< T > stack = Views.stack( rais );
-
-		final ImagePlus imp = ImageJFunctions.wrap( stack, "capture" );
 		// duplicate: otherwise it is virtual and cannot be modified
 		final ImagePlus dup = new Duplicator().run( imp );
-		IJ.run( dup, "Subtract...", "value=32768 slice");
-		VoxelDimensions voxelDimensions = getVoxelDimensions( bdv, 0 );
+
 		IJ.run( dup,
 				"Properties...",
 				"channels="+rais.size()
-						+" slices=1 frames=1 unit="+voxelDimensions.unit()
-						+" pixel_width="+voxelSpacing
-						+" pixel_height="+voxelSpacing+" voxel_depth=1.0");
+						+" slices=1 frames=1 unit="+voxelUnit
+						+" pixel_width=" + voxelSpacing[ 0 ]
+						+" pixel_height=" + voxelSpacing[ 1 ]
+						+" voxel_depth=" + voxelSpacing[ 2 ] );
+
 		final CompositeImage compositeImage = new CompositeImage( dup );
 		for ( int channel = 1; channel <= compositeImage.getNChannels(); ++channel )
 		{
 			compositeImage.setC( channel );
 			switch ( channel )
 			{
+				// TODO: get from bdv
 				case 1:
 					compositeImage.setChannelLut(
 							compositeImage.createLutFromColor( Color.GRAY ) );
-					compositeImage.setDisplayRange( 0, 1000 ); // TODO: get from bdv
-					break;
+					compositeImage.setDisplayRange( 0, 1000 ); break;
 				case 2: compositeImage.setChannelLut(
-						compositeImage.createLutFromColor( Color.GRAY ) ); break;
-				case 3: compositeImage.setChannelLut(
-						compositeImage.createLutFromColor( Color.RED ) ); break;
-				case 4: compositeImage.setChannelLut(
 						compositeImage.createLutFromColor( Color.GREEN ) ); break;
+				case 3: compositeImage.setChannelLut(
+						compositeImage.createLutFromColor( Color.MAGENTA ) ); break;
+				case 4: compositeImage.setChannelLut(
+						compositeImage.createLutFromColor( Color.CYAN ) ); break;
 				default: compositeImage.setChannelLut(
-						compositeImage.createLutFromColor( Color.BLUE ) ); break;
+						compositeImage.createLutFromColor( Color.ORANGE ) ); break;
 			}
 		}
 		compositeImage.show();

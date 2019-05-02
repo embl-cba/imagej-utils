@@ -150,6 +150,33 @@ public abstract class BdvUtils
 		return bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceId ).getSpimSource().getVoxelDimensions();
 	}
 
+	/**
+	 * TODO: does that make sense?
+	 *
+	 * @param bdv
+	 * @return
+	 */
+	public static double[] getViewerVoxelSpacing( BdvHandle bdv )
+	{
+		final AffineTransform3D viewerTransform = new AffineTransform3D();
+		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
+
+		final double[] zeroCanvas = { 0, 0, 0 };
+		final double[] zeroGlobal = new double[ 3 ];
+
+		final double[] oneCanvas = { 1, 1, 1 };
+		final double[] oneGlobal = new double[ 3 ];
+
+		viewerTransform.applyInverse( zeroGlobal, zeroCanvas );
+		viewerTransform.applyInverse( oneGlobal, oneCanvas );
+
+		final double[] viewerVoxelSpacing = new double[ 3 ];
+		for ( int d = 0; d < 3; d++ )
+			viewerVoxelSpacing[ d ] = Math.abs( zeroGlobal[ d ] - oneGlobal[ d ]);
+
+		return viewerVoxelSpacing;
+	}
+
 
 	public static AffineTransform3D getSourceTransform( Bdv bdv, int sourceId )
 	{
