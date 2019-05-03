@@ -66,9 +66,18 @@ public abstract class BdvUtils
 
 	public static void zoomToSource( Bdv bdv, int sourceId )
 	{
-		final FinalInterval interval = getInterval( bdv, sourceId );
+		setActive( bdv, sourceId, true );
 
+		final FinalInterval interval = getInterval( bdv, sourceId );
 		zoomToInterval( bdv, interval, 1.0 );
+	}
+
+	public static void setActive( Bdv bdv, int sourceId, boolean active )
+	{
+		final List< SourceState< ? > > sources =
+				bdv.getBdvHandle().getViewerPanel().getState().getSources();
+
+		sources.get( sourceId ).setActive( active );
 	}
 
 	public static FinalInterval getInterval( Bdv bdv, int sourceId )
