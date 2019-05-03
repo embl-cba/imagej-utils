@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils;
+package de.embl.cba.bdv.utils.capture;
 
 import bdv.cache.CacheControl;
 import bdv.util.Bdv;
@@ -10,6 +10,7 @@ import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
 import bdv.viewer.state.ViewerState;
 
+import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.transforms.utils.Transforms;
 import ij.CompositeImage;
 import ij.IJ;
@@ -43,61 +44,6 @@ import static de.embl.cba.bdv.utils.BdvUtils.*;
 public abstract class BdvViewCaptures
 {
 
-	@Deprecated
-	public static < R extends RealType< R > & NativeType< R > >
-	void captureViewOld( Bdv bdv, double resolution )
-	{
-
-		double[] scalingFactors = new double[ 3 ];
-		scalingFactors[ 0 ] = 1 / resolution;
-		scalingFactors[ 1 ] = 1 / resolution;
-		scalingFactors[ 2 ] = 1.0;
-
-		int n = bdv.getBdvHandle().getViewerPanel().getState().getSources().size();
-
-		final ArrayList< RandomAccessibleInterval< R > > randomAccessibleIntervals
-				= new ArrayList<>();
-
-		for ( int sourceIndex = 0; sourceIndex < n; ++sourceIndex )
-		{
-			final Interval interval = getSourceGlobalBoundingInterval( bdv, sourceIndex );
-
-			final Interval viewerInterval =
-					Intervals.largestContainedInterval(
-						getViewerGlobalBoundingInterval( bdv ) );
-
-			final boolean intersects = ! Intervals.isEmpty(
-					Intervals.intersect( interval, viewerInterval ) );
-
-			if ( intersects )
-			{
-				RealRandomAccessible< R > rra =
-						( RealRandomAccessible ) getRealRandomAccessible( bdv, sourceIndex );
-
-				final AffineTransform3D sourceTransform =
-						getSourceTransform( bdv, sourceIndex );
-
-				rra = RealViews.transform( rra, sourceTransform );
-
-				Scale scale = new Scale( scalingFactors );
-				RealRandomAccessible< R > rescaledRRA = RealViews.transform( rra, scale );
-				final RandomAccessible< R > rastered = Views.raster( rescaledRRA );
-
-				final FinalInterval scaledInterval =
-						Transforms.scaleIntervalInXY(
-								viewerInterval, scale );
-
-				final RandomAccessibleInterval< R > cropped =
-						Views.interval( rastered, scaledInterval );
-
-				randomAccessibleIntervals.add( Views.dropSingletonDimensions( cropped )  );
-			}
-
-		}
-
-		// showAsCompositeImage( bdv, resolution, randomAccessibleIntervals );
-
-	}
 
 	/**
 	 * TODO:
@@ -106,26 +52,25 @@ public abstract class BdvViewCaptures
 	 *
 	 *
 	 * @param bdv
-	 * @param resolution
+	 * @param pixelSpacing
 	 * @param voxelUnits
 	 *
 	 */
-	public static void captureView( BdvHandle bdv, double resolution, String voxelUnits )
+	public static void captureView( BdvHandle bdv, double pixelSpacing, String voxelUnits )
 	{
-
-		// TODO:
-		double[] scalingFactors = new double[ 3 ];
-		scalingFactors[ 0 ] = 1 / resolution;
-		scalingFactors[ 1 ] = 1 / resolution;
-		scalingFactors[ 2 ] = 1.0;
 
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
 		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
 
 		final double[] viewerVoxelSpacing = getViewerVoxelSpacing( bdv );
 
+		double dxy = pixelSpacing / viewerVoxelSpacing[ 0 ] ;
+
 		final int w = getBdvWindowWidth( bdv );
 		final int h = getBdvWindowHeight( bdv );
+
+		final long captureWidth = ( long ) Math.ceil( w / dxy );
+		final long captureHeight = ( long ) Math.ceil( h / dxy );
 
 		final ArrayList< RandomAccessibleInterval< UnsignedShortType > > rais
 				= new ArrayList<>();
@@ -133,7 +78,6 @@ public abstract class BdvViewCaptures
 				= new ArrayList<>();
 		final ArrayList< double[] > displayRanges
 				= new ArrayList<>();
-
 
 		final List< Integer > sourceIndices = getVisibleSourceIndices( bdv );
 
@@ -143,7 +87,7 @@ public abstract class BdvViewCaptures
 			{
 
 				final RandomAccessibleInterval< UnsignedShortType > rai
-						= ArrayImgs.unsignedShorts( w, h );
+						= ArrayImgs.unsignedShorts( captureWidth, captureHeight );
 
 				final Source< ? > source = getSource( bdv, sourceIndex );
 				final RandomAccess< ? extends RealType< ? > > sourceAccess =
@@ -163,11 +107,12 @@ public abstract class BdvViewCaptures
 				final double[] sourceRealPosition = new double[ 3 ];
 				final long[] sourcePosition = new long[ 3 ];
 
-				for ( double x = 0; x < w; x++ )
-					for ( double y = 0; y < h; y++ )
+				// TODO: rather loop through the capture image
+				for ( int x = 0; x < captureWidth; x++ )
+					for ( int y = 0; y < captureHeight; y++ )
 					{
-						canvasPosition[ 0 ] = x;
-						canvasPosition[ 1 ] = y;
+						canvasPosition[ 0 ] = x * dxy;
+						canvasPosition[ 1 ] = y * dxy;
 
 						viewerToSourceTransform.apply( canvasPosition, sourceRealPosition );
 
@@ -179,8 +124,8 @@ public abstract class BdvViewCaptures
 						{
 							sourceAccess.setPosition( sourcePosition );
 							Double pixelValue = sourceAccess.get().getRealDouble();
-							access.setPosition( ( int ) x, 0 );
-							access.setPosition( ( int ) y, 1 );
+							access.setPosition( x, 0 );
+							access.setPosition( y, 1 );
 							access.get().setReal( pixelValue );
 						}
 					}
@@ -192,7 +137,13 @@ public abstract class BdvViewCaptures
 			}
 		}
 
-		showAsCompositeImage( viewerVoxelSpacing, voxelUnits, rais, colors, displayRanges );
+		final double[] captureVoxelSpacing = new double[ 3 ];
+		for ( int d = 0; d < 2; d++ )
+			captureVoxelSpacing[ d ] = pixelSpacing;
+		captureVoxelSpacing[ 2 ] = viewerVoxelSpacing[ 2 ]; // TODO: makes sense?
+
+		if ( rais.size() > 0 )
+			showAsCompositeImage( captureVoxelSpacing, voxelUnits, rais, colors, displayRanges );
 	}
 
 	public static

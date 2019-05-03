@@ -55,7 +55,7 @@ public abstract class BdvUtils
 		final RandomAccessibleInterval< ? > rai =
 				getRandomAccessibleInterval( bdv, sourceId );
 		final Interval interval =
-				Intervals.largestContainedInterval( sourceTransform.estimateBounds( rai ) );
+				Intervals.smallestContainingInterval( sourceTransform.estimateBounds( rai ) );
 		return interval;
 	}
 
@@ -1080,7 +1080,7 @@ public abstract class BdvUtils
 		final Interval interval = getSourceGlobalBoundingInterval( bdv, sourceIndex );
 
 		final Interval viewerInterval =
-				Intervals.largestContainedInterval(
+				Intervals.smallestContainingInterval(
 						getViewerGlobalBoundingInterval( bdv ) );
 
 		final boolean intersects = ! Intervals.isEmpty(

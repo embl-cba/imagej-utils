@@ -4,14 +4,12 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
-import de.embl.cba.bdv.utils.BdvViewCaptures;
-import javafx.scene.paint.Color;
+import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
+import de.embl.cba.bdv.utils.capture.PixelSpacingDialog;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 import net.imagej.ImageJ;
-import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.basictypeaccess.array.IntArray;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
@@ -58,15 +56,23 @@ public class ExampleViewCapture
 		vt.set( 0, 2, 3 );
 		bdv.getViewerPanel().setCurrentViewerTransform( vt );
 
+
 		/**
 		 * install view capture behaviour
 		 */
+		final String pixelUnit = "nanometer";
+
+		final PixelSpacingDialog pixelSpacingDialog = new PixelSpacingDialog( 0.25, pixelUnit );
+
 		Behaviours behaviours = new Behaviours( new InputTriggerConfig() );
 		behaviours.install( bdv.getTriggerbindings(), "" );
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
-			BdvViewCaptures.captureView(
-					bdv, 1.0, "nanometer" );
+			new Thread( () -> {
+				if ( !pixelSpacingDialog.showDialog() ) return;
+				BdvViewCaptures.captureView(
+						bdv, pixelSpacingDialog.getPixelSpacing(), pixelUnit );
+			}).start();
 		}, "capture view", "C" ) ;
 	}
 
