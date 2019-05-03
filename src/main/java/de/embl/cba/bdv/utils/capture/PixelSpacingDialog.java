@@ -17,7 +17,7 @@ public class PixelSpacingDialog
 	public boolean showDialog()
 	{
 		final NonBlockingGenericDialog gd = new NonBlockingGenericDialog( "Pixel Spacing" );
-		gd.addNumericField( "Pixel Spacing [" + pixelUnit + "]", pixelSpacing, 5 );
+		gd.addNumericField( "Pixel Spacing", pixelSpacing, 3,  10, pixelUnit );
 		gd.showDialog();
 		if( gd.wasCanceled() ) return false;
 		pixelSpacing = gd.getNextNumber();
