@@ -56,7 +56,11 @@ public abstract class BdvViewCaptures
 	 * @param voxelUnits
 	 *
 	 */
-	public static void captureView( BdvHandle bdv, double pixelSpacing, String voxelUnits )
+	public static void captureView(
+			BdvHandle bdv,
+			double pixelSpacing,
+			String voxelUnits,
+			boolean checkSourceIntersectionWithViewerPlaneOnlyIn2D)
 	{
 
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
@@ -83,58 +87,63 @@ public abstract class BdvViewCaptures
 
 		for ( int sourceIndex : sourceIndices )
 		{
-			if ( BdvUtils.isSourceIntersectingCurrentView( bdv, sourceIndex ) )
+			if ( checkSourceIntersectionWithViewerPlaneOnlyIn2D )
 			{
-
-				final RandomAccessibleInterval< UnsignedShortType > rai
-						= ArrayImgs.unsignedShorts( captureWidth, captureHeight );
-
-				final Source< ? > source = getSource( bdv, sourceIndex );
-				final RandomAccess< ? extends RealType< ? > > sourceAccess =
-						getRealTypeNonVolatileRandomAccess( source, 0, 0 );
-				final AffineTransform3D sourceTransform =
-						BdvUtils.getSourceTransform( source, 0,0  );
-				final RandomAccessibleInterval< ? > sourceRai = source.getSource( 0, 0 );
-
-				AffineTransform3D viewerToSourceTransform = new AffineTransform3D();
-
-				viewerToSourceTransform.preConcatenate( viewerTransform.inverse() );
-				viewerToSourceTransform.preConcatenate( sourceTransform.inverse() );
-
-				final RandomAccess< UnsignedShortType > access = rai.randomAccess();
-
-				final double[] canvasPosition = new double[ 3 ];
-				final double[] sourceRealPosition = new double[ 3 ];
-				final long[] sourcePosition = new long[ 3 ];
-
-				// TODO: rather loop through the capture image
-				for ( int x = 0; x < captureWidth; x++ )
-					for ( int y = 0; y < captureHeight; y++ )
-					{
-						canvasPosition[ 0 ] = x * dxy;
-						canvasPosition[ 1 ] = y * dxy;
-
-						viewerToSourceTransform.apply( canvasPosition, sourceRealPosition );
-
-						// TODO: make work with real interpolated access
-						for ( int d = 0; d < 3; d++ )
-							sourcePosition[ d ] = (long) sourceRealPosition[ d ];
-
-						if ( Intervals.contains( sourceRai, new Point( sourcePosition ) ) )
-						{
-							sourceAccess.setPosition( sourcePosition );
-							Double pixelValue = sourceAccess.get().getRealDouble();
-							access.setPosition( x, 0 );
-							access.setPosition( y, 1 );
-							access.get().setReal( pixelValue );
-						}
-					}
-
-				rais.add( rai );
-				colors.add( getSourceColor( bdv, sourceIndex ) );
-
-				displayRanges.add( BdvUtils.getDisplayRange( bdv, sourceIndex) );
+				if ( ! BdvUtils.isSourceIntersectingCurrentViewIn2D( bdv, sourceIndex ) ) continue;
 			}
+			else
+			{
+				if ( ! BdvUtils.isSourceIntersectingCurrentView( bdv, sourceIndex ) ) continue;
+			}
+
+			final RandomAccessibleInterval< UnsignedShortType > rai
+					= ArrayImgs.unsignedShorts( captureWidth, captureHeight );
+
+			final Source< ? > source = getSource( bdv, sourceIndex );
+			final RandomAccess< ? extends RealType< ? > > sourceAccess =
+					getRealTypeNonVolatileRandomAccess( source, 0, 0 );
+			final AffineTransform3D sourceTransform =
+					BdvUtils.getSourceTransform( source, 0,0  );
+			final RandomAccessibleInterval< ? > sourceRai = source.getSource( 0, 0 );
+
+			AffineTransform3D viewerToSourceTransform = new AffineTransform3D();
+
+			viewerToSourceTransform.preConcatenate( viewerTransform.inverse() );
+			viewerToSourceTransform.preConcatenate( sourceTransform.inverse() );
+
+			final RandomAccess< UnsignedShortType > access = rai.randomAccess();
+
+			final double[] canvasPosition = new double[ 3 ];
+			final double[] sourceRealPosition = new double[ 3 ];
+			final long[] sourcePosition = new long[ 3 ];
+
+			// TODO: rather loop through the capture image
+			for ( int x = 0; x < captureWidth; x++ )
+				for ( int y = 0; y < captureHeight; y++ )
+				{
+					canvasPosition[ 0 ] = x * dxy;
+					canvasPosition[ 1 ] = y * dxy;
+
+					viewerToSourceTransform.apply( canvasPosition, sourceRealPosition );
+
+					// TODO: make work with real interpolated access
+					for ( int d = 0; d < 3; d++ )
+						sourcePosition[ d ] = (long) sourceRealPosition[ d ];
+
+					if ( Intervals.contains( sourceRai, new Point( sourcePosition ) ) )
+					{
+						sourceAccess.setPosition( sourcePosition );
+						Double pixelValue = sourceAccess.get().getRealDouble();
+						access.setPosition( x, 0 );
+						access.setPosition( y, 1 );
+						access.get().setReal( pixelValue );
+					}
+				}
+
+			rais.add( rai );
+			colors.add( getSourceColor( bdv, sourceIndex ) );
+
+			displayRanges.add( BdvUtils.getDisplayRange( bdv, sourceIndex) );
 		}
 
 		final double[] captureVoxelSpacing = new double[ 3 ];

@@ -1115,4 +1115,34 @@ public abstract class BdvUtils
 
 		return intersects;
 	}
+
+
+	public static boolean isSourceIntersectingCurrentViewIn2D( BdvHandle bdv, int sourceIndex )
+	{
+		final Interval interval = getSourceGlobalBoundingInterval( bdv, sourceIndex );
+
+		final Interval viewerInterval =
+				Intervals.smallestContainingInterval(
+						getViewerGlobalBoundingInterval( bdv ) );
+
+		final boolean intersects = ! Intervals.isEmpty(
+				intersect2D( interval, viewerInterval ) );
+
+		return intersects;
+	}
+
+
+	public static FinalInterval intersect2D( final Interval intervalA, final Interval intervalB )
+	{
+		assert intervalA.numDimensions() == intervalB.numDimensions();
+
+		final long[] min = new long[ 2 ];
+		final long[] max = new long[ 2 ];
+		for ( int d = 0; d < 2; ++d )
+		{
+			min[ d ] = Math.max( intervalA.min( d ), intervalB.min( d ) );
+			max[ d ] = Math.min( intervalA.max( d ), intervalB.max( d ) );
+		}
+		return new FinalInterval( min, max );
+	}
 }

@@ -75,7 +75,10 @@ public class ExampleViewCapture
 			new Thread( () -> {
 				if ( !pixelSpacingDialog.showDialog() ) return;
 				BdvViewCaptures.captureView(
-						bdv, pixelSpacingDialog.getPixelSpacing(), pixelUnit );
+						bdv,
+						pixelSpacingDialog.getPixelSpacing(),
+						pixelUnit,
+						false );
 			}).start();
 		}, "capture view", "C" ) ;
 	}
