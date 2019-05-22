@@ -504,11 +504,12 @@ public abstract class BdvDialogs
 
 	public static void showDisplaySettingsDialogForSourcesAtMousePosition(
 			BdvHandle bdv,
-			boolean allowMultipleDialogs )
+			boolean allowMultipleDialogs,
+			boolean evalSourcesAtPointIn2D )
 	{
 		final RealPoint point = BdvUtils.getGlobalMouseCoordinates( bdv );
 		final ArrayList< Integer > indices =
-				getSourceIndicesAtSelectedPoint( bdv, point );
+				getSourceIndicesAtSelectedPoint( bdv, point, evalSourcesAtPointIn2D );
 
 		if ( indices.size() == 0 ) return;
 

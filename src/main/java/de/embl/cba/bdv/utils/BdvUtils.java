@@ -74,10 +74,7 @@ public abstract class BdvUtils
 
 	public static void setActive( Bdv bdv, int sourceId, boolean active )
 	{
-		final List< SourceState< ? > > sources =
-				bdv.getBdvHandle().getViewerPanel().getState().getSources();
-
-		sources.get( sourceId ).setActive( active );
+		bdv.getBdvHandle().getViewerPanel().getVisibilityAndGrouping().setSourceActive( sourceId, active );
 	}
 
 	public static FinalInterval getInterval( Bdv bdv, int sourceId )
@@ -670,7 +667,7 @@ public abstract class BdvUtils
 
 	public static
 	ArrayList< Integer >
-	getSourceIndicesAtSelectedPoint( Bdv bdv, RealPoint selectedPoint )
+	getSourceIndicesAtSelectedPoint( Bdv bdv, RealPoint selectedPoint, boolean evalSourcesAtPointIn2D )
 	{
 		final ArrayList< Integer > sourceIndicesAtSelectedPoint = new ArrayList<>();
 
@@ -687,11 +684,32 @@ public abstract class BdvUtils
 
 			final long[] positionInSource = getPositionInSource( source, selectedPoint, 0, 0 );
 
-			final RandomAccessibleInterval< ? > interval = source.getSource( 0, 0 );
+			Interval interval = source.getSource( 0, 0 );
 			final Point point = new Point( positionInSource );
 
-			if ( Intervals.contains( interval, point ) )
-				sourceIndicesAtSelectedPoint.add( sourceIndex );
+			if ( evalSourcesAtPointIn2D )
+			{
+				final long[] min = new long[ 2 ];
+				final long[] max = new long[ 2 ];
+				final long[] positionInSource2D = new long[ 2 ];
+				for ( int d = 0; d < 2; d++ )
+				{
+					min[ d ] = interval.min( d );
+					max[ d ] = interval.max( d );
+					positionInSource2D[ d ] = positionInSource[ d ];
+				}
+
+				final FinalInterval interval2D = new FinalInterval( min, max );
+				final Point point2D = new Point( positionInSource2D );
+
+				if ( Intervals.contains( interval2D, point2D ) )
+					sourceIndicesAtSelectedPoint.add( sourceIndex );
+			}
+			else
+			{
+				if ( Intervals.contains( interval, point ) )
+					sourceIndicesAtSelectedPoint.add( sourceIndex );
+			}
 		}
 
 		return sourceIndicesAtSelectedPoint;

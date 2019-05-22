@@ -12,8 +12,9 @@ public class TryNonVolatileAccess
 {
 	public static < R extends RealType< R > >  void main( String[] args )
 	{
-		final File file = new File( TryNonVolatileAccess.class.getResource( "../labels-ulong.xml" ).getFile() );
-		final LazySpimSource< R > source = new LazySpimSource<>( "source", file );
+
+		final LazySpimSource< R > source = new LazySpimSource<>( "source",
+				TryNonVolatileAccess.class.getResource( "../labels-ulong.xml" ).getFile() );
 
 		final RandomAccessibleInterval< ? extends RealType< ? > > rai =
 				BdvUtils.getRealTypeNonVolatileRandomAccessibleInterval( source, 0, 0 );

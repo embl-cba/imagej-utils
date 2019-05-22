@@ -20,7 +20,8 @@ public class ExampleSourcesAtMouseCoordinates
 {
 	public static < T extends RealType< T > > void main ( String[] args )
 	{
-		final ImagePlus imagePlus = IJ.openImage( ExampleSourcesAtMouseCoordinates.class.getResource( "2d-timelapse-16bit-labelMask.tif" ).getFile() );
+		final ImagePlus imagePlus =
+				IJ.openImage( ExampleSourcesAtMouseCoordinates.class.getResource( "2d-timelapse-16bit-labelMask.tif" ).getFile() );
 
 		RandomAccessibleInterval< T > wrap = ImageJFunctions.wrapReal( imagePlus );
 
@@ -55,7 +56,7 @@ public class ExampleSourcesAtMouseCoordinates
 		{
 			final RealPoint point = BdvUtils.getGlobalMouseCoordinates( bdvHandle );
 			final ArrayList< Integer > points =
-					getSourceIndicesAtSelectedPoint( bdvHandle, point );
+					getSourceIndicesAtSelectedPoint( bdvHandle, point, true );
 			int a = 1;
 		}, "", "ctrl button1" ) ;
 

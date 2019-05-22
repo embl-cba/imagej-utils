@@ -13,7 +13,7 @@ import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
-public class ExampleRightClickDisplaySettingsDialog
+public class ExampleInteractiveDisplaySettingsDialog
 {
 	public static void main( String[] args )
 	{
@@ -52,7 +52,7 @@ public class ExampleRightClickDisplaySettingsDialog
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
 			BdvDialogs.showDisplaySettingsDialogForSourcesAtMousePosition(
-					bdv, false );
+					bdv, false, true );
 		}, "display settings dialog", "D" ) ;
 
 

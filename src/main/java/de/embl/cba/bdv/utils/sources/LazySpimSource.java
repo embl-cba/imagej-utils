@@ -1,7 +1,6 @@
 package de.embl.cba.bdv.utils.sources;
 
 import bdv.BigDataViewer;
-import bdv.ViewerImgLoader;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
@@ -9,9 +8,7 @@ import bdv.viewer.SourceAndConverter;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
-import mpicbg.spim.data.generic.sequence.ImgLoaderHint;
 import mpicbg.spim.data.sequence.MultiResolutionImgLoader;
-import mpicbg.spim.data.sequence.SetupImgLoader;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
@@ -24,17 +21,17 @@ import java.util.List;
 
 public class LazySpimSource< T extends NumericType< T > > implements Source< T >
 {
-	private final File file;
+	private final String path;
 	private final String name;
 	private Source< T > volatileSource;
 	private SpimData spimData;
 	private List< ConverterSetup > converterSetups;
 	private List< SourceAndConverter< ? > > sources;
 
-	public LazySpimSource( String name, File file )
+	public LazySpimSource( String name, String path )
 	{
 		this.name = name;
-		this.file = file;
+		this.path = path;
 	}
 
 	private Source< T > wrappedVolatileSource()
@@ -50,23 +47,23 @@ public class LazySpimSource< T extends NumericType< T > > implements Source< T >
 
 	private void initSpimData()
 	{
-		spimData = openSpimData( file );
+		spimData = openSpimData( path );
 		converterSetups = new ArrayList<>();
 		sources = new ArrayList<>();
 		BigDataViewer.initSetups( spimData, converterSetups, sources );
 	}
 
 
-	private SpimData openSpimData( File file )
+	private SpimData openSpimData( String path )
 	{
 		try
 		{
-			SpimData spimData = new XmlIoSpimData().load( file.toString() );
+			SpimData spimData = new XmlIoSpimData().load( path);
 			return spimData;
 		}
 		catch ( SpimDataException e )
 		{
-			System.out.println( file.toString() );
+			System.out.println( path );
 			e.printStackTrace();
 			return null;
 		}

@@ -16,10 +16,14 @@ import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.scijava.ui.behaviour.ClickBehaviour;
+import org.scijava.ui.behaviour.InputTrigger;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
+import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ExampleViewCapture
 {

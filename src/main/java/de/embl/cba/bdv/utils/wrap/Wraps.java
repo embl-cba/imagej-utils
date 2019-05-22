@@ -6,6 +6,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
@@ -33,6 +34,7 @@ public class Wraps
 					new RandomAccessibleIntervalSource4D(
 							channel,
 							Util.getTypeFromInterval( channel ),
+							getScalingTransform( imagePlus ),
 							imagePlus.getTitle() + "-C" + c );
 
 			sources.add( source4D );
@@ -40,6 +42,15 @@ public class Wraps
 
 		return sources;
 
+	}
+
+	public static AffineTransform3D getScalingTransform( ImagePlus imagePlus )
+	{
+		final AffineTransform3D scaling = new AffineTransform3D();
+		scaling.set( imagePlus.getCalibration().pixelWidth, 0, 0 );
+		scaling.set( imagePlus.getCalibration().pixelHeight, 1, 1 );
+		scaling.set( imagePlus.getCalibration().pixelDepth, 2, 2 );
+		return scaling;
 	}
 
 	public static < R extends RealType< R > & NativeType< R > >
