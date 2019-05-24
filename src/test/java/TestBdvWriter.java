@@ -1,4 +1,4 @@
-import de.embl.cba.bdv.utils.io.BdvWriter;
+import de.embl.cba.bdv.utils.io.BdvImagePlusExport;
 import ij.IJ;
 import ij.ImagePlus;
 
@@ -14,7 +14,7 @@ public class TestBdvWriter
 
 		String xmlOutputPath = "/Users/tischer/Desktop/bdv-test.xml";
 
-		BdvWriter.saveAsBdv( imagePlus, new File( xmlOutputPath ) );
+		BdvImagePlusExport.saveAsBdv( imagePlus, new File( xmlOutputPath ) );
 
 	}
 }

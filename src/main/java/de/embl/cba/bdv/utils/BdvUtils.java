@@ -1085,6 +1085,24 @@ public abstract class BdvUtils
 		}
 	}
 
+	public static void centerBdvWindowLocation( BdvHandle bdv )
+	{
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+		final ViewerFrame viewerFrame = getViewerFrame( bdv );
+
+		viewerFrame.setLocation(
+				screenSize.width / 2 - viewerFrame.getWidth() / 2,
+				0 + 50 );
+	}
+
+	public static ViewerFrame getViewerFrame( BdvHandle bdv )
+	{
+		return ( ViewerFrame ) bdv.getViewerPanel().getParent()
+				.getParent().getParent().getParent();
+	}
+
+
 	public static < R extends RealType< R > & NativeType< R > >
 	RandomAccessibleIntervalSource4D< R > createSourceFrom2DFrameList(
 			ArrayList< RandomAccessibleInterval< R > > frames2D,

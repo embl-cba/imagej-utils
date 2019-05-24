@@ -36,9 +36,7 @@ public class BdvWriterCommand implements Command
 			System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 
 		final ImagePlus imp = getImagePlus();
-		BdvWriter.saveAsBdv( imp, xmlOutputPath );
-
-
+		BdvImagePlusExport.saveAsBdv( imp, xmlOutputPath );
 	}
 
 	public ImagePlus getImagePlus()
