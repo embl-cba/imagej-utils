@@ -84,7 +84,7 @@ public class RealBoundingBoxExample
 
 		boundingBox.intervalChangedListeners().add( () -> {
 			/*
-			 TODO: for users the interval without the bbTransform is
+			 TODO: for usage the interval without the bbTransform is
 			 quite useless, maybe also return something else?
 			 an ROI?
 			  */

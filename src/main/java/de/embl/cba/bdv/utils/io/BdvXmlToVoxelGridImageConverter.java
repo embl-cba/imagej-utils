@@ -27,9 +27,8 @@ import net.imglib2.view.Views;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class BdvAffineXmlToVoxelGridImageConverter < T extends RealType< T > & NativeType< T > >
+public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeType< T > >
 {
-
 	private RealRandomAccessible< T > interpolatedSource;
 	private String voxelUnit;
 	private String imageTitle;
@@ -46,14 +45,27 @@ public class BdvAffineXmlToVoxelGridImageConverter < T extends RealType< T > & N
 		Bdv
 	}
 
-	public BdvAffineXmlToVoxelGridImageConverter(
+	public enum InterpolationType
+	{
+		NearestNeighbor,
+		NLinear
+	}
+
+	public BdvXmlToVoxelGridImageConverter(
 			String referenceBdvFilePath,
-			String sourceBdvFilePath )
+			String sourceBdvFilePath,
+			InterpolationType interpolationType
+	)
 	{
 		setTargetVoxelSpacingAndRealInterval( referenceBdvFilePath );
-		setSourceImageAndTransform( sourceBdvFilePath );
+		setSourceImageAndTransform( sourceBdvFilePath, interpolationType );
 		voxelUnit = "micrometer";
 		imageTitle = "image";
+	}
+
+	public BdvXmlToVoxelGridImageConverter(  )
+	{
+
 	}
 
 	public void run( FileFormat fileFormat, String pathWithoutExtension )
@@ -66,6 +78,7 @@ public class BdvAffineXmlToVoxelGridImageConverter < T extends RealType< T > & N
 		Logger.log( "Creating image..." );
 		final RandomAccessibleInterval< T > transformedRai =
 				createTransformedRai( interpolatedSource, sourceTransform, transformedSourceInterval );
+
 
 		save( transformedRai, fileFormat, pathWithoutExtension );
 	}
@@ -85,7 +98,7 @@ public class BdvAffineXmlToVoxelGridImageConverter < T extends RealType< T > & N
 		}
 	}
 
-	public void setSourceImageAndTransform( String sourceBdvFilePath )
+	public void setSourceImageAndTransform( String sourceBdvFilePath, InterpolationType interpolationType )
 	{
 		final SpimData spimData = openSpimData( sourceBdvFilePath );
 
@@ -95,7 +108,7 @@ public class BdvAffineXmlToVoxelGridImageConverter < T extends RealType< T > & N
 
 		sourceVoxelSpacing = BdvUtils.getVoxelSpacings( spimData, 0 ).get( level );
 
-		interpolatedSource = spimSource.getInterpolatedSource( 0, level, Interpolation.NEARESTNEIGHBOR );
+		interpolatedSource = spimSource.getInterpolatedSource( 0, level, getBdvInterpolation( interpolationType ) );
 
 		sourceTransform = new AffineTransform3D();
 		spimSource.getSourceTransform( 0, level, sourceTransform );
@@ -108,6 +121,21 @@ public class BdvAffineXmlToVoxelGridImageConverter < T extends RealType< T > & N
 				IntervalUtils.scale( targetRealInterval, scalingFactors ) );
 
 		sourceTransform.preConcatenate( scaleToVoxelGrid );
+	}
+
+	public Interpolation getBdvInterpolation( InterpolationType interpolationType )
+	{
+		Interpolation interpolation = null;
+		switch ( interpolationType )
+		{
+			case NearestNeighbor:
+				interpolation = Interpolation.NEARESTNEIGHBOR;
+				break;
+			case NLinear:
+				interpolation = Interpolation.NLINEAR;
+				break;
+		}
+		return interpolation;
 	}
 
 	private void setTargetVoxelSpacingAndRealInterval( String xmlFilename )

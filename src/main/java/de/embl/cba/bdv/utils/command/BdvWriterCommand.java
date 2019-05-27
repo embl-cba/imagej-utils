@@ -1,7 +1,8 @@
-package de.embl.cba.bdv.utils.io;
+package de.embl.cba.bdv.utils.command;
 
 import bdv.export.*;
 import bdv.ij.export.imgloader.ImagePlusImgLoader.MinMaxOption;
+import de.embl.cba.bdv.utils.io.BdvImagePlusExport;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.FolderOpener;
