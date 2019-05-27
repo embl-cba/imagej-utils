@@ -54,18 +54,12 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 	public BdvXmlToVoxelGridImageConverter(
 			String referenceBdvFilePath,
 			String sourceBdvFilePath,
-			InterpolationType interpolationType
-	)
+			InterpolationType interpolationType )
 	{
 		setTargetVoxelSpacingAndRealInterval( referenceBdvFilePath );
 		setSourceImageAndTransform( sourceBdvFilePath, interpolationType );
-		voxelUnit = "micrometer";
+
 		imageTitle = "image";
-	}
-
-	public BdvXmlToVoxelGridImageConverter(  )
-	{
-
 	}
 
 	public void run( FileFormat fileFormat, String pathWithoutExtension )
@@ -147,7 +141,7 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 				.getImgLoader().getSetupImgLoader( setupId )
 				.getImage( 0 );
 
-		targetVoxelSpacing = getTargetVoxelSpacing( targetSpimData, setupId );
+		setTargetVoxelSpacing( targetSpimData, setupId );
 		targetRealInterval = IntervalUtils.toCalibratedRealInterval( targetInterval, targetVoxelSpacing );
 	}
 
@@ -235,16 +229,18 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 		return imp;
 	}
 
-	public static double[] getTargetVoxelSpacing( SpimData medData, int setupId )
+	private void setTargetVoxelSpacing( SpimData medData, int setupId )
 	{
 		final VoxelDimensions targetVoxelDimensions
 				= medData.getSequenceDescription()
 				.getViewSetupsOrdered().get( setupId ).getVoxelSize();
 
-		final double[] targetVoxelSpacing = new double[ targetVoxelDimensions.numDimensions() ];
+		voxelUnit = targetVoxelDimensions.unit();
+
+		targetVoxelSpacing = new double[ targetVoxelDimensions.numDimensions() ];
 		for ( int d = 0; d < targetVoxelSpacing.length; d++ )
 			targetVoxelSpacing[ d ] = targetVoxelDimensions.dimension( d );
-		return targetVoxelSpacing;
+
 	}
 
 	public static double[] createScalingFactors( double[] targetVoxelSpacing,

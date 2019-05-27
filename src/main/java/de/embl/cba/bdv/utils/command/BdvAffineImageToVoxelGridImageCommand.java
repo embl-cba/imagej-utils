@@ -1,11 +1,6 @@
 package de.embl.cba.bdv.utils.command;
 
-import bdv.export.ExportMipmapInfo;
-import bdv.ij.export.imgloader.ImagePlusImgLoader.MinMaxOption;
 import de.embl.cba.bdv.utils.io.BdvXmlToVoxelGridImageConverter;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.plugin.FolderOpener;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import org.scijava.command.Command;
@@ -14,7 +9,6 @@ import org.scijava.plugin.Plugin;
 import org.scijava.widget.FileWidget;
 
 import java.io.File;
-
 
 @Plugin(type = Command.class,
 		menuPath = "Plugins>BigDataTools>Convert>Bdv Affine Image to Voxel Grid Image")
@@ -38,7 +32,6 @@ public class BdvAffineImageToVoxelGridImageCommand < T extends RealType< T > & N
 	// TODO: replace by enum, once possible
 	@Parameter( label = "Interpolation type", choices = { "NearestNeighbor", "NLinear"} )
 	public String interpolationType;
-
 
 	@Override
 	public void run()
