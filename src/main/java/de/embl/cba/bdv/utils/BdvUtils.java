@@ -1,5 +1,6 @@
 package de.embl.cba.bdv.utils;
 
+import bdv.ViewerSetupImgLoader;
 import bdv.VolatileSpimSource;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
@@ -19,6 +20,7 @@ import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
+import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.Point;
@@ -1070,6 +1072,27 @@ public abstract class BdvUtils
 
 		return null;
 
+	}
+
+	public static ArrayList< double[] > getVoxelSpacings( SpimData spimData, int setupId )
+	{
+		final VoxelDimensions voxelDimensions =
+				spimData.getSequenceDescription().getViewSetupsOrdered().get( setupId ).getVoxelSize();
+		final ViewerSetupImgLoader loader =
+				( ViewerSetupImgLoader ) spimData.getSequenceDescription().getImgLoader().getSetupImgLoader( setupId );
+		final double[][] resolutions = loader.getMipmapResolutions();
+
+		final ArrayList< double[] > voxelSpacings = new ArrayList<>();
+
+		for ( int level = 0; level < resolutions.length; level++ )
+		{
+			final double[] voxelSpacing = new double[ 3 ];
+			for ( int d = 0; d < 3; d++ )
+				voxelSpacing[ d ] = voxelDimensions.dimension( d ) * resolutions[ level ][ d ];
+			voxelSpacings.add( voxelSpacing );
+		}
+
+		return voxelSpacings;
 	}
 
 	public static < R extends RealType< R > & NativeType< R > >
