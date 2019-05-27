@@ -38,8 +38,11 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 	public static final int CHANNEL_DIM = 3;
 	public static final int TIME_DIM = 4;
 
+
+	// Use BdvRaiCYZCTExport instead
+	@Deprecated
 	public void export(
-			RandomAccessibleInterval< T > rai,
+			RandomAccessibleInterval< T > raiXYZ,
 			String name,
 			String filePathWithoutExtension,
 			double[] calibration,
@@ -47,8 +50,7 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 			double[] translation // TODO: replace by AffineTransform3D
 	)
 	{
-
-		rai = Views.zeroMin( rai ); // below code does not save pixels at negative coordinates....
+		raiXYZ = Views.zeroMin( raiXYZ ); // below code does not save pixels at negative coordinates....
 
 		final File hdf5File = new File( filePathWithoutExtension + ".h5" );
 		final File xmlFile = new File( filePathWithoutExtension + ".xml" );
@@ -56,7 +58,7 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 		// set up calibration
 		String pixelUnit = getPixelUnit( calibrationUnit );
 		final FinalVoxelDimensions voxelSize = new FinalVoxelDimensions( pixelUnit, calibration );
-		final FinalDimensions imageSize = getFinalDimensions( rai );
+		final FinalDimensions imageSize = getFinalDimensions( raiXYZ );
 
 		// propose reasonable mipmap settings
 		final ExportMipmapInfo autoMipmapSettings =
@@ -67,10 +69,10 @@ public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 		final ProgressWriter progressWriter = new ProgressWriterBdv();
 		progressWriter.out().println( "starting export..." );
 
-		final BasicImgLoader imgLoader = new RaiImgLoader( rai, calibration, calibrationUnit );
+		final BasicImgLoader imgLoader = new RaiImgLoader( raiXYZ, calibration, calibrationUnit );
 
-		final int numTimePoints = (int) rai.dimension( TIME_DIM );
-		final int numChannels = (int) rai.dimension( CHANNEL_DIM );
+		final int numTimePoints = (int) raiXYZ.dimension( TIME_DIM );
+		final int numChannels = (int) raiXYZ.dimension( CHANNEL_DIM );
 
 		final AffineTransform3D sourceTransform =
 				getSourceTransform3D( calibration, translation );

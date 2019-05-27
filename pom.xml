@@ -154,6 +154,11 @@
 			<artifactId>transforms-utils</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.itc</groupId>
+			<artifactId>image-transform-converters</artifactId>
+		</dependency>
+
 		<!-- FOR BENCHMARKING, MAYBE REMOVE LATER -->
 
 		<dependency>
