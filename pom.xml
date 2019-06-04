@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>de.embl.cba</groupId>
 		<artifactId>pom-embl-cba</artifactId>
-		<version>0.1.01</version>
+		<version>0.3.01</version>
 		<relativePath>../pom-embl-cba</relativePath>
 	</parent>
 
@@ -75,6 +75,37 @@
 		<imagej.app.directory>/Applications/Fiji.app/</imagej.app.directory>
 	</properties>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<archive>
+								<manifest>
+									<mainClass>
+										de.embl.cba.bdv.utils.io.BdvToVoxelGridImageConverter
+									</mainClass>
+								</manifest>
+							</archive>
+							<outputDirectory>
+								/Users/tischer/Documents/bdv-utils/target
+							</outputDirectory>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 	<repositories>
 

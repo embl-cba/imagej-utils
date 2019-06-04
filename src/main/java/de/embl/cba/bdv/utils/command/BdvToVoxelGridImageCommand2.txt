@@ -1,6 +1,6 @@
 package de.embl.cba.bdv.utils.command;
 
-import de.embl.cba.bdv.utils.io.BdvXmlToVoxelGridImageConverter;
+import de.embl.cba.bdv.utils.io.BdvToVoxelGridImageConverter;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import org.scijava.command.Command;
@@ -11,16 +11,20 @@ import org.scijava.widget.FileWidget;
 import java.io.File;
 
 @Plugin(type = Command.class,
-		menuPath = "Plugins>BigDataTools>Convert>Bdv Affine Image to Voxel Grid Image")
-public class BdvAffineImageToVoxelGridImageCommand < T extends RealType< T > & NativeType< T > >
+		menuPath = "Plugins>BigDataTools>Convert>Bdv to Voxel Grid Image")
+public class BdvToVoxelGridImageCommand2< T extends RealType< T > & NativeType< T > >
 		implements Command
 {
 
-	@Parameter( label = "Bdv reference image for voxel spacing and image size", style = FileWidget.OPEN_STYLE )
-	public File bdvReferenceImage;
+	@Parameter( label = "Target voxel spacing [ dx, dy, dz ]" )
+	public String targetVoxelSpacing = "0.5,0.5,0.5";
 
-	@Parameter( label = "Bdv source image", style = FileWidget.OPEN_STYLE )
-	public File bdvSourceImage;
+	@Parameter( label = "Target image number of voxels [ nx, ny, nz ]" )
+	public String targetNumberOfVoxels = "100,100,100";
+
+	@Parameter( label = "Target image number of voxels [ nx, ny, nz ]" )
+	public String targetNumberOfVoxels = "100,100,100";
+
 
 	@Parameter( label = "Output file", style = FileWidget.SAVE_STYLE )
 	public File outputPath;
@@ -38,13 +42,13 @@ public class BdvAffineImageToVoxelGridImageCommand < T extends RealType< T > & N
 	{
 		String outputPathWithoutExtension = outputPath.toString().substring(0, outputPath.toString().lastIndexOf('.'));
 
-		final BdvXmlToVoxelGridImageConverter< T > converter = new BdvXmlToVoxelGridImageConverter<>(
+		final BdvToVoxelGridImageConverter< T > converter = new BdvToVoxelGridImageConverter<>(
 				bdvReferenceImage.getAbsolutePath(),
 				bdvSourceImage.getAbsolutePath(),
-				BdvXmlToVoxelGridImageConverter.InterpolationType.valueOf( interpolationType ) );
+				BdvToVoxelGridImageConverter.InterpolationType.valueOf( interpolationType ) );
 
 		converter.run(
-				BdvXmlToVoxelGridImageConverter.FileFormat.valueOf( outputFileFormat ),
+				BdvToVoxelGridImageConverter.FileFormat.valueOf( outputFileFormat ),
 				outputPathWithoutExtension );
 	}
 

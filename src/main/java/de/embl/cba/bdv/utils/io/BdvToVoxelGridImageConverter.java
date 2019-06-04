@@ -27,7 +27,7 @@ import net.imglib2.view.Views;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeType< T > >
+public class BdvToVoxelGridImageConverter< T extends RealType< T > & NativeType< T > >
 {
 	private RealRandomAccessible< T > interpolatedSource;
 	private String voxelUnit;
@@ -51,7 +51,7 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 		NLinear
 	}
 
-	public BdvXmlToVoxelGridImageConverter(
+	public BdvToVoxelGridImageConverter(
 			String referenceBdvFilePath,
 			String sourceBdvFilePath,
 			InterpolationType interpolationType )
@@ -73,11 +73,10 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 		final RandomAccessibleInterval< T > transformedRai =
 				createTransformedRai( interpolatedSource, sourceTransform, transformedSourceInterval );
 
-
 		save( transformedRai, fileFormat, pathWithoutExtension );
 	}
 
-	public void save( RandomAccessibleInterval< T > transformedRai, FileFormat fileFormat, String pathWithoutExtension )
+	private void save( RandomAccessibleInterval< T > transformedRai, FileFormat fileFormat, String pathWithoutExtension )
 	{
 		switch ( fileFormat ){
 			case Tiff:
@@ -92,7 +91,7 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 		}
 	}
 
-	public void setSourceImageAndTransform( String sourceBdvFilePath, InterpolationType interpolationType )
+	private void setSourceImageAndTransform( String sourceBdvFilePath, InterpolationType interpolationType )
 	{
 		final SpimData spimData = openSpimData( sourceBdvFilePath );
 
@@ -117,7 +116,7 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 		sourceTransform.preConcatenate( scaleToVoxelGrid );
 	}
 
-	public Interpolation getBdvInterpolation( InterpolationType interpolationType )
+	private Interpolation getBdvInterpolation( InterpolationType interpolationType )
 	{
 		Interpolation interpolation = null;
 		switch ( interpolationType )
@@ -141,6 +140,7 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 				.getImgLoader().getSetupImgLoader( setupId )
 				.getImage( 0 );
 
+		// TODO: replace this by sourceTransform?!
 		setTargetVoxelSpacing( targetSpimData, setupId );
 		targetRealInterval = IntervalUtils.toCalibratedRealInterval( targetInterval, targetVoxelSpacing );
 	}
@@ -158,7 +158,7 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 		return targetSpimData;
 	}
 
-	public static < T extends RealType< T > & NativeType< T > >
+	private static < T extends RealType< T > & NativeType< T > >
 	void saveAsBdv(
 			RandomAccessibleInterval< T > rai,
 			String imageTitle,
@@ -180,7 +180,7 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 				new double[]{0,0,0});
 	}
 
-	public static < T extends RealType< T > & NativeType< T > >
+	private static < T extends RealType< T > & NativeType< T > >
 	void saveAsTiff( RandomAccessibleInterval< T > rai,
 					 String imageTitle,
 					 double[] voxelSpacing,
@@ -191,7 +191,7 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 		new FileSaver( imagePlus ).saveAsTiff( pathWithoutExtension + ".tif" );
 	}
 
-	public static < T extends RealType< T > & NativeType< T > >
+	private static < T extends RealType< T > & NativeType< T > >
 	RandomAccessibleInterval< T > createTransformedRai(
 			RealRandomAccessible< T > source,
 			AffineTransform3D transform,
@@ -243,10 +243,9 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 
 	}
 
-	public static double[] createScalingFactors( double[] targetVoxelSpacing,
+	private static double[] createScalingFactors( double[] targetVoxelSpacing,
 												 double[] sourceVoxelSpacing )
 	{
-
 		final double[] scales = new double[ 3 ];
 		for ( int d = 0; d < 3; ++d )
 			scales[ d ] = targetVoxelSpacing[ d ] / sourceVoxelSpacing[ d ];
@@ -254,7 +253,7 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 		return scales;
 	}
 
-	public static int getClosestSourceLevel( double[] targetVoxelSpacing, SpimData sourceData )
+	private static int getClosestSourceLevel( double[] targetVoxelSpacing, SpimData sourceData )
 	{
 		final ArrayList< double[] > voxelSpacings = BdvUtils.getVoxelSpacings( sourceData, 0 );
 
@@ -267,6 +266,19 @@ public class BdvXmlToVoxelGridImageConverter < T extends RealType< T > & NativeT
 		if ( level > 0 ) level -= 1;
 
 		return level;
+	}
+
+	/**
+	 *
+	 * @param args
+	 * @param <T>
+	 */
+	public static < T extends RealType< T > & NativeType< T > > void main( String[] args )
+	{
+		final BdvToVoxelGridImageConverter< T > converter
+				= new BdvToVoxelGridImageConverter< T >( args[ 0 ], args[ 1 ], InterpolationType.valueOf( args[ 2 ] ) );
+
+		converter.run( FileFormat.valueOf( args[ 3 ] ), args[ 4 ]);
 	}
 
 }
