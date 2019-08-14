@@ -21,13 +21,8 @@ public class ConvertRegisteredParapodLabelsToVoxelGridImageUsingMain
 						"/Users/tischer/Desktop/pao" }
 				);
 
-//
-//		final BdvToVoxelGridImageCommand< T > command = new BdvToVoxelGridImageCommand<>();
-//		command.bdvReferenceImage = new File("/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/AChE-MED.xml" );
-//		command.bdvSourceImage = new File("/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/ulong/em-segmented-cells-parapod-fib-labels.xml" );
-//		command.outputFileFormat = "Tiff";
-//		command.interpolationType = "NearestNeighbor";
-//		command.outputPath = new File( "/Users/tischer/Desktop/pao" );
-//		command.run();
+
+		// java -jar /Users/tischer/Documents/bdv-utils/target/bdv-utils-0.2.16-jar-with-dependencies.jar "/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/AChE-MED.xml" "/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/ulong/em-segmented-cells-parapod-fib-labels.xml" "NearestNeighbor" "Tiff" "/Users/tischer/Desktop/pao"
+
 	}
 }

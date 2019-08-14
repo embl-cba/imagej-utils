@@ -49,7 +49,6 @@ public abstract class BdvUtils
 
 	public static final String OVERLAY = "overlay";
 
-
 	public static Interval getSourceGlobalBoundingInterval( Bdv bdv, int sourceId )
 	{
 		final AffineTransform3D sourceTransform =
@@ -106,12 +105,8 @@ public abstract class BdvUtils
 				bdv.getBdvHandle().getViewerPanel().getState().getSources();
 
 		for ( int i = 0; i < sources.size(); ++i )
-		{
 			if ( sources.get( i ).getSpimSource().equals( source ) )
-			{
 				return i;
-			}
-		}
 
 		return -1;
 	}
@@ -139,9 +134,7 @@ public abstract class BdvUtils
 		final List< SourceState< ? > > sources = bdv.getBdvHandle().getViewerPanel().getState().getSources();
 
 		for ( SourceState source : sources )
-		{
 			sourceNames.add( source.getSpimSource().getName() );
-		}
 
 		return sourceNames;
 	}
@@ -149,7 +142,6 @@ public abstract class BdvUtils
 
 	public static int getSourceIndex( Bdv bdv, String sourceName )
 	{
-
 		return getSourceNames( bdv ).indexOf( sourceName );
 	}
 
@@ -221,15 +213,12 @@ public abstract class BdvUtils
 
 	public static AffineTransform3D getImageZoomTransform( Bdv bdv, FinalInterval interval, double zoomFactor )
 	{
-
 		final AffineTransform3D affineTransform3D = new AffineTransform3D();
 
 		double[] shiftToImage = new double[ 3 ];
 
 		for ( int d = 0; d < 3; ++d )
-		{
 			shiftToImage[ d ] = -( interval.min( d ) + interval.dimension( d ) / 2.0 );
-		}
 
 		affineTransform3D.translate( shiftToImage );
 
@@ -242,23 +231,12 @@ public abstract class BdvUtils
 		double[] shiftToBdvWindowCenter = new double[ 3 ];
 
 		for ( int d = 0; d < 2; ++d )
-		{
 			shiftToBdvWindowCenter[ d ] += bdvWindowDimensions[ d ] / 2.0;
-		}
 
 		affineTransform3D.translate( shiftToBdvWindowCenter );
 
 		return affineTransform3D;
 	}
-
-
-//	public static RandomAccessibleInterval< IntegerType > getIndexImg( BdvStackSource bdvStackSource, int t, int level )
-//	{
-//		final Source source = getSource( bdvStackSource, 0 );
-//
-//		return getIndexImg( source, t, level );
-//
-//	}
 
 	public static Source getSource( BdvStackSource bdvStackSource, int i )
 	{
@@ -267,25 +245,9 @@ public abstract class BdvUtils
 		return sourceAndConverter.getSpimSource();
 	}
 
-//	public static RandomAccessibleInterval< IntegerType > getIndexImg( Source source, int t, int level )
-//	{
-//		if ( source instanceof TransformedSource )
-//		{
-//			final Source wrappedVolatileSource = ( ( TransformedSource ) source ).getWrappedRealSource();
-//
-//			if ( wrappedVolatileSource instanceof ARGBConvertedRealSource )
-//			{
-//				return ( ( ARGBConvertedRealSource ) wrappedVolatileSource ).getWrappedRealSource( t, level );
-//			}
-//		}
-//
-//		return null; // TODO: throw some type error...
-//	}
-
 	public static ARGBType asArgbType( Color color )
 	{
-		return new ARGBType(
-						ARGBType.rgba(
+		return new ARGBType( ARGBType.rgba(
 							color.getRed(),
 							color.getGreen(),
 							color.getBlue(),
@@ -316,9 +278,7 @@ public abstract class BdvUtils
 		final long[] longPosition = new long[ n ];
 
 		for ( int d = 0; d < n; ++d )
-		{
 			longPosition[ d ] = (long) positionInSourceInPixelUnits.getFloatPosition( d );
-		}
 
 		return longPosition;
 	}
@@ -327,7 +287,6 @@ public abstract class BdvUtils
 
 	public static double[] getCurrentViewNormalVector( Bdv bdv )
 	{
-
 		AffineTransform3D currentViewerTransform = new AffineTransform3D();
 		bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( currentViewerTransform );
 
@@ -760,7 +719,6 @@ public abstract class BdvUtils
 	public static RandomAccessibleInterval< ? extends RealType< ? > >
 	getRealTypeNonVolatileRandomAccessibleInterval( Source source, int t, int level )
 	{
-
 		if ( source instanceof TransformedSource )
 			return getRealTypeNonVolatileRandomAccessibleInterval(
 					( ( TransformedSource ) source ).getWrappedSource(), t, level );
@@ -770,51 +728,21 @@ public abstract class BdvUtils
 					( ( ARGBConvertedRealSource ) source ).getWrappedRealSource(), t, level );
 
 		if ( source instanceof LazySpimSource )
+		{
 			return ( ( LazySpimSource ) source ).getNonVolatileSource( t, level );
+		}
 		else if ( source instanceof VolatileSpimSource )
-			return  ( ( VolatileSpimSource ) source )
-					.nonVolatile().getSource( t, 0 );
+		{
+			Logger.error( "The source " + source.getName() + " is of type VolatileSpimSource!\n" +
+					"Thus it is not possible to get a nonVolatile access.\n" +
+					"Please contact Christian.Tischer@EMBL.DE" );
+			return null;
+		}
 		else
+		{
 			return source.getSource( t, 0 );
+		}
 	}
-
-
-
-//	public static void extractSelectedObject(
-//			final Bdv bdv,
-//			final RealPoint point,
-//			int level,
-//			final ArrayList< RandomAccessibleInterval< BitType > > masksOutput,
-//			final ArrayList< double[] > calibrationsOutput
-//	)
-//	{
-//
-//		final List< Integer > visibleSourceIndices = bdv.getBdvHandle().getViewerPanel().getState().getVisibleSourceIndices();
-//
-//		for ( int sourceIndex : visibleSourceIndices )
-//		{
-//			final SourceState< ? > sourceState = bdv.getBdvHandle().getViewerPanel().getState().getSources().get( sourceIndex );
-//
-//			final Source source = sourceState.getSpimSource();
-//
-//			if ( isARGBConvertedRealSource( source ) )
-//			{
-//				level = level > source.getNumMipmapLevels() ?  source.getNumMipmapLevels() - 1 : level;
-//
-//				final RandomAccessibleInterval< IntegerType > indexImg = BdvUtils.getIndexImg( source, 0, level );
-//
-//				final long[] positionInSourceStack = BdvUtils.getPositionInSource( source, point, 0, level );
-//
-//				final ConnectedComponentExtractor connectedComponentExtractor = new ConnectedComponentExtractor( indexImg, new DiamondShape( 1 ), 1000 * 1000 * 1000L );
-//
-//				connectedComponentExtractor.run( positionInSourceStack );
-//
-//				masksOutput.add( connectedComponentExtractor.getCroppedRegionMask() );
-//
-//				calibrationsOutput.add( getCalibration( source, level ) );
-//			}
-//		}
-//	}
 
 	public static double[] getCalibration( Source source, int level )
 	{
@@ -836,7 +764,6 @@ public abstract class BdvUtils
 
 	public static AffineTransform3D getImageZoomTransform( Bdv bdv, FinalRealInterval interval  )
 	{
-
 		final AffineTransform3D affineTransform3D = new AffineTransform3D();
 
 		double[] centerPosition = new double[ 3 ];
@@ -964,7 +891,6 @@ public abstract class BdvUtils
 		return centerBdvWindowTranslation;
 	}
 
-
 	public static AffineTransform3D getViewerTransform( Bdv bdv, double[] position, double scale )
 	{
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
@@ -975,18 +901,14 @@ public abstract class BdvUtils
 
 		double[] translation = new double[ 3 ];
 		for( int d = 0; d < 3; ++d )
-		{
 			translation[ d ] = - position[ d ];
-		}
 
 		viewerTransform.setTranslation( translation );
 		viewerTransform.scale( scale );
 
 		double[] centerBdvWindowTranslation = new double[ 3 ];
 		for( int d = 0; d < 3; ++d )
-		{
 			centerBdvWindowTranslation[ d ] = + bdvWindowDimensions[ d ] / 2.0;
-		}
 
 		viewerTransform.translate( centerBdvWindowTranslation );
 
@@ -1053,22 +975,14 @@ public abstract class BdvUtils
 			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
 
 			if ( wrappedSource instanceof ARGBConvertedRealSource )
-			{
 				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedRealSource( t, level );
-			}
 		}
 		else if ( source instanceof SelectableARGBConvertedRealSource )
-		{
 			return ( ( SelectableARGBConvertedRealSource ) source ).getWrappedRealSource( t, level );
-		}
 		else if ( source.getType() instanceof RealType )
-		{
 			return source.getSource( t, level );
-		}
 		else
-		{
 			return null;
-		}
 
 		return null;
 
