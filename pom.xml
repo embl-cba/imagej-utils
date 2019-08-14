@@ -169,6 +169,11 @@
 			<groupId>de.embl.cba</groupId>
 			<artifactId>imaris-writer</artifactId>
 		</dependency>
+		<!-- Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<repository>
