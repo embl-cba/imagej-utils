@@ -66,38 +66,41 @@
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>EMBL</license.copyrightOwners>
 		<imagej.app.directory>/Applications/Fiji.app/</imagej.app.directory>
+		<enforcer.skip>true</enforcer.skip>
 	</properties>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>
-										de.embl.cba.bdv.utils.io.BdvToVoxelGridImageConverter
-									</mainClass>
-								</manifest>
-							</archive>
-							<outputDirectory>
-								/Users/tischer/Documents/bdv-utils/target
-							</outputDirectory>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+
+<!--	<build>-->
+<!--		<plugins>-->
+<!--			<plugin>-->
+<!--				<groupId>org.apache.maven.plugins</groupId>-->
+<!--				<artifactId>maven-assembly-plugin</artifactId>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<phase>package</phase>-->
+<!--						<goals>-->
+<!--							<goal>single</goal>-->
+<!--						</goals>-->
+<!--						<configuration>-->
+<!--							<archive>-->
+<!--								<manifest>-->
+<!--									<mainClass>-->
+<!--										de.embl.cba.bdv.utils.io.BdvToVoxelGridImageConverter-->
+<!--									</mainClass>-->
+<!--								</manifest>-->
+<!--							</archive>-->
+<!--							<outputDirectory>-->
+<!--								/Users/tischer/Documents/bdv-utils/target-->
+<!--							</outputDirectory>-->
+<!--							<descriptorRefs>-->
+<!--								<descriptorRef>jar-with-dependencies</descriptorRef>-->
+<!--							</descriptorRefs>-->
+<!--						</configuration>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--			</plugin>-->
+<!--		</plugins>-->
+<!--	</build>-->
+
 	<repositories>
 		<!-- for SciJava dependencies -->
 		<repository>
