@@ -33,7 +33,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 
-public class ImarisImageLoader< T extends NativeType< T >, V extends Volatile< T > & NativeType< V > , A extends VolatileAccess > implements ViewerImgLoader
+public class ImarisImageLoader2< T extends NativeType< T >, V extends Volatile< T > & NativeType< V > , A extends VolatileAccess > implements ViewerImgLoader
 {
 	private final DataTypes.DataType< T, V, A > dataType;
 
@@ -51,9 +51,9 @@ public class ImarisImageLoader< T extends NativeType< T >, V extends Volatile< T
 
 	private CacheArrayLoader< A > loader;
 
-	private final HashMap< Integer, ImarisImageLoader.SetupImgLoader > setupImgLoaders;
+	private final HashMap< Integer, ImarisImageLoader2.SetupImgLoader > setupImgLoaders;
 
-	public ImarisImageLoader(
+	public ImarisImageLoader2(
 			final DataTypes.DataType< T, V, A > dataType,
 			final File hdf5File,
 			final MipmapInfo mipmapInfo,
@@ -100,7 +100,7 @@ public class ImarisImageLoader< T extends NativeType< T >, V extends Volatile< T
 				for ( final BasicViewSetup setup : setups )
 				{
 					final int setupId = setup.getId();
-					setupImgLoaders.put( setupId, new ImarisImageLoader.SetupImgLoader( setupId ) );
+					setupImgLoaders.put( setupId, new ImarisImageLoader2.SetupImgLoader( setupId ) );
 				}
 			}
 		}
@@ -135,7 +135,7 @@ public class ImarisImageLoader< T extends NativeType< T >, V extends Volatile< T
 	}
 
 	@Override
-	public ImarisImageLoader.SetupImgLoader getSetupImgLoader( final int setupId )
+	public ImarisImageLoader2.SetupImgLoader getSetupImgLoader( final int setupId )
 	{
 		open();
 		return setupImgLoaders.get( setupId );

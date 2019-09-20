@@ -11,13 +11,9 @@ import bdv.img.hdf5.MipmapInfo;
 import bdv.img.hdf5.Util;
 import bdv.img.imaris.HDF5AccessHack;
 import bdv.img.imaris.IHDF5Access;
-import bdv.img.remote.RemoteImageLoader;
-import bdv.img.remote.XmlIoRemoteImageLoader;
 import bdv.spimdata.SequenceDescriptionMinimal;
 import bdv.util.MipmapTransforms;
 import ch.systemsx.cisd.hdf5.*;
-import mpicbg.spim.data.XmlHelpers;
-import mpicbg.spim.data.XmlIoSpimData;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.generic.sequence.ImgLoaderIo;
@@ -31,17 +27,16 @@ import net.imglib2.FinalDimensions;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.jdom2.Element;
 
-@ImgLoaderIo( format = "bdv.imaris", type = ImarisImageLoader.class )
-public class XmlIoImarisImageLoader implements XmlIoBasicImgLoader< ImarisImageLoader >
+@ImgLoaderIo( format = "bdv.imaris", type = ImarisImageLoader2.class )
+public class XmlIoImarisImageLoader implements XmlIoBasicImgLoader< ImarisImageLoader2 >
 {
-
 	private DataTypes.DataType< ?, ?, ? > dataType;
 	private MipmapInfo mipmapInfo;
 	private SequenceDescriptionMinimal seq;
 	private long[][] dimensions;
 
 	@Override
-	public Element toXml( final ImarisImageLoader imgLoader, final File basePath )
+	public Element toXml( final ImarisImageLoader2 imgLoader, final File basePath )
 	{
 		final Element elem = new Element( "ImageLoader" );
 		elem.setAttribute( IMGLOADER_FORMAT_ATTRIBUTE_NAME, "bdv.imaris" );
@@ -50,9 +45,8 @@ public class XmlIoImarisImageLoader implements XmlIoBasicImgLoader< ImarisImageL
 	}
 
 	@Override
-	public ImarisImageLoader fromXml( final Element elem, final File basePath, final AbstractSequenceDescription< ?, ?, ? > sequenceDescription )
+	public ImarisImageLoader2 fromXml( final Element elem, final File basePath, final AbstractSequenceDescription< ?, ?, ? > sequenceDescription )
 	{
-
 		try
 		{
 			parseImarisFile( basePath );
@@ -61,7 +55,7 @@ public class XmlIoImarisImageLoader implements XmlIoBasicImgLoader< ImarisImageL
 			e.printStackTrace();
 		}
 
-		return new ImarisImageLoader( dataType, basePath, mipmapInfo, dimensions, seq );
+		return new ImarisImageLoader2( dataType, basePath, mipmapInfo, dimensions, seq );
 	}
 
 	private void parseImarisFile( File basePath ) throws IOException
