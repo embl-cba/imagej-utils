@@ -1,6 +1,7 @@
-package de.embl.cba.bdv.utils.loaders;
+package de.embl.cba.bdv.utils.loaders.hdf5ulong;
 
 import bdv.img.hdf5.Partition;
+import de.embl.cba.bdv.utils.loaders.hdf5ulong.Hdf5UnsignedLongImageLoader;
 import mpicbg.spim.data.XmlHelpers;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
 import mpicbg.spim.data.generic.sequence.ImgLoaderIo;

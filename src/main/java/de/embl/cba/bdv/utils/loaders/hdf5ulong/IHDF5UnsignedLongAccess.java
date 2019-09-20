@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.loaders;
+package de.embl.cba.bdv.utils.loaders.hdf5ulong;
 
 import bdv.img.hdf5.DimsAndExistence;
 import bdv.img.hdf5.ViewLevelId;

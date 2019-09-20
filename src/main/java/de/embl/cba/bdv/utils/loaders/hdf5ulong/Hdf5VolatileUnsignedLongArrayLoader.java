@@ -1,4 +1,4 @@
-package de.embl.cba.bdv.utils.loaders;
+package de.embl.cba.bdv.utils.loaders.hdf5ulong;
 
 import bdv.img.cache.CacheArrayLoader;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileLongArray;
