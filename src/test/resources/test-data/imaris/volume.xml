@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpimData version="0.2">
+  <BasePath type="relative">../../../../../target/test-classes/test-data/imaris</BasePath>
+  <SequenceDescription>
+    <ImageLoader format="bdv.imaris" />
+    <ViewSetups>
+      <ViewSetup>
+        <id>0</id>
+        <name>channel 0</name>
+        <size>186 226 27</size>
+        <voxelSize>
+          <unit>um</unit>
+          <size>1.0 1.0 10.0</size>
+        </voxelSize>
+      </ViewSetup>
+    </ViewSetups>
+    <Timepoints type="range">
+      <first>0</first>
+      <last>2</last>
+    </Timepoints>
+  </SequenceDescription>
+  <ViewRegistrations>
+    <ViewRegistration timepoint="0" setup="0">
+      <ViewTransform type="affine">
+        <affine>1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 10.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="1" setup="0">
+      <ViewTransform type="affine">
+        <affine>1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 10.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+    <ViewRegistration timepoint="2" setup="0">
+      <ViewTransform type="affine">
+        <affine>1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 10.0 0.0</affine>
+      </ViewTransform>
+    </ViewRegistration>
+  </ViewRegistrations>
+</SpimData>
