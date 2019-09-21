@@ -55,6 +55,8 @@ public class XmlIoImarisImageLoader implements XmlIoBasicImgLoader< ImarisImageL
 			// - The sequenceDescription information is both in the xml as well as in the imaris hdf5 file; which one to take here?
 			// - the code in parseImarisFile() is from Imaris, where should it be?
 			// - How much information shall we put into the xml?
+			// - I guess we would need some class that is responsible for producing the xml?! (not only for Imaris files, but also for others, e.g. pyramidal Tiff).
+			// - Something like BdvXmlCreator? Input: Some image file, Output: xml
 			parseImarisFile( hdf5File );
 		} catch ( IOException e )
 		{
