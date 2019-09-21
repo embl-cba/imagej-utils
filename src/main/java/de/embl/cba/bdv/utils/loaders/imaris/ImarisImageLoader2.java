@@ -68,6 +68,11 @@ public class ImarisImageLoader2< T extends NativeType< T >, V extends Volatile< 
 		this.setupImgLoaders = new HashMap<>();
 	}
 
+	public File getHdf5File()
+	{
+		return hdf5File;
+	}
+
 	private boolean isOpen = false;
 
 	private void open()

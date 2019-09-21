@@ -1,5 +1,6 @@
 package de.embl.cba.bdv.utils.loaders.imaris;
 
+import static mpicbg.spim.data.XmlHelpers.loadPath;
 import static mpicbg.spim.data.XmlKeys.IMGLOADER_FORMAT_ATTRIBUTE_NAME;
 
 import java.io.File;
@@ -14,6 +15,7 @@ import bdv.img.imaris.IHDF5Access;
 import bdv.spimdata.SequenceDescriptionMinimal;
 import bdv.util.MipmapTransforms;
 import ch.systemsx.cisd.hdf5.*;
+import mpicbg.spim.data.XmlHelpers;
 import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import mpicbg.spim.data.generic.sequence.ImgLoaderIo;
@@ -39,23 +41,27 @@ public class XmlIoImarisImageLoader implements XmlIoBasicImgLoader< ImarisImageL
 	public Element toXml( final ImarisImageLoader2 imgLoader, final File basePath )
 	{
 		final Element elem = new Element( "ImageLoader" );
-		elem.setAttribute( IMGLOADER_FORMAT_ATTRIBUTE_NAME, "bdv.imaris" );
-//		elem.addContent( XmlHelpers.textElement( "baseUrl", imgLoader.baseUrl ) );
+		elem.setAttribute( IMGLOADER_FORMAT_ATTRIBUTE_NAME, this.getClass().getAnnotation( ImgLoaderIo.class ).format() );
+		elem.addContent( XmlHelpers.pathElement( "hdf5", imgLoader.getHdf5File(), basePath ) );
 		return elem;
 	}
 
 	@Override
 	public ImarisImageLoader2 fromXml( final Element elem, final File basePath, final AbstractSequenceDescription< ?, ?, ? > sequenceDescription )
 	{
+		final File hdf5File = loadPath( elem, "hdf5", basePath );
 		try
 		{
-			parseImarisFile( basePath );
+			// - The sequenceDescription information is both in the xml as well as in the imaris hdf5 file; which one to take here?
+			// - the code in parseImarisFile() is from Imaris, where should it be?
+			// - How much information shall we put into the xml?
+			parseImarisFile( hdf5File );
 		} catch ( IOException e )
 		{
 			e.printStackTrace();
 		}
 
-		return new ImarisImageLoader2( dataType, basePath, mipmapInfo, dimensions, seq );
+		return new ImarisImageLoader2( dataType, hdf5File, mipmapInfo, dimensions, this.seq );
 	}
 
 	private void parseImarisFile( File basePath ) throws IOException

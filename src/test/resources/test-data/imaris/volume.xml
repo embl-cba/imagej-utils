@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SpimData version="0.2">
-  <BasePath type="relative">../../../../../target/test-classes/test-data/imaris</BasePath>
+  <BasePath type="relative">.</BasePath>
   <SequenceDescription>
-    <ImageLoader format="bdv.imaris" />
+    <ImageLoader format="bdv.imaris">
+      <hdf5 type="relative">volume.ims</hdf5>
+    </ImageLoader>
     <ViewSetups>
       <ViewSetup>
         <id>0</id>
