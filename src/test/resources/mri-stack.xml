@@ -8,7 +8,7 @@
     <ViewSetups>
       <ViewSetup>
         <id>0</id>
-        <name>channel 1</name>
+        <name>mri_em</name>
         <size>186 226 27</size>
         <voxelSize>
           <unit>cm</unit>
