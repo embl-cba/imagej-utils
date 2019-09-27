@@ -15,7 +15,6 @@ public class SpimDataLoading
 	{
 		final File file = new File( SpimDataLoading.class.getResource( "bdv_mipmap-raw.xml" ).getFile() );
 
-
 		final SpimData spimData = openSpimData( file );
 		final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
 		final ArrayList< SourceAndConverter< ? > > sources = new ArrayList<>();
