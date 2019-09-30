@@ -1,5 +1,6 @@
 package de.embl.cba.bdv.utils;
 
+import bdv.BigDataViewer;
 import bdv.ViewerSetupImgLoader;
 import bdv.VolatileSpimSource;
 import bdv.tools.brightness.ConverterSetup;
@@ -21,6 +22,8 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import mpicbg.spim.data.SpimData;
+import mpicbg.spim.data.SpimDataException;
+import mpicbg.spim.data.XmlIoSpimData;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.Point;
@@ -48,6 +51,15 @@ public abstract class BdvUtils
 {
 
 	public static final String OVERLAY = "overlay";
+
+	public static Source< ? > openSource( String path, int sourceIndex )
+	{
+		final SpimData spimData = openSpimData( path );
+		final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
+		final ArrayList< SourceAndConverter< ? > > sources = new ArrayList<>();
+		BigDataViewer.initSetups( spimData, converterSetups, sources );
+		return sources.get( sourceIndex ).getSpimSource();
+	}
 
 	public static Interval getSourceGlobalBoundingInterval( Bdv bdv, int sourceId )
 	{
@@ -1099,5 +1111,20 @@ public abstract class BdvUtils
 			max[ d ] = Math.min( intervalA.max( d ), intervalB.max( d ) );
 		}
 		return new FinalInterval( min, max );
+	}
+
+	public static SpimData openSpimData( String path )
+	{
+		try
+		{
+			SpimData spimData = new XmlIoSpimData().load( path);
+			return spimData;
+		}
+		catch ( SpimDataException e )
+		{
+			System.out.println( path );
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

@@ -2,7 +2,6 @@ package de.embl.cba.bdv.utils.sources;
 
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
-import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -26,6 +25,8 @@ public class ARGBConvertedRealSource< R extends RealType< R > >
     final private InterpolatorFactory< VolatileARGBType, RandomAccessible< VolatileARGBType > >[] interpolatorFactories;
 
     private AffineTransform3D[] mipmapTransforms;
+    private VolatileARGBType outOfBoundsValue;
+
     {
         interpolatorFactories = new InterpolatorFactory[]{
                 new NearestNeighborInterpolatorFactory< VolatileARGBType >(),
@@ -33,10 +34,19 @@ public class ARGBConvertedRealSource< R extends RealType< R > >
         };
     }
 
-    public ARGBConvertedRealSource( Source< RealType > source, Converter< RealType, VolatileARGBType > converter )
+    public ARGBConvertedRealSource( Source< RealType > source,
+                                    Converter< RealType, VolatileARGBType > converter,
+                                    VolatileARGBType outOfBoundsValue )
     {
         this.source = source;
         this.converter = converter;
+        this.outOfBoundsValue = new VolatileARGBType( 0 );
+    }
+
+
+    public ARGBConvertedRealSource( Source< RealType > source, Converter< RealType, VolatileARGBType > converter )
+    {
+        this( source, converter, new VolatileARGBType( 0 ));
     }
 
     @Override
@@ -57,8 +67,10 @@ public class ARGBConvertedRealSource< R extends RealType< R > >
     @Override
     public RealRandomAccessible< VolatileARGBType > getInterpolatedSource(final int t, final int level, final Interpolation method)
     {
+
+
         final ExtendedRandomAccessibleInterval<VolatileARGBType, RandomAccessibleInterval<VolatileARGBType>> extendedSource =
-                Views.extendValue( getSource(t, level), new VolatileARGBType(0));
+                Views.extendValue( getSource(t, level), outOfBoundsValue );
         switch (method) {
             case NLINEAR:
                 return Views.interpolate(extendedSource, interpolatorFactories[1]);

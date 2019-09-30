@@ -57,6 +57,7 @@ public class AccumulateEMAndFMProjectorARGB extends AccumulateProjector< ARGBTyp
 		int aAccu = 0, rAccu = 0, gAccu = 0, bAccu = 0;
 
 		int sourceIndex = 0;
+
 		for ( final Cursor< ? extends ARGBType > access : accesses )
 		{
 			final int value = access.get().get();
@@ -65,10 +66,13 @@ public class AccumulateEMAndFMProjectorARGB extends AccumulateProjector< ARGBTyp
 			final int g = ARGBType.green( value );
 			final int b = ARGBType.blue( value );
 
-			if ( r == 0 && g == 0 && b == 0  )
-				continue;
+			if ( a == 0 ) continue;
 
-			if( sourceList.get( sourceIndex++  ).getName().contains( "_em" ) )
+			final Source< ? > source = sourceList.get( sourceIndex++ );
+
+			//sourceToMetadata.get( source );
+
+			if( source.getName().contains( "_em" ) )
 			{
 				aAvg += a;
 				rAvg += r;

@@ -1,28 +1,19 @@
 package de.embl.cba.bdv.utils.sources;
 
 import bdv.BigDataViewer;
-import bdv.img.remote.RemoteImageLoader;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
+import de.embl.cba.bdv.utils.BdvUtils;
 import mpicbg.spim.data.SpimData;
-import mpicbg.spim.data.SpimDataException;
-import mpicbg.spim.data.XmlIoSpimData;
 import mpicbg.spim.data.generic.sequence.BasicMultiResolutionImgLoader;
-import mpicbg.spim.data.generic.sequence.BasicMultiResolutionSetupImgLoader;
-import mpicbg.spim.data.sequence.ImgLoader;
-import mpicbg.spim.data.sequence.MultiResolutionImgLoader;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
-import net.imglib2.algorithm.math.Mul;
-import net.imglib2.img.Img;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.NumericType;
 
-import javax.activation.UnsupportedDataTypeException;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,27 +45,12 @@ public class LazySpimSource< T extends NumericType< T > > implements Source< T >
 
 	private void initSpimData()
 	{
-		spimData = openSpimData( path );
+		spimData = BdvUtils.openSpimData( path );
 		converterSetups = new ArrayList<>();
 		sources = new ArrayList<>();
 		BigDataViewer.initSetups( spimData, converterSetups, sources );
 	}
 
-
-	private SpimData openSpimData( String path )
-	{
-		try
-		{
-			SpimData spimData = new XmlIoSpimData().load( path);
-			return spimData;
-		}
-		catch ( SpimDataException e )
-		{
-			System.out.println( path );
-			e.printStackTrace();
-			return null;
-		}
-	}
 
 	public RandomAccessibleInterval< T > getNonVolatileSource( int t, int level )
 	{

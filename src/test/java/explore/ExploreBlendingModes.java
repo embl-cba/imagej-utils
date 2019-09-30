@@ -1,44 +1,37 @@
 package explore;
 
 import bdv.util.*;
-import de.embl.cba.bdv.utils.BdvUtils;
+import bdv.viewer.Source;
+import de.embl.cba.bdv.utils.io.SPIMDataReaders;
 import de.embl.cba.bdv.utils.render.AccumulateEMAndFMProjectorARGB;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
+import net.imglib2.type.volatiles.VolatileARGBType;
 
 public class ExploreBlendingModes
 {
 	public static void main( String[] args ) throws SpimDataException
 	{
-		SpimData spimData = new XmlIoSpimData().load(
-				ExploreBlendingModes.class.getResource( "../mri-stack.xml" ).getFile() );
+		final Source< VolatileARGBType > argbSource0 = SPIMDataReaders.openAsVolatileARGBTypeSource(
+				ExploreBlendingModes.class.getResource( "../mri-stack.xml" ).getFile(), 0 );
 
-		final BdvStackSource< ? > bdvStackSource = BdvFunctions.show( spimData,
-				BdvOptions.options().accumulateProjectorFactory( AccumulateEMAndFMProjectorARGB.factory ) ).get( 0 );
+		final BdvHandle bdvHandle = BdvFunctions.show(
+				argbSource0,
+				BdvOptions.options().
+						accumulateProjectorFactory( AccumulateEMAndFMProjectorARGB.factory ) ).getBdvHandle();
 
-		final BdvHandle bdvHandle = bdvStackSource.getBdvHandle();
-		AccumulateEMAndFMProjectorARGB.bdvHandle = bdvHandle;
+		final Source< VolatileARGBType > argbSource1 = SPIMDataReaders.openAsVolatileARGBTypeSource(
+				ExploreBlendingModes.class.getResource( "../mri-stack-shifted.xml" ).getFile(), 0 );
 
-		bdvStackSource.setDisplayRange( 0, 255 );
-		AccumulateEMAndFMProjectorARGB.setAccumulationModality( BdvUtils.getSource( bdvStackSource, 0 ).getName(), AccumulateEMAndFMProjectorARGB.AVG );
+		BdvFunctions.show( argbSource1, BdvOptions.options().addTo( bdvHandle ) );
 
-		SpimData spimData1 = new XmlIoSpimData().load( ExploreBlendingModes.class.getResource( "../mri-stack-shifted.xml" ).getFile() );
-		final BdvStackSource< ? > bdvStackSource1 = BdvFunctions.show( spimData1,
-				BdvOptions.options().addTo( bdvHandle ) ).get( 0 );
+		final Source< VolatileARGBType > argbSource2 = SPIMDataReaders.openAsVolatileARGBTypeSource(
+				ExploreBlendingModes.class.getResource( "../mri-stack-shifted1.xml" ).getFile(), 0 );
 
-		bdvStackSource1.setDisplayRange( 0, 255 );
-		AccumulateEMAndFMProjectorARGB.setAccumulationModality( BdvUtils.getSource( bdvStackSource1, 0 ).getName(), AccumulateEMAndFMProjectorARGB.AVG );
-
-		SpimData spimData2 = new XmlIoSpimData().load( ExploreBlendingModes.class.getResource( "../mri-stack-shifted1.xml" ).getFile() );
-
-		final BdvStackSource< ? > bdvStackSource2 = BdvFunctions.show( spimData2,
+		BdvFunctions.show( argbSource2,
 				BdvOptions.options().addTo(
-						bdvHandle ) ).get( 0 );
-
-		bdvStackSource2.setDisplayRange( 0, 255 );
-		AccumulateEMAndFMProjectorARGB.setAccumulationModality( BdvUtils.getSource( bdvStackSource1, 0 ).getName(), AccumulateEMAndFMProjectorARGB.SUM );
-
+						bdvHandle ) );
 	}
 
 }
