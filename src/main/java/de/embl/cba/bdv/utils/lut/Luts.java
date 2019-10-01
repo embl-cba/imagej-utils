@@ -10,7 +10,6 @@ public class Luts
 	public static final byte[][] GRAYSCALE = grayscaleLut();
 	public static final byte[][] BLUE_WHITE_RED = blueWhiteRedLut();
 
-
 	/**
 	 * Create lookup table with a  maximally distinct sets of colors (copied
 	 * from Fiji's Glasbey LUT).
@@ -262,6 +261,20 @@ public class Luts
 			lut[i][0] = (byte) i; // red
 			lut[i][1] = (byte) i; // green
 			lut[i][2] = (byte) i; // blue
+		}
+
+		return lut;
+	}
+
+	public final static byte[][] colorLut( Integer color )
+	{
+		byte[][] lut = new byte[256][3];
+
+		for (int i = 0; i < 256; i++)
+		{
+			lut[i][0] = (byte) ( ARGBType.red ( color ) * i / 255.0 ); // red
+			lut[i][1] = (byte) ( ARGBType.green ( color ) * i / 255.0 ); // green
+			lut[i][2] = (byte) ( ARGBType.blue ( color ) * i / 255.0 ); // blue
 		}
 
 		return lut;

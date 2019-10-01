@@ -3,6 +3,7 @@ package de.embl.cba.bdv.utils.io;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.MinMaxGroup;
 import bdv.tools.brightness.SetupAssignments;
+import net.imglib2.ops.parse.token.Int;
 import net.imglib2.type.numeric.ARGBType;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -12,10 +13,19 @@ import org.jdom2.input.SAXBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class XmlSettingsReader
 {
+	private ArrayList< MinMaxGroup > minMaxGroups;
+	private ArrayList< Integer > colors;
+	private static final double minIntervalSize = 0;
+
+	public XmlSettingsReader()
+	{
+	}
+
 	public boolean tryLoadSettings( final String xmlFilename )
 	{
 		File proposedSettingsFile = null;
@@ -57,68 +67,63 @@ public class XmlSettingsReader
 		return false;
 	}
 
-	public void loadSettings( final String xmlFilename ) throws IOException, JDOMException
+	private void loadSettings( final String xmlFilename ) throws IOException, JDOMException
 	{
 		final SAXBuilder sax = new SAXBuilder();
 		final Document doc = sax.build( xmlFilename );
 		final Element root = doc.getRootElement();
-//		viewer.stateFromXml( root );
-//		setupAssignments.restoreFromXml( root );
-//		manualTransformation.restoreFromXml( root );
-//		bookmarks.restoreFromXml( root );
-//		activeSourcesDialog.update();
-//		viewer.requestRepaint();
+
+		readSetupAssignmentsFromXml( root );
 	}
 
-	/**
-	 * Restore the state of this {@link SetupAssignments} from XML. Note, that
-	 * this only restores the assignments of setups to groups and group
-	 * settings. The list of {@link ConverterSetup}s is not restored.
-	 */
-	public void readSetupAssignmentsFromXml( final Element parent )
+	private void readSetupAssignmentsFromXml( final Element parent )
 	{
 		final Element elemSetupAssignments = parent.getChild( "SetupAssignments" );
 		if ( elemSetupAssignments == null )
 			return;
 		final Element elemConverterSetups = elemSetupAssignments.getChild( "ConverterSetups" );
 		final List< Element > converterSetupNodes = elemConverterSetups.getChildren( "ConverterSetup" );
+
 //		if ( converterSetupNodes.size() != setups.size() )
 //			throw new IllegalArgumentException();
-//
-//		final Element elemMinMaxGroups = elemSetupAssignments.getChild( "MinMaxGroups" );
-//		final List< Element > minMaxGroupNodes = elemMinMaxGroups.getChildren( "MinMaxGroup" );
-//		minMaxGroups.clear();
-//		for ( int i = 0; i < minMaxGroupNodes.size(); ++i )
-//			minMaxGroups.add( null );
-//		for ( final Element elem : minMaxGroupNodes  )
-//		{
-//			final int id = Integer.parseInt( elem.getChildText( "id" ) );
-//			final double fullRangeMin = Double.parseDouble( elem.getChildText( "fullRangeMin" ) );
-//			final double fullRangeMax = Double.parseDouble( elem.getChildText( "fullRangeMax" ) );
-//			final double rangeMin = Double.parseDouble( elem.getChildText( "rangeMin" ) );
-//			final double rangeMax = Double.parseDouble( elem.getChildText( "rangeMax" ) );
-//			final double currentMin = Double.parseDouble( elem.getChildText( "currentMin" ) );
-//			final double currentMax = Double.parseDouble( elem.getChildText( "currentMax" ) );
-//			minMaxGroups.set( id, new MinMaxGroup( fullRangeMin, fullRangeMax, rangeMin, rangeMax, currentMin, currentMax, minIntervalSize ) );
-//		}
-//
-//		for ( final Element elem : converterSetupNodes )
-//		{
-//			final int id = Integer.parseInt( elem.getChildText( "id" ) );
-//			final double min = Double.parseDouble( elem.getChildText( "min" ) );
-//			final double max = Double.parseDouble( elem.getChildText( "max" ) );
-//			final int color = Integer.parseInt( elem.getChildText( "color" ) );
-//			final int groupId = Integer.parseInt( elem.getChildText( "groupId" ) );
-//			final ConverterSetup setup = getSetupById( id );
-//			setup.setDisplayRange( min, max );
-//			setup.setColor( new ARGBType( color ) );
-//			final MinMaxGroup group = minMaxGroups.get( groupId );
-//			setupToGroup.put( setup, group );
-//			group.addSetup( setup );
-//		}
-//
-//		if ( updateListener != null )
-//			updateListener.update();
+
+		final Element elemMinMaxGroups = elemSetupAssignments.getChild( "MinMaxGroups" );
+		final List< Element > minMaxGroupNodes = elemMinMaxGroups.getChildren( "MinMaxGroup" );
+		minMaxGroups = new ArrayList<>(  );
+		for ( int i = 0; i < minMaxGroupNodes.size(); ++i )
+			minMaxGroups.add( null );
+		for ( final Element elem : minMaxGroupNodes  )
+		{
+			final int id = Integer.parseInt( elem.getChildText( "id" ) );
+			final double fullRangeMin = Double.parseDouble( elem.getChildText( "fullRangeMin" ) );
+			final double fullRangeMax = Double.parseDouble( elem.getChildText( "fullRangeMax" ) );
+			final double rangeMin = Double.parseDouble( elem.getChildText( "rangeMin" ) );
+			final double rangeMax = Double.parseDouble( elem.getChildText( "rangeMax" ) );
+			final double currentMin = Double.parseDouble( elem.getChildText( "currentMin" ) );
+			final double currentMax = Double.parseDouble( elem.getChildText( "currentMax" ) );
+			minMaxGroups.set( id, new MinMaxGroup( fullRangeMin, fullRangeMax, rangeMin, rangeMax, currentMin, currentMax, minIntervalSize ) );
+		}
+
+		colors = new ArrayList<>(  );
+		for ( final Element elem : converterSetupNodes )
+		{
+			final int id = Integer.parseInt( elem.getChildText( "id" ) );
+			final double min = Double.parseDouble( elem.getChildText( "min" ) );
+			final double max = Double.parseDouble( elem.getChildText( "max" ) );
+			final int color = Integer.parseInt( elem.getChildText( "color" ) );
+			final int groupId = Integer.parseInt( elem.getChildText( "groupId" ) );
+			colors.add( color );
+		}
+	}
+
+	public ArrayList< MinMaxGroup > getMinMaxGroups()
+	{
+		return minMaxGroups;
+	}
+
+	public ArrayList< Integer > getColors()
+	{
+		return colors;
 	}
 
 	private ConverterSetup getSetupById( final int id )
