@@ -6,7 +6,7 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
-public class LinearARGBConverter implements Converter< RealType, VolatileARGBType >
+public class LinearARGBConverter< R extends RealType< R >> implements Converter< R, VolatileARGBType >
 {
 	double min, max;
 	byte[][] lut;
@@ -25,7 +25,7 @@ public class LinearARGBConverter implements Converter< RealType, VolatileARGBTyp
 	}
 
 	@Override
-	public void convert( RealType realType, VolatileARGBType volatileARGBType )
+	public void convert( R realType, VolatileARGBType volatileARGBType )
 	{
 		final byte lutIndex = computeLutIndex( realType.getRealDouble() );
 		volatileARGBType.set( Luts.getARGBIndex( lutIndex, lut ) );

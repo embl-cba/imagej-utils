@@ -52,13 +52,13 @@ public abstract class BdvUtils
 
 	public static final String OVERLAY = "overlay";
 
-	public static Source< ? > openSource( String path, int sourceIndex )
+	public static < R extends RealType< R > > Source< R > openSource( String path, int sourceIndex )
 	{
 		final SpimData spimData = openSpimData( path );
 		final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
 		final ArrayList< SourceAndConverter< ? > > sources = new ArrayList<>();
 		BigDataViewer.initSetups( spimData, converterSetups, sources );
-		return sources.get( sourceIndex ).getSpimSource();
+		return ( Source ) sources.get( sourceIndex ).getSpimSource();
 	}
 
 	public static Interval getSourceGlobalBoundingInterval( Bdv bdv, int sourceId )

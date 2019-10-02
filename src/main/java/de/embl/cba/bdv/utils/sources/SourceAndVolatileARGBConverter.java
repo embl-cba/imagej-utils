@@ -1,28 +1,26 @@
 package de.embl.cba.bdv.utils.sources;
 
 import bdv.viewer.Source;
-import bdv.viewer.SourceAndConverter;
-import net.imglib2.Volatile;
 import net.imglib2.converter.Converter;
-import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
-public class SourceAndVolatileARGBConverter< T >
+public class SourceAndVolatileARGBConverter< R extends RealType< R > >
 {
 	/**
 	 * provides image data for all timepoints of one view.
 	 */
-	protected final Source< T > spimSource;
+	protected final Source< R > spimSource;
 
 	/**
 	 * converts {@link #spimSource} type T to ARGBType for display
 	 */
-	protected final Converter< T, VolatileARGBType > converter;
+	protected final Converter< R, VolatileARGBType > converter;
 	private final VolatileARGBType argbConvertedOutOfBoundsValue;
 
 	public SourceAndVolatileARGBConverter(
-			final Source< T > spimSource,
-			final Converter< T, VolatileARGBType > converter,
+			final Source< R > spimSource,
+			final Converter< R, VolatileARGBType > converter,
 			VolatileARGBType outOfBoundsValue )
 	{
 		this.spimSource = spimSource;
@@ -31,8 +29,8 @@ public class SourceAndVolatileARGBConverter< T >
 	}
 
 	public SourceAndVolatileARGBConverter(
-			final Source< T > source,
-			final Converter< T, VolatileARGBType > converter )
+			final Source< R > source,
+			final Converter< R, VolatileARGBType > converter )
 	{
 		this( source, converter, new VolatileARGBType( 0 ) );
 	}
@@ -41,7 +39,7 @@ public class SourceAndVolatileARGBConverter< T >
 	 * Get the {@link Source} (provides image data for all timepoints of one
 	 * angle).
 	 */
-	public Source< T > getSpimSource()
+	public Source< R > getSpimSource()
 	{
 		return spimSource;
 	}
@@ -50,7 +48,7 @@ public class SourceAndVolatileARGBConverter< T >
 	 * Get the {@link Converter} (converts source type T to ARGBType for
 	 * display).
 	 */
-	public Converter< T, VolatileARGBType > getConverter()
+	public Converter< R, VolatileARGBType > getConverter()
 	{
 		return converter;
 	}
