@@ -17,6 +17,9 @@ import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
+// TODO:
+// Constructor could look like this: ConvertedSource< A, B > implements Source< B >
+
 public class ARGBConvertedRealSource< R extends RealType< R > > implements Source< VolatileARGBType >
 {
     private final Source source;
@@ -41,7 +44,6 @@ public class ARGBConvertedRealSource< R extends RealType< R > > implements Sourc
         this.converter = converter;
         this.outOfBoundsValue = outOfBoundsValue;
     }
-
 
     public ARGBConvertedRealSource( Source< RealType > source, Converter< RealType, VolatileARGBType > converter )
     {
