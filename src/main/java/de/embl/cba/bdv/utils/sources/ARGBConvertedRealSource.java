@@ -17,8 +17,7 @@ import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
-public class ARGBConvertedRealSource< R extends RealType< R > >
-        implements Source< VolatileARGBType >
+public class ARGBConvertedRealSource< R extends RealType< R > > implements Source< VolatileARGBType >
 {
     private final Source source;
     private Converter< RealType, VolatileARGBType > converter;
@@ -40,13 +39,13 @@ public class ARGBConvertedRealSource< R extends RealType< R > >
     {
         this.source = source;
         this.converter = converter;
-        this.outOfBoundsValue = new VolatileARGBType( 0 );
+        this.outOfBoundsValue = outOfBoundsValue;
     }
 
 
     public ARGBConvertedRealSource( Source< RealType > source, Converter< RealType, VolatileARGBType > converter )
     {
-        this( source, converter, new VolatileARGBType( 0 ));
+        this( source, converter, new VolatileARGBType( 0 ) );
     }
 
     @Override
@@ -67,8 +66,6 @@ public class ARGBConvertedRealSource< R extends RealType< R > >
     @Override
     public RealRandomAccessible< VolatileARGBType > getInterpolatedSource(final int t, final int level, final Interpolation method)
     {
-
-
         final ExtendedRandomAccessibleInterval<VolatileARGBType, RandomAccessibleInterval<VolatileARGBType>> extendedSource =
                 Views.extendValue( getSource(t, level), outOfBoundsValue );
         switch (method) {

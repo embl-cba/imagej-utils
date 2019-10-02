@@ -60,6 +60,4 @@ public class LinearARGBConverter implements Converter< RealType, VolatileARGBTyp
 	{
 		return (byte) ( 255.0 * Math.max( Math.min( ( value - min ) / ( max - min ), 1.0 ), 0.0 ) );
 	}
-
-
 }
