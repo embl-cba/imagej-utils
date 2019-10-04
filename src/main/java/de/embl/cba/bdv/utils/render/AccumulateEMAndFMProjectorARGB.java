@@ -1,6 +1,7 @@
 package de.embl.cba.bdv.utils.render;
 
 import bdv.util.BdvHandle;
+import bdv.util.volatiles.VolatileViews;
 import bdv.viewer.Source;
 import bdv.viewer.render.AccumulateProjector;
 import bdv.viewer.render.AccumulateProjectorFactory;
@@ -22,7 +23,7 @@ public class AccumulateEMAndFMProjectorARGB extends AccumulateProjector< ARGBTyp
 				final ArrayList< VolatileProjector > sourceProjectors,
 				final ArrayList< Source< ? > > sources,
 				final ArrayList< ? extends RandomAccessible< ? extends ARGBType > > sourceScreenImages,
-				final RandomAccessibleInterval< ARGBType > targetScreenImages,
+				final RandomAccessibleInterval< ARGBType > targetScreenImage,
 				final int numThreads,
 				final ExecutorService executorService )
 		{
@@ -30,7 +31,7 @@ public class AccumulateEMAndFMProjectorARGB extends AccumulateProjector< ARGBTyp
 					sourceProjectors,
 					sources,
 					sourceScreenImages,
-					targetScreenImages,
+					targetScreenImage,
 					numThreads,
 					executorService );
 		}
@@ -51,16 +52,20 @@ public class AccumulateEMAndFMProjectorARGB extends AccumulateProjector< ARGBTyp
 	}
 
 	@Override
-	protected void accumulate( final Cursor< ? extends ARGBType >[] accesses, final ARGBType target )
+	protected void accumulate(
+			final Cursor< ? extends ARGBType >[] accesses,
+			final ARGBType target )
 	{
 		int aAvg = 0, rAvg = 0, gAvg = 0, bAvg = 0, numNonZeroAvg = 0;
 		int aAccu = 0, rAccu = 0, gAccu = 0, bAccu = 0;
 
 		int sourceIndex = 0;
 
+		final double[] position = new double[ 3 ];
 		for ( final Cursor< ? extends ARGBType > access : accesses )
 		{
 			final int value = access.get().get();
+			access.localize( position );
 			final int a = ARGBType.alpha( value );
 			final int r = ARGBType.red( value );
 			final int g = ARGBType.green( value );

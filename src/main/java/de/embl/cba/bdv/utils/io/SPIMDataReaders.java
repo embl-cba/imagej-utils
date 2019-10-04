@@ -38,7 +38,7 @@ public class SPIMDataReaders
 	public static < R extends RealType< R > > SourceAndVolatileARGBConverter< R >
 	openAsSourceAndVolatileARGBConverter( String xmlPath, int sourceIndex )
 	{
-		final Source< R > source =BdvUtils.openSource( xmlPath, sourceIndex );
+		final Source< R > source = BdvUtils.openSource( xmlPath, sourceIndex );
 
 		final XmlSettingsReader xmlSettingsReader = new XmlSettingsReader();
 

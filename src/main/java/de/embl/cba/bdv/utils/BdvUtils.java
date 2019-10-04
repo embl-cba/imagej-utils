@@ -806,8 +806,7 @@ public abstract class BdvUtils
 
 		return affineTransform3D;
 	}
-
-
+	
 	public static void moveToPosition( Bdv bdv, double[] xyz, int t, long durationMillis )
 	{
 		bdv.getBdvHandle().getViewerPanel().setTimepoint( t );

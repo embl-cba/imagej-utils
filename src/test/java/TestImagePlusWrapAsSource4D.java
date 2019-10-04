@@ -1,4 +1,5 @@
 import bdv.util.RandomAccessibleIntervalSource4D;
+import de.embl.cba.bdv.utils.sources.ModifiableRandomAccessibleIntervalSource4D;
 import de.embl.cba.bdv.utils.wrap.Wraps;
 import ij.IJ;
 import ij.ImagePlus;
@@ -19,7 +20,7 @@ public class TestImagePlusWrapAsSource4D
 				TestImagePlusWrapAsSource4D.class.getResource(
 						"imagePlus-20x-20y-2c-5z-3t.zip" ).getFile() );
 
-		final ArrayList< RandomAccessibleIntervalSource4D< R > > wrap01 =
+		final ArrayList< ModifiableRandomAccessibleIntervalSource4D< R > > wrap01 =
 				Wraps.imagePlusAsSource4DChannelList( imagePlus01 );
 
 		// Only one channel
@@ -27,7 +28,7 @@ public class TestImagePlusWrapAsSource4D
 				TestImagePlusWrapAsSource4D.class.getResource(
 						"imagePlus-20x-20y-1c-5z-3t.zip" ).getFile() );
 
-		final ArrayList< RandomAccessibleIntervalSource4D< R > > wrapC1 =
+		final ArrayList< ModifiableRandomAccessibleIntervalSource4D< R > > wrapC1 =
 				Wraps.imagePlusAsSource4DChannelList( imagePlusC1 );
 
 		// Only one channel, only one time-point
@@ -35,7 +36,7 @@ public class TestImagePlusWrapAsSource4D
 				TestImagePlusWrapAsSource4D.class.getResource(
 						"imagePlus-20x-20y-1c-5z-1t.zip" ).getFile() );
 
-		final ArrayList< RandomAccessibleIntervalSource4D< R > > wrapC1T1 =
+		final ArrayList< ModifiableRandomAccessibleIntervalSource4D< R > > wrapC1T1 =
 				Wraps.imagePlusAsSource4DChannelList( imagePlusC1T1 );
 
 	}

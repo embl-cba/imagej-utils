@@ -2,6 +2,7 @@ package de.embl.cba.bdv.utils.wrap;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.RandomAccessibleIntervalSource4D;
+import de.embl.cba.bdv.utils.sources.ModifiableRandomAccessibleIntervalSource4D;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
@@ -16,22 +17,21 @@ import java.util.ArrayList;
 
 public class Wraps
 {
-
 	public static < R extends RealType< R > & NativeType< R > >
-	ArrayList< RandomAccessibleIntervalSource4D< R > >
+	ArrayList< ModifiableRandomAccessibleIntervalSource4D< R > >
 	imagePlusAsSource4DChannelList( ImagePlus imagePlus )
 	{
 		RandomAccessibleInterval< R > wrap = wrapXYCZT( imagePlus );
 
-		final ArrayList< RandomAccessibleIntervalSource4D< R > > sources
+		final ArrayList< ModifiableRandomAccessibleIntervalSource4D< R > > sources
 				= new ArrayList<>();
 
 		for ( int c = 0; c < imagePlus.getNChannels(); c++ )
 		{
 			RandomAccessibleInterval< R > channel = Views.hyperSlice( wrap, 2, c );
 
-			final RandomAccessibleIntervalSource4D source4D =
-					new RandomAccessibleIntervalSource4D(
+			final ModifiableRandomAccessibleIntervalSource4D source4D =
+					new ModifiableRandomAccessibleIntervalSource4D<>(
 							channel,
 							Util.getTypeFromInterval( channel ),
 							getScalingTransform( imagePlus ),
@@ -41,7 +41,6 @@ public class Wraps
 		}
 
 		return sources;
-
 	}
 
 	public static AffineTransform3D getScalingTransform( ImagePlus imagePlus )

@@ -13,7 +13,7 @@ public class SourceAndVolatileARGBConverter< R extends RealType< R > >
 	protected final Source< R > spimSource;
 
 	/**
-	 * converts {@link #spimSource} type T to ARGBType for display
+	 * converts {@link #spimSource} type T to VolatileARGBType for display
 	 */
 	protected final Converter< R, VolatileARGBType > converter;
 	private final VolatileARGBType argbConvertedOutOfBoundsValue;

@@ -165,6 +165,10 @@
 			<groupId>org.itc</groupId>
 			<artifactId>image-transform-converters</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>de.embl.cba</groupId>
+			<artifactId>imglib2-lazy-algorithm</artifactId>
+		</dependency>
 		<!-- FOR BENCHMARKING, MAYBE REMOVE LATER -->
 		<dependency>
 			<groupId>de.embl.cba</groupId>
