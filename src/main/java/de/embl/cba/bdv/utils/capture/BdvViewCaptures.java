@@ -95,7 +95,6 @@ public abstract class BdvViewCaptures
 
 			final double[] canvasPosition = new double[ 3 ];
 			final double[] sourceRealPosition = new double[ 3 ];
-			final long[] sourcePosition = new long[ 3 ];
 
 			// TODO: rather loop through the capture image
 			for ( int x = 0; x < captureWidth; x++ )
@@ -106,13 +105,9 @@ public abstract class BdvViewCaptures
 
 					viewerToSourceTransform.apply( canvasPosition, sourceRealPosition );
 
-					// TODO: make work with real interpolated access
-					for ( int d = 0; d < 3; d++ )
-						sourcePosition[ d ] = (long) sourceRealPosition[ d ];
-
-					if ( Intervals.contains( sourceRai, new Point( sourcePosition ) ) )
+					if ( Intervals.contains( sourceRai, new RealPoint( sourceRealPosition ) ) )
 					{
-						sourceAccess.setPosition( sourcePosition );
+						sourceAccess.setPosition( sourceRealPosition );
 						Double pixelValue = sourceAccess.get().getRealDouble();
 						access.setPosition( x, 0 );
 						access.setPosition( y, 1 );
