@@ -4,12 +4,12 @@
 	<parent>
 		<groupId>de.embl.cba</groupId>
 		<artifactId>pom-embl-cba</artifactId>
-		<version>0.3.7</version>
+		<version>0.3.8</version>
 		<relativePath>../pom-embl-cba</relativePath>
 	</parent>
 	<artifactId>bdv-utils</artifactId>
 	<url>https://github.com/tischi/bdv-utils</url>
-	<version>0.2.18</version>
+	<version>0.2.19</version>
 	<name>BigDataViewer Utilities</name>
 	<description>TODO</description>
 	<inceptionYear>2018</inceptionYear>
@@ -136,7 +136,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
-			<version>1.0.0-beta-12</version>
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>

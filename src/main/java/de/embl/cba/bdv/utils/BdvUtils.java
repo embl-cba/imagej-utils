@@ -6,6 +6,7 @@ import bdv.VolatileSpimSource;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
 import de.embl.cba.bdv.utils.sources.LazySpimSource;
+import de.embl.cba.bdv.utils.sources.ModifiableRandomAccessibleIntervalSource4D;
 import de.embl.cba.bdv.utils.sources.SelectableARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
@@ -739,6 +740,9 @@ public abstract class BdvUtils
 			return getRealTypeNonVolatileRandomAccessibleInterval(
 					( ( ARGBConvertedRealSource ) source ).getWrappedRealSource(), t, level );
 
+		if ( source instanceof ModifiableRandomAccessibleIntervalSource4D )
+			return ( ( ModifiableRandomAccessibleIntervalSource4D ) source ).getRawSource( t, level );
+
 		if ( source instanceof LazySpimSource )
 		{
 			return ( ( LazySpimSource ) source ).getNonVolatileSource( t, level );
@@ -753,6 +757,38 @@ public abstract class BdvUtils
 		else
 		{
 			return source.getSource( t, 0 );
+		}
+	}
+
+
+	public static RealRandomAccess
+	getInterpolatedRealTypeNonVolatileRealRandomAccess( Source source, int t, int level )
+	{
+		if ( source instanceof TransformedSource )
+			return getInterpolatedRealTypeNonVolatileRealRandomAccess(
+					( ( TransformedSource ) source ).getWrappedSource(), t, level );
+
+		if ( source instanceof ARGBConvertedRealSource )
+			return getInterpolatedRealTypeNonVolatileRealRandomAccess(
+					( ( ARGBConvertedRealSource ) source ).getWrappedRealSource(), t, level );
+
+		if ( source instanceof ModifiableRandomAccessibleIntervalSource4D )
+			return null; // TODO
+
+		if ( source instanceof LazySpimSource )
+		{
+			return null; // TODO
+		}
+		else if ( source instanceof VolatileSpimSource )
+		{
+			Logger.error( "The source " + source.getName() + " is of type VolatileSpimSource!\n" +
+					"Thus it is not possible to get a nonVolatile access.\n" +
+					"Please contact Christian.Tischer@EMBL.DE" );
+			return null;
+		}
+		else
+		{
+			return source.getInterpolatedSource( t, 0, Interpolation.NLINEAR ).realRandomAccess();
 		}
 	}
 
@@ -806,7 +842,7 @@ public abstract class BdvUtils
 
 		return affineTransform3D;
 	}
-	
+
 	public static void moveToPosition( Bdv bdv, double[] xyz, int t, long durationMillis )
 	{
 		bdv.getBdvHandle().getViewerPanel().setTimepoint( t );

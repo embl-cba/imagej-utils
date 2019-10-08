@@ -1,21 +1,12 @@
 package de.embl.cba.bdv.utils.capture;
 
-import bdv.cache.CacheControl;
-import bdv.util.Bdv;
 import bdv.util.BdvHandle;
-import bdv.util.Prefs;
 import bdv.viewer.Source;
-import bdv.viewer.ViewerPanel;
-import bdv.viewer.overlay.ScaleBarOverlayRenderer;
-import bdv.viewer.render.MultiResolutionRenderer;
-import bdv.viewer.state.ViewerState;
 
 import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.transforms.utils.Transforms;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.Overlay;
 import ij.plugin.Duplicator;
 import ij.process.LUT;
 import net.imglib2.*;
@@ -23,19 +14,13 @@ import net.imglib2.Point;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.RealViews;
-import net.imglib2.realtransform.Scale;
-import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.ui.PainterThread;
-import net.imglib2.ui.RenderTarget;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +47,6 @@ public abstract class BdvViewCaptures
 			String voxelUnits,
 			boolean checkSourceIntersectionWithViewerPlaneOnlyIn2D)
 	{
-
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
 		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
 
@@ -88,20 +72,16 @@ public abstract class BdvViewCaptures
 		for ( int sourceIndex : sourceIndices )
 		{
 			if ( checkSourceIntersectionWithViewerPlaneOnlyIn2D )
-			{
 				if ( ! BdvUtils.isSourceIntersectingCurrentViewIn2D( bdv, sourceIndex ) ) continue;
-			}
 			else
-			{
 				if ( ! BdvUtils.isSourceIntersectingCurrentView( bdv, sourceIndex ) ) continue;
-			}
 
 			final RandomAccessibleInterval< UnsignedShortType > rai
 					= ArrayImgs.unsignedShorts( captureWidth, captureHeight );
 
 			final Source< ? > source = getSource( bdv, sourceIndex );
-			final RandomAccess< ? extends RealType< ? > > sourceAccess =
-					getRealTypeNonVolatileRandomAccess( source, 0, 0 );
+			final RealRandomAccess< ? extends RealType< ? > > sourceAccess =
+					getInterpolatedRealTypeNonVolatileRealRandomAccess( source, 0, 0 );
 			final AffineTransform3D sourceTransform =
 					BdvUtils.getSourceTransform( source, 0,0  );
 			final RandomAccessibleInterval< ? > sourceRai = source.getSource( 0, 0 );

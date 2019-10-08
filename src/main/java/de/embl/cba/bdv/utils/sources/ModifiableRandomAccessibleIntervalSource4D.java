@@ -1,7 +1,6 @@
 package de.embl.cba.bdv.utils.sources;
 
 import bdv.util.AbstractSource;
-import bdv.util.RandomAccessibleIntervalSource4D;
 import bdv.viewer.Interpolation;
 import de.embl.cba.lazyalgorithm.RandomAccessibleIntervalFilter;
 import net.imglib2.RandomAccessibleInterval;
@@ -19,6 +18,8 @@ public class ModifiableRandomAccessibleIntervalSource4D < T extends NumericType<
 	protected int currentTimePointIndex;
 
 	private RandomAccessibleInterval< T > currentSource;
+
+	private RandomAccessibleInterval< T > currentRawSource;
 
 	private final RealRandomAccessible< T >[] currentInterpolatedSources;
 
@@ -53,10 +54,9 @@ public class ModifiableRandomAccessibleIntervalSource4D < T extends NumericType<
 		{
 			final T zero = getType().createVariable();
 			zero.setZero();
-			currentSource = Views.hyperSlice( source, 3, timepointIndex );
+			currentRawSource = Views.hyperSlice( source, 3, timepointIndex );
 
-			if ( filter != null )
-				currentSource = filter.filter( currentSource );
+			applyFilter();
 
 			for ( final Interpolation method : Interpolation.values() )
 				currentInterpolatedSources[ method.ordinal() ] = Views.interpolate( Views.extendValue( currentSource, zero ), interpolators.get( method ) );
@@ -68,9 +68,19 @@ public class ModifiableRandomAccessibleIntervalSource4D < T extends NumericType<
 		}
 	}
 
+	private void applyFilter()
+	{
+		if ( filter == null  )
+			currentSource = currentRawSource;
+		else
+			currentSource = filter.filter( currentRawSource );
+	}
+
+	// set null for not applying a filter
 	public void setFilter( RandomAccessibleIntervalFilter filter )
 	{
 		this.filter = filter;
+		applyFilter();
 	}
 
 	@Override
@@ -85,6 +95,13 @@ public class ModifiableRandomAccessibleIntervalSource4D < T extends NumericType<
 		if ( t != currentTimePointIndex )
 			loadTimepoint( t );
 		return currentSource;
+	}
+
+	public RandomAccessibleInterval< T > getRawSource( final int t, final int level )
+	{
+		if ( t != currentTimePointIndex )
+			loadTimepoint( t );
+		return currentRawSource;
 	}
 
 	@Override

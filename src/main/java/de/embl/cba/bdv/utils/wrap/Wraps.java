@@ -58,31 +58,28 @@ public class Wraps
 		RandomAccessibleInterval< R > wrap = ImageJFunctions.wrapRealNative( imagePlus );
 
 		if ( imagePlus.getNFrames() == 1 )
-		{
 			wrap = Views.addDimension( wrap, 0, 0 );
-		}
 
 		if ( imagePlus.getNSlices() == 1 )
-		{
 			wrap = Views.addDimension( wrap, 0, 0 );
-			wrap = Views.permute(
-					wrap,
-					wrap.numDimensions() - 1,
-					wrap.numDimensions() - 2 );
-		}
+
+		wrap = Views.permute(
+				wrap,
+				wrap.numDimensions() - 1,
+				wrap.numDimensions() - 2 );
 
 		if ( imagePlus.getNChannels() == 1 )
-		{
 			wrap = Views.addDimension( wrap, 0, 0 );
-			wrap = Views.permute(
-					wrap,
-					wrap.numDimensions() - 1,
-					wrap.numDimensions() - 2 );
-			wrap = Views.permute(
-					wrap,
-					wrap.numDimensions() - 2,
-					wrap.numDimensions() - 3 );
-		}
+
+		wrap = Views.permute(
+				wrap,
+				wrap.numDimensions() - 1,
+				wrap.numDimensions() - 2 );
+		wrap = Views.permute(
+				wrap,
+				wrap.numDimensions() - 2,
+				wrap.numDimensions() - 3 );
+
 		return wrap;
 	}
 
@@ -92,13 +89,12 @@ public class Wraps
 		RandomAccessibleInterval< R > wrap = ImageJFunctions.wrapRealNative( imagePlus );
 
 		if ( imagePlus.getNFrames() == 1 )
-		{
 			wrap = Views.addDimension( wrap, 0, 0 );
-		}
 
 		if ( imagePlus.getNChannels() == 1 )
 		{
 			wrap = Views.addDimension( wrap, 0, 0 );
+
 			wrap = Views.permute(
 					wrap,
 					wrap.numDimensions() - 1,
@@ -108,10 +104,18 @@ public class Wraps
 		if ( imagePlus.getNSlices() == 1 )
 		{
 			wrap = Views.addDimension( wrap, 0, 0 );
+
 			wrap = Views.permute(
 					wrap,
 					wrap.numDimensions() - 1,
 					wrap.numDimensions() - 2 );
+			wrap = Views.permute(
+					wrap,
+					wrap.numDimensions() - 2,
+					wrap.numDimensions() - 3 );
+		}
+		else if ( imagePlus.getNSlices() > 1  && imagePlus.getNChannels() > 1 )
+		{
 			wrap = Views.permute(
 					wrap,
 					wrap.numDimensions() - 2,
