@@ -5,10 +5,7 @@ import bdv.ViewerSetupImgLoader;
 import bdv.VolatileSpimSource;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.transformation.TransformedSource;
-import de.embl.cba.bdv.utils.sources.LazySpimSource;
-import de.embl.cba.bdv.utils.sources.ModifiableRandomAccessibleIntervalSource4D;
-import de.embl.cba.bdv.utils.sources.SelectableARGBConvertedRealSource;
-import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
+import de.embl.cba.bdv.utils.sources.*;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 
 import bdv.util.*;
@@ -742,6 +739,10 @@ public abstract class BdvUtils
 
 		if ( source instanceof ModifiableRandomAccessibleIntervalSource4D )
 			return ( ( ModifiableRandomAccessibleIntervalSource4D ) source ).getRawSource( t, level );
+
+		if ( source instanceof ImagePlusFileSource )
+			return getRealTypeNonVolatileRandomAccessibleInterval(
+					( ( ImagePlusFileSource ) source ).getWrappedSource(), t, level );
 
 		if ( source instanceof LazySpimSource )
 		{

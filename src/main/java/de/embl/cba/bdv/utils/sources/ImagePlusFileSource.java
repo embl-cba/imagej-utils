@@ -1,6 +1,5 @@
 package de.embl.cba.bdv.utils.sources;
 
-import bdv.util.RandomAccessibleIntervalSource4D;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.Logger;
@@ -31,16 +30,16 @@ public class ImagePlusFileSource < R extends RealType< R > & NativeType< R > >
 	@Override
 	public boolean isPresent( int t )
 	{
-		return wrappedSource().isPresent( t );
+		return getWrappedSource().isPresent( t );
 	}
 
 	@Override
 	public RandomAccessibleInterval< R > getSource( int t, int level )
 	{
-		return wrappedSource().getSource( t, level );
+		return getWrappedSource().getSource( t, level );
 	}
 
-	private ModifiableRandomAccessibleIntervalSource4D< R > wrappedSource()
+	public ModifiableRandomAccessibleIntervalSource4D< R > getWrappedSource()
 	{
 		if ( raiSource4D == null ) loadAndCreateSource();
 
@@ -81,36 +80,36 @@ public class ImagePlusFileSource < R extends RealType< R > & NativeType< R > >
 	@Override
 	public RealRandomAccessible< R > getInterpolatedSource( int t, int level, Interpolation method )
 	{
-		return wrappedSource().getInterpolatedSource( t, level, method );
+		return getWrappedSource().getInterpolatedSource( t, level, method );
 	}
 
 	@Override
 	public void getSourceTransform( int t, int level, AffineTransform3D transform )
 	{
-		wrappedSource().getSourceTransform( t, level, transform  );
+		getWrappedSource().getSourceTransform( t, level, transform  );
 	}
 
 	@Override
 	public R getType()
 	{
-		return wrappedSource().getType();
+		return getWrappedSource().getType();
 	}
 
 	@Override
 	public String getName()
 	{
-		return wrappedSource().getName();
+		return getWrappedSource().getName();
 	}
 
 	@Override
 	public VoxelDimensions getVoxelDimensions()
 	{
-		return wrappedSource().getVoxelDimensions();
+		return getWrappedSource().getVoxelDimensions();
 	}
 
 	@Override
 	public int getNumMipmapLevels()
 	{
-		return wrappedSource().getNumMipmapLevels();
+		return getWrappedSource().getNumMipmapLevels();
 	}
 }
