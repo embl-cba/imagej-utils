@@ -10,7 +10,9 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import ij.process.LUT;
 import net.imglib2.*;
+import net.imglib2.Cursor;
 import net.imglib2.Point;
+import net.imglib2.algorithm.util.Grids;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -18,6 +20,7 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.Intervals;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 import java.awt.*;
@@ -60,12 +63,9 @@ public abstract class BdvViewCaptures
 		final long captureWidth = ( long ) Math.ceil( w / dxy );
 		final long captureHeight = ( long ) Math.ceil( h / dxy );
 
-		final ArrayList< RandomAccessibleInterval< UnsignedShortType > > rais
-				= new ArrayList<>();
-		final ArrayList< ARGBType > colors
-				= new ArrayList<>();
-		final ArrayList< double[] > displayRanges
-				= new ArrayList<>();
+		final ArrayList< RandomAccessibleInterval< UnsignedShortType > > captures = new ArrayList<>();
+		final ArrayList< ARGBType > colors = new ArrayList<>();
+		final ArrayList< double[] > displayRanges = new ArrayList<>();
 
 		final List< Integer > sourceIndices = getVisibleSourceIndices( bdv );
 
@@ -78,15 +78,12 @@ public abstract class BdvViewCaptures
 			else
 				if ( ! BdvUtils.isSourceIntersectingCurrentView( bdv, sourceIndex ) ) continue;
 
-			final RandomAccessibleInterval< UnsignedShortType > rai
+			final RandomAccessibleInterval< UnsignedShortType > capture
 					= ArrayImgs.unsignedShorts( captureWidth, captureHeight );
 
 			final Source< ? > source = getSource( bdv, sourceIndex );
 
 			final int level = getLevel( source, pixelSpacing );
-
-			final RealRandomAccess< ? extends RealType< ? > > interpolatedSourceAccess =
-					getInterpolatedRealTypeNonVolatileRealRandomAccess( source, t, level );
 
 			final AffineTransform3D sourceTransform =
 					BdvUtils.getSourceTransform( source, t, level );
@@ -96,26 +93,35 @@ public abstract class BdvViewCaptures
 			viewerToSourceTransform.preConcatenate( viewerTransform.inverse() );
 			viewerToSourceTransform.preConcatenate( sourceTransform.inverse() );
 
-			final RandomAccess< UnsignedShortType > access = rai.randomAccess();
+			Grids.collectAllContainedIntervals(
+					Intervals.dimensionsAsLongArray( capture ),
+					new int[]{100, 100}).parallelStream().forEach( interval ->
+			{
+				final RealRandomAccess< ? extends RealType< ? > > interpolatedSourceAccess =
+						getInterpolatedRealTypeNonVolatileRealRandomAccess( source, t, level );
 
-			final double[] canvasPosition = new double[ 3 ];
-			final double[] sourceRealPosition = new double[ 3 ];
+				final IntervalView< UnsignedShortType > crop = Views.interval( capture, interval );
+				final Cursor< UnsignedShortType > captureCursor = Views.iterable( crop ).localizingCursor();
+				final RandomAccess< UnsignedShortType > captureAccess = crop.randomAccess();
 
-			for ( int x = 0; x < captureWidth; x++ )
-				for ( int y = 0; y < captureHeight; y++ )
+				final double[] canvasPosition = new double[ 3 ];
+				final double[] sourceRealPosition = new double[ 3 ];
+
+				while ( captureCursor.hasNext() )
 				{
-					canvasPosition[ 0 ] = x * dxy;
-					canvasPosition[ 1 ] = y * dxy;
+					captureCursor.fwd();
+					captureCursor.localize( canvasPosition );
+					captureAccess.setPosition( captureCursor );
+					canvasPosition[ 0 ] *= dxy;
+					canvasPosition[ 1 ] *= dxy;
 					viewerToSourceTransform.apply( canvasPosition, sourceRealPosition );
 					interpolatedSourceAccess.setPosition( sourceRealPosition );
-					access.setPosition( x, 0 );
-					access.setPosition( y, 1 );
-					access.get().setReal( interpolatedSourceAccess.get().getRealDouble() );
+					captureAccess.get().setReal( interpolatedSourceAccess.get().getRealDouble() );
 				}
+			});
 
-			rais.add( rai );
+			captures.add( capture );
 			colors.add( getSourceColor( bdv, sourceIndex ) );
-
 			displayRanges.add( BdvUtils.getDisplayRange( bdv, sourceIndex) );
 		}
 
@@ -125,8 +131,8 @@ public abstract class BdvViewCaptures
 
 		captureVoxelSpacing[ 2 ] = viewerVoxelSpacing[ 2 ]; // TODO: makes sense?
 
-		if ( rais.size() > 0 )
-			showAsCompositeImage( captureVoxelSpacing, voxelUnits, rais, colors, displayRanges );
+		if ( captures.size() > 0 )
+			showAsCompositeImage( captureVoxelSpacing, voxelUnits, captures, colors, displayRanges );
 	}
 
 	public static
