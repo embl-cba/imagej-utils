@@ -73,7 +73,7 @@ public class ExampleViewCapture
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
 			new Thread( () -> {
-				if ( !pixelSpacingDialog.showDialog() ) return;
+				if ( ! pixelSpacingDialog.showDialog() ) return;
 				BdvViewCaptures.captureView(
 						bdv,
 						pixelSpacingDialog.getPixelSpacing(),

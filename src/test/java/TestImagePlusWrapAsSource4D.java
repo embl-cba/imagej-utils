@@ -12,6 +12,9 @@ import java.util.ArrayList;
 
 public class TestImagePlusWrapAsSource4D
 {
+
+	// TODO: Write a proper test!
+
 	public static < R extends RealType< R > & NativeType< R > >
 	void main( String[] args )
 	{
@@ -38,6 +41,8 @@ public class TestImagePlusWrapAsSource4D
 
 		final ArrayList< ModifiableRandomAccessibleIntervalSource4D< R > > wrapC1T1 =
 				Wraps.imagePlusAsSource4DChannelList( imagePlusC1T1 );
+
+		int a = 1;
 
 	}
 }

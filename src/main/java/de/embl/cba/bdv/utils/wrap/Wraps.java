@@ -21,14 +21,14 @@ public class Wraps
 	ArrayList< ModifiableRandomAccessibleIntervalSource4D< R > >
 	imagePlusAsSource4DChannelList( ImagePlus imagePlus )
 	{
-		RandomAccessibleInterval< R > wrap = wrapXYCZT( imagePlus );
+		RandomAccessibleInterval< R > wrap = wrapXYZCT( imagePlus );
 
 		final ArrayList< ModifiableRandomAccessibleIntervalSource4D< R > > sources
 				= new ArrayList<>();
 
 		for ( int c = 0; c < imagePlus.getNChannels(); c++ )
 		{
-			RandomAccessibleInterval< R > channel = Views.hyperSlice( wrap, 2, c );
+			RandomAccessibleInterval< R > channel = Views.hyperSlice( wrap, 3, c );
 
 			final ModifiableRandomAccessibleIntervalSource4D source4D =
 					new ModifiableRandomAccessibleIntervalSource4D<>(
@@ -52,36 +52,36 @@ public class Wraps
 		return scaling;
 	}
 
-	public static < R extends RealType< R > & NativeType< R > >
-	RandomAccessibleInterval< R > wrapXYCZT( ImagePlus imagePlus )
-	{
-		RandomAccessibleInterval< R > wrap = ImageJFunctions.wrapRealNative( imagePlus );
-
-		if ( imagePlus.getNFrames() == 1 )
-			wrap = Views.addDimension( wrap, 0, 0 );
-
-		if ( imagePlus.getNSlices() == 1 )
-			wrap = Views.addDimension( wrap, 0, 0 );
-
-		wrap = Views.permute(
-				wrap,
-				wrap.numDimensions() - 1,
-				wrap.numDimensions() - 2 );
-
-		if ( imagePlus.getNChannels() == 1 )
-			wrap = Views.addDimension( wrap, 0, 0 );
-
-		wrap = Views.permute(
-				wrap,
-				wrap.numDimensions() - 1,
-				wrap.numDimensions() - 2 );
-		wrap = Views.permute(
-				wrap,
-				wrap.numDimensions() - 2,
-				wrap.numDimensions() - 3 );
-
-		return wrap;
-	}
+//	public static < R extends RealType< R > & NativeType< R > >
+//	RandomAccessibleInterval< R > wrapXYCZT( ImagePlus imagePlus )
+//	{
+//		RandomAccessibleInterval< R > wrap = ImageJFunctions.wrapRealNative( imagePlus );
+//
+//		if ( imagePlus.getNFrames() == 1 )
+//			wrap = Views.addDimension( wrap, 0, 0 );
+//
+//		if ( imagePlus.getNSlices() == 1 )
+//			wrap = Views.addDimension( wrap, 0, 0 );
+//
+//		wrap = Views.permute(
+//				wrap,
+//				wrap.numDimensions() - 1,
+//				wrap.numDimensions() - 2 );
+//
+//		if ( imagePlus.getNChannels() == 1 )
+//			wrap = Views.addDimension( wrap, 0, 0 );
+//
+//		wrap = Views.permute(
+//				wrap,
+//				wrap.numDimensions() - 1,
+//				wrap.numDimensions() - 2 );
+//		wrap = Views.permute(
+//				wrap,
+//				wrap.numDimensions() - 2,
+//				wrap.numDimensions() - 3 );
+//
+//		return wrap;
+//	}
 
 	public static < R extends RealType< R > & NativeType< R > >
 	RandomAccessibleInterval< R > wrapXYZCT( ImagePlus imagePlus )
@@ -121,6 +121,14 @@ public class Wraps
 					wrap.numDimensions() - 2,
 					wrap.numDimensions() - 3 );
 		}
+
+//		if ( imagePlus.getNSlices() > 1  && imagePlus.getNChannels() == 1 && imagePlus.getNFrames() == 1 )
+//		{
+//			wrap = Views.permute(
+//					wrap,
+//					wrap.numDimensions() - 2,
+//					wrap.numDimensions() - 3 );
+//		}
 
 		return wrap;
 	}

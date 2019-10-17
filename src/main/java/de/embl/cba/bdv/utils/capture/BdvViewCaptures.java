@@ -80,7 +80,7 @@ public abstract class BdvViewCaptures
 					= ArrayImgs.unsignedShorts( captureWidth, captureHeight );
 
 			final Source< ? > source = getSource( bdv, sourceIndex );
-			final RealRandomAccess< ? extends RealType< ? > > sourceAccess =
+			final RealRandomAccess< ? extends RealType< ? > > interpolatedSourceAccess =
 					getInterpolatedRealTypeNonVolatileRealRandomAccess( source, 0, 0 );
 			final AffineTransform3D sourceTransform =
 					BdvUtils.getSourceTransform( source, 0,0  );
@@ -96,23 +96,16 @@ public abstract class BdvViewCaptures
 			final double[] canvasPosition = new double[ 3 ];
 			final double[] sourceRealPosition = new double[ 3 ];
 
-			// TODO: rather loop through the capture image
 			for ( int x = 0; x < captureWidth; x++ )
 				for ( int y = 0; y < captureHeight; y++ )
 				{
 					canvasPosition[ 0 ] = x * dxy;
 					canvasPosition[ 1 ] = y * dxy;
-
 					viewerToSourceTransform.apply( canvasPosition, sourceRealPosition );
-
-					if ( Intervals.contains( sourceRai, new RealPoint( sourceRealPosition ) ) )
-					{
-						sourceAccess.setPosition( sourceRealPosition );
-						Double pixelValue = sourceAccess.get().getRealDouble();
-						access.setPosition( x, 0 );
-						access.setPosition( y, 1 );
-						access.get().setReal( pixelValue );
-					}
+					interpolatedSourceAccess.setPosition( sourceRealPosition );
+					access.setPosition( x, 0 );
+					access.setPosition( y, 1 );
+					access.get().setReal( interpolatedSourceAccess.get().getRealDouble() );
 				}
 
 			rais.add( rai );

@@ -778,13 +778,12 @@ public abstract class BdvUtils
 
 		if ( source instanceof LazySpimSource )
 		{
-			return null; // TODO
+			return ( ( LazySpimSource ) source ).getInterpolatedNonVolatileSource( t, level ).realRandomAccess();
 		}
 		else if ( source instanceof VolatileSpimSource )
 		{
 			Logger.error( "The source " + source.getName() + " is of type VolatileSpimSource!\n" +
-					"Thus it is not possible to get a nonVolatile access.\n" +
-					"Please contact Christian.Tischer@EMBL.DE" );
+					"Thus it is not possible to get a nonVolatile access.");
 			return null;
 		}
 		else

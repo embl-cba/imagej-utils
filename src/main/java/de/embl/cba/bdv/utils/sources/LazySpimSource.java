@@ -21,6 +21,7 @@ public class LazySpimSource< T extends NumericType< T > > implements Source< T >
 {
 	private final String path;
 	private final String name;
+	private Source< T > source;
 	private Source< T > volatileSource;
 	private SpimData spimData;
 	private List< ConverterSetup > converterSetups;
@@ -39,9 +40,21 @@ public class LazySpimSource< T extends NumericType< T > > implements Source< T >
 		if ( volatileSource == null )
 			volatileSource = ( Source< T > ) sources.get( 0 ).asVolatile().getSpimSource();
 
+		if ( source == null )
+			source = ( Source< T > ) sources.get( 0 ).getSpimSource();
+
 		return volatileSource;
 	}
 
+	private Source< T > wrappedSource()
+	{
+		if ( spimData == null ) initSpimData();
+
+		if ( source == null )
+			source = ( Source< T > ) sources.get( 0 ).getSpimSource();
+
+		return source;
+	}
 
 	private void initSpimData()
 	{
@@ -51,7 +64,6 @@ public class LazySpimSource< T extends NumericType< T > > implements Source< T >
 		BigDataViewer.initSetups( spimData, converterSetups, sources );
 	}
 
-
 	public RandomAccessibleInterval< T > getNonVolatileSource( int t, int level )
 	{
 		if ( spimData == null ) initSpimData();
@@ -59,6 +71,11 @@ public class LazySpimSource< T extends NumericType< T > > implements Source< T >
 		final BasicMultiResolutionImgLoader imgLoader = ( BasicMultiResolutionImgLoader ) spimData.getSequenceDescription().getImgLoader();
 
 		return ( RandomAccessibleInterval ) imgLoader.getSetupImgLoader( 0 ).getImage( t, level );
+	}
+
+	public RealRandomAccessible< T > getInterpolatedNonVolatileSource( int t, int level )
+	{
+		return wrappedSource().getInterpolatedSource( t, level, Interpolation.NLINEAR );
 	}
 
 	@Override
