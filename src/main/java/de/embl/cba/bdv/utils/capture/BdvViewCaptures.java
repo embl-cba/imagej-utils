@@ -69,6 +69,8 @@ public abstract class BdvViewCaptures
 
 		final List< Integer > sourceIndices = getVisibleSourceIndices( bdv );
 
+		final int t = bdv.getViewerPanel().getState().getCurrentTimepoint();
+
 		for ( int sourceIndex : sourceIndices )
 		{
 			if ( checkSourceIntersectionWithViewerPlaneOnlyIn2D )
@@ -80,11 +82,14 @@ public abstract class BdvViewCaptures
 					= ArrayImgs.unsignedShorts( captureWidth, captureHeight );
 
 			final Source< ? > source = getSource( bdv, sourceIndex );
+
+			final int level = getLevel( source, pixelSpacing );
+
 			final RealRandomAccess< ? extends RealType< ? > > interpolatedSourceAccess =
-					getInterpolatedRealTypeNonVolatileRealRandomAccess( source, 0, 0 );
+					getInterpolatedRealTypeNonVolatileRealRandomAccess( source, t, level );
+
 			final AffineTransform3D sourceTransform =
-					BdvUtils.getSourceTransform( source, 0,0  );
-			final RandomAccessibleInterval< ? > sourceRai = source.getSource( 0, 0 );
+					BdvUtils.getSourceTransform( source, t, level );
 
 			AffineTransform3D viewerToSourceTransform = new AffineTransform3D();
 
@@ -117,6 +122,7 @@ public abstract class BdvViewCaptures
 		final double[] captureVoxelSpacing = new double[ 3 ];
 		for ( int d = 0; d < 2; d++ )
 			captureVoxelSpacing[ d ] = pixelSpacing;
+
 		captureVoxelSpacing[ 2 ] = viewerVoxelSpacing[ 2 ]; // TODO: makes sense?
 
 		if ( rais.size() > 0 )

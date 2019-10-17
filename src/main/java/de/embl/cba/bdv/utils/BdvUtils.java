@@ -761,6 +761,36 @@ public abstract class BdvUtils
 		}
 	}
 
+	/**
+	 * Returns the highest level where the source voxel spacings are <= the requested ones.
+	 *
+	 *
+	 * @param source
+	 * @param voxelSpacings
+	 * @return
+	 */
+	public static int getLevel( Source< ? > source, double... voxelSpacings )
+	{
+		final int numMipmapLevels = source.getNumMipmapLevels();
+		final int numDimensions = voxelSpacings.length;
+
+		for ( int level = numMipmapLevels - 1; level >= 0 ; level-- )
+		{
+			final double[] calibration = BdvUtils.getCalibration( source, level );
+
+			boolean allSpacingsSmallerThanRequested = true;
+
+			for ( int d = 0; d < numDimensions; d++ )
+			{
+				if ( calibration[ d ] > voxelSpacings[ d ] )
+					allSpacingsSmallerThanRequested = false;
+			}
+
+			if ( allSpacingsSmallerThanRequested )
+				return level;
+		}
+		return 0;
+	}
 
 	public static RealRandomAccess
 	getInterpolatedRealTypeNonVolatileRealRandomAccess( Source source, int t, int level )

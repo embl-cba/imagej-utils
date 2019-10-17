@@ -20,7 +20,7 @@ public class ExampleInteractiveDisplaySettingsDialog
 		/**
 		 * show first image
 		 */
-		final ArrayImg< UnsignedIntType, IntArray > img0 = getImage();
+		final ArrayImg< UnsignedIntType, IntArray > img0 = createImage();
 		final BdvStackSource stackSource0 = BdvFunctions.show(
 				img0, "image 0",
 				BdvOptions.options().is2D() );
@@ -32,7 +32,7 @@ public class ExampleInteractiveDisplaySettingsDialog
 		/**
 		 * add second image
 		 */
-		final ArrayImg< UnsignedIntType, IntArray > img1 = getImage();
+		final ArrayImg< UnsignedIntType, IntArray > img1 = createImage();
 
 		// shift location
 		final IntervalView< UnsignedIntType > translated
@@ -58,7 +58,7 @@ public class ExampleInteractiveDisplaySettingsDialog
 
 	}
 
-	public static ArrayImg< UnsignedIntType, IntArray > getImage()
+	public static ArrayImg< UnsignedIntType, IntArray > createImage()
 	{
 		ArrayImg< UnsignedIntType, IntArray > img
 				= ArrayImgs.unsignedInts( 256, 256, 1 );
