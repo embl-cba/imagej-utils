@@ -1,11 +1,14 @@
 package de.embl.cba.bdv.utils.render;
 
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvHandle;
 import bdv.util.volatiles.VolatileViews;
 import bdv.viewer.Source;
 import bdv.viewer.render.AccumulateProjector;
 import bdv.viewer.render.AccumulateProjectorFactory;
 import bdv.viewer.render.VolatileProjector;
+import de.embl.cba.bdv.utils.sources.Metadata;
+import de.embl.cba.bdv.utils.sources.Sources;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -71,26 +74,28 @@ public class AccumulateEMAndFMProjectorARGB extends AccumulateProjector< ARGBTyp
 			final int g = ARGBType.green( value );
 			final int b = ARGBType.blue( value );
 
-			if ( a == 0 ) continue;
+			if ( a == 0 ) continue; // TODO: think about this!
 
-			final Source< ? > source = sourceList.get( sourceIndex++ );
+			Source< ? > source = sourceList.get( sourceIndex++ );
+			if ( source instanceof TransformedSource  )
+				source = ((TransformedSource)source).getWrappedSource();
 
-			//sourceToMetadata.get( source );
+			final Metadata metadata = Sources.sourceToMetadata.get( source );
 
-			if( source.getName().contains( "_em" ) )
+			if ( metadata == null || ! metadata.modality.equals( Metadata.Modality.EM ) )
+			{
+				aAccu += a;
+				rAccu += r;
+				gAccu += g;
+				bAccu += b;
+			}
+			else
 			{
 				aAvg += a;
 				rAvg += r;
 				gAvg += g;
 				bAvg += b;
 				numNonZeroAvg++;
-			}
-			else
-			{
-				aAccu += a;
-				rAccu += r;
-				gAccu += g;
-				bAccu += b;
 			}
 		}
 

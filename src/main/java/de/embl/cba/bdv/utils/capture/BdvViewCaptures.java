@@ -29,15 +29,16 @@ import java.util.List;
 
 import static de.embl.cba.bdv.utils.BdvUtils.*;
 
+
+/**
+ * TODO:
+ * - Rather return an ImagePlus and let the user decide what to do with it
+ * - Implement different rendering modes for different image modalities
+ *
+ */
 public abstract class BdvViewCaptures
 {
-
-
 	/**
-	 * TODO:
-	 * - make it optional to capture an interpolated view
-	 *
-	 *
 	 *
 	 * @param bdv
 	 * @param pixelSpacing
@@ -172,7 +173,6 @@ public abstract class BdvViewCaptures
 
 		compositeImage.show();
 		compositeImage.setTitle( "Bdv View Capture" );
-		IJ.run(compositeImage, "Make Composite", "");
-
+		IJ.run( compositeImage, "Make Composite", "" );
 	}
 }

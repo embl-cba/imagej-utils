@@ -52,7 +52,7 @@ public class ImagePlusFileSource < R extends RealType< R > & NativeType< R > >
 
 		metadata.numSpatialDimensions = imagePlus.getNSlices() > 1 ? 3 : 2;
 
-		if( metadata.flavour == Metadata.Flavour.LabelSource || imagePlus.getBitDepth() == 8 )
+		if( metadata.modality == Metadata.Modality.Segmentation || imagePlus.getBitDepth() == 8 )
 		{
 			metadata.displayRangeMin = 0.0;
 			metadata.displayRangeMax = 500.0;
