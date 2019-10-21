@@ -1,9 +1,13 @@
 package de.embl.cba.bdv.utils.capture;
 
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvHandle;
 import bdv.viewer.Source;
 
 import de.embl.cba.bdv.utils.BdvUtils;
+import de.embl.cba.bdv.utils.sources.Metadata;
+import de.embl.cba.bdv.utils.sources.Sources;
+import fiji.util.NNearestNeighborSearch;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -14,6 +18,8 @@ import net.imglib2.Cursor;
 import net.imglib2.algorithm.util.Grids;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolator;
+import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
@@ -35,7 +41,7 @@ import static de.embl.cba.bdv.utils.BdvUtils.*;
  * - Implement different rendering modes for different image modalities
  *
  */
-public abstract class BdvViewCaptures
+public abstract class BdvViewCaptures < R extends RealType< R > >
 {
 	/**
 	 *  @param bdv
@@ -43,7 +49,7 @@ public abstract class BdvViewCaptures
 	 * @param voxelUnits
 	 * @return
 	 */
-	public static CompositeImage captureView(
+	public static < R extends RealType< R > > CompositeImage captureView(
 			BdvHandle bdv,
 			double pixelSpacing,
 			String voxelUnits,
@@ -80,12 +86,9 @@ public abstract class BdvViewCaptures
 			final RandomAccessibleInterval< UnsignedShortType > capture
 					= ArrayImgs.unsignedShorts( captureWidth, captureHeight );
 
-			final Source< ? > source = getSource( bdv, sourceIndex );
-
-
+			Source< ? > source = getSource( bdv, sourceIndex );
 
 			final int level = getLevel( source, pixelSpacing );
-
 			final AffineTransform3D sourceTransform =
 					BdvUtils.getSourceTransform( source, t, level );
 
@@ -98,8 +101,7 @@ public abstract class BdvViewCaptures
 					Intervals.dimensionsAsLongArray( capture ),
 					new int[]{100, 100}).parallelStream().forEach( interval ->
 			{
-				final RealRandomAccess< ? extends RealType< ? > > interpolatedSourceAccess =
-						getInterpolatedRealTypeNonVolatileRealRandomAccess( source, t, level );
+				RealRandomAccess< ? extends RealType< ? > > sourceAccess = getInterpolatedRealRandomAccess( t, source, level );
 
 				final IntervalView< UnsignedShortType > crop = Views.interval( capture, interval );
 				final Cursor< UnsignedShortType > captureCursor = Views.iterable( crop ).localizingCursor();
@@ -116,8 +118,8 @@ public abstract class BdvViewCaptures
 					canvasPosition[ 0 ] *= dxy;
 					canvasPosition[ 1 ] *= dxy;
 					viewerToSourceTransform.apply( canvasPosition, sourceRealPosition );
-					interpolatedSourceAccess.setPosition( sourceRealPosition );
-					captureAccess.get().setReal( interpolatedSourceAccess.get().getRealDouble() );
+					sourceAccess.setPosition( sourceRealPosition );
+					captureAccess.get().setReal( sourceAccess.get().getRealDouble() );
 				}
 			});
 
@@ -138,6 +140,32 @@ public abstract class BdvViewCaptures
 			return null;
 
 
+	}
+
+	public static RealRandomAccess< ? extends RealType< ? > >
+	getInterpolatedRealRandomAccess( int t, Source< ? > source, int level )
+	{
+		RealRandomAccess< ? extends RealType< ? > > sourceAccess;
+		if ( isInterpolate( source ) )
+			sourceAccess = getInterpolatedRealTypeNonVolatileRealRandomAccess( source, t, level );
+		else
+			sourceAccess = Views.interpolate(
+					getRealTypeNonVolatileRandomAccessibleInterval( source, t, level ),
+					new NearestNeighborInterpolatorFactory<>() ).realRandomAccess();
+
+		return sourceAccess;
+	}
+
+	public static boolean isInterpolate( Source< ? > source )
+	{
+		if ( source instanceof TransformedSource )
+			source = ((TransformedSource)source).getWrappedSource();
+
+		boolean interpolate = true;
+		if ( Sources.sourceToMetadata.containsKey( source ) )
+			if ( Sources.sourceToMetadata.get( source ).modality.equals( Metadata.Modality.Segmentation ) )
+				interpolate = false;
+		return interpolate;
 	}
 
 	public static CompositeImage asCompositeImage(
