@@ -6,6 +6,7 @@ import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 
 import de.embl.cba.bdv.utils.BdvUtils;
+import de.embl.cba.bdv.utils.lut.Luts;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.sources.Metadata;
 import de.embl.cba.bdv.utils.sources.Sources;
@@ -70,6 +71,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 
 		final ArrayList< RandomAccessibleInterval< UnsignedShortType > > captures = new ArrayList<>();
 		final ArrayList< ARGBType > colors = new ArrayList<>();
+		final ArrayList< Boolean > isSegmentations = new ArrayList<>();
 		final ArrayList< double[] > displayRanges = new ArrayList<>();
 
 		final List< Integer > sourceIndices = getVisibleSourceIndices( bdv );
@@ -98,6 +100,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 			viewerToSourceTransform.preConcatenate( sourceTransform.inverse() );
 
 			final boolean interpolate = isInterpolate( source );
+			isSegmentations.add( ! interpolate );
 
 			Grids.collectAllContainedIntervals(
 					Intervals.dimensionsAsLongArray( capture ),
@@ -138,7 +141,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		captureVoxelSpacing[ 2 ] = viewerVoxelSpacing[ 2 ]; // TODO: makes sense?
 
 		if ( captures.size() > 0 )
-			return asCompositeImage( captureVoxelSpacing, voxelUnits, captures, colors, displayRanges );
+			return asCompositeImage( captureVoxelSpacing, voxelUnits, captures, colors, displayRanges, isSegmentations );
 		else
 			return null;
 
@@ -180,7 +183,8 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 			String voxelUnit,
 			ArrayList< RandomAccessibleInterval< UnsignedShortType > > rais,
 			ArrayList< ARGBType > colors,
-			ArrayList< double[] > displayRanges )
+			ArrayList< double[] > displayRanges,
+			ArrayList< Boolean > isSegmentations )
 	{
 		final RandomAccessibleInterval< UnsignedShortType > stack = Views.stack( rais );
 
@@ -201,12 +205,23 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 
 		for ( int channel = 1; channel <= compositeImage.getNChannels(); ++channel )
 		{
-			final Color color = new Color( colors.get( channel - 1 ).get() );
-			final LUT lut = compositeImage.createLutFromColor( color );
-			compositeImage.setC( channel );
-			compositeImage.setChannelLut( lut );
-			final double[] range = displayRanges.get( channel - 1 );
-			compositeImage.setDisplayRange( range[ 0 ], range[ 1 ] );
+			final Boolean isSegmentation = isSegmentations.get( channel - 1 );
+
+			if ( isSegmentation )
+			{
+				final LUT lut = Luts.glasbeyLutIJ();
+				compositeImage.setC( channel );
+				compositeImage.setChannelLut( lut );
+			}
+			else
+			{
+				Color color = new Color( colors.get( channel - 1 ).get() );
+				final LUT lut = compositeImage.createLutFromColor( color );
+				compositeImage.setC( channel );
+				compositeImage.setChannelLut( lut );
+				final double[] range = displayRanges.get( channel - 1 );
+				compositeImage.setDisplayRange( range[ 0 ], range[ 1 ] );
+			}
 		}
 
 		compositeImage.setTitle( "Bdv View Capture" );

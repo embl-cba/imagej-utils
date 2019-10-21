@@ -43,7 +43,7 @@ public class TestViewCapture < R extends RealType< R > >
 				show.getBdvHandle(),
 				1,
 				"nanometer",
-				false );
+				false ).show();
 	}
 
 
