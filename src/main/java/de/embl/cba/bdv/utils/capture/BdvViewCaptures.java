@@ -11,7 +11,6 @@ import ij.plugin.Duplicator;
 import ij.process.LUT;
 import net.imglib2.*;
 import net.imglib2.Cursor;
-import net.imglib2.Point;
 import net.imglib2.algorithm.util.Grids;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -39,13 +38,12 @@ import static de.embl.cba.bdv.utils.BdvUtils.*;
 public abstract class BdvViewCaptures
 {
 	/**
-	 *
-	 * @param bdv
+	 *  @param bdv
 	 * @param pixelSpacing
 	 * @param voxelUnits
-	 *
+	 * @return
 	 */
-	public static void captureView(
+	public static CompositeImage captureView(
 			BdvHandle bdv,
 			double pixelSpacing,
 			String voxelUnits,
@@ -83,6 +81,8 @@ public abstract class BdvViewCaptures
 					= ArrayImgs.unsignedShorts( captureWidth, captureHeight );
 
 			final Source< ? > source = getSource( bdv, sourceIndex );
+
+
 
 			final int level = getLevel( source, pixelSpacing );
 
@@ -133,11 +133,14 @@ public abstract class BdvViewCaptures
 		captureVoxelSpacing[ 2 ] = viewerVoxelSpacing[ 2 ]; // TODO: makes sense?
 
 		if ( captures.size() > 0 )
-			showAsCompositeImage( captureVoxelSpacing, voxelUnits, captures, colors, displayRanges );
+			return asCompositeImage( captureVoxelSpacing, voxelUnits, captures, colors, displayRanges );
+		else
+			return null;
+
+
 	}
 
-	public static
-	void showAsCompositeImage(
+	public static CompositeImage asCompositeImage(
 			double[] voxelSpacing,
 			String voxelUnit,
 			ArrayList< RandomAccessibleInterval< UnsignedShortType > > rais,
@@ -171,8 +174,9 @@ public abstract class BdvViewCaptures
 			compositeImage.setDisplayRange( range[ 0 ], range[ 1 ] );
 		}
 
-		compositeImage.show();
 		compositeImage.setTitle( "Bdv View Capture" );
 		IJ.run( compositeImage, "Make Composite", "" );
+
+		return compositeImage;
 	}
 }
