@@ -735,7 +735,7 @@ public abstract class BdvUtils
 
 		if ( source instanceof ARGBConvertedRealSource )
 			return getRealTypeNonVolatileRandomAccessibleInterval(
-					( ( ARGBConvertedRealSource ) source ).getWrappedRealSource(), t, level );
+					( ( ARGBConvertedRealSource ) source ).getWrappedSource(), t, level );
 
 		if ( source instanceof ModifiableRandomAccessibleIntervalSource4D )
 			return ( ( ModifiableRandomAccessibleIntervalSource4D ) source ).getRawSource( t, level );
@@ -793,22 +793,22 @@ public abstract class BdvUtils
 	}
 
 	public static RealRandomAccess
-	getInterpolatedRealTypeNonVolatileRealRandomAccess( Source source, int t, int level )
+	getInterpolatedRealTypeNonVolatileRealRandomAccess( Source source, int t, int level, Interpolation interpolation )
 	{
 		if ( source instanceof TransformedSource )
 			return getInterpolatedRealTypeNonVolatileRealRandomAccess(
-					( ( TransformedSource ) source ).getWrappedSource(), t, level );
+					( ( TransformedSource ) source ).getWrappedSource(), t, level, interpolation );
 
 		if ( source instanceof ARGBConvertedRealSource )
 			return getInterpolatedRealTypeNonVolatileRealRandomAccess(
-					( ( ARGBConvertedRealSource ) source ).getWrappedRealSource(), t, level );
+					( ( ARGBConvertedRealSource ) source ).getWrappedSource(), t, level, interpolation );
 
 		if ( source instanceof ModifiableRandomAccessibleIntervalSource4D )
 			return null; // TODO
 
 		if ( source instanceof LazySpimSource )
 		{
-			return ( ( LazySpimSource ) source ).getInterpolatedNonVolatileSource( t, level ).realRandomAccess();
+			return ( ( LazySpimSource ) source ).getInterpolatedNonVolatileSource( t, level, interpolation ).realRandomAccess();
 		}
 		else if ( source instanceof VolatileSpimSource )
 		{
@@ -994,8 +994,7 @@ public abstract class BdvUtils
 
 	public static ARGBType getSourceColor( Bdv bdv, int sourceId )
 	{
-		return bdv.getBdvHandle().getSetupAssignments()
-				.getConverterSetups().get( sourceId ).getColor();
+		return bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( sourceId ).getColor();
 	}
 
 	public static double[] getDisplayRange( Bdv bdv, int sourceId )
@@ -1052,10 +1051,10 @@ public abstract class BdvUtils
 			final Source wrappedSource = ( ( TransformedSource ) source ).getWrappedSource();
 
 			if ( wrappedSource instanceof ARGBConvertedRealSource )
-				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedRealSource( t, level );
+				return ( ( ARGBConvertedRealSource ) wrappedSource ).getWrappedSource( t, level );
 		}
 		else if ( source instanceof SelectableARGBConvertedRealSource )
-			return ( ( SelectableARGBConvertedRealSource ) source ).getWrappedRealSource( t, level );
+			return ( ( SelectableARGBConvertedRealSource ) source ).getWrappedSource( t, level );
 		else if ( source.getType() instanceof RealType )
 			return source.getSource( t, level );
 		else

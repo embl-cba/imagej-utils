@@ -116,12 +116,12 @@ public class ARGBConvertedRealSource< R extends RealType< R > > implements Sourc
         return converter;
     }
 
-    public RandomAccessibleInterval< RealType > getWrappedRealSource( int t, int mipMapLevel )
+    public RandomAccessibleInterval< RealType > getWrappedSource( int t, int mipMapLevel )
     {
         return source.getSource( t, mipMapLevel );
     }
 
-    public Source< RealType > getWrappedRealSource()
+    public Source< RealType > getWrappedSource()
     {
         return source;
     }

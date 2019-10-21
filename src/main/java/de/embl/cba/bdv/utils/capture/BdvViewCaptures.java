@@ -2,12 +2,13 @@ package de.embl.cba.bdv.utils.capture;
 
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvHandle;
+import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 
 import de.embl.cba.bdv.utils.BdvUtils;
+import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.sources.Metadata;
 import de.embl.cba.bdv.utils.sources.Sources;
-import fiji.util.NNearestNeighborSearch;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -18,7 +19,6 @@ import net.imglib2.Cursor;
 import net.imglib2.algorithm.util.Grids;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolator;
 import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
@@ -97,11 +97,14 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 			viewerToSourceTransform.preConcatenate( viewerTransform.inverse() );
 			viewerToSourceTransform.preConcatenate( sourceTransform.inverse() );
 
+			final boolean interpolate = isInterpolate( source );
+
 			Grids.collectAllContainedIntervals(
 					Intervals.dimensionsAsLongArray( capture ),
 					new int[]{100, 100}).parallelStream().forEach( interval ->
 			{
-				RealRandomAccess< ? extends RealType< ? > > sourceAccess = getInterpolatedRealRandomAccess( t, source, level );
+				RealRandomAccess< ? extends RealType< ? > > sourceAccess =
+						getInterpolatedRealRandomAccess( t, source, level, interpolate );
 
 				final IntervalView< UnsignedShortType > crop = Views.interval( capture, interval );
 				final Cursor< UnsignedShortType > captureCursor = Views.iterable( crop ).localizingCursor();
@@ -143,15 +146,13 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 	}
 
 	public static RealRandomAccess< ? extends RealType< ? > >
-	getInterpolatedRealRandomAccess( int t, Source< ? > source, int level )
+	getInterpolatedRealRandomAccess( int t, Source< ? > source, int level, boolean interpolate )
 	{
 		RealRandomAccess< ? extends RealType< ? > > sourceAccess;
-		if ( isInterpolate( source ) )
-			sourceAccess = getInterpolatedRealTypeNonVolatileRealRandomAccess( source, t, level );
+		if ( interpolate )
+			sourceAccess = getInterpolatedRealTypeNonVolatileRealRandomAccess( source, t, level, Interpolation.NLINEAR );
 		else
-			sourceAccess = Views.interpolate(
-					getRealTypeNonVolatileRandomAccessibleInterval( source, t, level ),
-					new NearestNeighborInterpolatorFactory<>() ).realRandomAccess();
+			sourceAccess = getInterpolatedRealTypeNonVolatileRealRandomAccess( source, t, level, Interpolation.NEARESTNEIGHBOR );
 
 		return sourceAccess;
 	}
@@ -161,10 +162,16 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		if ( source instanceof TransformedSource )
 			source = ((TransformedSource)source).getWrappedSource();
 
+		if ( source instanceof ARGBConvertedRealSource )
+			source = ((ARGBConvertedRealSource)source).getWrappedSource();
+
 		boolean interpolate = true;
 		if ( Sources.sourceToMetadata.containsKey( source ) )
-			if ( Sources.sourceToMetadata.get( source ).modality.equals( Metadata.Modality.Segmentation ) )
+		{
+			final Metadata metadata = Sources.sourceToMetadata.get( source );
+			if ( metadata.modality.equals( Metadata.Modality.Segmentation ) )
 				interpolate = false;
+		}
 		return interpolate;
 	}
 

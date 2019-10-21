@@ -73,9 +73,9 @@ public class LazySpimSource< T extends NumericType< T > > implements Source< T >
 		return ( RandomAccessibleInterval ) imgLoader.getSetupImgLoader( 0 ).getImage( t, level );
 	}
 
-	public RealRandomAccessible< T > getInterpolatedNonVolatileSource( int t, int level )
+	public RealRandomAccessible< T > getInterpolatedNonVolatileSource( int t, int level, Interpolation interpolation )
 	{
-		return wrappedSource().getInterpolatedSource( t, level, Interpolation.NLINEAR );
+		return wrappedSource().getInterpolatedSource( t, level, interpolation );
 	}
 
 	@Override

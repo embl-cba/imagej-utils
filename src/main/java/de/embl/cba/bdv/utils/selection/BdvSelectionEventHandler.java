@@ -85,7 +85,7 @@ public class BdvSelectionEventHandler
 
 	private boolean is3D()
 	{
-		return source.getWrappedRealSource( 0, 0 ).numDimensions() == 3;
+		return source.getWrappedSource( 0, 0 ).numDimensions() == 3;
 	}
 
 	private void install3DViewBehaviour( )
