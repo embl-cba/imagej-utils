@@ -21,13 +21,11 @@ run("Convert Tiff Slices to XML/HDF5", "inputfolder=/Users/tischer/Desktop/Tiff-
 
 ```
 final BdvTiffPlanesWriterCommand command = new BdvTiffPlanesWriterCommand();
-
 command.inputFolder = new File( "/Users/tischer/Desktop/Tiff-slices" );
 command.voxelSizeX = 1.0;
 command.voxelSizeY = 1.0;
-command.voxelSizeZ = 20.0;
+command.voxelSizeZ = 10.0;
 command.xmlOutputPath = new File( "/Users/tischer/Desktop/bdv.xml" );
-
 command.run();
 ```
 
