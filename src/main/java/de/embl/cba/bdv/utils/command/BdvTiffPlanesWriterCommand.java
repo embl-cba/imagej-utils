@@ -1,6 +1,6 @@
 package de.embl.cba.bdv.utils.command;
 
-import bdv.export.*;
+import bdv.export.ExportMipmapInfo;
 import bdv.ij.export.imgloader.ImagePlusImgLoader.MinMaxOption;
 import de.embl.cba.bdv.utils.io.BdvImagePlusExport;
 import ij.IJ;
@@ -9,25 +9,31 @@ import ij.plugin.FolderOpener;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.widget.FileWidget;
 
 import java.io.File;
 
 
 @Plugin(type = Command.class,
-		menuPath = "Plugins>BigDataTools>Export>Deprecated>Save as BigDataViewer xml/hdf5")
-public class BdvWriterCommand implements Command
+		menuPath = "Plugins>BigDataTools>Export>Export Tiff Slices as XML/HDF5")
+public class BdvTiffPlanesWriterCommand implements Command
 {
-	public static final String VIRTUAL_STACK = "Virtual Stack";
+	@Parameter( label = "Input folder", style = "directory, open" )
+	File inputFolder;
 
-	@Parameter( choices = { VIRTUAL_STACK } )
-	String importModality;
-
-	@Parameter( style = FileWidget.OPEN_STYLE )
-	File inputPath;
-
-	@Parameter( style = FileWidget.SAVE_STYLE )
+	@Parameter( label = "Output file path (.xml)", style = "save" )
 	File xmlOutputPath;
+
+	@Parameter( label = "Voxel unit" )
+	String voxelUnit = "micrometer";
+
+	@Parameter( label = "Voxel size X" )
+	Double voxelSizeX;
+
+	@Parameter( label = "Voxel size Y" )
+	Double voxelSizeY;
+
+	@Parameter( label = "Voxel size Z" )
+	Double voxelSizeZ;
 
 	@Override
 	public void run()
@@ -41,14 +47,14 @@ public class BdvWriterCommand implements Command
 
 	public ImagePlus getImagePlus()
 	{
-		ImagePlus imp = null;
+		final FolderOpener folderOpener = new FolderOpener();
+		folderOpener.openAsVirtualStack( true );
+		ImagePlus imp = folderOpener.openFolder( inputFolder.getParent() );
 
-		if ( importModality.equals( VIRTUAL_STACK ) )
-		{
-			final FolderOpener folderOpener = new FolderOpener();
-			folderOpener.openAsVirtualStack( true );
-			imp = folderOpener.openFolder( inputPath.getParent() );
-		}
+		imp.getCalibration().pixelWidth = voxelSizeX;
+		imp.getCalibration().pixelHeight = voxelSizeY;
+		imp.getCalibration().pixelDepth = voxelSizeZ;
+		imp.getCalibration().setUnit( voxelUnit );
 
 		return imp;
 	}

@@ -54,7 +54,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 			BdvHandle bdv,
 			double pixelSpacing,
 			String voxelUnits,
-			boolean checkSourceIntersectionWithViewerPlaneOnlyIn2D)
+			boolean checkSourceIntersectionWithViewerPlaneOnlyIn2D )
 	{
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
 		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
@@ -69,6 +69,8 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		final long captureWidth = ( long ) Math.ceil( w / dxy );
 		final long captureHeight = ( long ) Math.ceil( h / dxy );
 
+		// TODO: Maybe capture Segmentations (or everything?) as ARGBType images?
+		// Like this, the label masks would look as nice as in the Bdv.
 		final ArrayList< RandomAccessibleInterval< UnsignedShortType > > captures = new ArrayList<>();
 		final ArrayList< ARGBType > colors = new ArrayList<>();
 		final ArrayList< Boolean > isSegmentations = new ArrayList<>();

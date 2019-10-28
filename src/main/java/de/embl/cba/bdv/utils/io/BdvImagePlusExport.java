@@ -30,6 +30,9 @@ public class BdvImagePlusExport
 {
 	public static void saveAsBdv( ImagePlus imp, File xmlOutputPath )
 	{
+		if ( ! xmlOutputPath.getAbsolutePath().endsWith( ".xml" ) )
+			xmlOutputPath = new File( xmlOutputPath.getAbsolutePath() + ".xml" );
+
 		// check the image type
 		switch ( imp.getType() )
 		{
@@ -222,19 +225,17 @@ public class BdvImagePlusExport
 		progressWriter.out().println( "done" );
 	}
 
-
 	protected static Parameters getParametersAutomated(
 			final int bitDepth,
 			final ExportMipmapInfo autoMipmapSettings,
 			String xmlExportPath )
 	{
-
 		String seqFilename = xmlExportPath;
 
 		final String hdf5Filename = xmlExportPath.substring( 0, seqFilename.length() - 4 ) + ".h5";
 		final File hdf5File = new File( hdf5Filename );
 
-		if ( !seqFilename.endsWith( ".xml" ) ) seqFilename += ".xml";
+		if ( ! seqFilename.endsWith( ".xml" ) ) seqFilename += ".xml";
 		final File seqFile = new File( seqFilename );
 		final File parent = seqFile.getParentFile();
 		if ( parent == null || ! parent.exists() || ! parent.isDirectory() )
