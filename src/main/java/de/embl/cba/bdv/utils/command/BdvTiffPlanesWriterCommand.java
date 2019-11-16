@@ -11,7 +11,7 @@ import java.io.File;
 
 
 @Plugin(type = Command.class,
-		menuPath = "Plugins>BigDataTools>Export>Export Tiff Slices as XML/HDF5")
+		menuPath = "Plugins>BigDataTools>Convert>Convert Tiff Slices to XML/HDF5")
 public class BdvTiffPlanesWriterCommand implements Command
 {
 	@Parameter( label = "Input folder", style = "directory, open" )

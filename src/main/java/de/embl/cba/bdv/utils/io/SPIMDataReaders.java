@@ -21,7 +21,7 @@ public class SPIMDataReaders
 
 		byte[][] lut = Luts.GRAYSCALE;
 		double min = 0.0;
-		double max = 255;
+		double max = 65535.0;
 		if ( xmlSettingsReader.tryLoadSettings( xmlPath ) )
 		{
 			lut = Luts.colorLut( xmlSettingsReader.getColors().get( 0 ) );

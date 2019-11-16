@@ -1,16 +1,19 @@
 package de.embl.cba.bdv.utils;
 
+import bdv.tools.boundingbox.BoxSelectionOptions;
+import bdv.tools.boundingbox.TransformedRealBoxSelectionDialog;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.SliderPanelDouble;
-import bdv.util.Bdv;
-import bdv.util.BdvHandle;
-import bdv.util.BdvStackSource;
-import bdv.util.BoundedValueDouble;
+import bdv.util.*;
+import bdv.viewer.Source;
 import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.converters.LinearARGBConverter;
 import ij.gui.GenericDialog;
+import net.imglib2.FinalRealInterval;
+import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 
 import javax.swing.*;
@@ -23,8 +26,6 @@ import static de.embl.cba.bdv.utils.BdvUtils.getSourceIndicesAtSelectedPoint;
 
 public abstract class BdvDialogs
 {
-
-
 	private static JFrame displaySettingsFrame;
 
 	public static void addSourceDisplaySettingsUI( JPanel panel,
@@ -53,7 +54,6 @@ public abstract class BdvDialogs
 			double rangeMin,
 			double rangeMax )
 	{
-
 		final ArrayList< Integer > indices = new ArrayList<>();
 		indices.add( sourceIndex );
 
@@ -68,6 +68,17 @@ public abstract class BdvDialogs
 		return panel;
 	}
 
+	/**
+	 * Show display setting for single source
+	 *
+	 * @param bdv
+	 * @param name
+	 * @param sourceIndex
+	 * @param color
+	 * @param rangeMin
+	 * @param rangeMax
+	 * @return
+	 */
 	public static JPanel getSourceDisplaySettingsPanel(
 			Bdv bdv,
 			String name,
@@ -76,7 +87,6 @@ public abstract class BdvDialogs
 			double rangeMin,
 			double rangeMax )
 	{
-
 		final ArrayList< Integer > indices = new ArrayList<>();
 		indices.add( sourceIndex );
 
@@ -91,13 +101,13 @@ public abstract class BdvDialogs
 		return panel;
 	}
 
+
 	public static JPanel getSourceDisplaySettingsPanel(
 			Bdv bdv,
 			Integer sourceIndex,
 			double rangeMin,
 			double rangeMax )
 	{
-
 		final JPanel panel = getSourceDisplaySettingsPanel(
 				bdv,
 				BdvUtils.getSourceName( bdv, sourceIndex ),
@@ -117,7 +127,6 @@ public abstract class BdvDialogs
 													  double rangeMin,
 													  double rangeMax )
 	{
-
 		JPanel panel =
 				getSourcesDisplaySettingsPanel(
 						bdv,
@@ -130,9 +139,20 @@ public abstract class BdvDialogs
 		parentPanel.add( panel );
 
 		return panel;
-
 	}
 
+	/**
+	 * Show display settings for multiple sources.
+	 * There is only one UI, but the settings will be applied to all sources.
+	 *
+	 * @param bdv
+	 * @param name
+	 * @param sourceIndices
+	 * @param color
+	 * @param rangeMin
+	 * @param rangeMax
+	 * @return
+	 */
 	public static JPanel getSourcesDisplaySettingsPanel(
 			Bdv bdv,
 			String name,
@@ -148,7 +168,11 @@ public abstract class BdvDialogs
 				0,10,0,10) );
 		panel.add( Box.createHorizontalGlue() );
 		panel.setOpaque( true );
-		panel.setBackground( color );
+
+		if ( color.equals( Color.BLACK ) )
+			panel.setBackground( Color.WHITE );
+		else
+			panel.setBackground( color );
 
 		JLabel jLabel = new JLabel( name );
 		jLabel.setHorizontalAlignment( SwingConstants.CENTER );
@@ -556,4 +580,70 @@ public abstract class BdvDialogs
 			return displaySettingsFrame;
 		}
 	}
+
+	/**
+	 *
+	 * The source is used to select the maximal range of the selection.
+	 *
+	 * @param bdvHandle
+	 * @param source
+	 * @return
+	 */
+	public static TransformedRealBoxSelectionDialog.Result showBoundingBoxDialog( BdvHandle bdvHandle, Source< ? > source  )
+	{
+		final AffineTransform3D affineTransform3D = new AffineTransform3D();
+		source.getSourceTransform( 0, 0, affineTransform3D );
+		final FinalRealInterval sourceInterval = affineTransform3D.estimateBounds( source.getSource( 0, 0 ) );
+
+		final FinalRealInterval viewerInterval =
+				BdvUtils.getViewerGlobalBoundingInterval( bdvHandle );
+
+		final FinalRealInterval initialInterval = getInitialBoundingBoxInterval( viewerInterval, sourceInterval );
+
+		final AffineTransform3D boxTransform = new AffineTransform3D();
+
+		final int currentTimepoint =
+				bdvHandle.getViewerPanel().getState().getCurrentTimepoint();
+
+		final int numTimepoints =
+				bdvHandle.getViewerPanel().getState().getNumTimepoints();
+
+		return BdvFunctions.selectRealBox(
+				bdvHandle,
+				boxTransform,
+				initialInterval,
+				sourceInterval,
+				BoxSelectionOptions.options()
+						.title( "Select region" )
+						.initialTimepointRange( currentTimepoint, currentTimepoint )
+						.selectTimepointRange( 0, numTimepoints )
+		);
+	}
+
+	private static FinalRealInterval getInitialBoundingBoxInterval( RealInterval viewerInterval, RealInterval sourceInterval )
+	{
+		double[] center = new double[ 3 ];
+		double[] size = new double[ 3 ];
+
+		for (int d = 0; d < 2; d++)
+		{
+			center[ d ] = ( viewerInterval.realMax( d ) + viewerInterval.realMin( d ) ) / 2.0;
+			size[ d ] = ( viewerInterval.realMax( d ) - viewerInterval.realMin( d ) ) / 2.0;
+		}
+
+		center[ 2 ] = viewerInterval.realMin( 2 );
+		size[ 2 ] = ( sourceInterval.realMax( 2 ) - sourceInterval.realMin( 2 ) ) / 2.0;
+
+		double[] min = new double[ 3 ];
+		double[] max = new double[ 3 ];
+
+		for (int d = 0; d < 3; d++)
+		{
+			min[ d ] = center[ d ] - size[ d ] / 2;
+			max[ d ] = center[ d ] + size[ d ] / 2;
+		}
+
+		return new FinalRealInterval( min, max );
+	}
+
 }

@@ -1162,6 +1162,16 @@ public abstract class BdvUtils
 		return intersects;
 	}
 
+	public static void moveBdvViewToAxialZeroPosition( BdvHandle bdvHandle )
+	{
+		final AffineTransform3D viewerTransform = new AffineTransform3D();
+		bdvHandle.getViewerPanel()
+				.getState().getViewerTransform( viewerTransform );
+		final double[] translation = viewerTransform.getTranslation();
+		translation[ 2 ] = 0;
+		viewerTransform.setTranslation( translation );
+		bdvHandle.getViewerPanel().setCurrentViewerTransform( viewerTransform );
+	}
 
 	public static FinalInterval intersect2D( final Interval intervalA, final Interval intervalB )
 	{

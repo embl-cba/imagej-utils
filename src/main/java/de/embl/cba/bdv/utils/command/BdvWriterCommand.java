@@ -13,9 +13,8 @@ import org.scijava.widget.FileWidget;
 
 import java.io.File;
 
-
 @Plugin(type = Command.class,
-		menuPath = "Plugins>BigDataTools>Export>Deprecated>Save as BigDataViewer xml/hdf5")
+		menuPath = "Plugins>BigDataTools>Deprecated>Save as BigDataViewer xml/hdf5")
 public class BdvWriterCommand implements Command
 {
 	public static final String VIRTUAL_STACK = "Virtual Stack";
