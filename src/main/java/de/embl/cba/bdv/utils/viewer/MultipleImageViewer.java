@@ -145,7 +145,8 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 
 		BdvBehaviours.addPositionAndViewLoggingBehaviour( bdv, behaviours, "P" );
 
-		installSourceBrowsingBehaviour( behaviours );
+		BdvBehaviours.addExportSourcesToVoxelImagesBehaviour( bdv, behaviours, "ctrl E" );
+		BdvBehaviours.addSourceBrowsingBehaviour( bdv, behaviours );
 
 		installPlatynereisRegistrationBehaviour( behaviours );
 
@@ -176,29 +177,6 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> (new Thread( () -> {
 			prealignCurrentPlatynereisXRaySource( true );
 		} )).start(), "Register Platy", "shift R" ) ;
-	}
-
-	private void installSourceBrowsingBehaviour( Behaviours behaviours )
-	{
-		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
-
-			(new Thread( () -> {
-				final int currentSource = bdv.getViewerPanel().getVisibilityAndGrouping().getCurrentSource();
-				if ( currentSource == 0 ) return;
-				bdv.getViewerPanel().getVisibilityAndGrouping().setCurrentSource( currentSource - 1 );
-			} )).start();
-
-		}, "Go to previous source", "J" ) ;
-
-		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
-
-			(new Thread( () -> {
-				final int currentSource = bdv.getViewerPanel().getVisibilityAndGrouping().getCurrentSource();
-				if ( currentSource == bdv.getViewerPanel().getVisibilityAndGrouping().numSources() - 1  ) return;
-				bdv.getViewerPanel().getVisibilityAndGrouping().setCurrentSource( currentSource + 1 );
-			} )).start();
-
-		}, "Go to next source", "K" ) ;
 	}
 
 	public void prealignCurrentPlatynereisXRaySource( boolean showIntermediateResults )

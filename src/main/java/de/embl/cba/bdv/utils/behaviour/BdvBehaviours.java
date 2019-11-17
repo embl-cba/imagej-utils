@@ -16,6 +16,7 @@ import net.imglib2.FinalRealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ui.behaviour.ClickBehaviour;
+import org.scijava.ui.behaviour.util.Behaviours;
 
 import javax.swing.*;
 import java.io.File;
@@ -139,4 +140,26 @@ public class BdvBehaviours
 		return view.toString().replace( "3d-affine", "View" );
 	}
 
+	public static void addSourceBrowsingBehaviour( BdvHandle bdv, Behaviours behaviours  )
+	{
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
+
+			(new Thread( () -> {
+				final int currentSource = bdv.getViewerPanel().getVisibilityAndGrouping().getCurrentSource();
+				if ( currentSource == 0 ) return;
+				bdv.getViewerPanel().getVisibilityAndGrouping().setCurrentSource( currentSource - 1 );
+			} )).start();
+
+		}, "Go to previous source", "J" ) ;
+
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
+
+			(new Thread( () -> {
+				final int currentSource = bdv.getViewerPanel().getVisibilityAndGrouping().getCurrentSource();
+				if ( currentSource == bdv.getViewerPanel().getVisibilityAndGrouping().numSources() - 1  ) return;
+				bdv.getViewerPanel().getVisibilityAndGrouping().setCurrentSource( currentSource + 1 );
+			} )).start();
+
+		}, "Go to next source", "K" ) ;
+	}
 }

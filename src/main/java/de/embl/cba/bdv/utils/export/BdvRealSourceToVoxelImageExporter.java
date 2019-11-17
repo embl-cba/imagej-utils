@@ -5,7 +5,7 @@ import bdv.util.BdvHandle;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 import bdv.viewer.state.SourceState;
-import de.embl.cba.bdv.utils.RAIUtils;
+import de.embl.cba.bdv.utils.RandomAccessibleIntervalUtils;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.io.FileSaver;
@@ -214,7 +214,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 			String name,
 			boolean virtual )
 	{
-		if ( ! virtual ) raiXYZ = RAIUtils.copyVolumeRAI( raiXYZ, numThreads );
+		if ( ! virtual ) raiXYZ = RandomAccessibleIntervalUtils.copyVolumeRAI( raiXYZ, numThreads );
 
 		final RandomAccessibleInterval< T > raiXYZC = Views.addDimension( raiXYZ, 0, 0 );
 		final RandomAccessibleInterval< T > raiXYCZ = Views.permute( raiXYZC, 2, 3 );

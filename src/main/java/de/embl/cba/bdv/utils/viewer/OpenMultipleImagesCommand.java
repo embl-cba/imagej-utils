@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 public class OpenMultipleImagesCommand implements Command
 {
 	@Parameter ( visibility = ItemVisibility.MESSAGE  )
-	String message = "Select images";
+	String help = "HELP: Press F1 and F2 within BigDataViewer.";
 
 	@Parameter ( label = "Choose input files" )
 	public File[] inputFiles;
@@ -22,7 +22,7 @@ public class OpenMultipleImagesCommand implements Command
 	@Parameter ( label = "Only consider files matching" )
 	public String regExp = ".*.xml";
 
-	@Parameter ( label = "Blending mode", choices = { "Avg", "Sum", "Auto" } )
+	@Parameter ( label = "Blending mode", choices = { "Avg", "Sum" } )
 	public String blendingMode = "Avg";
 
 	public void run()

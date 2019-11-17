@@ -15,7 +15,7 @@ import net.imglib2.view.Views;
 
 import java.util.List;
 
-public class RAIUtils
+public class RandomAccessibleIntervalUtils
 {
 	/**
 	 *
