@@ -14,7 +14,6 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.*;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.view.IntervalView;
 import net.imglib2.view.RandomAccessibleOnRealRandomAccessible;
 import net.imglib2.view.Views;
 
@@ -183,7 +182,10 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		final RandomAccessibleInterval< T > raiXYZTC = Views.addDimension( raiXYZT, 0, 0 );
 		final RandomAccessibleInterval< T > raiXYZCT = Views.permute( raiXYZTC, 3, 4 );
 		final RandomAccessibleInterval< T > raiXYCZT = Views.permute( raiXYZCT, 2, 3 );
-		return asImagePlus( raiXYCZT, name, true );
+
+		ImagePlus imagePlus = asImagePlus( raiXYCZT, name, exportDataType );
+
+		return imagePlus;
 	}
 
 	public void setOutputDirectory( String outputDirectory )
@@ -218,7 +220,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		final RandomAccessibleInterval< T > raiXYCZ = Views.permute( raiXYZC, 2, 3 );
 		RandomAccessibleInterval< T > zeroMin = Views.zeroMin( raiXYCZ );
 
-		ImagePlus imagePlus = getImagePlusOfSpecifiedDataType( zeroMin, name, exportDataType );
+		ImagePlus imagePlus = asImagePlus( zeroMin, name, exportDataType );
 
 		setCalibration( imagePlus );
 
@@ -233,7 +235,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		imagePlus.getCalibration().pixelDepth = outputVoxelSpacings[ 2 ];
 	}
 
-	private ImagePlus getImagePlusOfSpecifiedDataType( RandomAccessibleInterval< T > zeroMin, String name, ExportDataType exportDataType )
+	private ImagePlus asImagePlus( RandomAccessibleInterval< T > zeroMin, String name, ExportDataType exportDataType )
 	{
 		ImagePlus imagePlus;
 		switch ( exportDataType )

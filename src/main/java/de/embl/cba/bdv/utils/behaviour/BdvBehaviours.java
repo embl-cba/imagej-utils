@@ -17,6 +17,11 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ui.behaviour.ClickBehaviour;
 
+import javax.swing.*;
+import java.io.File;
+
+import static de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter.*;
+
 // TODO:
 // - remove logging, return things
 
@@ -75,7 +80,7 @@ public class BdvBehaviours
 								bdvHandle,
 								maximalRangeInterval );
 
-				if ( !  BdvRealSourceToVoxelImageExporter.Dialog.showDialog() ) return;
+				if ( ! Dialog.showDialog() ) return;
 
 				final BdvRealSourceToVoxelImageExporter exporter =
 						new BdvRealSourceToVoxelImageExporter(
@@ -84,17 +89,30 @@ public class BdvBehaviours
 								result.getInterval(),
 								result.getMinTimepoint(),
 								result.getMaxTimepoint(),
-								BdvRealSourceToVoxelImageExporter.Dialog.interpolation,
-								BdvRealSourceToVoxelImageExporter.Dialog.outputVoxelSpacings,
-								BdvRealSourceToVoxelImageExporter.Dialog.exportModality,
-								BdvRealSourceToVoxelImageExporter.Dialog.exportDataType,
+								Dialog.interpolation,
+								Dialog.outputVoxelSpacings,
+								Dialog.exportModality,
+								Dialog.exportDataType,
 								Runtime.getRuntime().availableProcessors(),
 								new ProgressWriterIJ()
 						);
 
-				exporter.setOutputDirectory( "/Users/tischer/Documents/bdv-utils/src/test/resources/test-output-data" );
+				SwingUtilities.invokeLater( () ->
+				{
+					if ( Dialog.exportModality.equals( ExportModality.SaveAsTiffStacks ) )
+					{
+						final JFileChooser fileChooser = new JFileChooser();
+						fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
+						final int returnVal = fileChooser.showSaveDialog( null );
+						if ( returnVal == JFileChooser.APPROVE_OPTION )
+							exporter.setOutputDirectory( fileChooser.getSelectedFile().getAbsolutePath() );
+						else
+							return;
+					}
+					exporter.export();
+				} );
 
-				exporter.export();
+
 			}).start();
 		}, "ExportSourcesToVoxelImages", trigger ) ;
 	}
