@@ -1,12 +1,18 @@
 package de.embl.cba.bdv.utils.behaviour;
 
+import bdv.ij.util.ProgressWriterIJ;
+import bdv.tools.boundingbox.TransformedRealBoxSelectionDialog;
 import bdv.util.BdvHandle;
+import bdv.viewer.Interpolation;
 import de.embl.cba.bdv.utils.BdvDialogs;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
 import de.embl.cba.bdv.utils.capture.PixelSpacingDialog;
+import de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter;
 import ij.CompositeImage;
+import ij.gui.GenericDialog;
+import net.imglib2.FinalRealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ui.behaviour.ClickBehaviour;
@@ -51,6 +57,46 @@ public class BdvBehaviours
 				compositeImage.show();
 			}).start();
 		}, "capture view", trigger ) ;
+	}
+
+	public static void addExportSourcesToVoxelImagesBehaviour(
+			BdvHandle bdvHandle,
+			org.scijava.ui.behaviour.util.Behaviours behaviours,
+			String trigger )
+	{
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		{
+			new Thread( () ->
+			{
+				final FinalRealInterval maximalRangeInterval = BdvUtils.getRealIntervalOfVisibleSources( bdvHandle );
+
+				final TransformedRealBoxSelectionDialog.Result result =
+						BdvDialogs.showBoundingBoxDialog(
+								bdvHandle,
+								maximalRangeInterval );
+
+				if ( !  BdvRealSourceToVoxelImageExporter.Dialog.showDialog() ) return;
+
+				final BdvRealSourceToVoxelImageExporter exporter =
+						new BdvRealSourceToVoxelImageExporter(
+								bdvHandle,
+								BdvUtils.getVisibleSourceIndices( bdvHandle ),
+								result.getInterval(),
+								result.getMinTimepoint(),
+								result.getMaxTimepoint(),
+								BdvRealSourceToVoxelImageExporter.Dialog.interpolation,
+								BdvRealSourceToVoxelImageExporter.Dialog.outputVoxelSpacings,
+								BdvRealSourceToVoxelImageExporter.Dialog.exportModality,
+								BdvRealSourceToVoxelImageExporter.Dialog.exportDataType,
+								Runtime.getRuntime().availableProcessors(),
+								new ProgressWriterIJ()
+						);
+
+				exporter.setOutputDirectory( "/Users/tischer/Documents/bdv-utils/src/test/resources/test-output-data" );
+
+				exporter.export();
+			}).start();
+		}, "ExportSourcesToVoxelImages", trigger ) ;
 	}
 
 	public static void addDisplaySettingsBehaviour(

@@ -10,6 +10,7 @@ import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 import java.util.List;
@@ -37,9 +38,34 @@ public class RAIUtils
 		final long numElements =
 				AbstractImg.numElements( Intervals.dimensionsAsLongArray( volume ) );
 
-		RandomAccessibleInterval< R > copy;
+		final IntervalView< R > zeroMin = Views.zeroMin( volume );
 
-		R type = getType( volume );
+		R type = getType( zeroMin );
+
+		final RandomAccessibleInterval< R > copy =
+				createEmptyRAI( zeroMin, dimensionX, dimensionY, numElements, type );
+
+		// LoopBuilder.setImages( copy, volume ).forEachPixel( Type::set );
+
+		final int[] blockSize = {
+				dimensionX,
+				dimensionY,
+				( int ) Math.ceil( dimensionZ / numThreads ) };
+
+		final List< Interval > intervals = Grids.collectAllContainedIntervals(
+				Intervals.dimensionsAsLongArray( volume ), blockSize );
+
+		intervals.parallelStream().forEach(
+				interval -> copy( zeroMin, Views.interval( copy, interval ) ) );
+
+		final IntervalView< R > translate = Views.translate( copy, Intervals.minAsLongArray( volume ) );
+
+		return translate;
+	}
+
+	public static < R extends RealType< R > & NativeType< R > > RandomAccessibleInterval< R > createEmptyRAI( RandomAccessibleInterval< R > volume, int dimensionX, int dimensionY, long numElements, R type )
+	{
+		RandomAccessibleInterval< R > copy;
 
 		if ( numElements < Integer.MAX_VALUE - 1 )
 		{
@@ -56,19 +82,6 @@ public class RAIUtils
 
 			copy = new CellImgFactory( type, cellSize ).create( volume );
 		}
-
-		// LoopBuilder.setImages( copy, volume ).forEachPixel( Type::set );
-
-		final int[] blockSize = {
-				dimensionX,
-				dimensionY,
-				( int ) Math.ceil( dimensionZ / numThreads ) };
-
-		final List< Interval > intervals = Grids.collectAllContainedIntervals(
-				Intervals.dimensionsAsLongArray( volume ), blockSize );
-
-		intervals.parallelStream().forEach(
-				interval -> copy( volume, Views.interval( copy, interval ) ) );
 
 		return copy;
 	}

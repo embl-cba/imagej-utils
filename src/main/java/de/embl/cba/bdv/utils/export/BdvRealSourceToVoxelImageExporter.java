@@ -7,6 +7,7 @@ import bdv.viewer.Source;
 import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.RAIUtils;
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.io.FileSaver;
 import net.imglib2.*;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -19,6 +20,7 @@ import net.imglib2.view.Views;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & NativeType< T > >
@@ -51,6 +53,50 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		UnsignedByte,
 		UnsignedShort,
 		Float
+	}
+
+	public static class Dialog
+	{
+		private static final String[] XYZ = new String[]{ "X", "Y", "Z" };
+
+		public static double[] outputVoxelSpacings = new double[]{ 1.0, 1.0, 1.0 };
+		public static BdvRealSourceToVoxelImageExporter.ExportModality exportModality = BdvRealSourceToVoxelImageExporter.ExportModality.ShowAsImagePlus;
+		public static BdvRealSourceToVoxelImageExporter.ExportDataType exportDataType = BdvRealSourceToVoxelImageExporter.ExportDataType.UnsignedShort;
+		public static Interpolation interpolation = Interpolation.NLINEAR;
+
+		public static boolean showDialog()
+		{
+			final GenericDialog gd = new GenericDialog( "Export to voxel images" );
+
+			for ( int d = 0; d < 3; d++ )
+				gd.addNumericField( "Output Voxel Spacing " + XYZ[ d ], outputVoxelSpacings[ d ], 3 );
+
+			String[] exportModalities = getNames( BdvRealSourceToVoxelImageExporter.ExportModality.class );
+			gd.addChoice( "Export Modality", exportModalities, exportModality.toString() );
+
+			final String[] exportDataTypes = getNames( BdvRealSourceToVoxelImageExporter.ExportDataType.class );
+			gd.addChoice( "Export Data Type", exportDataTypes, exportDataType.toString() );
+
+			final String[] interpolations = getNames( Interpolation.class );
+			gd.addChoice( "Interpolation", interpolations, interpolation.toString() );
+
+			gd.showDialog();
+			if ( gd.wasCanceled() ) return false;
+
+			for ( int d = 0; d < 3; d++ )
+				outputVoxelSpacings[ d ] = gd.getNextNumber();
+
+			exportModality = BdvRealSourceToVoxelImageExporter.ExportModality.valueOf( gd.getNextChoice() );
+			exportDataType = BdvRealSourceToVoxelImageExporter.ExportDataType.valueOf( gd.getNextChoice() );
+			interpolation = Interpolation.valueOf( gd.getNextChoice() );
+
+			return true;
+		}
+
+		private static String[] getNames( Class< ? extends Enum< ? > > e )
+		{
+			return Arrays.stream( e.getEnumConstants() ).map( Enum::name ).toArray( String[]::new );
+		}
 	}
 
 	public BdvRealSourceToVoxelImageExporter(
@@ -97,7 +143,9 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 
 				if ( rai == null ) continue;
 
-				final String name = source.getName() + "--T" + String.format( "%1$05d", t );;
+				String name = source.getName();
+				if ( tMax - tMin > 0 )
+					name += "--T" + String.format( "%1$05d", t );
 
 				switch ( exportModality )
 				{
@@ -164,11 +212,11 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 			String name,
 			boolean virtual )
 	{
+		if ( ! virtual ) raiXYZ = RAIUtils.copyVolumeRAI( raiXYZ, numThreads );
+
 		final RandomAccessibleInterval< T > raiXYZC = Views.addDimension( raiXYZ, 0, 0 );
 		final RandomAccessibleInterval< T > raiXYCZ = Views.permute( raiXYZC, 2, 3 );
 		RandomAccessibleInterval< T > zeroMin = Views.zeroMin( raiXYCZ );
-
-		if ( ! virtual ) zeroMin = RAIUtils.copyVolumeRAI( zeroMin, numThreads );
 
 		ImagePlus imagePlus = getImagePlusOfSpecifiedDataType( zeroMin, name, exportDataType );
 

@@ -8,7 +8,7 @@
     <ViewSetups>
       <ViewSetup>
         <id>0</id>
-        <name>mri_em</name>
+        <name>mri-stack</name>
         <size>186 226 27</size>
         <voxelSize>
           <unit>cm</unit>

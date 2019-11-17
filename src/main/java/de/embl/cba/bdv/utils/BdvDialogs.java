@@ -9,6 +9,7 @@ import bdv.viewer.Source;
 import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.converters.LinearARGBConverter;
+import ij.IJ;
 import ij.gui.GenericDialog;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealInterval;
@@ -608,16 +609,22 @@ public abstract class BdvDialogs
 		final int numTimepoints =
 				bdvHandle.getViewerPanel().getState().getNumTimepoints();
 
-		return BdvFunctions.selectRealBox(
+		final TransformedRealBoxSelectionDialog.Result result = BdvFunctions.selectRealBox(
 				bdvHandle,
 				boxTransform,
 				initialInterval,
 				maximalRangeInterval,
 				BoxSelectionOptions.options()
-						.title( "Select region" )
+						.title( "Select Region" )
 						.initialTimepointRange( currentTimepoint, currentTimepoint )
 						.selectTimepointRange( 0, numTimepoints )
 		);
+
+		// TODO: remove this once, this issue is resolved:
+		// https://github.com/bigdataviewer/bigdataviewer-core/issues/63
+		IJ.wait( 100 );
+
+		return result;
 	}
 
 	private static FinalRealInterval getInitialBoundingBoxInterval( RealInterval viewerInterval, RealInterval sourceInterval )

@@ -1210,4 +1210,22 @@ public abstract class BdvUtils
 		currentSource.getSourceTransform( 0, 0, affineTransform3D );
 		return affineTransform3D.estimateBounds( currentSource.getSource( 0, 0 ) );
 	}
+
+	public static FinalRealInterval getRealIntervalOfVisibleSources( BdvHandle bdvHandle )
+	{
+		final List< Integer > visibleSourceIndices = bdvHandle.getViewerPanel().getState().getVisibleSourceIndices();
+
+		FinalRealInterval union = Intervals.createMinMaxReal( 0,0,0,0,0,0 );
+
+		for ( int sourceIndex : visibleSourceIndices )
+		{
+			final Source< ? > currentSource = getSource( bdvHandle, sourceIndex );
+			final AffineTransform3D affineTransform3D = new AffineTransform3D();
+			currentSource.getSourceTransform( 0, 0, affineTransform3D );
+			final FinalRealInterval bounds = affineTransform3D.estimateBounds( currentSource.getSource( 0, 0 ) );
+			union = Intervals.union( union, bounds );
+		}
+
+		return union;
+	}
 }
