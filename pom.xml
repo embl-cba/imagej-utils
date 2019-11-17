@@ -168,6 +168,10 @@
 			<groupId>de.embl.cba</groupId>
 			<artifactId>imglib2-lazy-algorithm</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>de.embl.cba</groupId>
+			<artifactId>fiji-plugin-morphometry</artifactId>
+		</dependency>
 		<!-- FOR BENCHMARKING, MAYBE REMOVE LATER -->
 		<dependency>
 			<groupId>de.embl.cba</groupId>
