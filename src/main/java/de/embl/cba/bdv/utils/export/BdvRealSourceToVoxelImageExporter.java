@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BdvRealExporter < T extends RealType< T > & NativeType< T > >
+public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & NativeType< T > >
 {
 	private final List< SourceState< ? > > sacs;
 	private final List< Integer > sourceIndices;
@@ -36,6 +36,7 @@ public class BdvRealExporter < T extends RealType< T > & NativeType< T > >
 	protected AffineTransform3D pixelRenderToPhysical;
 	private String outputUnit;
 	private FinalInterval outputPixelInterval;
+	private final ExportDataType exportDataType;
 	private int numThreads;
 	private String outputDirectory;
 
@@ -45,7 +46,14 @@ public class BdvRealExporter < T extends RealType< T > & NativeType< T > >
 		SaveAsTiffStacks
 	}
 
-	public BdvRealExporter(
+	public enum ExportDataType
+	{
+		UnsignedByte,
+		UnsignedShort,
+		Float
+	}
+
+	public BdvRealSourceToVoxelImageExporter(
 			BdvHandle bdv,
 			List< Integer > sourceIndices,
 			final RealInterval interval,
@@ -54,6 +62,7 @@ public class BdvRealExporter < T extends RealType< T > & NativeType< T > >
 			final Interpolation interpolation,
 			final double[] outputVoxelSpacings,
 			final ExportModality exportModality,
+			final ExportDataType exportDataType,
 			int numThreads,
 			final ProgressWriter progress )
 	{
@@ -65,6 +74,7 @@ public class BdvRealExporter < T extends RealType< T > & NativeType< T > >
 		this.interpolation = interpolation;
 		this.outputVoxelSpacings = outputVoxelSpacings;
 		this.exportModality = exportModality;
+		this.exportDataType = exportDataType;
 		this.numThreads = numThreads;
 //		this.baseType = baseType;
 		this.progress = progress;
@@ -83,7 +93,10 @@ public class BdvRealExporter < T extends RealType< T > & NativeType< T > >
 
 			for ( int t = tMin; t <= tMax; ++t )
 			{
-				final RandomAccessibleInterval< T > rai = tryGetRAI( source, t );
+				final RandomAccessibleInterval< T > rai = getCroppedAndRasteredRAI( source, t );
+
+				if ( rai == null ) continue;
+
 				final String name = source.getName() + "--T" + String.format( "%1$05d", t );;
 
 				switch ( exportModality )
@@ -104,8 +117,11 @@ public class BdvRealExporter < T extends RealType< T > & NativeType< T > >
 			switch ( exportModality )
 			{
 				case ShowAsImagePlus:
-					final ImagePlus imagePlusMovie = asImagePlus( rais, source.getName() );
-					imagePlusMovie.show();
+					if ( rais.size() > 0 )
+					{
+						final ImagePlus imagePlusMovie = asImagePlus( rais, source.getName() );
+						imagePlusMovie.show();
+					}
 					break;
 				default:
 					break;
@@ -127,17 +143,6 @@ public class BdvRealExporter < T extends RealType< T > & NativeType< T > >
 		this.outputDirectory = outputDirectory;
 	}
 
-	private RandomAccessibleInterval< T > tryGetRAI( Source< ? > source, int t )
-	{
-		try
-		{
-			return getCroppedAndRasteredRAI( source, t ) ;
-		} catch ( Exception e ){
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 	private RandomAccessibleInterval< T > getCroppedAndRasteredRAI( Source< ? > source, int t )
 	{
 		final RealRandomAccessible< T > realRA = ( RealRandomAccessible< T > ) source.getInterpolatedSource( t, 0, interpolation );
@@ -155,25 +160,49 @@ public class BdvRealExporter < T extends RealType< T > & NativeType< T > >
 	}
 
 	private ImagePlus asImagePlus(
-			RandomAccessibleInterval< T > voxelRAI,
+			RandomAccessibleInterval< T > raiXYZ,
 			String name,
 			boolean virtual )
 	{
-		final IntervalView< T > ts = Views.addDimension( voxelRAI, 0, 0 );
+		final RandomAccessibleInterval< T > raiXYZC = Views.addDimension( raiXYZ, 0, 0 );
+		final RandomAccessibleInterval< T > raiXYCZ = Views.permute( raiXYZC, 2, 3 );
+		RandomAccessibleInterval< T > zeroMin = Views.zeroMin( raiXYCZ );
 
-		final IntervalView< T > permute = Views.permute( ts, 2, 3 );
+		if ( ! virtual ) zeroMin = RAIUtils.copyVolumeRAI( zeroMin, numThreads );
 
-		RandomAccessibleInterval< T > zeroMin = Views.zeroMin( permute );
+		ImagePlus imagePlus = getImagePlusOfSpecifiedDataType( zeroMin, name, exportDataType );
 
-		if ( ! virtual )
-			zeroMin = RAIUtils.copyVolumeRAI( zeroMin, numThreads );
+		setCalibration( imagePlus );
 
-		final ImagePlus imagePlus = ImageJFunctions.wrap( zeroMin, name );
+		return imagePlus;
+	}
+
+	private void setCalibration( ImagePlus imagePlus )
+	{
 		imagePlus.getCalibration().setUnit( outputUnit );
 		imagePlus.getCalibration().pixelWidth = outputVoxelSpacings[ 0 ];
 		imagePlus.getCalibration().pixelHeight = outputVoxelSpacings[ 1 ];
 		imagePlus.getCalibration().pixelDepth = outputVoxelSpacings[ 2 ];
+	}
 
+	private ImagePlus getImagePlusOfSpecifiedDataType( RandomAccessibleInterval< T > zeroMin, String name, ExportDataType exportDataType )
+	{
+		ImagePlus imagePlus;
+		switch ( exportDataType )
+		{
+			case UnsignedByte:
+				imagePlus = ImageJFunctions.wrapUnsignedByte( zeroMin, name );
+				break;
+			case UnsignedShort:
+				imagePlus = ImageJFunctions.wrapUnsignedShort( zeroMin, name );
+				break;
+			case Float:
+				imagePlus = ImageJFunctions.wrapFloat( zeroMin, name );
+				break;
+			default:
+				imagePlus = ImageJFunctions.wrapFloat( zeroMin, name );
+				break;
+		}
 		return imagePlus;
 	}
 

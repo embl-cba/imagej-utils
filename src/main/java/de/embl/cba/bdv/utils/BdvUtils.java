@@ -1201,4 +1201,13 @@ public abstract class BdvUtils
 			return null;
 		}
 	}
+
+	public static FinalRealInterval getRealIntervalOfCurrentSource( BdvHandle bdvHandle )
+	{
+		final int currentSourceIndex = bdvHandle.getViewerPanel().getState().getCurrentSource();
+		final Source< ? > currentSource = getSource( bdvHandle, currentSourceIndex );
+		final AffineTransform3D affineTransform3D = new AffineTransform3D();
+		currentSource.getSourceTransform( 0, 0, affineTransform3D );
+		return affineTransform3D.estimateBounds( currentSource.getSource( 0, 0 ) );
+	}
 }

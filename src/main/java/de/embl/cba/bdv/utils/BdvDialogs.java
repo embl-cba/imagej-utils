@@ -587,18 +587,18 @@ public abstract class BdvDialogs
 	 *
 	 * @param bdvHandle
 	 * @param source
+	 * @param maximalRangeInterval
 	 * @return
 	 */
-	public static TransformedRealBoxSelectionDialog.Result showBoundingBoxDialog( BdvHandle bdvHandle, Source< ? > source  )
+	public static TransformedRealBoxSelectionDialog.Result showBoundingBoxDialog(
+			BdvHandle bdvHandle,
+			FinalRealInterval maximalRangeInterval )
 	{
-		final AffineTransform3D affineTransform3D = new AffineTransform3D();
-		source.getSourceTransform( 0, 0, affineTransform3D );
-		final FinalRealInterval sourceInterval = affineTransform3D.estimateBounds( source.getSource( 0, 0 ) );
-
 		final FinalRealInterval viewerInterval =
 				BdvUtils.getViewerGlobalBoundingInterval( bdvHandle );
 
-		final FinalRealInterval initialInterval = getInitialBoundingBoxInterval( viewerInterval, sourceInterval );
+		final FinalRealInterval initialInterval =
+				getInitialBoundingBoxInterval( viewerInterval, maximalRangeInterval );
 
 		final AffineTransform3D boxTransform = new AffineTransform3D();
 
@@ -612,7 +612,7 @@ public abstract class BdvDialogs
 				bdvHandle,
 				boxTransform,
 				initialInterval,
-				sourceInterval,
+				maximalRangeInterval,
 				BoxSelectionOptions.options()
 						.title( "Select region" )
 						.initialTimepointRange( currentTimepoint, currentTimepoint )
