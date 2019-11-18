@@ -101,14 +101,12 @@ public class BdvBehaviours
 								new ProgressWriterIJ()
 						);
 
-//				SwingUtilities.invokeLater( () ->
-//				{
-					if ( Dialog.exportModality.equals( ExportModality.SaveAsTiffStacks ) )
-					{
-						final String outputDirectory = IJ.getDirectory( "Choose and output directory" );
-						exporter.setOutputDirectory( outputDirectory );
-					}
-//				} );
+				if ( Dialog.exportModality.equals( ExportModality.SaveAsTiffStacks ) )
+				{
+					final String outputDirectory = IJ.getDirectory( "Choose and output directory" );
+					exporter.setOutputDirectory( outputDirectory );
+				}
+
 
 				exporter.export();
 

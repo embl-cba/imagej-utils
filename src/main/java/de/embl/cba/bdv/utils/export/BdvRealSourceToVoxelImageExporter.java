@@ -161,7 +161,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 						rais.add( rai );
 						break;
 					case SaveAsTiffStacks:
-						Logger.log( "Converting to ImagePlus...");
+						Logger.log( "Load image data into RAM...");
 						final ImagePlus imagePlusStack = asImagePlus( rai, name, false );
 						final String path = outputDirectory + File.separator + name + ".tif";
 						Logger.log( "Save as Tiff to path: " + path ) ;
