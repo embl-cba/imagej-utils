@@ -11,6 +11,7 @@ import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
 import de.embl.cba.bdv.utils.capture.PixelSpacingDialog;
 import de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter;
 import ij.CompositeImage;
+import ij.IJ;
 import ij.gui.GenericDialog;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealPoint;
@@ -100,21 +101,16 @@ public class BdvBehaviours
 								new ProgressWriterIJ()
 						);
 
-				SwingUtilities.invokeLater( () ->
-				{
+//				SwingUtilities.invokeLater( () ->
+//				{
 					if ( Dialog.exportModality.equals( ExportModality.SaveAsTiffStacks ) )
 					{
-						final JFileChooser fileChooser = new JFileChooser();
-						fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
-						final int returnVal = fileChooser.showSaveDialog( null );
-						if ( returnVal == JFileChooser.APPROVE_OPTION )
-							exporter.setOutputDirectory( fileChooser.getSelectedFile().getAbsolutePath() );
-						else
-							return;
+						final String outputDirectory = IJ.getDirectory( "Choose and output directory" );
+						exporter.setOutputDirectory( outputDirectory );
 					}
-					exporter.export();
-				} );
+//				} );
 
+				exporter.export();
 
 			}).start();
 		}, "ExportSourcesToVoxelImages", trigger ) ;
