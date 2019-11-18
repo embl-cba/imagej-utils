@@ -81,6 +81,8 @@ public class BdvBehaviours
 								bdvHandle,
 								maximalRangeInterval );
 
+				BdvUtils.getVoxelDimensionsOfCurrentSource( bdvHandle ).dimensions( Dialog.outputVoxelSpacings );
+
 				if ( ! Dialog.showDialog() ) return;
 
 				final BdvRealSourceToVoxelImageExporter exporter =
@@ -94,7 +96,7 @@ public class BdvBehaviours
 								Dialog.outputVoxelSpacings,
 								Dialog.exportModality,
 								Dialog.exportDataType,
-								Runtime.getRuntime().availableProcessors(),
+								1,
 								new ProgressWriterIJ()
 						);
 

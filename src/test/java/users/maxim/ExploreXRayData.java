@@ -27,7 +27,7 @@ public class ExploreXRayData
 		viewer.setOpService( imageJ.op() );
 		viewer.showImages( MultipleImageViewer.BlendingMode.Avg );
 //		viewer.saveSettingsXmlForCurrentSource();
-		viewer.prealignCurrentPlatynereisXRaySource( false );
-		viewer.saveSettingsXmlForCurrentSource();
+//		viewer.prealignCurrentPlatynereisXRaySource( false );
+//		viewer.saveSettingsXmlForCurrentSource();
 	}
 }

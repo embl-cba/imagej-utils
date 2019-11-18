@@ -146,6 +146,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		BdvBehaviours.addPositionAndViewLoggingBehaviour( bdv, behaviours, "P" );
 
 		BdvBehaviours.addExportSourcesToVoxelImagesBehaviour( bdv, behaviours, "ctrl E" );
+
 		BdvBehaviours.addSourceBrowsingBehaviour( bdv, behaviours );
 
 		installPlatynereisRegistrationBehaviour( behaviours );

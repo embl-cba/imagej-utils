@@ -5,6 +5,8 @@ import bdv.util.BdvHandle;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 import bdv.viewer.state.SourceState;
+import de.embl.cba.bdv.utils.BdvUtils;
+import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.bdv.utils.RandomAccessibleIntervalUtils;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -131,6 +133,9 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		setRenderResolutionTransform();
 		setOutputVoxelUnit();
 
+		final int numVolumes = sourceIndices.size() * ( tMax - tMin + 1 );
+		int iVolume = 0;
+
 		for ( int i : sourceIndices )
 		{
 			final Source< ? > source = sacs.get( i ).getSpimSource();
@@ -138,13 +143,17 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 
 			for ( int t = tMin; t <= tMax; ++t )
 			{
-				final RandomAccessibleInterval< T > rai = getCroppedAndRasteredRAI( source, t );
-
-				if ( rai == null ) continue;
-
 				String name = source.getName();
 				if ( tMax - tMin > 0 )
 					name += "--T" + String.format( "%1$05d", t );
+				Logger.log( "Exporting: " + name  );
+
+				final int level = BdvUtils.getLevel( source, outputVoxelSpacings );
+				Logger.log( "Sampling from resolution level: " + level  );
+
+				final RandomAccessibleInterval< T > rai = getCroppedAndRasteredRAI( source, t, level );
+
+				if ( rai == null ) continue;
 
 				switch ( exportModality )
 				{
@@ -152,13 +161,17 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 						rais.add( rai );
 						break;
 					case SaveAsTiffStacks:
+						Logger.log( "Converting to ImagePlus...");
 						final ImagePlus imagePlusStack = asImagePlus( rai, name, false );
+						final String path = outputDirectory + File.separator + name + ".tif";
+						Logger.log( "Save as Tiff to path: " + path ) ;
 						FileSaver fileSaver = new FileSaver( imagePlusStack );
-						fileSaver.saveAsTiff( outputDirectory + File.separator + name + ".tif" );
+						fileSaver.saveAsTiff( path );
 						break;
 					default:
 						break;
 				}
+				progress.setProgress( 1.0 * ++iVolume  / numVolumes );
 			}
 
 			switch ( exportModality )
@@ -174,6 +187,8 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 					break;
 			}
 		}
+
+		Logger.log( "Export is done." );
 	}
 
 	public ImagePlus asImagePlus( ArrayList< RandomAccessibleInterval< T > > raiXYZTimePoints, String name )
@@ -193,12 +208,12 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		this.outputDirectory = outputDirectory;
 	}
 
-	private RandomAccessibleInterval< T > getCroppedAndRasteredRAI( Source< ? > source, int t )
+	private RandomAccessibleInterval< T > getCroppedAndRasteredRAI( Source< ? > source, int t, int level )
 	{
-		final RealRandomAccessible< T > realRA = ( RealRandomAccessible< T > ) source.getInterpolatedSource( t, 0, interpolation );
+		final RealRandomAccessible< T > realRA = ( RealRandomAccessible< T > ) source.getInterpolatedSource( t, level, interpolation );
 
 		final AffineTransform3D sourceTransform = new AffineTransform3D();
-		source.getSourceTransform( t, 0, sourceTransform );
+		source.getSourceTransform( t, level, sourceTransform );
 
 		final RealRandomAccessible< T > physicalRRA = RealViews.transform( realRA, sourceTransform );
 

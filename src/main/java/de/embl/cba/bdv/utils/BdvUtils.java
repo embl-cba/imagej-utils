@@ -1211,6 +1211,12 @@ public abstract class BdvUtils
 		return affineTransform3D.estimateBounds( currentSource.getSource( 0, 0 ) );
 	}
 
+	public static VoxelDimensions getVoxelDimensionsOfCurrentSource( BdvHandle bdvHandle )
+	{
+		final int currentSourceIndex = bdvHandle.getViewerPanel().getState().getCurrentSource();
+		return BdvUtils.getVoxelDimensions( bdvHandle, currentSourceIndex );
+	}
+
 	public static FinalRealInterval getRealIntervalOfVisibleSources( BdvHandle bdvHandle )
 	{
 		final List< Integer > visibleSourceIndices = bdvHandle.getViewerPanel().getState().getVisibleSourceIndices();
