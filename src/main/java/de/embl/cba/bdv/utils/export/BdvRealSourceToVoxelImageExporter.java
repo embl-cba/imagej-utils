@@ -8,14 +8,21 @@ import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.bdv.utils.RandomAccessibleIntervalUtils;
+import de.embl.cba.transforms.utils.Transforms;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.io.FileSaver;
 import net.imglib2.*;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.interpolation.InterpolatorFactory;
+import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory;
+import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.*;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Intervals;
+import net.imglib2.view.ExtendedRandomAccessibleInterval;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.RandomAccessibleOnRealRandomAccessible;
 import net.imglib2.view.Views;
 
@@ -23,6 +30,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static bdv.viewer.Interpolation.NLINEAR;
 
 public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & NativeType< T > >
 {
@@ -38,7 +47,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 	private AffineTransform3D resolutionTransform;
 	protected AffineTransform3D pixelRenderToPhysical;
 	private String outputUnit;
-	private FinalInterval outputPixelInterval;
+	private FinalInterval outputVoxelInterval;
 	private final ExportDataType exportDataType;
 	private int numThreads;
 	private String outputDirectory;
@@ -63,7 +72,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		public static double[] outputVoxelSpacings = new double[]{ 1.0, 1.0, 1.0 };
 		public static BdvRealSourceToVoxelImageExporter.ExportModality exportModality = BdvRealSourceToVoxelImageExporter.ExportModality.ShowAsImagePlus;
 		public static BdvRealSourceToVoxelImageExporter.ExportDataType exportDataType = BdvRealSourceToVoxelImageExporter.ExportDataType.UnsignedShort;
-		public static Interpolation interpolation = Interpolation.NLINEAR;
+		public static Interpolation interpolation = NLINEAR;
 
 		public static boolean showDialog()
 		{
@@ -143,6 +152,8 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 
 			for ( int t = tMin; t <= tMax; ++t )
 			{
+				long startTimeMillis = System.currentTimeMillis();
+
 				String name = source.getName();
 				if ( tMax - tMin > 0 )
 					name += "--T" + String.format( "%1$05d", t );
@@ -161,8 +172,8 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 						rais.add( rai );
 						break;
 					case SaveAsTiffStacks:
-						Logger.log( "Load image data into RAM...");
-						final ImagePlus imagePlusStack = asImagePlus( rai, name, false );
+						final ImagePlus imagePlusStack = asImagePlus( rai, name );
+						Logger.log( "Loading and converting to output voxel space done in [ms]: " + ( System.currentTimeMillis() - startTimeMillis ));
 						final String path = outputDirectory + File.separator + name + ".tif";
 						Logger.log( "Save as Tiff to path: " + path ) ;
 						FileSaver fileSaver = new FileSaver( imagePlusStack );
@@ -171,7 +182,10 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 					default:
 						break;
 				}
+
 				progress.setProgress( 1.0 * ++iVolume  / numVolumes );
+
+				Logger.log( "Export done in [ms]: " + ( System.currentTimeMillis() - startTimeMillis ));
 			}
 
 			switch ( exportModality )
@@ -210,27 +224,53 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 
 	private RandomAccessibleInterval< T > getCroppedAndRasteredRAI( Source< ? > source, int t, int level )
 	{
-		final RealRandomAccessible< T > realRA = ( RealRandomAccessible< T > ) source.getInterpolatedSource( t, level, interpolation );
-
 		final AffineTransform3D sourceTransform = new AffineTransform3D();
 		source.getSourceTransform( t, level, sourceTransform );
 
-		final RealRandomAccessible< T > physicalRRA = RealViews.transform( realRA, sourceTransform );
+		final AffineTransform3D inputVoxelToOuputVoxelTransform =
+				sourceTransform.copy().preConcatenate( resolutionTransform.inverse() );
 
-		final RealRandomAccessible< T > outputVoxelSizeRRA = RealViews.affine( physicalRRA, resolutionTransform.inverse() );
+		Interval inputVoxelInterval =
+				Intervals.smallestContainingInterval(
+						inputVoxelToOuputVoxelTransform.inverse().estimateBounds( outputVoxelInterval ) );
 
-		final RandomAccessibleOnRealRandomAccessible< T > voxelRA = Views.raster( outputVoxelSizeRRA );
+		inputVoxelInterval = Intervals.intersect( inputVoxelInterval, source.getSource( t, level )  );
 
-		return Views.interval( voxelRA, outputPixelInterval );
+		RandomAccessibleInterval< T > rai = ( RandomAccessibleInterval ) Views.interval( source.getSource( t, level ), inputVoxelInterval );
+
+		// force from disk into RAM (is this neccessary ?)
+		rai = RandomAccessibleIntervalUtils.copyVolumeRAI( rai, 1 );
+
+		final RandomAccessible< T > ra = Views.extendBorder( rai );
+
+		final RealRandomAccessible realRA;
+		switch ( interpolation )
+		{
+			case NLINEAR:
+				realRA = Views.interpolate( ra, new ClampingNLinearInterpolatorFactory<>() );
+				break;
+			case NEARESTNEIGHBOR:
+				realRA = Views.interpolate( ra, new NearestNeighborInterpolatorFactory<>() );
+				break;
+			default:
+				realRA = Views.interpolate( ra, new ClampingNLinearInterpolatorFactory<>() );
+				break;
+		}
+
+		RandomAccessible< T > outputVoxelRA = RealViews.transform( realRA, inputVoxelToOuputVoxelTransform );
+
+		RandomAccessibleInterval< T > outputRAI = Views.interval( outputVoxelRA, outputVoxelInterval );
+
+		// force into RAM
+		outputRAI = RandomAccessibleIntervalUtils.copyVolumeRAI( outputRAI, numThreads );
+
+		return outputRAI;
 	}
 
 	private ImagePlus asImagePlus(
 			RandomAccessibleInterval< T > raiXYZ,
-			String name,
-			boolean virtual )
+			String name )
 	{
-		if ( ! virtual ) raiXYZ = RandomAccessibleIntervalUtils.copyVolumeRAI( raiXYZ, numThreads );
-
 		final RandomAccessibleInterval< T > raiXYZC = Views.addDimension( raiXYZ, 0, 0 );
 		final RandomAccessibleInterval< T > raiXYCZ = Views.permute( raiXYZC, 2, 3 );
 		RandomAccessibleInterval< T > zeroMin = Views.zeroMin( raiXYCZ );
@@ -292,7 +332,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 			max[ d ] = (long) Math.ceil( interval.realMax( d ) / outputVoxelSpacings[ d ] );
 		}
 
-		outputPixelInterval = new FinalInterval( min, max );
+		outputVoxelInterval = new FinalInterval( min, max );
 	}
 
 	private void setRenderResolutionTransform( )

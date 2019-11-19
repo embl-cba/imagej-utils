@@ -10,31 +10,28 @@ import bdv.viewer.Interpolation;
 import de.embl.cba.bdv.utils.BdvDialogs;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter;
-import ij.IJ;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 import net.imagej.ImageJ;
 import net.imglib2.FinalRealInterval;
-import org.junit.Test;
 
-import javax.swing.*;
-import java.util.List;
-
-public class ExploreExportSourcesFromBdvAsVoxelImages
+public class ExploreExportSourcesFromBdv
 {
 	public void run() throws SpimDataException
 	{
-		final SpimData spimData = new XmlIoSpimData().load( ExploreExportSourcesFromBdvAsVoxelImages.class.getResource( "../mri-stack.xml" ).getFile() );
+		final SpimData spimData = new XmlIoSpimData().load( ExploreExportSourcesFromBdv.class.getResource( "../mri-stack.xml" ).getFile() );
 
 		final BdvStackSource< ? > bdvStackSource =
 				BdvFunctions.show( spimData ).get( 0 );
 
+		bdvStackSource.setDisplayRange( 0, 255 );
+
 		final BdvHandle bdvHandle = bdvStackSource.getBdvHandle();
 
-		final SpimData spimData2 = new XmlIoSpimData().load( ExploreExportSourcesFromBdvAsVoxelImages.class.getResource( "../mri-stack-shifted.xml" ).getFile() );
+		final SpimData spimData2 = new XmlIoSpimData().load( ExploreExportSourcesFromBdv.class.getResource( "../mri-stack-shifted.xml" ).getFile() );
 
-		BdvFunctions.show( spimData2, BdvOptions.options().addTo( bdvHandle ) );
+		BdvFunctions.show( spimData2, BdvOptions.options().addTo( bdvHandle ) ).get( 0 ).setDisplayRange( 0, 255 );
 
 		final FinalRealInterval maximalRangeInterval = BdvUtils.getRealIntervalOfCurrentSource( bdvHandle );
 
@@ -53,7 +50,7 @@ public class ExploreExportSourcesFromBdvAsVoxelImages
 						Interpolation.NLINEAR,
 						new double[]{ 0.5, 0.5, 0.5 },
 						BdvRealSourceToVoxelImageExporter.ExportModality.ShowAsImagePlus,
-						BdvRealSourceToVoxelImageExporter.ExportDataType.UnsignedShort,
+						BdvRealSourceToVoxelImageExporter.ExportDataType.UnsignedByte,
 						Runtime.getRuntime().availableProcessors(),
 						new ProgressWriterIJ()
 				);
@@ -67,6 +64,6 @@ public class ExploreExportSourcesFromBdvAsVoxelImages
 	public static void main( String[] args ) throws SpimDataException
 	{
 		new ImageJ().ui().showUI();
-		new ExploreExportSourcesFromBdvAsVoxelImages().run();
+		new ExploreExportSourcesFromBdv().run();
 	}
 }
