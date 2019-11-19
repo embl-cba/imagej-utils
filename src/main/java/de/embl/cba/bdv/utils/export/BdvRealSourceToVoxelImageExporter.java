@@ -19,6 +19,7 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.RandomAccessibleOnRealRandomAccessible;
 import net.imglib2.view.Views;
 
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,6 +144,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 
 			for ( int t = tMin; t <= tMax; ++t )
 			{
+				long startTime = System.currentTimeMillis();
 				String name = source.getName();
 				if ( tMax - tMin > 0 )
 					name += "--T" + String.format( "%1$05d", t );
@@ -163,6 +165,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 					case SaveAsTiffStacks:
 						Logger.log( "Load image data into RAM...");
 						final ImagePlus imagePlusStack = asImagePlus( rai, name, false );
+						Logger.log( "Loading done in [ms] " + ( System.currentTimeMillis() - startTime ) );
 						final String path = outputDirectory + File.separator + name + ".tif";
 						Logger.log( "Save as Tiff to path: " + path ) ;
 						FileSaver fileSaver = new FileSaver( imagePlusStack );
