@@ -10,7 +10,7 @@ import java.io.File;
 
 public class TestBdvTiffSlicesExportCommand
 {
-	@Test
+	//@Test
 	public void run()
 	{
 		final BdvTiffPlanesWriterCommand command = new BdvTiffPlanesWriterCommand();

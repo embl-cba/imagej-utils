@@ -97,7 +97,7 @@ public class BdvBehaviours
 								Dialog.outputVoxelSpacings,
 								Dialog.exportModality,
 								Dialog.exportDataType,
-								1,
+								Dialog.numProcessingThreads,
 								new ProgressWriterIJ()
 						);
 

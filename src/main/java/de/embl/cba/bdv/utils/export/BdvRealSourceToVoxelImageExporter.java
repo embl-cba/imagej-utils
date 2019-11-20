@@ -75,6 +75,8 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		public static BdvRealSourceToVoxelImageExporter.ExportDataType exportDataType = BdvRealSourceToVoxelImageExporter.ExportDataType.UnsignedShort;
 		public static Interpolation interpolation = NLINEAR;
 
+		public static int numProcessingThreads = Runtime.getRuntime().availableProcessors();
+
 		public static boolean showDialog()
 		{
 			final GenericDialog gd = new GenericDialog( "Export to voxel images" );
@@ -91,6 +93,8 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 			final String[] interpolations = getNames( Interpolation.class );
 			gd.addChoice( "Interpolation", interpolations, interpolation.toString() );
 
+			gd.addNumericField( "Number of processing threads", numProcessingThreads, 0 );
+
 			gd.showDialog();
 			if ( gd.wasCanceled() ) return false;
 
@@ -100,6 +104,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 			exportModality = BdvRealSourceToVoxelImageExporter.ExportModality.valueOf( gd.getNextChoice() );
 			exportDataType = BdvRealSourceToVoxelImageExporter.ExportDataType.valueOf( gd.getNextChoice() );
 			interpolation = Interpolation.valueOf( gd.getNextChoice() );
+			numProcessingThreads = ( int ) gd.getNextNumber();
 
 			return true;
 		}

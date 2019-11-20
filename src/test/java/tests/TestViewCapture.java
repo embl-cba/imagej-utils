@@ -29,7 +29,7 @@ import java.util.List;
 
 public class TestViewCapture < R extends RealType< R > >
 {
-	@Test
+	//@Test
 	public void captureView()
 	{
 		int w = 1000;
