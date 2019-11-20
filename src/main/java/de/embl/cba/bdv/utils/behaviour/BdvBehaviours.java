@@ -3,7 +3,6 @@ package de.embl.cba.bdv.utils.behaviour;
 import bdv.ij.util.ProgressWriterIJ;
 import bdv.tools.boundingbox.TransformedRealBoxSelectionDialog;
 import bdv.util.BdvHandle;
-import bdv.viewer.Interpolation;
 import de.embl.cba.bdv.utils.BdvDialogs;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
@@ -12,15 +11,11 @@ import de.embl.cba.bdv.utils.capture.PixelSpacingDialog;
 import de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter;
 import ij.CompositeImage;
 import ij.IJ;
-import ij.gui.GenericDialog;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.util.Behaviours;
-
-import javax.swing.*;
-import java.io.File;
 
 import static de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter.*;
 
@@ -101,7 +96,7 @@ public class BdvBehaviours
 								new ProgressWriterIJ()
 						);
 
-				if ( Dialog.exportModality.equals( ExportModality.SaveAsTiffStacks ) )
+				if ( Dialog.exportModality.equals( ExportModality.SaveAsTiffVolumes ) )
 				{
 					final String outputDirectory = IJ.getDirectory( "Choose and output directory" );
 					exporter.setOutputDirectory( outputDirectory );

@@ -8,25 +8,19 @@ import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.bdv.utils.RandomAccessibleIntervalUtils;
-import de.embl.cba.transforms.utils.Transforms;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.io.FileSaver;
 import net.imglib2.*;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.interpolation.InterpolatorFactory;
 import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory;
 import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.realtransform.*;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
-import net.imglib2.view.ExtendedRandomAccessibleInterval;
-import net.imglib2.view.IntervalView;
-import net.imglib2.view.RandomAccessibleOnRealRandomAccessible;
 import net.imglib2.view.Views;
 
-import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,8 +49,8 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 
 	public enum ExportModality
 	{
-		ShowAsImagePlus,
-		SaveAsTiffStacks
+		ShowImages,
+		SaveAsTiffVolumes
 	}
 
 	public enum ExportDataType
@@ -71,7 +65,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		private static final String[] XYZ = new String[]{ "X", "Y", "Z" };
 
 		public static double[] outputVoxelSpacings = new double[]{ 1.0, 1.0, 1.0 };
-		public static BdvRealSourceToVoxelImageExporter.ExportModality exportModality = BdvRealSourceToVoxelImageExporter.ExportModality.ShowAsImagePlus;
+		public static BdvRealSourceToVoxelImageExporter.ExportModality exportModality = BdvRealSourceToVoxelImageExporter.ExportModality.ShowImages;
 		public static BdvRealSourceToVoxelImageExporter.ExportDataType exportDataType = BdvRealSourceToVoxelImageExporter.ExportDataType.UnsignedShort;
 		public static Interpolation interpolation = NLINEAR;
 
@@ -154,7 +148,8 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		for ( int i : sourceIndices )
 		{
 			final Source< ? > source = sacs.get( i ).getSpimSource();
-			final ArrayList< RandomAccessibleInterval< T > > rais = new ArrayList<>();
+
+			ArrayList< RandomAccessibleInterval< T > > timepoints = new ArrayList<>();
 
 			for ( int t = tMin; t <= tMax; ++t )
 			{
@@ -168,43 +163,49 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 				final int level = BdvUtils.getLevel( source, outputVoxelSpacings );
 				Logger.log( "Sampling from resolution level: " + level  );
 
-				final RandomAccessibleInterval< T > rai = getCroppedAndRasteredRAI( source, t, level );
-				if ( rai == null ) continue;
+				RandomAccessibleInterval< T > rai = getCroppedAndRasteredRAI( source, t, level );
 
 				switch ( exportModality )
 				{
-					case ShowAsImagePlus:
-						rais.add( rai );
+					case ShowImages:
+						timepoints.add( rai );
 						break;
-					case SaveAsTiffStacks:
-						final ImagePlus imagePlusStack = asImagePlus( rai, name );
+					case SaveAsTiffVolumes:
+						ImagePlus imagePlusVolume = asImagePlus( rai, name );
 						Logger.log( "Loading and converting to output voxel space done in [ms]: " + ( System.currentTimeMillis() - startTimeMillis ));
 						final String path = outputDirectory + File.separator + name + ".tif";
 						Logger.log( "Save as Tiff to path: " + path ) ;
-						FileSaver fileSaver = new FileSaver( imagePlusStack );
+						final FileSaver fileSaver = new FileSaver( imagePlusVolume );
 						fileSaver.saveAsTiff( path );
+						// try to free memory
+						rai = null;
+						imagePlusVolume = null;
+						System.gc();
 						break;
 					default:
 						break;
 				}
 
 				progress.setProgress( 1.0 * ++iVolume  / numVolumes );
-
 				Logger.log( "Export done in [ms]: " + ( System.currentTimeMillis() - startTimeMillis ));
-			}
+			} // time
 
 			switch ( exportModality )
 			{
-				case ShowAsImagePlus:
-					if ( rais.size() > 0 )
+				case ShowImages:
+					if ( timepoints.size() > 0 )
 					{
-						final ImagePlus imagePlusMovie = asImagePlus( rais, source.getName() );
+						final ImagePlus imagePlusMovie = asImagePlus( timepoints, source.getName() );
 						imagePlusMovie.show();
 					}
 					break;
 				default:
 					break;
 			}
+
+			// try to free memory
+			timepoints = null;
+			System.gc();
 		}
 
 		Logger.log( "Export is done." );
@@ -265,7 +266,6 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		RandomAccessible< T > outputVoxelRA = RealViews.transform( realRA, inputVoxelToOuputVoxelTransform );
 
 		RandomAccessibleInterval< T > outputRAI = Views.interval( outputVoxelRA, outputVoxelInterval );
-
 		// force into RAM
 		outputRAI = RandomAccessibleIntervalUtils.copyVolumeRAI( outputRAI, numThreads );
 

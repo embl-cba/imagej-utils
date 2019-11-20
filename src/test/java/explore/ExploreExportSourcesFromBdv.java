@@ -49,7 +49,7 @@ public class ExploreExportSourcesFromBdv
 						result.getMaxTimepoint(),
 						Interpolation.NLINEAR,
 						new double[]{ 0.5, 0.5, 0.5 },
-						BdvRealSourceToVoxelImageExporter.ExportModality.ShowAsImagePlus,
+						BdvRealSourceToVoxelImageExporter.ExportModality.ShowImages,
 						BdvRealSourceToVoxelImageExporter.ExportDataType.UnsignedByte,
 						Runtime.getRuntime().availableProcessors(),
 						new ProgressWriterIJ()

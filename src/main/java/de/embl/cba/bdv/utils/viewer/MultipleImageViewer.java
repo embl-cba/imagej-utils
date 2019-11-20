@@ -11,6 +11,7 @@ import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
+import bdv.viewer.animate.TextOverlayAnimator;
 import bdv.viewer.state.ViewerState;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
@@ -431,7 +432,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 
 		if ( isFirstImage ) bdv = bdvStackSource.getBdvHandle();
 
-		if ( isFirstImage ) bdv.getViewerPanel().showMessage( "Press F1 or F2 for help." );
+		if ( isFirstImage ) bdv.getViewerPanel().addOverlayAnimator( new TextOverlayAnimator( "Press F2 for help.", 3000 ) );
 
 		final Source< ? > source = bdvStackSource.getSources().get( 0 ).getSpimSource();
 		final Source< ? extends Volatile< ? > > volatileSource = bdvStackSource.getSources().get( 0 ).asVolatile().getSpimSource();
