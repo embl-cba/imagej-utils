@@ -145,15 +145,16 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		final int numVolumes = sourceIndices.size() * ( tMax - tMin + 1 );
 		int iVolume = 0;
 
+		long exportStartTimeMillis = System.currentTimeMillis();
+
 		for ( int i : sourceIndices )
 		{
 			final Source< ? > source = sacs.get( i ).getSpimSource();
-
 			ArrayList< RandomAccessibleInterval< T > > timepoints = new ArrayList<>();
 
 			for ( int t = tMin; t <= tMax; ++t )
 			{
-				long startTimeMillis = System.currentTimeMillis();
+				long volumeStartTimeMillis = System.currentTimeMillis();
 
 				String name = source.getName();
 				if ( tMax - tMin > 0 )
@@ -172,7 +173,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 						break;
 					case SaveAsTiffVolumes:
 						ImagePlus imagePlusVolume = asImagePlus( rai, name );
-						Logger.log( "Loading and converting to output voxel space done in [ms]: " + ( System.currentTimeMillis() - startTimeMillis ));
+						Logger.log( "Loading and converting to output voxel space done in [ms]: " + ( System.currentTimeMillis() - volumeStartTimeMillis ));
 						final String path = outputDirectory + File.separator + name + ".tif";
 						Logger.log( "Save as Tiff to path: " + path ) ;
 						final FileSaver fileSaver = new FileSaver( imagePlusVolume );
@@ -187,7 +188,8 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 				}
 
 				progress.setProgress( 1.0 * ++iVolume  / numVolumes );
-				Logger.log( "Export done in [ms]: " + ( System.currentTimeMillis() - startTimeMillis ));
+				Logger.log( "Export done in [ms]: " + ( System.currentTimeMillis() - volumeStartTimeMillis ));
+				Logger.progress( "Export", exportStartTimeMillis, iVolume, numVolumes );
 			} // time
 
 			switch ( exportModality )
