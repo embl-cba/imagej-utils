@@ -163,7 +163,6 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 				Logger.log( "Sampling from resolution level: " + level  );
 
 				final RandomAccessibleInterval< T > rai = getCroppedAndRasteredRAI( source, t, level );
-
 				if ( rai == null ) continue;
 
 				switch ( exportModality )

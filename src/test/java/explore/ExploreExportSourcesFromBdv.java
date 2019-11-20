@@ -47,7 +47,7 @@ public class ExploreExportSourcesFromBdv
 						result.getInterval(),
 						result.getMinTimepoint(),
 						result.getMaxTimepoint(),
-						Interpolation.NEARESTNEIGHBOR,
+						Interpolation.NLINEAR,
 						new double[]{ 0.5, 0.5, 0.5 },
 						BdvRealSourceToVoxelImageExporter.ExportModality.ShowAsImagePlus,
 						BdvRealSourceToVoxelImageExporter.ExportDataType.UnsignedByte,
