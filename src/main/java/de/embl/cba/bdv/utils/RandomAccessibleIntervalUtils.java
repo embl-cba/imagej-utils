@@ -50,13 +50,13 @@ public class RandomAccessibleIntervalUtils
 		final int[] blockSize = {
 				dimensionX,
 				dimensionY,
-				( int ) Math.ceil( dimensionZ / numThreads ) };
+				( int ) ( Math.ceil( dimensionZ / numThreads ) + 1 )};
 
 		final List< Interval > intervals = Grids.collectAllContainedIntervals(
 				Intervals.dimensionsAsLongArray( volume ), blockSize );
 
 		intervals.parallelStream().forEach(
-				interval -> copy( zeroMin, Views.interval( copy, interval ) ) );
+				interval -> copyAssumingSameIterationOrder( zeroMin, Views.interval( copy, interval ) ) );
 
 		final IntervalView< R > translate = Views.translate( copy, Intervals.minAsLongArray( volume ) );
 
@@ -94,19 +94,40 @@ public class RandomAccessibleIntervalUtils
 		Cursor< T > targetCursor = target.localizingCursor();
 		RandomAccess< T > sourceRandomAccess = source.randomAccess();
 
-		// iterate over the input cursor
+		// iterate over the target cursor
 		while ( targetCursor.hasNext() )
 		{
-			// move input cursor forward
+			// move target cursor forward
 			targetCursor.fwd();
 
-			// set the output cursor to the position of the input cursor
+			// set the source access to the position of the target cursor
 			sourceRandomAccess.setPosition( targetCursor );
 
-			// set the value of this pixel of the output image, every Type supports T.set( T type )
+			// set the value of the target pixel
 			targetCursor.get().set( sourceRandomAccess.get() );
 		}
 	}
+
+	public static < T extends Type< T > > void copyAssumingSameIterationOrder(
+			final RandomAccessible< T > source,
+			final IterableInterval< T > target )
+	{
+		// create a cursor that automatically localizes itself on every move
+		Cursor< T > targetCursor = target.localizingCursor();
+		final IntervalView< T > interval = Views.interval( source, target );
+		final Cursor< T > sourceCursor = interval.cursor();
+
+		// iterate over the target cursor
+		while ( targetCursor.hasNext() )
+		{
+			// move target cursor forward
+			targetCursor.fwd();
+
+			// set the value of the target pixel
+			targetCursor.get().set( sourceCursor.next() );
+		}
+	}
+
 
 	private static < R extends RealType< R > & NativeType< R > >
 	R getType( RandomAccessibleInterval< R > rai )
