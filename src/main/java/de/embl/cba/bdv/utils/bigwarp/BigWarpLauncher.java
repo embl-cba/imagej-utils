@@ -59,7 +59,7 @@ public class BigWarpLauncher
 		final BigWarp bigWarp = tryGetBigWarp( bigWarpData );
 
 		setDisplayRange( bigWarp, displayRangeMovingSource, 0 );
-		setDisplayRange( bigWarp, displayRangeMovingSource, 1 );
+		setDisplayRange( bigWarp, displayRangeFixedSource, 1 );
 
 		bigWarp.getViewerFrameP().getViewerPanel().requestRepaint();
 		bigWarp.getViewerFrameQ().getViewerPanel().requestRepaint();
