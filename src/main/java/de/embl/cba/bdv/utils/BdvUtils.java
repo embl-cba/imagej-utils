@@ -1157,15 +1157,14 @@ public abstract class BdvUtils
 		return intersects;
 	}
 
-
-	public static List< Integer > getInCurrentViewerWindowVisibleSourceIndices( BdvHandle bdvHandle, boolean isVisibleIn2D )
+	public static List< Integer > getSourceIndiciesVisibleInCurrentViewerWindow( BdvHandle bdvHandle, boolean checkIntersectionWithViewerWindowOnlyIn2D )
 	{
 		final List< Integer > visibleSourceIndices = bdvHandle.getViewerPanel().getState().getVisibleSourceIndices();
 
 		final ArrayList< Integer > visibleInCurrentViewSourceIndices = new ArrayList<>();
 		for ( int sourceIndex : visibleSourceIndices )
 		{
-			if ( isVisibleIn2D )
+			if ( checkIntersectionWithViewerWindowOnlyIn2D )
 			{
 				if ( BdvUtils.isSourceIntersectingCurrentViewIn2D( bdvHandle, sourceIndex ) )
 				{
@@ -1177,9 +1176,7 @@ public abstract class BdvUtils
 				}
 			}
 		}
-
 		return visibleInCurrentViewSourceIndices;
-
 	}
 
 	public static boolean isSourceIntersectingCurrentViewIn2D( BdvHandle bdv, int sourceIndex )

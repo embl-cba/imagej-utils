@@ -120,12 +120,11 @@ public class BdvBehaviours
 		{
 			new Thread( () ->
 			{
-				final List< Integer > sourceIndices = BdvUtils.getInCurrentViewerWindowVisibleSourceIndices( bdvHandle, true );
+				final List< Integer > sourceIndices = BdvUtils.getSourceIndiciesVisibleInCurrentViewerWindow( bdvHandle, true );
 
 				if ( ! BigWarpLauncher.Dialog.showDialog( bdvHandle, sourceIndices ) ) return;
 
-
-				final BigWarpLauncher bigWarpLauncher = new BigWarpLauncher(
+				new BigWarpLauncher(
 						bdvHandle,
 						BigWarpLauncher.Dialog.movingVolatileSource,
 						BigWarpLauncher.Dialog.fixedVolatileSource,

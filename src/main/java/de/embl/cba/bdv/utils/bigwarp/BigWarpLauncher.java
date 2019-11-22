@@ -1,6 +1,5 @@
 package de.embl.cba.bdv.utils.bigwarp;
 
-import bdv.gui.BigWarpViewerFrame;
 import bdv.gui.TransformTypeSelectDialog;
 import bdv.ij.util.ProgressWriterIJ;
 import bdv.tools.brightness.ConverterSetup;
@@ -13,11 +12,9 @@ import bigwarp.BigWarpInit;
 import de.embl.cba.bdv.utils.BdvUtils;
 import ij.gui.GenericDialog;
 import mpicbg.spim.data.SpimDataException;
-import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.InvertibleRealTransform;
 import net.imglib2.ui.TransformListener;
-import weka.gui.knowledgeflow.StepEditorDialog;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -25,7 +22,6 @@ import java.util.List;
 
 public class BigWarpLauncher
 {
-
 	private AffineTransform3D bigWarpTransform;
 
 	public static class Dialog
