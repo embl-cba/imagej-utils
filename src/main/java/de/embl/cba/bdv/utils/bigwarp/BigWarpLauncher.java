@@ -1,8 +1,10 @@
 package de.embl.cba.bdv.utils.bigwarp;
 
+import bdv.gui.TransformTypeSelectDialog;
 import bdv.ij.util.ProgressWriterIJ;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.MinMaxGroup;
+import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvHandle;
 import bdv.viewer.Source;
 import bigwarp.BigWarp;
@@ -10,6 +12,10 @@ import bigwarp.BigWarpInit;
 import de.embl.cba.bdv.utils.BdvUtils;
 import ij.gui.GenericDialog;
 import mpicbg.spim.data.SpimDataException;
+import net.imglib2.realtransform.AffineTransform2D;
+import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.realtransform.InvertibleRealTransform;
+import net.imglib2.ui.TransformListener;
 
 import java.util.List;
 
@@ -46,14 +52,13 @@ public class BigWarpLauncher
 
 			return true;
 		}
-
 	}
 
-	public BigWarpLauncher( Source< ? > movingSource, Source< ? > fixedSource, double[] displayRangeMovingSource, double[] displayRangeFixedSource )
+	public BigWarpLauncher( BdvHandle bdvHandle, Source< ? > movingSource, Source< ? > fixedSource, double[] displayRangeMovingSource, double[] displayRangeFixedSource )
 	{
 		final String[] sourceNames = { movingSource.getName(), fixedSource.getName() };
 		final Source< ? >[] movingSources = { movingSource };
-		final Source< ? >[] fixedSources = { movingSource };
+		final Source< ? >[] fixedSources = { fixedSource };
 
 		final BigWarp.BigWarpData< ? > bigWarpData = BigWarpInit.createBigWarpData( movingSources, fixedSources, sourceNames );
 		final BigWarp bigWarp = tryGetBigWarp( bigWarpData );
@@ -64,6 +69,31 @@ public class BigWarpLauncher
 		bigWarp.getViewerFrameP().getViewerPanel().requestRepaint();
 		bigWarp.getViewerFrameQ().getViewerPanel().requestRepaint();
 		bigWarp.getLandmarkFrame().repaint();
+		bigWarp.setTransformType( TransformTypeSelectDialog.TRANSLATION );
+
+		bigWarp.loadLandmarks( "/Users/tischer/Documents/bdv-utils/src/test/resources/mri-stack-shifted-landmarks.csv" );
+
+		bigWarp.addTransformListener( new TransformListener< InvertibleRealTransform >()
+		{
+			@Override
+			public void transformChanged( InvertibleRealTransform invertibleRealTransform )
+			{
+				final AffineTransform3D bigWarpTransform = bigWarp.getMovingToFixedTransformAsAffineTransform3D();
+
+				if ( bigWarpTransform == null ) return;
+
+				final TransformedSource source = ( TransformedSource ) movingSource;
+				final AffineTransform3D tmp = new AffineTransform3D();
+				tmp.identity();
+				source.setIncrementalTransform( tmp );
+				source.getFixedTransform( tmp );
+				tmp.preConcatenate( bigWarpTransform );
+				source.setFixedTransform( tmp );
+				BdvUtils.repaint( bdvHandle );
+			}
+		} );
+
+
 	}
 
 	public void setDisplayRange( BigWarp bigWarp, double[] displayRangeMovingSource, int sourceIndexBigWarp )

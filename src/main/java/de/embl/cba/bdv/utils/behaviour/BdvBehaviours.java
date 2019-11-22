@@ -105,7 +105,6 @@ public class BdvBehaviours
 					exporter.setOutputDirectory( outputDirectory );
 				}
 
-
 				exporter.export();
 
 			}).start();
@@ -127,6 +126,7 @@ public class BdvBehaviours
 
 
 				final BigWarpLauncher bigWarpLauncher = new BigWarpLauncher(
+						bdvHandle,
 						BigWarpLauncher.Dialog.movingVolatileSource,
 						BigWarpLauncher.Dialog.fixedVolatileSource,
 						BigWarpLauncher.Dialog.displayRangeMovingSource,

@@ -146,14 +146,14 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 
 		BdvBehaviours.addAlignSourcesWithBigWarpBehaviour( bdv, behaviours, "ctrl B");
 
-		installPlatynereisRegistrationBehaviour( behaviours );
+		addPlatynereisRegistrationBehaviour( behaviours );
 
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> (new Thread( () -> {
 			printManualTransformOfCurrentSource();
 		} )).start(), "Print manual transform", "shift T" ) ;
 
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> SwingUtilities.invokeLater( () -> {
-			saveSettingsXmlForCurrentSource();
+			saveSettingsXmlForCurrentSource( bdv.getBdvHandle() );
 		} ), "Save new XML for current source (including additional transformations)", "ctrl S" ) ;
 
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> SwingUtilities.invokeLater( () -> {
@@ -167,7 +167,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 
 	}
 
-	private void installPlatynereisRegistrationBehaviour( Behaviours behaviours )
+	private void addPlatynereisRegistrationBehaviour( Behaviours behaviours )
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> (new Thread( () -> {
 			prealignCurrentPlatynereisXRaySource( false );
@@ -271,10 +271,10 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		Logger.log( "Full transform:" + concatenate.toString() );
 	}
 
-	private File saveSettingsXmlForCurrentSource()
+	private File saveSettingsXmlForCurrentSource( BdvHandle bdvHandle )
 	{
-		final int currentSource = bdv.getBdvHandle().getViewerPanel().getState().getCurrentSource();
-		final Source< ? > source = BdvUtils.getSource( bdv, currentSource );
+		final int currentSource = bdvHandle.getViewerPanel().getState().getCurrentSource();
+		final Source< ? > source = BdvUtils.getSource( bdvHandle, currentSource );
 		final TransformedSource< ? > transformedSource = ( TransformedSource ) source;
 		final AffineTransform3D fixedTransform = new AffineTransform3D();
 		transformedSource.getFixedTransform( fixedTransform );
@@ -282,6 +282,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		Logger.log( "Additional transform: " + fixedTransform.toString() );
 
 		final SpimData spimData = sourceToSpimData.get( source );
+
 		spimData.getViewRegistrations().getViewRegistration( 0, 0 ).preconcatenateTransform( new ViewTransformAffine( "Additional transform", fixedTransform ) );
 
 		final String xmlPath = sourceToXmlPath.get( source );
@@ -306,32 +307,6 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		}
 
 		return proposedFile;
-
-
-//		final XmlIoTransformedSources xmlIoTransformedSources = new XmlIoTransformedSources();
-//		final ArrayList< AffineTransform3D > transforms = new ArrayList<>();
-//		transforms.add( manualTransform );
-//		final Element manualTransformXml = xmlIoTransformedSources.toXml( new ManualSourceTransforms( transforms ) );
-//
-//		final Element root = new Element( "Transformation" );
-//		root.addContent( manualTransformXml );
-//
-//		final Document doc = new Document( root );
-//		final XMLOutputter xout = new XMLOutputter( Format.getPrettyFormat() );
-//
-//		final String xmlPath = sourceToXmlPath.get( source );
-//
-//		final String settingsPath = xmlPath.replace( ".xml", ".settings.xml" );
-//
-//		Logger.log( "Saving settings: " + settingsPath );
-//
-//		try
-//		{
-//			xout.output( doc, new FileWriter( settingsPath ) );
-//		} catch ( IOException e )
-//		{
-//			e.printStackTrace();
-//		}
 	}
 
 	private void addSource( )
