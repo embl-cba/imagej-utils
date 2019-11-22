@@ -129,7 +129,13 @@ public abstract class BdvUtils
 		return sources.get( sourceIndex ).getSpimSource();
 	}
 
+	public static Source< ? > getVolatileSource( Bdv bdv, int sourceIndex )
+	{
+		final List< SourceState< ? > > sources =
+				bdv.getBdvHandle().getViewerPanel().getState().getSources();
 
+		return sources.get( sourceIndex ).asVolatile().getSpimSource();
+	}
 
 	public static String getSourceName( Bdv bdv, int sourceId )
 	{
@@ -635,10 +641,7 @@ public abstract class BdvUtils
 		return getPixelValue( source, point, t );
 	}
 
-
-	public static
-	ArrayList< Integer >
-	getSourceIndicesAtSelectedPoint( Bdv bdv, RealPoint selectedPoint, boolean evalSourcesAtPointIn2D )
+	public static ArrayList< Integer > getSourceIndicesAtSelectedPoint( Bdv bdv, RealPoint selectedPoint, boolean evalSourcesAtPointIn2D )
 	{
 		final ArrayList< Integer > sourceIndicesAtSelectedPoint = new ArrayList<>();
 
@@ -1147,6 +1150,30 @@ public abstract class BdvUtils
 		return intersects;
 	}
 
+
+	public static List< Integer > getInCurrentViewerWindowVisibleSourceIndices( BdvHandle bdvHandle, boolean isVisibleIn2D )
+	{
+		final List< Integer > visibleSourceIndices = bdvHandle.getViewerPanel().getState().getVisibleSourceIndices();
+
+		final ArrayList< Integer > visibleInCurrentViewSourceIndices = new ArrayList<>();
+		for ( int sourceIndex : visibleSourceIndices )
+		{
+			if ( isVisibleIn2D )
+			{
+				if ( BdvUtils.isSourceIntersectingCurrentViewIn2D( bdvHandle, sourceIndex ) )
+				{
+					visibleInCurrentViewSourceIndices.add( sourceIndex );
+				}
+				else if ( !BdvUtils.isSourceIntersectingCurrentView( bdvHandle, sourceIndex ) )
+				{
+					visibleInCurrentViewSourceIndices.add( sourceIndex );
+				}
+			}
+		}
+
+		return visibleInCurrentViewSourceIndices;
+
+	}
 
 	public static boolean isSourceIntersectingCurrentViewIn2D( BdvHandle bdv, int sourceIndex )
 	{

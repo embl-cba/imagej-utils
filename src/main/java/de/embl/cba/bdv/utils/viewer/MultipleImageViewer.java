@@ -1,5 +1,6 @@
 package de.embl.cba.bdv.utils.viewer;
 
+import bdv.ij.util.ProgressWriterIJ;
 import bdv.tools.HelpDialog;
 import bdv.tools.brightness.MinMaxGroup;
 import bdv.tools.brightness.SetupAssignments;
@@ -13,6 +14,8 @@ import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.animate.TextOverlayAnimator;
 import bdv.viewer.state.ViewerState;
+import bigwarp.BigWarp;
+import bigwarp.BigWarpInit;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.bdv.utils.behaviour.BdvBehaviours;
@@ -41,6 +44,7 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
+import org.janelia.utility.ui.RepeatingReleasedEventsFixer;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -150,6 +154,8 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 
 		BdvBehaviours.addSourceBrowsingBehaviour( bdv, behaviours );
 
+		BdvBehaviours.addAlignSourcesWithBigWarpBehaviour( bdv, behaviours, "ctrl B");
+
 		installPlatynereisRegistrationBehaviour( behaviours );
 
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> (new Thread( () -> {
@@ -167,6 +173,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> SwingUtilities.invokeLater( () -> {
 			helpDialog.setVisible( ! helpDialog.isVisible() );
 		} ), "Show additional help", "F2" ) ;
+
 
 	}
 
@@ -370,6 +377,9 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 	public void showImages( BlendingMode blendingMode )
 	{
 		initHelpDialog();
+
+		// TODO: maybe this helps with Bdv sometimes becoming non-responsive for keyboard shortcuts?
+		new RepeatingReleasedEventsFixer().install();
 
 		this.blendingMode = blendingMode;
 

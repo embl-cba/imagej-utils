@@ -146,6 +146,11 @@
 			<artifactId>3D_Viewer</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigwarp_fiji</artifactId>
+			<version>5.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>ome</groupId>
 			<artifactId>bio-formats_plugins</artifactId>
 			<exclusions>
@@ -167,6 +172,10 @@
 		<dependency>
 			<groupId>de.embl.cba</groupId>
 			<artifactId>imglib2-lazy-algorithm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.embl.cba</groupId>
+			<artifactId>fiji-plugin-morphometry</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>de.embl.cba</groupId>

@@ -6,6 +6,7 @@ import bdv.util.BdvHandle;
 import de.embl.cba.bdv.utils.BdvDialogs;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
+import de.embl.cba.bdv.utils.bigwarp.BigWarpLauncher;
 import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
 import de.embl.cba.bdv.utils.capture.PixelSpacingDialog;
 import de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter;
@@ -16,6 +17,8 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.util.Behaviours;
+
+import java.util.List;
 
 import static de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter.*;
 
@@ -94,6 +97,39 @@ public class BdvBehaviours
 								Dialog.exportDataType,
 								Dialog.numProcessingThreads,
 								new ProgressWriterIJ()
+						);
+
+				if ( Dialog.exportModality.equals( ExportModality.SaveAsTiffVolumes ) )
+				{
+					final String outputDirectory = IJ.getDirectory( "Choose and output directory" );
+					exporter.setOutputDirectory( outputDirectory );
+				}
+
+
+				exporter.export();
+
+			}).start();
+		}, "ExportSourcesToVoxelImages", trigger ) ;
+	}
+
+	public static void addAlignSourcesWithBigWarpBehaviour(
+			BdvHandle bdvHandle,
+			org.scijava.ui.behaviour.util.Behaviours behaviours,
+			String trigger )
+	{
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		{
+			new Thread( () ->
+			{
+				final List< Integer > sourceIndices = BdvUtils.getInCurrentViewerWindowVisibleSourceIndices( bdvHandle, true );
+
+				if ( ! BigWarpLauncher.Dialog.showDialog( bdvHandle, sourceIndices ) ) return;
+
+
+				final BdvRealSourceToVoxelImageExporter exporter =
+						new BigWarpLauncher(
+								BdvUtils.getVolatileSource( bdvHandle, BigWarpLauncher.Dialog.movingSourceIndex ),
+								BdvUtils.getVolatileSource( bdvHandle, BigWarpLauncher.Dialog.fixedSourceIndex )
 						);
 
 				if ( Dialog.exportModality.equals( ExportModality.SaveAsTiffVolumes ) )
