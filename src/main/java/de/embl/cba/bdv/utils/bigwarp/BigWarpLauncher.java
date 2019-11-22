@@ -1,5 +1,6 @@
 package de.embl.cba.bdv.utils.bigwarp;
 
+import bdv.gui.BigWarpViewerFrame;
 import bdv.gui.TransformTypeSelectDialog;
 import bdv.ij.util.ProgressWriterIJ;
 import bdv.tools.brightness.ConverterSetup;
@@ -16,11 +17,17 @@ import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.InvertibleRealTransform;
 import net.imglib2.ui.TransformListener;
+import weka.gui.knowledgeflow.StepEditorDialog;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 public class BigWarpLauncher
 {
+
+	private AffineTransform3D bigWarpTransform;
+
 	public static class Dialog
 	{
 		public static Source< ? > movingVolatileSource;
@@ -69,31 +76,65 @@ public class BigWarpLauncher
 		bigWarp.getViewerFrameP().getViewerPanel().requestRepaint();
 		bigWarp.getViewerFrameQ().getViewerPanel().requestRepaint();
 		bigWarp.getLandmarkFrame().repaint();
-		bigWarp.setTransformType( TransformTypeSelectDialog.TRANSLATION );
+		bigWarp.setTransformType( TransformTypeSelectDialog.SIMILARITY );
 
 		bigWarp.loadLandmarks( "/Users/tischer/Documents/bdv-utils/src/test/resources/mri-stack-shifted-landmarks.csv" );
 
+		addListeners( bdvHandle, bigWarp, ( TransformedSource ) movingSource );
+	}
+
+	private void addListeners( BdvHandle bdvHandle, BigWarp bigWarp, TransformedSource movingSource )
+	{
 		bigWarp.addTransformListener( new TransformListener< InvertibleRealTransform >()
 		{
 			@Override
 			public void transformChanged( InvertibleRealTransform invertibleRealTransform )
 			{
-				final AffineTransform3D bigWarpTransform = bigWarp.getMovingToFixedTransformAsAffineTransform3D();
-
-				if ( bigWarpTransform == null ) return;
-
-				final TransformedSource source = ( TransformedSource ) movingSource;
-				final AffineTransform3D tmp = new AffineTransform3D();
-				tmp.identity();
-				source.setIncrementalTransform( tmp );
-				source.getFixedTransform( tmp );
-				tmp.preConcatenate( bigWarpTransform );
-				source.setFixedTransform( tmp );
-				BdvUtils.repaint( bdvHandle );
+				bigWarpTransform = bigWarp.getMovingToFixedTransformAsAffineTransform3D();
 			}
 		} );
 
+		bigWarp.getViewerFrameP().addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( final WindowEvent e )
+			{
+				applyBigWarpTransform( bdvHandle, movingSource );
+			}
+		} );
 
+		bigWarp.getViewerFrameQ().addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( final WindowEvent e )
+			{
+				applyBigWarpTransform( bdvHandle, movingSource );
+			}
+		} );
+
+		bigWarp.getLandmarkFrame().addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( final WindowEvent e )
+			{
+				applyBigWarpTransform( bdvHandle, movingSource );
+			}
+		} );
+
+	}
+
+	private void applyBigWarpTransform( BdvHandle bdvHandle, TransformedSource movingSource )
+	{
+		if ( bigWarpTransform == null ) return;
+
+		final TransformedSource source = movingSource;
+		final AffineTransform3D tmp = new AffineTransform3D();
+		tmp.identity();
+		source.setIncrementalTransform( tmp );
+		source.getFixedTransform( tmp );
+		tmp.preConcatenate( bigWarpTransform );
+		source.setFixedTransform( tmp );
+		BdvUtils.repaint( bdvHandle );
 	}
 
 	public void setDisplayRange( BigWarp bigWarp, double[] displayRangeMovingSource, int sourceIndexBigWarp )
