@@ -1,9 +1,6 @@
 package de.embl.cba.bdv.utils.viewer;
 
-import bdv.ij.util.ProgressWriterIJ;
 import bdv.tools.HelpDialog;
-import bdv.tools.brightness.MinMaxGroup;
-import bdv.tools.brightness.SetupAssignments;
 import bdv.tools.transformation.TransformedSource;
 import bdv.tools.transformation.XmlIoTransformedSources;
 import bdv.util.BdvFunctions;
@@ -13,9 +10,6 @@ import bdv.util.BdvStackSource;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.animate.TextOverlayAnimator;
-import bdv.viewer.state.ViewerState;
-import bigwarp.BigWarp;
-import bigwarp.BigWarpInit;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.bdv.utils.behaviour.BdvBehaviours;
@@ -34,13 +28,9 @@ import net.imagej.ops.OpService;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
-import net.imglib2.histogram.DiscreteFrequencyDistribution;
-import net.imglib2.histogram.Histogram1d;
-import net.imglib2.histogram.Real1dBinMapper;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
@@ -223,7 +213,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		BdvUtils.moveToPosition( bdv, new double[]{ 0, 0, 0}, 0, 100 );
 	}
 
-	public void applyTransformToCurrentSource(
+	private void applyTransformToCurrentSource(
 			AffineTransform3D transform,
 			String transformName )
 	{
@@ -265,7 +255,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		BdvUtils.repaint( bdv );
 	}
 
-	public void printManualTransformOfCurrentSource( )
+	private void printManualTransformOfCurrentSource( )
 	{
 		final int currentSource = bdv.getBdvHandle().getViewerPanel().getState().getCurrentSource();
 		final Source< ? > source = BdvUtils.getSource( bdv, currentSource );
@@ -281,7 +271,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		Logger.log( "Full transform:" + concatenate.toString() );
 	}
 
-	public File saveSettingsXmlForCurrentSource()
+	private File saveSettingsXmlForCurrentSource()
 	{
 		final int currentSource = bdv.getBdvHandle().getViewerPanel().getState().getCurrentSource();
 		final Source< ? > source = BdvUtils.getSource( bdv, currentSource );
@@ -344,7 +334,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 //		}
 	}
 
-	public void addSource( )
+	private void addSource( )
 	{
 		final JFileChooser jFileChooser = new JFileChooser( );
 		if ( jFileChooser.showOpenDialog( bdv.getViewerPanel() ) == JFileChooser.APPROVE_OPTION )
@@ -459,54 +449,13 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 
 //		setColor( filePath, bdvStackSource );
 
-		initBrightness( 0.001, 0.999, bdv.getViewerPanel().getState(), bdv.getSetupAssignments(), sourceToXmlPath.size() - 1  );
+		BdvUtils.initBrightness( bdv,0.001, 0.999,  sourceToXmlPath.size() - 1  );
 
 		options = options.sourceTransform( new AffineTransform3D() );
 
 		isFirstImage = false;
 	}
 
-
-	public static void initBrightness(
-			final double cumulativeMinCutoff,
-			final double cumulativeMaxCutoff,
-			final ViewerState state,
-			final SetupAssignments setupAssignments,
-			int sourceIndex )
-	{
-
-		final Source< ? > source = state.getSources().get( sourceIndex ).getSpimSource();
-		final int timepoint = state.getCurrentTimepoint();
-		if ( !source.isPresent( timepoint ) )
-			return;
-		if ( !UnsignedShortType.class.isInstance( source.getType() ) )
-			return;
-		@SuppressWarnings( "unchecked" )
-		final RandomAccessibleInterval< UnsignedShortType > img = ( RandomAccessibleInterval< UnsignedShortType > ) source.getSource( timepoint, source.getNumMipmapLevels() - 1 );
-		final long z = ( img.min( 2 ) + img.max( 2 ) + 1 ) / 2;
-
-		final int numBins = 6535;
-		final Histogram1d< UnsignedShortType > histogram = new Histogram1d<>( Views.iterable( Views.hyperSlice( img, 2, z ) ), new Real1dBinMapper< UnsignedShortType >( 0, 65535, numBins, false ) );
-		final DiscreteFrequencyDistribution dfd = histogram.dfd();
-		final long[] bin = new long[] { 0 };
-		double cumulative = 0;
-		int i = 0;
-		for ( ; i < numBins && cumulative < cumulativeMinCutoff; ++i )
-		{
-			bin[ 0 ] = i;
-			cumulative += dfd.relativeFrequency( bin );
-		}
-		final int min = i * 65535 / numBins;
-		for ( ; i < numBins && cumulative < cumulativeMaxCutoff; ++i )
-		{
-			bin[ 0 ] = i;
-			cumulative += dfd.relativeFrequency( bin );
-		}
-		final int max = i * 65535 / numBins;
-		final MinMaxGroup minmax = setupAssignments.getMinMaxGroups().get( sourceIndex );
-		minmax.getMinBoundedValue().setCurrentValue( min );
-		minmax.getMaxBoundedValue().setCurrentValue( max );
-	}
 
 	private Settings tryLoadSettings( String xmlPath )
 	{

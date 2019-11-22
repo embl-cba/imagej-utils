@@ -1,6 +1,8 @@
 package de.embl.cba.bdv.utils.bigwarp;
 
 import bdv.ij.util.ProgressWriterIJ;
+import bdv.tools.brightness.ConverterSetup;
+import bdv.tools.brightness.MinMaxGroup;
 import bdv.util.BdvHandle;
 import bdv.viewer.Source;
 import bigwarp.BigWarp;
@@ -9,15 +11,16 @@ import de.embl.cba.bdv.utils.BdvUtils;
 import ij.gui.GenericDialog;
 import mpicbg.spim.data.SpimDataException;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class BigWarpLauncher
 {
 	public static class Dialog
 	{
-		public static Source< ? > movingSource;
-		public static Source< ? > fixedSource;
+		public static Source< ? > movingVolatileSource;
+		public static Source< ? > fixedVolatileSource;
+		public static double[] displayRangeMovingSource;
+		public static double[] displayRangeFixedSource;
 
 		public static boolean showDialog( BdvHandle bdvHandle, List< Integer > sourceIndices )
 		{
@@ -33,16 +36,20 @@ public class BigWarpLauncher
 			gd.showDialog();
 			if ( gd.wasCanceled() ) return false;
 
+			final int movingSourceIndex = BdvUtils.getSourceIndex( bdvHandle, gd.getNextChoice() );
+			movingVolatileSource = BdvUtils.getVolatileSource( bdvHandle, movingSourceIndex );
+			displayRangeMovingSource = BdvUtils.getDisplayRange( bdvHandle, movingSourceIndex );
 
-			final Source< ? > movingSource = BdvUtils.getVolatileSource( bdvHandle, BdvUtils.getSourceIndex( bdvHandle, gd.getNextChoice() ) );
-			final Source< ? > fixedSource = BdvUtils.getVolatileSource( bdvHandle, BdvUtils.getSourceIndex( bdvHandle, gd.getNextChoice() ) );
+			final int fixedSourceIndex = BdvUtils.getSourceIndex( bdvHandle, gd.getNextChoice() );
+			fixedVolatileSource = BdvUtils.getVolatileSource( bdvHandle, fixedSourceIndex );
+			displayRangeFixedSource = BdvUtils.getDisplayRange( bdvHandle, fixedSourceIndex );
 
 			return true;
 		}
 
 	}
 
-	public BigWarpLauncher( Source< ? > movingSource, Source< ? > fixedSource )
+	public BigWarpLauncher( Source< ? > movingSource, Source< ? > fixedSource, double[] displayRangeMovingSource, double[] displayRangeFixedSource )
 	{
 		final String[] sourceNames = { movingSource.getName(), fixedSource.getName() };
 		final Source< ? >[] movingSources = { movingSource };
@@ -50,9 +57,24 @@ public class BigWarpLauncher
 
 		final BigWarp.BigWarpData< ? > bigWarpData = BigWarpInit.createBigWarpData( movingSources, fixedSources, sourceNames );
 		final BigWarp bigWarp = tryGetBigWarp( bigWarpData );
+
+		setDisplayRange( bigWarp, displayRangeMovingSource, 0 );
+		setDisplayRange( bigWarp, displayRangeMovingSource, 1 );
+
 		bigWarp.getViewerFrameP().getViewerPanel().requestRepaint();
 		bigWarp.getViewerFrameQ().getViewerPanel().requestRepaint();
 		bigWarp.getLandmarkFrame().repaint();
+	}
+
+	public void setDisplayRange( BigWarp bigWarp, double[] displayRangeMovingSource, int sourceIndexBigWarp )
+	{
+		final ConverterSetup converterSetup = bigWarp.getSetupAssignments().getConverterSetups().get( sourceIndexBigWarp );
+		final double min = displayRangeMovingSource[ 0 ];
+		final double max = displayRangeMovingSource[ 1 ];
+		converterSetup.setDisplayRange( min, max );
+		final MinMaxGroup minMaxGroup = bigWarp.getSetupAssignments().getMinMaxGroup( converterSetup );
+		minMaxGroup.getMinBoundedValue().setCurrentValue( min );
+		minMaxGroup.getMaxBoundedValue().setCurrentValue( max );
 	}
 
 	public BigWarp tryGetBigWarp( BigWarp.BigWarpData< ? > bigWarpData )
@@ -66,4 +88,5 @@ public class BigWarpLauncher
 		}
 		return null;
 	}
+
 }

@@ -126,20 +126,12 @@ public class BdvBehaviours
 				if ( ! BigWarpLauncher.Dialog.showDialog( bdvHandle, sourceIndices ) ) return;
 
 
-				final BdvRealSourceToVoxelImageExporter exporter =
-						new BigWarpLauncher(
-								BdvUtils.getVolatileSource( bdvHandle, BigWarpLauncher.Dialog.movingSourceIndex ),
-								BdvUtils.getVolatileSource( bdvHandle, BigWarpLauncher.Dialog.fixedSourceIndex )
-						);
-
-				if ( Dialog.exportModality.equals( ExportModality.SaveAsTiffVolumes ) )
-				{
-					final String outputDirectory = IJ.getDirectory( "Choose and output directory" );
-					exporter.setOutputDirectory( outputDirectory );
-				}
-
-
-				exporter.export();
+				final BigWarpLauncher bigWarpLauncher = new BigWarpLauncher(
+						BigWarpLauncher.Dialog.movingVolatileSource,
+						BigWarpLauncher.Dialog.fixedVolatileSource,
+						BigWarpLauncher.Dialog.displayRangeMovingSource,
+						BigWarpLauncher.Dialog.displayRangeFixedSource
+				);
 
 			}).start();
 		}, "ExportSourcesToVoxelImages", trigger ) ;
