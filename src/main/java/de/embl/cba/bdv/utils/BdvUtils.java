@@ -184,10 +184,10 @@ public abstract class BdvUtils
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
 		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
 
-		final double[] zeroCanvas = { 0, 0, 0 };
+		final double[] zeroCanvas = { 0.0, 0.0, 0.0 };
 		final double[] zeroGlobal = new double[ 3 ];
 
-		final double[] oneCanvas = { 1, 1, 1 };
+		final double[] oneCanvas = { 1.0, 1.0, 1.0 };
 		final double[] oneGlobal = new double[ 3 ];
 
 		viewerTransform.applyInverse( zeroGlobal, zeroCanvas );
@@ -431,7 +431,6 @@ public abstract class BdvUtils
 			AffineTransform3D newViewerTransform,
 			long duration)
 	{
-
 		AffineTransform3D currentViewerTransform = new AffineTransform3D();
 		bdv.getBdvHandle().getViewerPanel().getState().getViewerTransform( currentViewerTransform );
 
@@ -443,12 +442,9 @@ public abstract class BdvUtils
 						0,
 						duration );
 
-
 		bdv.getBdvHandle().getViewerPanel().setTransformAnimator( similarityTransformAnimator );
 		bdv.getBdvHandle().getViewerPanel().transformChanged( newViewerTransform );
-
 	}
-
 
 	public static void changeBdvViewerTransform(
 			Bdv bdv,
@@ -828,7 +824,7 @@ public abstract class BdvUtils
 		}
 		else
 		{
-			return source.getInterpolatedSource( t, 0, Interpolation.NLINEAR ).realRandomAccess();
+			return source.getInterpolatedSource( t, level, Interpolation.NLINEAR ).realRandomAccess();
 		}
 	}
 

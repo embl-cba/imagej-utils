@@ -78,7 +78,6 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 	private WeakHashMap< Source< ? >, SpimData > sourceToSpimData;
 	private WeakHashMap< Source< ? >, Source< ? extends Volatile< ? > > > sourceToVolatileSource;
 
-
 	public enum BlendingMode
 	{
 		Avg,
@@ -145,7 +144,6 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		BdvBehaviours.addSourceBrowsingBehaviour( bdv, behaviours );
 
 		BdvBehaviours.addAlignSourcesWithBigWarpBehaviour( bdv, behaviours, "ctrl B");
-
 		addPlatynereisRegistrationBehaviour( behaviours );
 
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> (new Thread( () -> {

@@ -53,9 +53,7 @@ public class ExampleInteractiveDisplaySettingsDialog
 		{
 			BdvDialogs.showDisplaySettingsDialogForSourcesAtMousePosition(
 					bdv, false, true );
-		}, "display settings dialog", "D" ) ;
-
-
+		}, "dxisplay settings dialog", "D" ) ;
 	}
 
 	public static ArrayImg< UnsignedIntType, IntArray > createImage()

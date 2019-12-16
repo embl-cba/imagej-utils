@@ -31,10 +31,11 @@ public class ExampleARGBConverted2dTimelapse16bitTiffImage
 		 * Show the gray-scale image
 		 */
 
-		final BdvStackSource show = BdvFunctions.show(
-				raiSource,
-				2,
-				BdvOptions.options().is2D() );
+		final BdvStackSource show =
+				BdvFunctions.show(
+					raiSource,
+					2,
+					BdvOptions.options().is2D() );
 
 		show.setDisplayRange( 0, 3 );
 

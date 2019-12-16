@@ -123,7 +123,6 @@ public class BdvBehaviours
 				final List< Integer > sourceIndices = BdvUtils.getSourceIndiciesVisibleInCurrentViewerWindow( bdvHandle, true );
 
 				if ( ! BigWarpLauncher.Dialog.showDialog( bdvHandle, sourceIndices ) ) return;
-
 				new BigWarpLauncher(
 						bdvHandle,
 						BigWarpLauncher.Dialog.movingVolatileSource,

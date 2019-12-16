@@ -3,15 +3,15 @@
   <BasePath type="relative">.</BasePath>
   <SequenceDescription>
     <ImageLoader format="bdv.hdf5">
-      <hdf5 type="relative">mri-stack.h5</hdf5>
+      <hdf5 type="relative">multi-resolution-mri-stack.h5</hdf5>
     </ImageLoader>
     <ViewSetups>
       <ViewSetup>
         <id>0</id>
-        <name>mri-stack</name>
+        <name>channel 1</name>
         <size>186 226 27</size>
         <voxelSize>
-          <unit>cm</unit>
+          <unit>micron</unit>
           <size>5.0 5.0 10.0</size>
         </voxelSize>
         <attributes>

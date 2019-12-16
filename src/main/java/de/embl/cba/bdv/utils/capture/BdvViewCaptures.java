@@ -97,7 +97,6 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 					BdvUtils.getSourceTransform( source, t, level );
 
 			AffineTransform3D viewerToSourceTransform = new AffineTransform3D();
-
 			viewerToSourceTransform.preConcatenate( viewerTransform.inverse() );
 			viewerToSourceTransform.preConcatenate( sourceTransform.inverse() );
 
@@ -146,8 +145,6 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 			return asCompositeImage( captureVoxelSpacing, voxelUnits, captures, colors, displayRanges, isSegmentations );
 		else
 			return null;
-
-
 	}
 
 	public static RealRandomAccess< ? extends RealType< ? > >
