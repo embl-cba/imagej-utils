@@ -69,7 +69,7 @@ public class AccumulateAverageProjectorARGB extends AccumulateProjector< ARGBTyp
 			final int g = ARGBType.green( value );
 			final int b = ARGBType.blue( value );
 
-			// if ( a == 0 ) continue; // TODO: think about this!
+			//if ( a == 0 ) continue; // TODO: think about this!
 
 			aAvg += a;
 			rAvg += r;

@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.DoubleStream;
 
+import static de.embl.cba.bdv.utils.BdvUtils.*;
 import static de.embl.cba.transforms.utils.Transforms.createBoundingIntervalAfterTransformation;
 
 
@@ -179,8 +180,10 @@ public abstract class BdvUtils
 	 * @param bdv
 	 * @return
 	 */
-	public static double[] getViewerVoxelSpacing( BdvHandle bdv )
+	public static double[] getViewerVoxelSpacingOLD( BdvHandle bdv )
 	{
+
+		// TODO: understand this logic!
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
 		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
 
@@ -198,6 +201,39 @@ public abstract class BdvUtils
 			viewerVoxelSpacing[ d ] = Math.abs( zeroGlobal[ d ] - oneGlobal[ d ]);
 
 		return viewerVoxelSpacing;
+	}
+
+	public static double getViewerVoxelSpacing( BdvHandle bdv )
+	{
+		final int w = getBdvWindowWidth( bdv );
+		final int h = getBdvWindowHeight( bdv );
+
+		// TODO: understand this logic!
+		final AffineTransform3D viewerTransform = new AffineTransform3D();
+		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
+
+
+		final double[] physicalA = new double[ 3 ];
+		final double[] physicalB = new double[ 3 ];
+
+		viewerTransform.applyInverse( physicalA, new double[]{ 0, 0, 0} );
+		viewerTransform.applyInverse( physicalB, new double[]{ 0, w, 0} );
+
+		double viewerPhysicalWidth = LinAlgHelpers.distance( physicalA, physicalB );
+
+		viewerTransform.applyInverse( physicalA, new double[]{ 0, 0, 0} );
+		viewerTransform.applyInverse( physicalB, new double[]{ h, 0, 0} );
+
+		double viewerPhysicalHeight = LinAlgHelpers.distance( physicalA, physicalB );
+
+		final double viewerPhysicalVoxelSpacingX = viewerPhysicalWidth / w;
+		final double viewerPhysicalVoxelSpacingY = viewerPhysicalHeight / h;
+
+		if ( ! ( viewerPhysicalVoxelSpacingX == viewerPhysicalVoxelSpacingY ) )
+		{
+			throw new UnsupportedOperationException( "Wrong computation of viewer voxel size" );
+		}
+		return viewerPhysicalVoxelSpacingX;
 	}
 
 

@@ -8,15 +8,15 @@ import java.util.regex.Pattern;
 
 public class FileUtils
 {
-	public static ArrayList< File > getFileList( File directory, String fileNameRegExp )
+	public static ArrayList< File > getFileList( File directory, String fileNameRegExp, boolean recursive )
 	{
 		final ArrayList< File > files = new ArrayList<>();
-		populateFileList( directory, fileNameRegExp,files );
+		populateFileList( directory, fileNameRegExp,files, recursive );
 		return files;
 	}
 
 	public static void populateFileList(
-			File directory, String fileNameRegExp, List< File > files) {
+			File directory, String fileNameRegExp, List< File > files, boolean recursive ) {
 
 		// Get all the files from a directory.
 		File[] fList = directory.listFiles();
@@ -37,7 +37,8 @@ public class FileUtils
 				}
 				else if ( file.isDirectory() )
 				{
-					populateFileList( file, fileNameRegExp, files );
+					if ( recursive )
+						populateFileList( file, fileNameRegExp, files, recursive );
 				}
 			}
 		}

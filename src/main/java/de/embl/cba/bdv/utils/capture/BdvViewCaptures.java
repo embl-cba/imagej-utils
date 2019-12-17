@@ -59,9 +59,8 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
 		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
 
-		final double[] viewerVoxelSpacing = getViewerVoxelSpacing( bdv );
-
-		double dxy = pixelSpacing / viewerVoxelSpacing[ 0 ] ;
+		final double viewerVoxelSpacing = getViewerVoxelSpacing( bdv );
+		double dxy = pixelSpacing / viewerVoxelSpacing;
 
 		final int w = getBdvWindowWidth( bdv );
 		final int h = getBdvWindowHeight( bdv );
@@ -110,20 +109,31 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 				RealRandomAccess< ? extends RealType< ? > > sourceAccess =
 						getInterpolatedRealRandomAccess( t, source, level, interpolate );
 
-				final IntervalView< UnsignedShortType > crop = Views.interval( capture, interval );
-				final Cursor< UnsignedShortType > captureCursor = Views.iterable( crop ).localizingCursor();
-				final RandomAccess< UnsignedShortType > captureAccess = crop.randomAccess();
+				final IntervalView< UnsignedShortType > crop =
+						Views.interval( capture, interval );
+
+				final Cursor< UnsignedShortType > captureCursor =
+						Views.iterable( crop ).localizingCursor();
+
+				final RandomAccess< UnsignedShortType > captureAccess
+						= crop.randomAccess();
 
 				final double[] canvasPosition = new double[ 3 ];
 				final double[] sourceRealPosition = new double[ 3 ];
 
 				while ( captureCursor.hasNext() )
 				{
+					// captureCursor is the position on the captured image in voxel units
 					captureCursor.fwd();
 					captureCursor.localize( canvasPosition );
 					captureAccess.setPosition( captureCursor );
+
+					// canvasPosition is the position on the canvas, in calibrated units
+					// dxy is the step size that is needed to get the desired resolution in the
+					// output image
 					canvasPosition[ 0 ] *= dxy;
 					canvasPosition[ 1 ] *= dxy;
+
 					viewerToSourceTransform.apply( canvasPosition, sourceRealPosition );
 					sourceAccess.setPosition( sourceRealPosition );
 					captureAccess.get().setReal( sourceAccess.get().getRealDouble() );
@@ -139,7 +149,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		for ( int d = 0; d < 2; d++ )
 			captureVoxelSpacing[ d ] = pixelSpacing;
 
-		captureVoxelSpacing[ 2 ] = viewerVoxelSpacing[ 2 ]; // TODO: makes sense?
+		captureVoxelSpacing[ 2 ] = viewerVoxelSpacing; // TODO: ???
 
 		if ( captures.size() > 0 )
 			return asCompositeImage( captureVoxelSpacing, voxelUnits, captures, colors, displayRanges, isSegmentations );

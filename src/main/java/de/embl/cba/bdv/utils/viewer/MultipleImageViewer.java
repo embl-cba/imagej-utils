@@ -422,7 +422,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 
 //		setColor( filePath, bdvStackSource );
 
-		BdvUtils.initBrightness( bdv,0.001, 0.999,  sourceToXmlPath.size() - 1  );
+		BdvUtils.initBrightness( bdv,0.01, 0.99,  sourceToXmlPath.size() - 1  );
 
 		options = options.sourceTransform( new AffineTransform3D() );
 

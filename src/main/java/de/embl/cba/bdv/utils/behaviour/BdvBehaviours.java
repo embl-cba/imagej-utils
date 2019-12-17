@@ -52,7 +52,7 @@ public class BdvBehaviours
 		{
 			new Thread( () -> {
 				final String pixelUnit = "micrometer";
-				final PixelSpacingDialog dialog = new PixelSpacingDialog( BdvUtils.getViewerVoxelSpacing( bdv )[ 0 ], pixelUnit );
+				final PixelSpacingDialog dialog = new PixelSpacingDialog( BdvUtils.getViewerVoxelSpacing( bdv ), pixelUnit );
 				if ( ! dialog.showDialog() ) return;
 				final CompositeImage compositeImage = BdvViewCaptures.captureView(
 						bdv,

@@ -1,5 +1,6 @@
 package de.embl.cba.bdv.utils.viewer;
 
+import ij.IJ;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -28,8 +29,11 @@ public class OpenMultipleImagesCommand implements Command
 	public void run()
 	{
 		final ArrayList< String > validPaths = getValidPaths( regExp, inputFiles );
+		final long start = System.currentTimeMillis();
+		IJ.log( "Opening " + validPaths.size() + " files...");
 		final MultipleImageViewer viewer = new MultipleImageViewer( validPaths );
 		viewer.showImages( MultipleImageViewer.BlendingMode.valueOf( blendingMode ) );
+		IJ.log( "...done in " + ( System.currentTimeMillis() - start ) + " ms.");
 	}
 
 	private ArrayList< String > getValidPaths( String regExp, File[] paths )

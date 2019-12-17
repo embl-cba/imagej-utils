@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 import static de.embl.cba.bdv.utils.FileUtils.getFileList;
 
-public class ExploreXRayData
+public class Explore2SourcesOfXRayData
 {
 	public static void main( String[] args )
 	{
@@ -17,17 +17,10 @@ public class ExploreXRayData
 
 		final String excludeTransformedRegExp = "^(?!.*?(?:transformed)).*xml$";
 		final ArrayList< File > paths = getFileList( new File( "/Volumes/cba/exchange/maxim/ver2/2sources" ),
-				excludeTransformedRegExp );
-
-//		final ArrayList< File > subSet = new ArrayList<>();
-//		subSet.add( paths.get( 0 ) );
-//		subSet.add( paths.get( 1 ) );
+				excludeTransformedRegExp, false );
 
 		final MultipleImageViewer viewer = new MultipleImageViewer( paths );
 		viewer.setOpService( imageJ.op() );
 		viewer.showImages( MultipleImageViewer.BlendingMode.Avg );
-//		viewer.saveSettingsXmlForCurrentSource();
-//		viewer.prealignCurrentPlatynereisXRaySource( false );
-//		viewer.saveSettingsXmlForCurrentSource();
 	}
 }

@@ -7,7 +7,7 @@ import java.io.File;
 
 import static de.embl.cba.bdv.utils.FileUtils.getFileList;
 
-public class ExploreXRayDataWithViewMultipleBdvImagesCommand
+public class ExploreRegisteredXRayData
 {
 	public static void main(final String... args)
 	{
@@ -15,7 +15,7 @@ public class ExploreXRayDataWithViewMultipleBdvImagesCommand
 		ij.ui().showUI();
 
 		final OpenMultipleImagesCommand command = new OpenMultipleImagesCommand();
-		command.inputFiles = getFileList( new File( "/Volumes/cba/exchange/maxim/ver2" ), ".*.xml" ).toArray( new File[]{} );
+		command.inputFiles = getFileList( new File( "/Volumes/cba/exchange/maxim/ver2/transformed" ), ".*.xml", false ).toArray( new File[]{} );
 
 		command.run();
 	}
