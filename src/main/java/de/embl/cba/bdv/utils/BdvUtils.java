@@ -205,34 +205,36 @@ public abstract class BdvUtils
 
 	public static double getViewerVoxelSpacing( BdvHandle bdv )
 	{
-		final int w = getBdvWindowWidth( bdv );
-		final int h = getBdvWindowHeight( bdv );
+		final int windowWidth = getBdvWindowWidth( bdv );
+		final int windowHeight = getBdvWindowHeight( bdv );
 
 		// TODO: understand this logic!
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
 		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
 
-
 		final double[] physicalA = new double[ 3 ];
 		final double[] physicalB = new double[ 3 ];
 
 		viewerTransform.applyInverse( physicalA, new double[]{ 0, 0, 0} );
-		viewerTransform.applyInverse( physicalB, new double[]{ 0, w, 0} );
+		viewerTransform.applyInverse( physicalB, new double[]{ 0, windowWidth, 0} );
 
 		double viewerPhysicalWidth = LinAlgHelpers.distance( physicalA, physicalB );
 
 		viewerTransform.applyInverse( physicalA, new double[]{ 0, 0, 0} );
-		viewerTransform.applyInverse( physicalB, new double[]{ h, 0, 0} );
+		viewerTransform.applyInverse( physicalB, new double[]{ windowHeight, 0, 0} );
 
 		double viewerPhysicalHeight = LinAlgHelpers.distance( physicalA, physicalB );
 
-		final double viewerPhysicalVoxelSpacingX = viewerPhysicalWidth / w;
-		final double viewerPhysicalVoxelSpacingY = viewerPhysicalHeight / h;
+		final double viewerPhysicalVoxelSpacingX = viewerPhysicalWidth / windowWidth;
+		final double viewerPhysicalVoxelSpacingY = viewerPhysicalHeight / windowHeight;
 
-		if ( ! ( viewerPhysicalVoxelSpacingX == viewerPhysicalVoxelSpacingY ) )
-		{
-			throw new UnsupportedOperationException( "Wrong computation of viewer voxel size" );
-		}
+		IJ.log( "[DEBUG] windowWidth = " + windowWidth );
+		IJ.log( "[DEBUG] windowHeight = " + windowHeight );
+		IJ.log( "[DEBUG] viewerPhysicalWidth = " + viewerPhysicalWidth );
+		IJ.log( "[DEBUG] viewerPhysicalHeight = " + viewerPhysicalHeight );
+		IJ.log( "[DEBUG] viewerPhysicalVoxelSpacingX = " + viewerPhysicalVoxelSpacingX );
+		IJ.log( "[DEBUG] viewerPhysicalVoxelSpacingY = " + viewerPhysicalVoxelSpacingY );
+
 		return viewerPhysicalVoxelSpacingX;
 	}
 

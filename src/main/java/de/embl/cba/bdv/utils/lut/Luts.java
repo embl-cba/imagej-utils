@@ -171,6 +171,25 @@ public class Luts
 		return color;
 	}
 
+	/**
+	 *
+	 * @param r 0 - 255
+	 * @param g 0 - 255
+	 * @param b 0 - 255
+	 * @param brightness 0.0 - 1.0
+	 * @return
+	 */
+	public static int getARGBIndex( int r, int g, int b, double brightness )
+	{
+		final int color = ARGBType.rgba(
+				(int) (r * brightness),
+				(int) (g * brightness),
+				(int) (b * brightness),
+				(int) (255 * brightness) );
+
+		return color;
+	}
+
 	public static int getARGBIndex( final byte lutIndex, final byte[][] lut )
 	{
 		final int color = ARGBType.rgba(

@@ -6,7 +6,7 @@ public class LinearARGBLut implements AdjustableARGBLut
 
 	byte[][] lut;
 
-	public LinearARGBLut(  double min, double max )
+	public LinearARGBLut( double min, double max )
 	{
 		this.min = min;
 		this.max = max;

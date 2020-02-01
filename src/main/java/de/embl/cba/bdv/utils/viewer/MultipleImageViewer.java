@@ -280,7 +280,6 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		Logger.log( "Additional transform: " + fixedTransform.toString() );
 
 		final SpimData spimData = sourceToSpimData.get( source );
-
 		spimData.getViewRegistrations().getViewRegistration( 0, 0 ).preconcatenateTransform( new ViewTransformAffine( "Additional transform", fixedTransform ) );
 
 		final String xmlPath = sourceToXmlPath.get( source );

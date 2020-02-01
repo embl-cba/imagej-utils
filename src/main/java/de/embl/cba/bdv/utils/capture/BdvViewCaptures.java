@@ -50,7 +50,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 	 * @param voxelUnits
 	 * @return
 	 */
-	public static < R extends RealType< R > > CompositeImage captureView(
+	public static synchronized < R extends RealType< R > > CompositeImage captureView(
 			BdvHandle bdv,
 			double pixelSpacing,
 			String voxelUnits,
