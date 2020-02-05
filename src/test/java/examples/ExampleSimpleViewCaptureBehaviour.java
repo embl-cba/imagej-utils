@@ -3,6 +3,7 @@ package examples;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvStackSource;
+import de.embl.cba.bdv.utils.behaviour.BdvBehaviours;
 import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
 import de.embl.cba.bdv.utils.capture.PixelSpacingDialog;
 import mpicbg.spim.data.SpimData;
@@ -14,14 +15,14 @@ import org.scijava.ui.behaviour.util.Behaviours;
 
 import java.util.List;
 
-public class ExampleViewCaptureBehaviour
+public class ExampleSimpleViewCaptureBehaviour
 {
 	public static void main( String[] args ) throws SpimDataException
 	{
 		/**
 		 * show first image
 		 */
-		final String path = ExampleViewCaptureBehaviour.class
+		final String path = ExampleSimpleViewCaptureBehaviour.class
 				.getResource( "../mri-stack.xml" ).getFile();
 
 		SpimData spimData = new XmlIoSpimData().load( path );
@@ -51,23 +52,10 @@ public class ExampleViewCaptureBehaviour
 		/**
 		 * install view capture behaviour
 		 */
-		final String pixelUnit = "unit";
-
-		final PixelSpacingDialog pixelSpacingDialog = new PixelSpacingDialog( 0.25, pixelUnit );
 
 		Behaviours behaviours = new Behaviours( new InputTriggerConfig() );
 		behaviours.install( bdv.getTriggerbindings(), "" );
-		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
-		{
-			new Thread( () -> {
-				if ( ! pixelSpacingDialog.showDialog() ) return;
-				BdvViewCaptures.captureView(
-						bdv,
-						pixelSpacingDialog.getPixelSpacing(),
-						pixelUnit,
-						false );
-			}).start();
-		}, "capture view", "C" ) ;
+		BdvBehaviours.addSimpleViewCaptureBehaviour( bdv, behaviours, "C" );
 	}
 
 

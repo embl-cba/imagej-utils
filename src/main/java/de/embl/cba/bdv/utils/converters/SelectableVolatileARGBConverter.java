@@ -18,6 +18,7 @@ package de.embl.cba.bdv.utils.converters;
 
 import bdv.viewer.TimePointListener;
 import de.embl.cba.bdv.utils.selection.Segment;
+import de.embl.cba.tables.color.LazyLabelsARGBConverter;
 import net.imglib2.Volatile;
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.ARGBType;

@@ -2,16 +2,23 @@ package examples;
 
 import bdv.util.*;
 import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
-import de.embl.cba.bdv.utils.capture.PixelSpacingDialog;
-import ij.CompositeImage;
+import de.embl.cba.bdv.utils.capture.ViewCaptureResult;
+import de.embl.cba.bdv.utils.converters.LinearARGBConverter;
+import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
+import de.embl.cba.bdv.utils.lut.Luts;
+import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 import net.imagej.ImageJ;
+import net.imglib2.img.array.ArrayCursor;
+import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.array.IntArray;
 import net.imglib2.realtransform.AffineTransform3D;
-import org.scijava.ui.behaviour.ClickBehaviour;
-import org.scijava.ui.behaviour.io.InputTriggerConfig;
-import org.scijava.ui.behaviour.util.Behaviours;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.integer.UnsignedIntType;
+import net.imglib2.util.Util;
 
 import java.util.List;
 
@@ -26,42 +33,50 @@ public class ExampleViewCapture
 		/**
 		 * show first image
 		 */
-		final String path = ExampleViewCapture.class
+		String path = ExampleViewCapture.class
 				.getResource( "../multi-resolution-mri-stack.xml" ).getFile();
 
 		SpimData spimData = new XmlIoSpimData().load( path );
 
-		final List< BdvStackSource< ? > > stackSources = BdvFunctions.show( spimData, BdvOptions.options().preferredSize( 600,600 ) );
+		List< BdvStackSource< ? > > stackSources = BdvFunctions.show( spimData, BdvOptions.options().preferredSize( 600,600 ) );
 		stackSources.get( 0 ).setDisplayRange( 0, 255 );
+		stackSources.get( 0 ).setColor( new ARGBType( ARGBType.rgba( 255,0,0,255 ) ) );
 
 		final BdvHandle bdvHandle = stackSources.get( 0 ).getBdvHandle();
 
 		/**
 		 * add another image
 		 */
-//		final IntervalView< UnsignedIntType > img = Views.translate( Utils.create2DGradientImage(), new long[]{ 0, 0, 0 } );
-//
-//		final BdvStackSource stackSource = BdvFunctions.show(
-//				img, "image 0",
-//				BdvOptions.options().addTo( bdv ) );
-//		stackSource.setDisplayRange( 0, 300 );
-//		stackSource.setColor( new ARGBType( ARGBType.rgba( 0, 255, 0, 0 ) ) );
-//
-//		final AffineTransform3D vt = new AffineTransform3D();
-//		bdv.getViewerPanel().getState().getViewerTransform( vt );
-//		vt.set( 0, 2, 3 );
-//		bdv.getViewerPanel().setCurrentViewerTransform( vt );
+		path = ExampleViewCapture.class
+				.getResource( "../mri-stack-shifted.xml" ).getFile();
+		spimData = new XmlIoSpimData().load( path );
+		stackSources = BdvFunctions.show( spimData, BdvOptions.options().addTo( bdvHandle ) );
+		stackSources.get( 0 ).setDisplayRange( 0, 255 );
+
+
+		/**
+		 * also add an ARBGType image
+		 */
+
+		final ArrayImg< UnsignedIntType, IntArray > img = ArrayImgs.unsignedInts( 256, 256, 1000 );
+		final ArrayCursor< UnsignedIntType > cursor = img.cursor();
+		while ( cursor.hasNext() )
+			cursor.next().set( cursor.getIntPosition( 0 ) );
+
+		final RandomAccessibleIntervalSource source = new RandomAccessibleIntervalSource( img, Util.getTypeFromInterval( img ), "" );
+		final SelectableVolatileARGBConverter converter = new SelectableVolatileARGBConverter( new LinearARGBConverter( 0, 255,  Luts.BLUE_WHITE_RED ) );
+		final ARGBConvertedRealSource convertedRealSource = new ARGBConvertedRealSource( source, converter );
+
+		BdvFunctions.show( convertedRealSource, BdvOptions.options().addTo( bdvHandle ) );
 
 
 		/**
 		 * capture a view
 		 */
+		final ViewCaptureResult captureResult = BdvViewCaptures.captureView( bdvHandle, 1, "micron", true );
 
-//		BdvViewCaptures.captureView( bdvHandle, 5, "micron", true ).show();
-
-		rotateView( bdvHandle );
-
-		BdvViewCaptures.captureView( bdvHandle, 5, "micron", true ).show();
+		captureResult.rawImagesStack.show();
+		captureResult.rgbImage.show();
 
 	}
 

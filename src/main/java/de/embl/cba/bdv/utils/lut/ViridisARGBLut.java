@@ -63,10 +63,10 @@ public class ViridisARGBLut implements ARGBLut
 		for (int i = 0; i < vals.length; i++)
 		{
 			argbIndices[ i ] = ARGBType.rgba(
-					vals[ i ][ 0 ],
-					vals[ i ][ 1 ],
-					vals[ i ][ 2 ],
-					alpha / 255. );
+					255. * vals[ i ][ 0 ],
+					255. * vals[ i ][ 1 ],
+					255. * vals[ i ][ 2 ],
+					alpha );
 		}
 
 		return argbIndices;

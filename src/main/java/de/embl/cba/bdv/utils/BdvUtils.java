@@ -28,6 +28,7 @@ import mpicbg.spim.data.XmlIoSpimData;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.Point;
+import net.imglib2.converter.Converter;
 import net.imglib2.histogram.DiscreteFrequencyDistribution;
 import net.imglib2.histogram.Histogram1d;
 import net.imglib2.histogram.Real1dBinMapper;
@@ -49,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.DoubleStream;
 
-import static de.embl.cba.bdv.utils.BdvUtils.*;
 import static de.embl.cba.transforms.utils.Transforms.createBoundingIntervalAfterTransformation;
 
 
@@ -136,6 +136,15 @@ public abstract class BdvUtils
 
 		return sources.get( sourceIndex ).getSpimSource();
 	}
+
+	public static Converter< ?, ARGBType > getConverter( Bdv bdv, int sourceIndex )
+	{
+		final List< SourceState< ? > > sources =
+				bdv.getBdvHandle().getViewerPanel().getState().getSources();
+
+		return sources.get( sourceIndex ).getConverter();
+	}
+
 
 	public static Source< ? > getVolatileSource( Bdv bdv, int sourceIndex )
 	{
@@ -794,10 +803,7 @@ public abstract class BdvUtils
 		}
 		else if ( source instanceof VolatileSpimSource )
 		{
-			Logger.error( "The source " + source.getName() + " is of type VolatileSpimSource!\n" +
-					"Thus it is not possible to get a nonVolatile access.\n" +
-					"Please contact Christian.Tischer@EMBL.DE" );
-			return null;
+			throw new UnsupportedOperationException( source.getName() + " is of type VolatileSpimSource; cannot get nonVolatile access" );
 		}
 		else
 		{
@@ -836,6 +842,8 @@ public abstract class BdvUtils
 		return 0;
 	}
 
+
+
 	public static RealRandomAccess
 	getInterpolatedRealTypeNonVolatileRealRandomAccess( Source source, int t, int level, Interpolation interpolation )
 	{
@@ -856,9 +864,7 @@ public abstract class BdvUtils
 		}
 		else if ( source instanceof VolatileSpimSource )
 		{
-			Logger.error( "The source " + source.getName() + " is of type VolatileSpimSource!\n" +
-					"Thus it is not possible to get a nonVolatile access.");
-			return null;
+			throw new UnsupportedOperationException( source.getName() + " is of type VolatileSpimSource; cannot get nonVolatile access" );
 		}
 		else
 		{

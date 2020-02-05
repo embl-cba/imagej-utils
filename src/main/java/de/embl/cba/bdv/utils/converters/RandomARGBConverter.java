@@ -5,11 +5,15 @@ import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class RandomARGBConverter implements Converter< RealType, VolatileARGBType >
 {
 	final static public double goldenRatio = 1.0 / ( 0.5 * Math.sqrt( 5 ) + 0.5 );
 	long seed;
 	byte[][] lut;
+	Map< Double, Integer > doubleToARGBIndex = new ConcurrentHashMap<>(  );
 
 	public RandomARGBConverter( )
 	{
@@ -49,8 +53,15 @@ public class RandomARGBConverter implements Converter< RealType, VolatileARGBTyp
 	@Override
 	public void convert( RealType realType, VolatileARGBType volatileARGBType )
 	{
-		final double random = createRandom( realType.getRealDouble() );
+		final double realDouble = realType.getRealDouble();
 
-		volatileARGBType.set( Luts.getARGBIndex( ( byte ) ( 255.0 * random ), lut ) );
+		if ( ! doubleToARGBIndex.containsKey( realDouble ) )
+		{
+			final double random = createRandom( realDouble );
+			final int argbIndex = Luts.getARGBIndex( ( byte ) ( 255.0 * random ), lut );
+			doubleToARGBIndex.put( realDouble, argbIndex );
+		}
+
+		volatileARGBType.get().set( doubleToARGBIndex.get( realDouble ) );
 	}
 }

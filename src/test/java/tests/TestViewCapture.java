@@ -25,6 +25,7 @@ import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
+import java.io.File;
 import java.util.List;
 
 public class TestViewCapture < R extends RealType< R > >
@@ -39,11 +40,13 @@ public class TestViewCapture < R extends RealType< R > >
 		final BdvStackSource< ? > show = BdvFunctions.show( source );
 		show.setDisplayRange( 0, w );
 
-		BdvViewCaptures.captureView(
-				show.getBdvHandle(),
-				1,
-				"nanometer",
-				false ).show();
+//		BdvViewCaptures.captureView(
+//				show.getBdvHandle(),
+//				1,
+//				"nanometer",
+//				false ).show();
+//
+		BdvViewCaptures.saveScreenShot( new File("/Users/tischer/Desktop/tmp.jpg"), show.getBdvHandle().getViewerPanel() );
 	}
 
 
@@ -67,6 +70,4 @@ public class TestViewCapture < R extends RealType< R > >
 		new ImageJ().ui().showUI();
 		new TestViewCapture().captureView();
 	}
-
-
 }

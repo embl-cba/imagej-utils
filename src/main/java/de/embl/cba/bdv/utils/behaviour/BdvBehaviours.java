@@ -9,8 +9,8 @@ import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.bdv.utils.bigwarp.BigWarpLauncher;
 import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
 import de.embl.cba.bdv.utils.capture.PixelSpacingDialog;
+import de.embl.cba.bdv.utils.capture.ViewCaptureResult;
 import de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter;
-import ij.CompositeImage;
 import ij.IJ;
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealPoint;
@@ -18,6 +18,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.util.Behaviours;
 
+import javax.swing.*;
 import java.util.List;
 
 import static de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter.*;
@@ -54,15 +55,39 @@ public class BdvBehaviours
 				final String pixelUnit = "micrometer";
 				final PixelSpacingDialog dialog = new PixelSpacingDialog( BdvUtils.getViewerVoxelSpacing( bdv ), pixelUnit );
 				if ( ! dialog.showDialog() ) return;
-				final CompositeImage compositeImage = BdvViewCaptures.captureView(
+				final ViewCaptureResult viewCaptureResult = BdvViewCaptures.captureView(
 						bdv,
 						dialog.getPixelSpacing(),
 						pixelUnit,
 						false );
-				compositeImage.show();
+				viewCaptureResult.rgbImage.show();
+				viewCaptureResult.rawImagesStack.show();
 			}).start();
-		}, "capture view", trigger ) ;
+		}, "capture raw view", trigger ) ;
 	}
+
+	public static void addSimpleViewCaptureBehaviour(
+			BdvHandle bdv,
+			Behaviours behaviours,
+			String trigger )
+	{
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+		{
+			new Thread( () -> {
+				SwingUtilities.invokeLater( () -> {
+					final JFileChooser jFileChooser = new JFileChooser();
+					if ( jFileChooser.showSaveDialog( bdv.getViewerPanel() ) == JFileChooser.APPROVE_OPTION )
+					{
+						BdvViewCaptures.saveScreenShot(
+								jFileChooser.getSelectedFile(),
+								bdv.getViewerPanel() );
+					}
+				});
+			}).start();
+
+		}, "capture simple view", trigger ) ;
+	}
+
 
 	public static void addExportSourcesToVoxelImagesBehaviour(
 			BdvHandle bdvHandle,
@@ -110,6 +135,8 @@ public class BdvBehaviours
 			}).start();
 		}, "ExportSourcesToVoxelImages", trigger ) ;
 	}
+
+
 
 	public static void addAlignSourcesWithBigWarpBehaviour(
 			BdvHandle bdvHandle,

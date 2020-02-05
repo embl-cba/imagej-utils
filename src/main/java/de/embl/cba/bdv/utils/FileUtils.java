@@ -15,6 +15,19 @@ public class FileUtils
 		return files;
 	}
 
+	public static File changeExtension(File f, String newExtension) {
+		if ( f.getName().contains( "." ) )
+		{
+			int i = f.getName().lastIndexOf( '.' );
+			String name = f.getName().substring( 0, i );
+			return new File( f.getParent() + "/" + name + newExtension );
+		}
+		else
+		{
+			return new File( f.toString() + ".jpg" );
+		}
+	}
+
 	public static void populateFileList(
 			File directory, String fileNameRegExp, List< File > files, boolean recursive ) {
 
