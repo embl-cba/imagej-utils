@@ -6,14 +6,15 @@ import java.util.ArrayList;
 
 
 /**
- * Modified version of Glasbey LUT, excluding grayish colors
- *
- *
+ * Modified version of Glasbey LUT,
+ * excluding grayish and dark colors
  *
  */
 public class GlasbeyARGBLut implements ARGBLut
 {
 	public static final int MINIMUM_RGB_DIFFERENCE = 50;
+	public static final int MINIMUM_SUM_BRIGHTNESS = 150;
+
 	private static int alpha;
 	private static ArrayList< Integer > indices;
 	private final int numColors;
@@ -120,6 +121,9 @@ public class GlasbeyARGBLut implements ARGBLut
 					&& ( Math.abs( g[ i ] - b[ i ] ) < MINIMUM_RGB_DIFFERENCE )
 					&& ( Math.abs( r[ i ] - b[ i ] ) < MINIMUM_RGB_DIFFERENCE ) )
 				continue; // too grayish
+
+			if ( ( r[ i ] + g[ i ] + b[ i ] ) < MINIMUM_SUM_BRIGHTNESS )
+				continue; // too dark
 
 			indices.add( ARGBType.rgba(
 					r[ i ],
