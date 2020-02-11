@@ -135,7 +135,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		 */
 		BdvBehaviours.addDisplaySettingsBehaviour( bdv, behaviours, "D" );
 
-		BdvBehaviours.addViewCaptureBehaviour( bdv, behaviours, "C" );
+		BdvBehaviours.addViewCaptureBehaviour( bdv, behaviours, "C", false );
 
 		BdvBehaviours.addPositionAndViewLoggingBehaviour( bdv, behaviours, "P" );
 

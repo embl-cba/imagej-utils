@@ -1347,4 +1347,20 @@ public abstract class BdvUtils
 		minmax.getMinBoundedValue().setCurrentValue( min );
 		minmax.getMaxBoundedValue().setCurrentValue( max );
 	}
+
+	public static String getGlobalMousePositionString( BdvHandle bdv )
+	{
+		final RealPoint globalMouseCoordinates = getGlobalMouseCoordinates( bdv );
+		final String string = globalMouseCoordinates.toString();
+		string.replace( "(", "" ).replace( ")", "" );
+		return string;
+	}
+
+	public static String getBdvViewerTransformString( BdvHandle bdv )
+	{
+		final AffineTransform3D view = new AffineTransform3D();
+		bdv.getViewerPanel().getState().getViewerTransform( view );
+
+		return view.toString().replace( "3d-affine: (", "" ).replace( ")", "" );
+	}
 }

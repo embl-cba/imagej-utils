@@ -62,6 +62,8 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 	 * @param pixelSpacing
 	 * @param voxelUnit
 	 * @return
+	 *
+	 * TODO clean up this mess!!
 	 */
 	public static synchronized < R extends RealType< R > > ViewCaptureResult captureView(
 			BdvHandle bdv,
@@ -282,7 +284,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		IJ.run( dup,
 				"Properties...",
 				"channels="+rais.size()
-						+" slices=1 frames=1 unit="+voxelUnit
+						+" slices=1 frames=1 unit=" + voxelUnit
 						+" pixel_width=" + voxelSpacing[ 0 ]
 						+" pixel_height=" + voxelSpacing[ 1 ]
 						+" voxel_depth=" + voxelSpacing[ 2 ] );
@@ -291,25 +293,13 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 
 		for ( int channel = 1; channel <= compositeImage.getNChannels(); ++channel )
 		{
-			final Boolean isSegmentation = isSegmentations.get( channel - 1 );
-
-			if ( isSegmentation )
-			{
-				// TODO: This does not reflect what one sees in the Platybrowser anyway
-//				final LUT lut = Luts.glasbeyLutIJ();
-//				compositeImage.setC( channel );
-//				compositeImage.setChannelLut( lut );
-			}
-			else
-			{
-//				Color color = new Color( colors.get( channel - 1 ).get() );
-				final LUT lut = compositeImage.createLutFromColor( Color.WHITE );
-				compositeImage.setC( channel );
-				compositeImage.setChannelLut( lut );
-				final double[] range = displayRanges.get( channel - 1 );
-				compositeImage.setDisplayRange( range[ 0 ], range[ 1 ] );
-			}
+			final LUT lut = compositeImage.createLutFromColor( Color.WHITE );
+			compositeImage.setC( channel );
+			compositeImage.setChannelLut( lut );
+			final double[] range = displayRanges.get( channel - 1 );
+			compositeImage.setDisplayRange( range[ 0 ], range[ 1 ] );
 		}
+
 		compositeImage.setTitle( "View Capture Raw" );
 		return compositeImage;
 	}

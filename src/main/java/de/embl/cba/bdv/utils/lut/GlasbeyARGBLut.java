@@ -2,31 +2,42 @@ package de.embl.cba.bdv.utils.lut;
 
 import net.imglib2.type.numeric.ARGBType;
 
+import java.util.ArrayList;
+
+
+/**
+ * Modified version of Glasbey LUT, excluding grayish colors
+ *
+ *
+ *
+ */
 public class GlasbeyARGBLut implements ARGBLut
 {
-	public static final int NUM_COLORS = 255;
+	public static final int MINIMUM_RGB_DIFFERENCE = 50;
 	private static int alpha;
-	private final int[] indices;
+	private static ArrayList< Integer > indices;
+	private final int numColors;
 
 	public GlasbeyARGBLut()
 	{
-		alpha = 255;
-		indices = this.argbGlasbeyIndices();
+		this( 255 );
 	}
 
 	public GlasbeyARGBLut( int alpha )
 	{
 		this.alpha = alpha;
 		indices = this.argbGlasbeyIndices();
+		numColors = indices.size();
 	}
 
 	@Override
 	public int getARGB( double x )
 	{
-		// convert to index > 0, unless x = 0.0D;
+		// convert to index > 0 unless x = 0.0D;
 		// (index 0 is the black color)
-		final int index = ( int ) Math.ceil( x * NUM_COLORS );
-		return indices[ index ];
+
+		final int index = ( int ) Math.ceil( x * ( numColors - 1 ) );
+		return indices.get( index );
 	}
 
 	/**
@@ -39,7 +50,7 @@ public class GlasbeyARGBLut implements ARGBLut
 	 *
 	 * @return Glasbey lookup table
 	 */
-	public final static int[] argbGlasbeyIndices()
+	public final static ArrayList< Integer > argbGlasbeyIndices()
 	{
 		int[] r = { 0, 0, 255, 0, 0, 255, 0, 255, 0, 154, 0, 120, 31, 255,
 				177, 241, 254, 221, 32, 114, 118, 2, 200, 136, 255, 133, 161,
@@ -98,19 +109,26 @@ public class GlasbeyARGBLut implements ARGBLut
 				89, 34, 223, 204, 69, 97, 78, 81, 248, 73, 35, 18, 173, 0, 51,
 				2, 158, 212, 89, 193, 43, 40, 246, 146, 84, 238, 72, 101, 101 };
 
-		int[] argbIndices = new int[ r.length ];
 
-		for (int i = 0; i < r.length; i++)
+		indices = new ArrayList< Integer >();
+
+		indices.add( ARGBType.rgba( 0, 0, 0, 0) );
+
+		for (int i = 1; i < r.length; i++)
 		{
+			if ( ( Math.abs( g[ i ] - r[ i ] ) < MINIMUM_RGB_DIFFERENCE )
+					&& ( Math.abs( g[ i ] - b[ i ] ) < MINIMUM_RGB_DIFFERENCE )
+					&& ( Math.abs( r[ i ] - b[ i ] ) < MINIMUM_RGB_DIFFERENCE ) )
+				continue; // too grayish
 
-			argbIndices[ i ] = ARGBType.rgba(
+			indices.add( ARGBType.rgba(
 					r[ i ],
 					g[ i ],
 					b[ i ],
-					alpha );
+					alpha ));
 		}
 
-		return argbIndices;
+		return indices;
 	}
 
 }

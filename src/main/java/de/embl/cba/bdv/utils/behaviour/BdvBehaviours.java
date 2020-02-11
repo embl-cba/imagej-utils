@@ -13,8 +13,6 @@ import de.embl.cba.bdv.utils.capture.ViewCaptureResult;
 import de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter;
 import ij.IJ;
 import net.imglib2.FinalRealInterval;
-import net.imglib2.RealPoint;
-import net.imglib2.realtransform.AffineTransform3D;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.util.Behaviours;
 
@@ -36,9 +34,8 @@ public class BdvBehaviours
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
 
 			(new Thread( () -> {
-				final RealPoint globalMouseCoordinates = BdvUtils.getGlobalMouseCoordinates( bdv );
-				Logger.log( "\nBigDataViewer position: \n" + globalMouseCoordinates.toString() );
-				Logger.log( "BigDataViewer transform: \n"+ getBdvViewerTransform( bdv ) );
+				Logger.log( "\nBigDataViewer position: " + BdvUtils.getGlobalMousePositionString( bdv ) );
+				Logger.log( "BigDataViewer transform: " + BdvUtils.getBdvViewerTransformString( bdv ) );
 			} )).start();
 
 		}, "Print position and view", trigger ) ;
@@ -47,7 +44,8 @@ public class BdvBehaviours
 	public static void addViewCaptureBehaviour(
 			BdvHandle bdv,
 			org.scijava.ui.behaviour.util.Behaviours behaviours,
-			String trigger )
+			String trigger,
+			final boolean showRawData )
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
@@ -61,7 +59,8 @@ public class BdvBehaviours
 						pixelUnit,
 						false );
 				viewCaptureResult.rgbImage.show();
-				viewCaptureResult.rawImagesStack.show();
+				if ( showRawData )
+					viewCaptureResult.rawImagesStack.show();
 			}).start();
 		}, "capture raw view", trigger ) ;
 	}
@@ -174,14 +173,6 @@ public class BdvBehaviours
 								true ),
 				"show display settings dialog",
 				trigger ) ;
-	}
-
-	public static String getBdvViewerTransform( BdvHandle bdv )
-	{
-		final AffineTransform3D view = new AffineTransform3D();
-		bdv.getViewerPanel().getState().getViewerTransform( view );
-
-		return view.toString().replace( "3d-affine", "View" );
 	}
 
 	public static void addSourceBrowsingBehaviour( BdvHandle bdv, Behaviours behaviours  )
