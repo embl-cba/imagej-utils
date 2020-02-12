@@ -28,6 +28,7 @@ public class Metadata
 
 	public enum Modality
 	{
+		@Deprecated
 		Segmentation,
 		FM,
 		EM,
