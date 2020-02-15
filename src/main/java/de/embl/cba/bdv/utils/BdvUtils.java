@@ -1165,7 +1165,6 @@ public abstract class BdvUtils
 				.getParent().getParent().getParent();
 	}
 
-
 	public static < R extends RealType< R > & NativeType< R > >
 	RandomAccessibleIntervalSource4D< R > createSourceFrom2DFrameList(
 			ArrayList< RandomAccessibleInterval< R > > frames2D,

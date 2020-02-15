@@ -5,10 +5,13 @@ import ij3d.Content;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Metadata
 {
+	// TODO: refactor this, e.g. separate in basic metadata and other metadata that extends the basic metadata
 	public String displayName = "Image";
 	public Color color = null;
 	public String colorMap = null;
@@ -23,7 +26,11 @@ public class Metadata
 	public BdvStackSource< ? > bdvStackSource = null;
 	public Content content = null; // 3D
 	public String segmentsTablePath = null;
-	public ArrayList< Double > selectedSegmentIds =  new ArrayList<>(  );
+	public List< String > additionalSegmentTableNames = new ArrayList<>(  );
+	public String colorByColumn = null;
+	public List< Double > selectedSegmentIds = new ArrayList<>(  );
+	public boolean showSelectedSegmentsIn3d = false;
+	public boolean showImageIn3d = false;
 	public String xmlLocation = null;
 
 	public enum Modality
