@@ -14,10 +14,12 @@ public class Metadata
 	// TODO: refactor this, e.g. separate in basic metadata and other metadata that extends the basic metadata
 	public String displayName = "Image";
 	public Color color = null;
-	public String colorMap = null;
-	public Type type = null;
 	public Double displayRangeMin = null;
 	public Double displayRangeMax = null;
+	public String colorMap = null;
+	public Double colorMapMin = null;
+	public Double colorMapMax = null;
+	public Type type = null;
 	public String imageId = null;
 	public List< String > imageSetIDs = new ArrayList<>();
 	public Modality modality = Modality.FM;
