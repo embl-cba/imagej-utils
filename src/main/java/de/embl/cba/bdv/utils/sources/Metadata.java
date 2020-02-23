@@ -1,6 +1,7 @@
 package de.embl.cba.bdv.utils.sources;
 
 import bdv.util.BdvStackSource;
+import de.embl.cba.tables.view.combined.SegmentsTableBdvAnd3dViews;
 import ij3d.Content;
 
 import java.awt.*;
@@ -12,6 +13,7 @@ import java.util.Map;
 public class Metadata
 {
 	// TODO: refactor this, e.g. separate in basic metadata and other metadata that extends the basic metadata
+	// TODO: also it really now became a SourceState as well
 	public String displayName = "Image";
 	public Color color = null;
 	public Double displayRangeMin = null;
@@ -34,6 +36,7 @@ public class Metadata
 	public boolean showSelectedSegmentsIn3d = false;
 	public boolean showImageIn3d = false;
 	public String xmlLocation = null;
+	public SegmentsTableBdvAnd3dViews views = null;
 
 	public enum Modality
 	{
@@ -48,7 +51,7 @@ public class Metadata
 	{
 		Image,
 		Segmentation,
-		Mask,
+		Mask
 	}
 
 	public Metadata( String imageId )
