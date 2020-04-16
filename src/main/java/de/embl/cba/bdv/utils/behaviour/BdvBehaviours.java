@@ -158,7 +158,7 @@ public class BdvBehaviours
 				);
 
 			}).start();
-		}, "ExportSourcesToVoxelImages", trigger ) ;
+		}, "AlignSourcesWithBigWarp", trigger ) ;
 	}
 
 	public static void addDisplaySettingsBehaviour(

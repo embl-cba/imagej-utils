@@ -161,8 +161,6 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> SwingUtilities.invokeLater( () -> {
 			helpDialog.setVisible( ! helpDialog.isVisible() );
 		} ), "Show additional help", "F2" ) ;
-
-
 	}
 
 	private void addPlatynereisRegistrationBehaviour( Behaviours behaviours )
