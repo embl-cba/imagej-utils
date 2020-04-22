@@ -144,6 +144,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		BdvBehaviours.addSourceBrowsingBehaviour( bdv, behaviours );
 
 		BdvBehaviours.addAlignSourcesWithBigWarpBehaviour( bdv, behaviours, "ctrl B");
+
 		addPlatynereisRegistrationBehaviour( behaviours );
 
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> (new Thread( () -> {

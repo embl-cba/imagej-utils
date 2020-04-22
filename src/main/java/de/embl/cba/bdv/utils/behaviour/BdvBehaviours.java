@@ -135,8 +135,6 @@ public class BdvBehaviours
 		}, "ExportSourcesToVoxelImages", trigger ) ;
 	}
 
-
-
 	public static void addAlignSourcesWithBigWarpBehaviour(
 			BdvHandle bdvHandle,
 			org.scijava.ui.behaviour.util.Behaviours behaviours,

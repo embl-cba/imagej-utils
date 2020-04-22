@@ -36,6 +36,5 @@ public class BrightnessUpdateListener implements BoundedValueDouble.UpdateListen
 		{
 			converterSetup.setDisplayRange( min.getCurrentValue(), max.getCurrentValue() );
 		}
-
 	}
 }

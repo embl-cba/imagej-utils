@@ -193,7 +193,7 @@ public abstract class BdvDialogs
 		return panel;
 	}
 
-	public static JButton createColorButton( JPanel panel,
+	public static JButton createColorButton( JComponent component,
 											 int[] buttonDimensions,
 											 Bdv bdv,
 											 ArrayList< Integer > sourceIndices )
@@ -215,7 +215,7 @@ public abstract class BdvDialogs
 						.setColor( BdvUtils.asArgbType( color ) );
 			}
 
-			panel.setBackground( color );
+			component.setBackground( color );
 		} );
 
 
@@ -224,9 +224,8 @@ public abstract class BdvDialogs
 
 	public static JButton createColorButton( JPanel panel,
 											 int[] buttonDimensions,
-											 BdvStackSource bdvStackSource )
+											 BdvSource bdvSource )
 	{
-
 		JButton colorButton;
 		colorButton = new JButton( "C" );
 
@@ -236,8 +235,30 @@ public abstract class BdvDialogs
 		colorButton.addActionListener( e -> {
 			Color color = JColorChooser.showDialog( null, "", null );
 			if ( color == null ) return;
-			bdvStackSource.setColor( BdvUtils.asArgbType( color ) );
+			bdvSource.setColor( BdvUtils.asArgbType( color ) );
 			panel.setBackground( color );
+		} );
+
+		return colorButton;
+	}
+
+	public static JButton createColorButtonWithColoredBackground(
+			int[] buttonDimensions,
+			BdvSource bdvSource,
+			Color initialColor )
+	{
+		JButton colorButton;
+		colorButton = new JButton( " " );
+		colorButton.setBackground( initialColor );
+
+		colorButton.setPreferredSize(
+				new Dimension( buttonDimensions[ 0 ], buttonDimensions[ 1 ] ) );
+
+		colorButton.addActionListener( e -> {
+			Color color = JColorChooser.showDialog( null, "", null );
+			if ( color == null ) return;
+			bdvSource.setColor( BdvUtils.asArgbType( color ) );
+			colorButton.setBackground( color );
 		} );
 
 		return colorButton;
@@ -315,7 +336,6 @@ public abstract class BdvDialogs
 		return button;
 	}
 
-
 	private static ArrayList< ConverterSetup > getConverterSetups(
 			BdvStackSource bdvStackSource )
 	{
@@ -366,12 +386,19 @@ public abstract class BdvDialogs
 						rangeMax,
 						currentRangeMax );
 
+		double spinnerStepSize = ( currentRangeMax - currentRangeMin ) / 100.0;
+
 		JPanel panel = new JPanel();
 		panel.setLayout( new BoxLayout( panel, BoxLayout.PAGE_AXIS ) );
 		final SliderPanelDouble minSlider =
-				new SliderPanelDouble( "Min", min, 1 );
+				new SliderPanelDouble( "Min", min, spinnerStepSize );
+		minSlider.setNumColummns( 7 );
+		minSlider.setDecimalFormat( "####E0" );
+
 		final SliderPanelDouble maxSlider =
-				new SliderPanelDouble( "Max", max, 1 );
+				new SliderPanelDouble( "Max", max, spinnerStepSize );
+		maxSlider.setNumColummns( 7 );
+		maxSlider.setDecimalFormat( "####E0" );
 
 		final BrightnessUpdateListener brightnessUpdateListener =
 				new BrightnessUpdateListener(
@@ -485,7 +512,7 @@ public abstract class BdvDialogs
 
 	public static JCheckBox createVisibilityCheckbox(
 			int[] dims,
-			BdvStackSource bdvStackSource,
+			BdvSource bdvSource,
 			boolean isVisible )
 	{
 		JCheckBox checkBox = new JCheckBox( "" );
@@ -493,7 +520,7 @@ public abstract class BdvDialogs
 		checkBox.setPreferredSize( new Dimension( dims[ 0 ], dims[ 1 ] ) );
 
 		checkBox.addActionListener( e ->
-				bdvStackSource.setActive( checkBox.isSelected() ) );
+				bdvSource.setActive( checkBox.isSelected() ) );
 
 		return checkBox;
 	}

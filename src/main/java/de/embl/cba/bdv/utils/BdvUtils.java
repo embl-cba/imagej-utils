@@ -8,6 +8,7 @@ import bdv.tools.brightness.MinMaxGroup;
 import bdv.tools.brightness.SetupAssignments;
 import bdv.tools.transformation.TransformedSource;
 import bdv.viewer.state.ViewerState;
+import de.embl.cba.bdv.utils.measure.PixelValueStatistics;
 import de.embl.cba.bdv.utils.sources.*;
 import de.embl.cba.bdv.utils.transforms.ConcatenatedTransformAnimator;
 
@@ -27,27 +28,39 @@ import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
+import net.imglib2.Cursor;
 import net.imglib2.Point;
+import net.imglib2.RandomAccess;
+import net.imglib2.algorithm.neighborhood.HyperSphereShape;
+import net.imglib2.algorithm.neighborhood.Neighborhood;
+import net.imglib2.algorithm.neighborhood.Shape;
 import net.imglib2.converter.Converter;
 import net.imglib2.histogram.DiscreteFrequencyDistribution;
 import net.imglib2.histogram.Histogram1d;
 import net.imglib2.histogram.Real1dBinMapper;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.roi.IterableRegion;
+import net.imglib2.roi.Masks;
+import net.imglib2.roi.RealMask;
+import net.imglib2.roi.Regions;
+import net.imglib2.roi.geom.GeomMasks;
+import net.imglib2.roi.geom.real.Sphere;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.util.Util;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collector;
 import java.util.stream.DoubleStream;
 
 import static de.embl.cba.transforms.utils.Transforms.createBoundingIntervalAfterTransformation;
@@ -654,7 +667,6 @@ public abstract class BdvUtils
 		return posInBdvInMicrometer;
 	}
 
-
 	public static < R extends RealType< R > >
 	Map< Integer, Double >
 	getPixelValuesOfActiveSources( Bdv bdv, RealPoint point, int t )
@@ -669,6 +681,28 @@ public abstract class BdvUtils
 
 			if ( realDouble != null )
 				sourceIndexToPixelValue.put( sourceIndex, realDouble );
+		}
+
+		return sourceIndexToPixelValue;
+	}
+
+	public static
+	HashMap< Integer, PixelValueStatistics > getPixelValueStatisticsOfActiveSources(
+			Bdv bdv,
+			RealPoint point,
+			double radius,
+			int t )
+	{
+		final HashMap< Integer, PixelValueStatistics > sourceIndexToPixelValue = new HashMap<>();
+
+		final List< Integer > visibleSourceIndices = getVisibleSourceIndices( bdv );
+
+		for ( int sourceIndex : visibleSourceIndices )
+		{
+			final PixelValueStatistics statistics = getPixelValueStatistics( bdv, sourceIndex, point, radius, t );
+
+			if ( statistics != null )
+				sourceIndexToPixelValue.put( sourceIndex, statistics );
 		}
 
 		return sourceIndexToPixelValue;
@@ -689,6 +723,114 @@ public abstract class BdvUtils
 		final Source source = sourceState.getSpimSource();
 
 		return getPixelValue( source, point, t );
+	}
+
+	public static PixelValueStatistics getPixelValueStatistics( Bdv bdv, int sourceIndex, RealPoint point, double radius, int t )
+	{
+		final SourceState< ? > sourceState =
+				bdv.getBdvHandle().getViewerPanel()
+						.getState().getSources().get( sourceIndex );
+
+		final Source source = sourceState.getSpimSource();
+
+		return getPixelValueStatistics( bdv, source, point, radius, t );
+	}
+
+	private static PixelValueStatistics getPixelValueStatistics( Bdv bdv, Source source, RealPoint point, double radius, int t )
+	{
+		final RandomAccessibleInterval< ? extends RealType< ? > > rai = getRealTypeNonVolatileRandomAccessibleInterval( source, t, 0 );
+
+		if ( rai == null ) return null;
+
+		final long[] positionInSource = BdvUtils.getPositionInSource( source, point, t, 0 );
+
+		final int sourceIndex = getSourceIndex( bdv, source );
+
+		final VoxelDimensions voxelDimensions = BdvUtils.getVoxelDimensions( bdv, sourceIndex );
+
+		double pixelSize = 1;
+		if ( voxelDimensions != null )
+			pixelSize = voxelDimensions.dimension( 0 );
+
+		// Create a sphere shaped ROI
+		final double[] center = new double[ 3 ];
+		point.localize( center );
+		RealMask mask = GeomMasks.closedSphere(center, radius );
+
+		IterableRegion< BoolType > iterableRegion = toIterableRegion(mask, rai);
+		IterableInterval< ? extends RealType<?>> iterable = Regions.sample(iterableRegion, rai);
+
+		final ArrayList< Double > values = new ArrayList<>();
+		for( RealType<?> pixel : iterable )
+		{
+			values.add( pixel.getRealDouble() );
+		}
+
+		final DoubleStatistics summaryStatistics = values.stream().collect(
+				DoubleStatistics::new,
+				DoubleStatistics::accept,
+				DoubleStatistics::combine );
+
+
+		final PixelValueStatistics statistics = new PixelValueStatistics();
+		statistics.numVoxels = summaryStatistics.getCount();
+		statistics.mean = summaryStatistics.getAverage();
+		statistics.sdev = summaryStatistics.getStandardDeviation();
+
+		return statistics;
+	}
+
+	static class DoubleStatistics extends DoubleSummaryStatistics {
+
+		private double sumOfSquare = 0.0d;
+		private double sumOfSquareCompensation; // Low order bits of sum
+		private double simpleSumOfSquare; // Used to compute right sum for non-finite inputs
+
+		@Override
+		public void accept(double value) {
+			super.accept(value);
+			double squareValue = value * value;
+			simpleSumOfSquare += squareValue;
+			sumOfSquareWithCompensation(squareValue);
+		}
+
+		public DoubleStatistics combine(DoubleStatistics other) {
+			super.combine(other);
+			simpleSumOfSquare += other.simpleSumOfSquare;
+			sumOfSquareWithCompensation(other.sumOfSquare);
+			sumOfSquareWithCompensation(other.sumOfSquareCompensation);
+			return this;
+		}
+
+		private void sumOfSquareWithCompensation(double value) {
+			double tmp = value - sumOfSquareCompensation;
+			double velvel = sumOfSquare + tmp; // Little wolf of rounding error
+			sumOfSquareCompensation = (velvel - sumOfSquare) - tmp;
+			sumOfSquare = velvel;
+		}
+
+		public double getSumOfSquare() {
+			double tmp =  sumOfSquare + sumOfSquareCompensation;
+			if (Double.isNaN(tmp) && Double.isInfinite(simpleSumOfSquare)) {
+				return simpleSumOfSquare;
+			}
+			return tmp;
+		}
+
+		public final double getStandardDeviation() {
+			return getCount() > 0 ? Math.sqrt((getSumOfSquare() / getCount()) - Math.pow(getAverage(), 2)) : 0.0d;
+		}
+
+	}
+
+	private static IterableRegion< BoolType > toIterableRegion( RealMask mask, Interval image )
+	{
+		// Convert ROI from R^n to Z^n.
+		final RandomAccessible<BoolType > discreteROI = Views.raster( Masks.toRealRandomAccessible(mask) );
+		// Apply finite bounds to the discrete ROI.
+		final IntervalView<BoolType> boundedDiscreteROI = Views.interval(discreteROI, image);
+		// Create an iterable version of the finite discrete ROI.
+		return Regions.iterable(boundedDiscreteROI);
 	}
 
 	public static ArrayList< Integer > getSourceIndicesAtSelectedPoint( Bdv bdv, RealPoint selectedPoint, boolean evalSourcesAtPointIn2D )
@@ -738,7 +880,6 @@ public abstract class BdvUtils
 
 		return sourceIndicesAtSelectedPoint;
 	}
-
 
 
 	public static Double getPixelValue(
