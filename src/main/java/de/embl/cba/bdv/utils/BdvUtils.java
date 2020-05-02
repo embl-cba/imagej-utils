@@ -40,10 +40,7 @@ import net.imglib2.histogram.Histogram1d;
 import net.imglib2.histogram.Real1dBinMapper;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.roi.IterableRegion;
-import net.imglib2.roi.Masks;
-import net.imglib2.roi.RealMask;
-import net.imglib2.roi.Regions;
+import net.imglib2.roi.*;
 import net.imglib2.roi.geom.GeomMasks;
 import net.imglib2.roi.geom.real.Sphere;
 import net.imglib2.type.NativeType;
@@ -57,6 +54,7 @@ import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -250,12 +248,12 @@ public abstract class BdvUtils
 		final double viewerPhysicalVoxelSpacingX = viewerPhysicalWidth / windowWidth;
 		final double viewerPhysicalVoxelSpacingY = viewerPhysicalHeight / windowHeight;
 
-		IJ.log( "[DEBUG] windowWidth = " + windowWidth );
-		IJ.log( "[DEBUG] windowHeight = " + windowHeight );
-		IJ.log( "[DEBUG] viewerPhysicalWidth = " + viewerPhysicalWidth );
-		IJ.log( "[DEBUG] viewerPhysicalHeight = " + viewerPhysicalHeight );
-		IJ.log( "[DEBUG] viewerPhysicalVoxelSpacingX = " + viewerPhysicalVoxelSpacingX );
-		IJ.log( "[DEBUG] viewerPhysicalVoxelSpacingY = " + viewerPhysicalVoxelSpacingY );
+//		IJ.log( "[DEBUG] windowWidth = " + windowWidth );
+//		IJ.log( "[DEBUG] windowHeight = " + windowHeight );
+//		IJ.log( "[DEBUG] viewerPhysicalWidth = " + viewerPhysicalWidth );
+//		IJ.log( "[DEBUG] viewerPhysicalHeight = " + viewerPhysicalHeight );
+//		IJ.log( "[DEBUG] viewerPhysicalVoxelSpacingX = " + viewerPhysicalVoxelSpacingX );
+//		IJ.log( "[DEBUG] viewerPhysicalVoxelSpacingY = " + viewerPhysicalVoxelSpacingY );
 
 		return viewerPhysicalVoxelSpacingX;
 	}
@@ -755,8 +753,7 @@ public abstract class BdvUtils
 		// Create a sphere shaped ROI
 		final double[] center = new double[ 3 ];
 		point.localize( center );
-		RealMask mask = GeomMasks.closedSphere(center, radius );
-
+		RealMaskRealInterval mask = GeomMasks.closedSphere(center, radius );
 		IterableRegion< BoolType > iterableRegion = toIterableRegion(mask, rai);
 		IterableInterval< ? extends RealType<?>> iterable = Regions.sample(iterableRegion, rai);
 
@@ -823,14 +820,18 @@ public abstract class BdvUtils
 
 	}
 
-	private static IterableRegion< BoolType > toIterableRegion( RealMask mask, Interval image )
+	private static IterableRegion< BoolType > toIterableRegion( RealMaskRealInterval mask, Interval image )
 	{
 		// Convert ROI from R^n to Z^n.
 		final RandomAccessible<BoolType > discreteROI = Views.raster( Masks.toRealRandomAccessible(mask) );
 		// Apply finite bounds to the discrete ROI.
-		final IntervalView<BoolType> boundedDiscreteROI = Views.interval(discreteROI, image);
+		final Interval maskInterval = Intervals.smallestContainingInterval( mask );
+		final FinalInterval intersect = Intervals.intersect( maskInterval, image );
+		final IntervalView<BoolType> boundedDiscreteROI = Views.interval(discreteROI, intersect);
 		// Create an iterable version of the finite discrete ROI.
-		return Regions.iterable(boundedDiscreteROI);
+		final IterableRegion< BoolType > iterable = Regions.iterable( boundedDiscreteROI );
+
+		return iterable;
 	}
 
 	public static ArrayList< Integer > getSourceIndicesAtSelectedPoint( Bdv bdv, RealPoint selectedPoint, boolean evalSourcesAtPointIn2D )

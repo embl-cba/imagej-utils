@@ -20,6 +20,7 @@ import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class ExamplePixelStatisticsOfVisibleSources
 {
@@ -52,6 +53,13 @@ public class ExamplePixelStatisticsOfVisibleSources
 		stackSource1.setDisplayRange( 0, 300 );
 
 		final HashMap< Integer, PixelValueStatistics > statistics = BdvUtils.getPixelValueStatisticsOfActiveSources( bdv, new RealPoint( 100, 100, 0 ), 3, 0 );
+
+		for ( Map.Entry< Integer, PixelValueStatistics > entry : statistics.entrySet() )
+		{
+			System.out.println( entry.getKey() );
+			System.out.println( entry.getValue() );
+
+		}
 	}
 
 	public static ArrayImg< UnsignedIntType, IntArray > createImage()

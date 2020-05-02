@@ -34,12 +34,10 @@ import java.util.Map;
 
 public class BdvRaiVolumeExport< T extends RealType< T >  & NativeType< T > >
 {
-
 	public static final int CHANNEL_DIM = 3;
 	public static final int TIME_DIM = 4;
 
-
-	// Use BdvRaiCYZCTExport instead
+	// UseBdvRaiCYZCTExport instead
 	@Deprecated
 	public void export(
 			RandomAccessibleInterval< T > raiXYZ,
