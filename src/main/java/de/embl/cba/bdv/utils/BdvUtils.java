@@ -28,12 +28,8 @@ import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
-import net.imglib2.Cursor;
 import net.imglib2.Point;
 import net.imglib2.RandomAccess;
-import net.imglib2.algorithm.neighborhood.HyperSphereShape;
-import net.imglib2.algorithm.neighborhood.Neighborhood;
-import net.imglib2.algorithm.neighborhood.Shape;
 import net.imglib2.converter.Converter;
 import net.imglib2.histogram.DiscreteFrequencyDistribution;
 import net.imglib2.histogram.Histogram1d;
@@ -42,7 +38,6 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.roi.*;
 import net.imglib2.roi.geom.GeomMasks;
-import net.imglib2.roi.geom.real.Sphere;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.ARGBType;
@@ -54,11 +49,9 @@ import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.DoubleStream;
 
 import static de.embl.cba.transforms.utils.Transforms.createBoundingIntervalAfterTransformation;
@@ -777,50 +770,7 @@ public abstract class BdvUtils
 		return statistics;
 	}
 
-	static class DoubleStatistics extends DoubleSummaryStatistics {
-
-		private double sumOfSquare = 0.0d;
-		private double sumOfSquareCompensation; // Low order bits of sum
-		private double simpleSumOfSquare; // Used to compute right sum for non-finite inputs
-
-		@Override
-		public void accept(double value) {
-			super.accept(value);
-			double squareValue = value * value;
-			simpleSumOfSquare += squareValue;
-			sumOfSquareWithCompensation(squareValue);
-		}
-
-		public DoubleStatistics combine(DoubleStatistics other) {
-			super.combine(other);
-			simpleSumOfSquare += other.simpleSumOfSquare;
-			sumOfSquareWithCompensation(other.sumOfSquare);
-			sumOfSquareWithCompensation(other.sumOfSquareCompensation);
-			return this;
-		}
-
-		private void sumOfSquareWithCompensation(double value) {
-			double tmp = value - sumOfSquareCompensation;
-			double velvel = sumOfSquare + tmp; // Little wolf of rounding error
-			sumOfSquareCompensation = (velvel - sumOfSquare) - tmp;
-			sumOfSquare = velvel;
-		}
-
-		public double getSumOfSquare() {
-			double tmp =  sumOfSquare + sumOfSquareCompensation;
-			if (Double.isNaN(tmp) && Double.isInfinite(simpleSumOfSquare)) {
-				return simpleSumOfSquare;
-			}
-			return tmp;
-		}
-
-		public final double getStandardDeviation() {
-			return getCount() > 0 ? Math.sqrt((getSumOfSquare() / getCount()) - Math.pow(getAverage(), 2)) : 0.0d;
-		}
-
-	}
-
-	private static IterableRegion< BoolType > toIterableRegion( RealMaskRealInterval mask, Interval image )
+	public static IterableRegion< BoolType > toIterableRegion( RealMaskRealInterval mask, Interval image )
 	{
 		// Convert ROI from R^n to Z^n.
 		final RandomAccessible<BoolType > discreteROI = Views.raster( Masks.toRealRandomAccessible(mask) );
