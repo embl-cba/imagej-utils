@@ -15,15 +15,11 @@ public class Metadata
 	// TODO: refactor this, e.g. separate in basic metadata and other metadata that extends the basic metadata
 	// TODO: also it really now became a SourceState as well
 	public String displayName = "Image";
-	public Color color = null;
-	public Double displayRangeMin = null;
-	public Double displayRangeMax = null;
-	public String colorMap = null;
-	public Double colorMapMin = null;
-	public Double colorMapMax = null;
-	public Type type = null;
+	public String color = null;
+	public double[] contrastLimits;
 	public String imageId = null;
 	public List< String > imageSetIDs = new ArrayList<>();
+	public Type type = Type.Image;
 	public Modality modality = Modality.FM;
 	public int numSpatialDimensions = 3;
 	public boolean showInitially = false;

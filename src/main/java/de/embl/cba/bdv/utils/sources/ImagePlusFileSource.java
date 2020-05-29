@@ -54,13 +54,11 @@ public class ImagePlusFileSource < R extends RealType< R > & NativeType< R > >
 
 		if( metadata.modality == Metadata.Modality.Segmentation || imagePlus.getBitDepth() == 8 )
 		{
-			metadata.displayRangeMin = 0.0;
-			metadata.displayRangeMax = 500.0;
+			metadata.contrastLimits = new double[]{0.0,500};
 		}
 		else if( imagePlus.getBitDepth() == 16 )
 		{
-			metadata.displayRangeMin = 0.0;
-			metadata.displayRangeMax = 65535.0;
+			metadata.contrastLimits = new double[]{0.0,65535.0};
 		}
 
 		raiSource4D = ( ModifiableRandomAccessibleIntervalSource4D< R > )
