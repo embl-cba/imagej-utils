@@ -22,7 +22,7 @@ public class ConvertRegisteredParapodLabelsToVoxelGridImageUsingMain
 				);
 
 
-		// java -jar /Users/tischer/Documents/bdv-utils/target/bdv-utils-0.2.16-jar-with-dependencies.jar "/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/AChE-MED.xml" "/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/ulong/em-segmented-cells-parapod-fib-labels.xml" "NearestNeighbor" "Tiff" "/Users/tischer/Desktop/pao"
+		// java -jar /Users/tischer/Documents/imagej-utils/target/imagej-utils-0.2.16-jar-with-dependencies.jar "/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/AChE-MED.xml" "/Volumes/arendt/EM_6dpf_segmentation/EM-Prospr/ulong/em-segmented-cells-parapod-fib-labels.xml" "NearestNeighbor" "Tiff" "/Users/tischer/Desktop/pao"
 
 	}
 }

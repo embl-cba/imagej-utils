@@ -7,9 +7,9 @@
 		<version>0.3.12</version>
 		<relativePath>../pom-embl-cba</relativePath>
 	</parent>
-	<artifactId>bdv-utils</artifactId>
-	<url>https://github.com/tischi/bdv-utils</url>
-	<version>0.3.5</version>
+	<artifactId>imagej-utils</artifactId>
+	<url>https://github.com/tischi/imagej-utils</url>
+	<version>0.5.0</version>
 	<name>BigDataViewer Utilities</name>
 	<description>TODO</description>
 	<inceptionYear>2018</inceptionYear>
@@ -49,14 +49,14 @@
 		</mailingList>
 	</mailingLists>
 	<scm>
-		<connection>scm:git:git://github.com/tischi/bdv-utils</connection>
-		<developerConnection>scm:git:git@github.com/tischi/bdv-utils</developerConnection>
+		<connection>scm:git:git://github.com/tischi/imagej-utils</connection>
+		<developerConnection>scm:git:git@github.com/tischi/imagej-utils</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/tischi/bdv-utils</url>
+		<url>https://github.com/tischi/imagej-utils</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/imglib/bdv-utils/issues</url>
+		<url>https://github.com/imglib/imagej-utils/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>None</system>
@@ -88,7 +88,7 @@
 	<!--								</manifest>-->
 	<!--							</archive>-->
 	<!--							<outputDirectory>-->
-	<!--								/Users/tischer/Documents/bdv-utils/target-->
+	<!--								/Users/tischer/Documents/imagej-utils/target-->
 	<!--							</outputDirectory>-->
 	<!--							<descriptorRefs>-->
 	<!--								<descriptorRef>jar-with-dependencies</descriptorRef>-->
@@ -133,6 +133,7 @@
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2</artifactId>
 		</dependency>
+		<!-- TODO: Is this version still needed? -->
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
@@ -166,16 +167,10 @@
 			<artifactId>image-transform-converters</artifactId>
 		</dependency>
 		<!-- TODO: try to remove. It is only here for the platynereis registration	-->
-<!--		<dependency>-->
-<!--			<groupId>de.embl.cba</groupId>-->
-<!--			<artifactId>fiji-plugin-morphometry</artifactId>-->
-<!--		</dependency>-->
-		<!-- FOR BENCHMARKING, MAYBE REMOVE LATER -->
 		<dependency>
 			<groupId>de.embl.cba</groupId>
-			<artifactId>imaris-writer</artifactId>
+			<artifactId>fiji-plugin-morphometry</artifactId>
 		</dependency>
-		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -185,7 +180,7 @@
 		<repository>
 			<id>bintray-tischi-snapshots</id>
 			<name>tischi-snapshots</name>
-			<url>https://api.bintray.com/maven/tischi/snapshots/bdv-utils/;publish=1</url>
+			<url>https://api.bintray.com/maven/tischi/snapshots/imagej-utils/;publish=1</url>
 		</repository>
 	</distributionManagement>
 </project>

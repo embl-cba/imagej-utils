@@ -9,8 +9,8 @@
 		<relativePath>../pom-embl-cba</relativePath>
 	</parent>
 
-	<artifactId>bdv-utils</artifactId>
-	<url>https://github.com/tischi/bdv-utils</url>
+	<artifactId>imagej-utils</artifactId>
+	<url>https://github.com/tischi/imagej-utils</url>
 	<version>0.2.16</version>
 
 	<name>BigDataViewer Utilities</name>
@@ -55,14 +55,14 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/tischi/bdv-utils</connection>
-		<developerConnection>scm:git:git@github.com/tischi/bdv-utils</developerConnection>
+		<connection>scm:git:git://github.com/tischi/imagej-utils</connection>
+		<developerConnection>scm:git:git@github.com/tischi/imagej-utils</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/tischi/bdv-utils</url>
+		<url>https://github.com/tischi/imagej-utils</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/imglib/bdv-utils/issues</url>
+		<url>https://github.com/imglib/imagej-utils/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>None</system>
@@ -167,7 +167,7 @@
 		<repository>
 			<id>bintray-tischi-snapshots</id>
 			<name>tischi-snapshots</name>
-			<url>https://api.bintray.com/maven/tischi/snapshots/bdv-utils/;publish=1</url>
+			<url>https://api.bintray.com/maven/tischi/snapshots/imagej-utils/;publish=1</url>
 		</repository>
 	</distributionManagement>
 

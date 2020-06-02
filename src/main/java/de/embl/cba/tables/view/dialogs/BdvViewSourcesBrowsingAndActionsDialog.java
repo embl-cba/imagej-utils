@@ -120,7 +120,7 @@ public class BdvViewSourcesBrowsingAndActionsDialog extends JPanel
 		saveScreenShot( outputFile, bdvView.getBdv().getViewerPanel() );
 	}
 
-	// TODO move to bdv-utils or bdv-playground
+	// TODO move to imagej-utils or bdv-playground
 	public static void saveScreenShot( final File outputFile, ViewerPanel viewer )
 	{
 		final ViewerState renderState = viewer.getState();

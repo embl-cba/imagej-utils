@@ -19,7 +19,7 @@ public class TestBdvTiffSlicesExportCommand
 		command.voxelSizeX = 1.0;
 		command.voxelSizeY = 1.0;
 		command.voxelSizeZ = 20.0;
-		command.xmlOutputPath = new File("/Users/tischer/Documents/bdv-utils/src/test/resources/test-data/mri.xml" );
+		command.xmlOutputPath = new File("/Users/tischer/Documents/imagej-utils/src/test/resources/test-data/mri.xml" );
 
 		command.run();
 

@@ -1,4 +1,4 @@
-# bdv-utils
+# imagej-utils
 
 
 ## Commands

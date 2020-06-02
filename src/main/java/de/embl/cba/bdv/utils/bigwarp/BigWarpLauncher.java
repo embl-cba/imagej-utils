@@ -74,7 +74,7 @@ public class BigWarpLauncher
 		bigWarp.getLandmarkFrame().repaint();
 		bigWarp.setTransformType( TransformTypeSelectDialog.SIMILARITY );
 
-//		bigWarp.loadLandmarks( "/Users/tischer/Documents/bdv-utils/src/test/resources/mri-stack-shifted-landmarks.csv" );
+//		bigWarp.loadLandmarks( "/Users/tischer/Documents/imagej-utils/src/test/resources/mri-stack-shifted-landmarks.csv" );
 
 		addListeners( bdvHandle, bigWarp, ( TransformedSource ) movingSource );
 	}

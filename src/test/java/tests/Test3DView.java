@@ -15,6 +15,7 @@ import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
 import net.imagej.ImageJ;
+import net.imagej.patcher.LegacyInjector;
 import net.imglib2.type.numeric.ARGBType;
 import org.junit.Test;
 
@@ -22,7 +23,7 @@ import java.util.List;
 
 public class Test3DView
 {
-	@Test
+	//@Test
 	public void showObjectAndVolumeIn3D() throws SpimDataException
 	{
 		final ImageJ ij = new ImageJ();

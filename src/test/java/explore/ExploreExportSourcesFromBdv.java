@@ -55,7 +55,7 @@ public class ExploreExportSourcesFromBdv
 						new ProgressWriterIJ()
 				);
 
-		exporter.setOutputDirectory( "/Users/tischer/Documents/bdv-utils/src/test/resources/test-output-data" );
+		exporter.setOutputDirectory( "/Users/tischer/Documents/imagej-utils/src/test/resources/test-output-data" );
 
 		exporter.export();
 
