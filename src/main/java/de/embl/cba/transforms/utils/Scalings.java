@@ -4,6 +4,7 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
 import net.imglib2.algorithm.gauss3.Gauss3;
+import net.imglib2.interpolation.randomaccess.ClampingNLinearInterpolatorFactory;
 import net.imglib2.interpolation.randomaccess.NLinearInterpolatorFactory;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.realtransform.Scale;
@@ -97,7 +98,7 @@ public abstract class Scalings
 		// Convert to RealRandomAccessible such that we can obtain values at (infinite) non-integer coordinates
 		RealRandomAccessible< T > rra =
 				Views.interpolate( Views.extendBorder( input ),
-						new NLinearInterpolatorFactory<>() );
+						new ClampingNLinearInterpolatorFactory<>() );
 
 		// Change scale such that we can sample from integer coordinates (for raster function below)
 		Scale scale = new Scale( scalingFactors );
