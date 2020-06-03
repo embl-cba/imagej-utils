@@ -5,6 +5,8 @@ import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.tables.color.LazyCategoryColoringModel;
 import de.embl.cba.tables.color.SelectionColoringModel;
 import de.embl.cba.tables.image.ImageSourcesModel;
+import de.embl.cba.tables.plot.GridLinesOverlay;
+import de.embl.cba.tables.plot.TableRowsScatterPlot;
 import de.embl.cba.tables.select.DefaultSelectionModel;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRowImageSegment;
@@ -13,6 +15,7 @@ import de.embl.cba.tables.view.SegmentsBdvView;
 import de.embl.cba.tables.view.TableRowsTableView;
 import ij3d.Image3DUniverse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SegmentsTableBdvAnd3dViews
@@ -57,24 +60,30 @@ public class SegmentsTableBdvAnd3dViews
 				= new SelectionColoringModel<>(
 					coloringModel, selectionModel );
 
-		segmentsBdvView = new SegmentsBdvView<>(
-				tableRowImageSegments,
-				selectionModel,
-				selectionColoringModel,
-				imageSourcesModel,
-				bdv );
+		bdv = bdvView( bdv, selectionColoringModel );
 
+		tableView( bdv, selectionColoringModel );
 
-		bdv = segmentsBdvView.getBdv();
+		threeDView( bdv, universe, selectionColoringModel );
 
-		tableRowsTableView = new TableRowsTableView<>(
-				tableRowImageSegments,
-				selectionModel,
-				selectionColoringModel,
-				viewName );
+		final ArrayList< String > columnNames = new ArrayList<>( tableRowImageSegments.get( 0 ).getColumnNames() );
 
-		tableRowsTableView.showTableAndMenu( bdv.getViewerPanel() );
+		final TableRowsScatterPlot< TableRowImageSegment > scatterPlotView =
+				new TableRowsScatterPlot(
+						tableRowImageSegments,
+						viewName,
+						selectionColoringModel,
+						selectionModel,
+						columnNames.get( 0 ),
+						columnNames.get( 1 ),
+						GridLinesOverlay.NONE,
+						15 );
 
+		scatterPlotView.show( bdv.getViewerPanel() );
+	}
+
+	private void threeDView( BdvHandle bdv, Image3DUniverse universe, SelectionColoringModel< TableRowImageSegment > selectionColoringModel )
+	{
 		segments3dView = new Segments3dView<>(
 				tableRowImageSegments,
 				selectionModel,
@@ -84,7 +93,31 @@ public class SegmentsTableBdvAnd3dViews
 		);
 
 		segments3dView.setParentComponent( bdv.getViewerPanel() );
+	}
 
+	private void tableView( BdvHandle bdv, SelectionColoringModel< TableRowImageSegment > selectionColoringModel )
+	{
+		tableRowsTableView = new TableRowsTableView<>(
+				tableRowImageSegments,
+				selectionModel,
+				selectionColoringModel,
+				viewName );
+
+		tableRowsTableView.showTableAndMenu( bdv.getViewerPanel() );
+	}
+
+	private BdvHandle bdvView( BdvHandle bdv, SelectionColoringModel< TableRowImageSegment > selectionColoringModel )
+	{
+		segmentsBdvView = new SegmentsBdvView<>(
+				tableRowImageSegments,
+				selectionModel,
+				selectionColoringModel,
+				imageSourcesModel,
+				bdv );
+
+
+		bdv = segmentsBdvView.getBdv();
+		return bdv;
 	}
 
 	public SelectionModel< TableRowImageSegment > getSelectionModel()

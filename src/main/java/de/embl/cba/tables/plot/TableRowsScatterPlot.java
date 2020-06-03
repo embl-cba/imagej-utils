@@ -48,7 +48,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 	private double viewerPointSize;
 	private Source< VolatileARGBType > argbSource;
 	private NearestNeighborSearchOnKDTree< Integer > search;
-	private final String plateName;
 	private String columnNameX;
 	private String columnNameY;
 	private BdvStackSource< VolatileARGBType > scatterPlotBdvSource;
@@ -74,7 +73,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 			String name,
 			SelectionColoringModel< T > coloringModel,
 			SelectionModel< T > selectionModel,
-			String plateName,
 			String columnNameX,
 			String columnNameY,
 			String lineOverlay,
@@ -84,7 +82,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 		this.name = name;
 		this.coloringModel = coloringModel;
 		this.selectionModel = selectionModel;
-		this.plateName = plateName;
 		this.columnNameX = columnNameX;
 		this.columnNameY = columnNameY;
 
@@ -450,7 +447,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 				argbSource,
 				BdvOptions.options()
 						.is2D()
-						.frameTitle( plateName )
+						.frameTitle( name )
 						.preferredSize( Globals.proposedComponentWindowWidth(), Globals.proposedComponentWindowWidth() )
 						.transformEventHandlerFactory( new BehaviourTransformEventHandlerPlanar
 						.BehaviourTransformEventHandlerPlanarFactory() ) );
