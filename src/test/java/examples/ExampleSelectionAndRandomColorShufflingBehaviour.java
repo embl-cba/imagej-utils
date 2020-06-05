@@ -1,3 +1,5 @@
+package examples;
+
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;

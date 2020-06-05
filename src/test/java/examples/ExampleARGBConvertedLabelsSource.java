@@ -1,3 +1,5 @@
+package examples;
+
 import bdv.util.BdvFunctions;
 import mpicbg.spim.data.SpimDataException;
 

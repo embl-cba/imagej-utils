@@ -1,7 +1,5 @@
 package de.embl.cba.tables.color;
 
-import de.embl.cba.tables.color.AbstractColoringModel;
-import de.embl.cba.tables.color.ColoringModel;
 import de.embl.cba.tables.select.SelectionModel;
 import net.imglib2.type.numeric.ARGBType;
 
@@ -13,15 +11,15 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 	ColoringModel< T > coloringModel;
 	SelectionModel< T > selectionModel;
 
-	private SelectionMode selectionMode;
+	private SelectionColoringMode selectionColoringMode;
 	private ARGBType selectionColor;
 	private double brightnessNotSelected;
 
 	public static final ARGBType YELLOW =
 			new ARGBType( ARGBType.rgba( 255, 255, 0, 255 ) );
-	private final List< SelectionMode > selectionModes;
+	private final List< SelectionColoringMode > selectionColoringModes;
 
-	public enum SelectionMode
+	public enum SelectionColoringMode
 	{
 		OnlyShowSelected,
 		SelectionColor,
@@ -35,11 +33,11 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 	{
 		setColoringModel( coloringModel );
 		this.selectionModel = selectionModel;
-		this.selectionModes = Arrays.asList( de.embl.cba.tables.color.SelectionColoringModel.SelectionMode.values() );
+		this.selectionColoringModes = Arrays.asList( SelectionColoringMode.values() );
 
 		this.selectionColor = YELLOW;
 		this.brightnessNotSelected = 0.1;
-		this.selectionMode = SelectionMode.DimNotSelected;
+		this.selectionColoringMode = SelectionColoringMode.DimNotSelected;
 	}
 
 	@Override
@@ -51,7 +49,7 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 
 		final boolean isSelected = selectionModel.isSelected( input );
 
-		switch ( selectionMode )
+		switch ( selectionColoringMode )
 		{
 			case DimNotSelected:
 
@@ -95,11 +93,11 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 				brightnessNotSelected * 255 )  );
 	}
 
-	public void setSelectionMode( SelectionMode selectionMode )
+	public void setSelectionColoringMode( SelectionColoringMode selectionColoringMode )
 	{
-		this.selectionMode = selectionMode;
+		this.selectionColoringMode = selectionColoringMode;
 
-		switch ( selectionMode )
+		switch ( selectionColoringMode )
 		{
 			case DimNotSelected:
 				brightnessNotSelected = 0.2;
@@ -121,9 +119,9 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 		notifyColoringListeners();
 	}
 
-	public SelectionMode getSelectionMode()
+	public SelectionColoringMode getSelectionColoringMode()
 	{
-		return selectionMode;
+		return selectionColoringMode;
 	}
 
 	public void setSelectionColor( ARGBType selectionColor )
@@ -148,15 +146,15 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 
 	public void iterateSelectionMode()
 	{
-		final int selectionModeIndex = selectionModes.indexOf( selectionMode );
+		final int selectionModeIndex = selectionColoringModes.indexOf( selectionColoringMode );
 
-		if ( selectionModeIndex < selectionModes.size() - 1 )
+		if ( selectionModeIndex < selectionColoringModes.size() - 1 )
 		{
-			setSelectionMode( selectionModes.get( selectionModeIndex + 1 ) );
+			setSelectionColoringMode( selectionColoringModes.get( selectionModeIndex + 1 ) );
 		}
 		else
 		{
-			setSelectionMode( selectionModes.get( 0 ) );
+			setSelectionColoringMode( selectionColoringModes.get( 0 ) );
 		}
 	}
 }

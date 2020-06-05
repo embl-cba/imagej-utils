@@ -1,3 +1,5 @@
+package examples;
+
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import de.embl.cba.bdv.utils.selection.BdvSelectionEventHandler;

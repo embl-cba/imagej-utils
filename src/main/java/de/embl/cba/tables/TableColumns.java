@@ -15,7 +15,6 @@ public class TableColumns
 			columnsFromImageJ1ResultsTable(
 			ResultsTable resultsTable )
 	{
-
 		List< String > columnNames = Arrays.asList( resultsTable.getHeadings() );
 		final int numRows = resultsTable.size();
 

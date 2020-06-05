@@ -66,20 +66,27 @@ public class SegmentsTableBdvAnd3dViews
 
 		threeDView( bdv, universe, selectionColoringModel );
 
-		final ArrayList< String > columnNames = new ArrayList<>( tableRowImageSegments.get( 0 ).getColumnNames() );
+		// scatterPlotView( bdv, selectionColoringModel );
+	}
 
-		final TableRowsScatterPlot< TableRowImageSegment > scatterPlotView =
-				new TableRowsScatterPlot(
-						tableRowImageSegments,
-						viewName,
-						selectionColoringModel,
-						selectionModel,
-						columnNames.get( 0 ),
-						columnNames.get( 1 ),
-						GridLinesOverlay.NONE,
-						15 );
+	private void scatterPlotView( BdvHandle bdv, SelectionColoringModel< TableRowImageSegment > selectionColoringModel )
+	{
+		new Thread( () -> {
+			final ArrayList< String > columnNames = new ArrayList<>( tableRowImageSegments.get( 0 ).getColumnNames() );
 
-		scatterPlotView.show( bdv.getViewerPanel() );
+			final TableRowsScatterPlot< TableRowImageSegment > scatterPlotView =
+					new TableRowsScatterPlot(
+							tableRowImageSegments,
+							viewName,
+							selectionColoringModel,
+							selectionModel,
+							columnNames.get( 0 ),
+							columnNames.get( 1 ),
+							GridLinesOverlay.NONE,
+							15 );
+
+			scatterPlotView.show( bdv.getViewerPanel() );
+		}).start();
 	}
 
 	private void threeDView( BdvHandle bdv, Image3DUniverse universe, SelectionColoringModel< TableRowImageSegment > selectionColoringModel )

@@ -1,3 +1,5 @@
+package examples;
+
 import bdv.util.*;
 import ij.IJ;
 import ij.ImagePlus;

@@ -1,9 +1,10 @@
+package examples;
+
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.RandomAccessibleIntervalSource;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter;
-import de.embl.cba.bdv.utils.sources.Metadata;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;

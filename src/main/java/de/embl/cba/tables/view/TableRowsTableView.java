@@ -492,13 +492,13 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	private JMenuItem createContinueExistingAnnotationMenuItem()
 	{
-		final JMenuItem menuItem = new JMenuItem( "Continue existing annotation..." );
+		final JMenuItem menuItem = new JMenuItem( "Continue annotation..." );
 
 		menuItem.addActionListener( e ->
 				SwingUtilities.invokeLater( () ->
 						{
 							final String annotationColumn = TableUIs.selectColumnNameUI( table, "Annotation column" );
-							continueExistingAnnotation( annotationColumn );
+							continueAnnotation( annotationColumn );
 						}
 						) );
 
@@ -525,21 +525,22 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		final String columnName = gd.getNextString();
 		this.addColumn( columnName, "None" );
 
-		continueExistingAnnotation( columnName );
+		continueAnnotation( columnName );
 	}
 
-	private void continueExistingAnnotation( String columnName )
+	public void continueAnnotation( String columnName )
 	{
 		final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut() );
 
-		selectionColoringModel.setSelectionMode( SelectionColoringModel.SelectionMode.SelectionColor );
+		selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.SelectionColor );
 		selectionColoringModel.setColoringModel( categoricalColoringModel );
 
 		final Annotator annotator = new Annotator(
 				columnName,
 				tableRows,
 				selectionModel,
-				categoricalColoringModel
+				categoricalColoringModel,
+				selectionColoringModel
 		);
 
 		annotator.showDialog();
@@ -831,7 +832,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 							if ( coloringModel == null ) return;
 
 							selectionColoringModel.setColoringModel( coloringModel );
-							selectionColoringModel.setSelectionMode( SelectionColoringModel.SelectionMode.SelectionColor );
+							selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.SelectionColor );
 						}
 					}
 				}

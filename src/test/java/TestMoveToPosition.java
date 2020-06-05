@@ -2,6 +2,7 @@ import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
+import examples.Examples;
 import mpicbg.spim.data.SpimDataException;
 import net.imglib2.realtransform.AffineTransform3D;
 

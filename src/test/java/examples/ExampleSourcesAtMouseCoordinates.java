@@ -1,3 +1,5 @@
+package examples;
+
 import bdv.util.*;
 import de.embl.cba.bdv.utils.BdvUtils;
 import ij.IJ;

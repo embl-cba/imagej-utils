@@ -1,3 +1,5 @@
+package examples;
+
 import bdv.VolatileSpimSource;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;

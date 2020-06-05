@@ -536,7 +536,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 		if ( component != null )
 		{
 			JFrame topFrame = ( JFrame ) SwingUtilities.getWindowAncestor( component );
-
 			final int x = topFrame.getLocationOnScreen().x + component.getWidth() + 10;
 			final int y = topFrame.getLocationOnScreen().y;
 			createAndShowImage( x, y );
