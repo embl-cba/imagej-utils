@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * excluding grayish and dark colors
  *
  */
-public class GlasbeyARGBLut implements ARGBLut
+public class GlasbeyARGBLut implements IndexARGBLut
 {
 	public static final int MINIMUM_RGB_DIFFERENCE = 50;
 	public static final int MINIMUM_SUM_BRIGHTNESS = 150;
@@ -34,10 +34,14 @@ public class GlasbeyARGBLut implements ARGBLut
 	@Override
 	public int getARGB( double x )
 	{
-		// convert to index > 0 unless x = 0.0D;
-		// (index 0 is the black color)
-
 		final int index = ( int ) Math.ceil( x * ( numColors - 1 ) );
+		return indices.get( index );
+	}
+
+	@Override
+	public int getARGB( int x )
+	{
+		final int index = x % numColors;
 		return indices.get( index );
 	}
 
@@ -134,5 +138,6 @@ public class GlasbeyARGBLut implements ARGBLut
 
 		return indices;
 	}
+
 
 }

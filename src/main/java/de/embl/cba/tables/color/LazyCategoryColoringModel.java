@@ -1,6 +1,7 @@
 package de.embl.cba.tables.color;
 
 import de.embl.cba.bdv.utils.lut.ARGBLut;
+import de.embl.cba.bdv.utils.lut.IndexARGBLut;
 import de.embl.cba.tables.color.AbstractColoringModel;
 import de.embl.cba.tables.color.CategoryColoringModel;
 import net.imglib2.type.numeric.ARGBType;
@@ -13,7 +14,7 @@ import static de.embl.cba.bdv.utils.converters.RandomARGBConverter.goldenRatio;
 public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > implements CategoryColoringModel< T >
 {
 	private Map< T, ARGBType > inputToColorMap;
-	private ARGBLut argbLut;
+	private IndexARGBLut argbLut;
 	private int randomSeed;
 
 	/**
@@ -24,12 +25,12 @@ public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > i
 	 *
 	 * @param argbLut
 	 */
-	public LazyCategoryColoringModel( ARGBLut argbLut )
+	public LazyCategoryColoringModel( IndexARGBLut argbLut )
 	{
 		super();
 		this.argbLut = argbLut;
 		this.inputToColorMap = new HashMap<>(  );
-		this.randomSeed = 50;
+		this.randomSeed = 42;
 	}
 
 	@Override
@@ -37,8 +38,8 @@ public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > i
 	{
 		if( ! inputToColorMap.keySet().contains( input ) )
 		{
-			final double random = createRandom( inputToColorMap.size() + 1 );
-			inputToColorMap.put( input, new ARGBType( argbLut.getARGB( random ) ) );
+			//final double random = createRandom( inputToColorMap.size() + 1 );
+			inputToColorMap.put( input, new ARGBType( argbLut.getARGB( inputToColorMap.size() + 1  ) ) );
 		}
 
 		output.set( inputToColorMap.get( input ).get() );
@@ -59,5 +60,4 @@ public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > i
 
 		notifyColoringListeners();
 	}
-
 }

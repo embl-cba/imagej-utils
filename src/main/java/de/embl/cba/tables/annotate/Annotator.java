@@ -14,7 +14,6 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 public class Annotator < T extends TableRow > extends JFrame
@@ -255,6 +254,7 @@ public class Annotator < T extends TableRow > extends JFrame
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 
 		final JCheckBox checkBox = new JCheckBox( "Skip \"None\"" );
+		checkBox.setSelected( true );
 
 		checkBox.addActionListener( e -> {
 			skipNone = checkBox.isSelected();

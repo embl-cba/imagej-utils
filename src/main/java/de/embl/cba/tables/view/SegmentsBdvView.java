@@ -133,7 +133,6 @@ public class SegmentsBdvView < T extends ImageSegment >
 		registerAsColoringListener( this.selectionColoringModel );
 
 		installBdvBehaviours();
-
 	}
 
 	public void initSegments( List< T > segments )
@@ -530,7 +529,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
 			showPopupMenu( x, y );
-		}, "context menu", "button3", "P" ) ;
+		}, "context menu", "button3" ) ;
 
 	}
 
@@ -556,8 +555,8 @@ public class SegmentsBdvView < T extends ImageSegment >
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 						new Thread( () -> shuffleRandomColors() ).start(),
-				segmentsName + "-change-color-random-seed",
-				incrementCategoricalLutRandomSeedTrigger );
+					segmentsName + "-change-color-random-seed",
+						incrementCategoricalLutRandomSeedTrigger );
 	}
 
 	private void installShowLabelMaskAsBinaryMaskBehaviour()

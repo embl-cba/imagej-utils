@@ -1040,16 +1040,24 @@ public abstract class BdvUtils
 
 		newViewerTransform.translate( getBdvWindowCenter( bdv ) );
 
-		final SimilarityTransformAnimator similarityTransformAnimator =
-				new SimilarityTransformAnimator(
-						currentViewerTransform,
-						newViewerTransform,
-						0,
-						0,
-						durationMillis );
+		if ( durationMillis <= 0 )
+		{
+			bdv.getBdvHandle().getViewerPanel().setCurrentViewerTransform( newViewerTransform );
+			return;
+		}
+		else
+		{
+			final SimilarityTransformAnimator similarityTransformAnimator =
+					new SimilarityTransformAnimator(
+							currentViewerTransform,
+							newViewerTransform,
+							0,
+							0,
+							durationMillis );
 
-		bdv.getBdvHandle().getViewerPanel().setTransformAnimator( similarityTransformAnimator );
-		bdv.getBdvHandle().getViewerPanel().transformChanged( currentViewerTransform );
+			bdv.getBdvHandle().getViewerPanel().setTransformAnimator( similarityTransformAnimator );
+			bdv.getBdvHandle().getViewerPanel().transformChanged( currentViewerTransform );
+		}
 	}
 
 	public static void zoomToPosition( Bdv bdv, double[] xyzt, Double scale, long durationMillis )
