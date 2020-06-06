@@ -14,6 +14,7 @@ import de.embl.cba.bdv.utils.sources.Metadata;
 import de.embl.cba.bdv.utils.sources.ModifiableRandomAccessibleIntervalSource4D;
 import de.embl.cba.lazyalgorithm.RandomAccessibleIntervalNeighborhoodFilter;
 import de.embl.cba.lazyalgorithm.converter.NeighborhoodNonZeroBoundariesConverter;
+import de.embl.cba.swing.PopupMenu;
 import de.embl.cba.tables.Logger;
 import de.embl.cba.tables.color.*;
 import de.embl.cba.tables.image.ImageSourcesModel;
@@ -25,6 +26,7 @@ import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRowListener;
 import de.embl.cba.tables.view.dialogs.BdvViewSourcesBrowsingAndActionsDialog;
+import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.neighborhood.HyperSphereShape;
@@ -131,6 +133,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 		registerAsColoringListener( this.selectionColoringModel );
 
 		installBdvBehaviours();
+
 	}
 
 	public void initSegments( List< T > segments )
@@ -524,6 +527,29 @@ public class SegmentsBdvView < T extends ImageSegment >
 		installShowLabelMaskAsBoundaryBehaviour();
 		install3DViewBehaviour();
 		installImageSetNavigationBehaviour( );
+
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
+			showPopupMenu( x, y );
+		}, "context menu", "button3", "P" ) ;
+
+	}
+
+	private void showPopupMenu( int x, int y )
+	{
+		final PopupMenu popupMenu = new PopupMenu();
+
+		popupMenu.addPopupAction( "Change animation settings...", e ->
+		{
+			new Thread( () -> {
+				final GenericDialog genericDialog = new GenericDialog( "Animation settings");
+				genericDialog.addNumericField( "Animation duration [ms]", segmentFocusAnimationDurationMillis, 0 );
+				genericDialog.showDialog();
+				if ( genericDialog.wasCanceled() ) return;
+				segmentFocusAnimationDurationMillis = (int) genericDialog.getNextNumber();
+			} ).start();
+		} );
+
+		popupMenu.show( bdv.getViewerPanel().getDisplay(), x, y );
 	}
 
 	private void installRandomColorShufflingBehaviour()
