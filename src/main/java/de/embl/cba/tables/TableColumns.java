@@ -136,8 +136,16 @@ public class TableColumns
 
 		for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
 		{
+			final String[] split = rowsInTableIncludingHeader.get( 1 ).split( delim );
+			final String firstCell = split[ columnIndex ];
+
+			String defaultValue = "None"; // for text
+			if ( Tables.isNumeric( firstCell ) )
+				defaultValue = "NaN"; // for numbers
+
+			final ArrayList< String > values = new ArrayList< >( Collections.nCopies( numRowsTargetTable, defaultValue ));
+
 			final String columnName = columnNames.get( columnIndex );
-			final ArrayList< String > values = new ArrayList< >( Collections.nCopies( numRowsTargetTable, "NaN"));
 			columnNameToStrings.put( columnName, values );
 			if ( columnName.equals( mergeByColumnName ) )
 				mergeByColumnIndex = columnIndex;
@@ -149,10 +157,13 @@ public class TableColumns
 //		final long start = System.currentTimeMillis();
 		final int numRowsSourceTable = rowsInTableIncludingHeader.size() - 1;
 
+		// TODO: code looks inefficient...
 		for ( int rowIndex = 0; rowIndex < numRowsSourceTable; ++rowIndex )
 		{
 			final String[] split = rowsInTableIncludingHeader.get( rowIndex + 1 ).split( delim );
-			final Double orderValue = Utils.parseDouble( split[ mergeByColumnIndex ] );
+			final String cell = split[ mergeByColumnIndex ];
+
+			final Double orderValue = Utils.parseDouble( cell );
 			final int targetRowIndex = mergeByColumnValues.indexOf( orderValue );
 
 			for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
@@ -196,7 +207,7 @@ public class TableColumns
 			final ArrayList< Double > doubles = new ArrayList<>( numRows );
 
 			for ( int row = 0; row < numRows; ++row )
-				toDouble( strings, doubles, row );
+				doubles.add( Utils.parseDouble( strings.get( row ) ) );
 
 			return doubles;
 		}
@@ -205,7 +216,7 @@ public class TableColumns
 			final ArrayList< Double > doubles = new ArrayList<>( numRows );
 
 			for ( int row = 0; row < numRows; ++row )
-				toDouble( strings, doubles, row );
+				doubles.add( Utils.parseDouble( strings.get( row ) ) );
 
 			return doubles;
 		}
@@ -219,8 +230,7 @@ public class TableColumns
 		}
 	}
 
-	public static Object[] asTypedArray( List< String > strings )
-			throws UnsupportedDataTypeException
+	public static Object[] asTypedArray( List< String > strings ) throws UnsupportedDataTypeException
 	{
 		final Class columnType = getColumnType( strings.get( 0 ) );
 
@@ -244,7 +254,6 @@ public class TableColumns
 		{
 			throw new UnsupportedDataTypeException("");
 		}
-
 	}
 
 	public static Object[] toDoubles( List< String > strings, int numRows )
@@ -252,39 +261,9 @@ public class TableColumns
 		final Double[] doubles = new Double[ numRows ];
 
 		for ( int row = 0; row < numRows; ++row )
-			toDouble( strings, doubles, row );
+			doubles[ row ] =  Utils.parseDouble( strings.get( row ) );
 
 		return doubles;
-	}
-
-	public static void toDouble( List< String > strings, ArrayList< Double > doubles, int row )
-	{
-		final String s = strings.get( row );
-		if ( isNaN( s ) )
-			doubles.add( Double.NaN );
-		else
-			doubles.add( Utils.parseDouble( s ) );
-	}
-
-	public static void toDouble( List< String > strings, Double[] doubles, int row )
-	{
-		final String s = strings.get( row );
-		if ( isNaN( s ) )
-			doubles[ row ] =  Double.NaN ;
-		else if ( isInf( s ) )
-			doubles[ row ] =  Double.POSITIVE_INFINITY;
-		else
-			doubles[ row ] =  Utils.parseDouble( s );
-	}
-
-	public static boolean isNaN( String s )
-	{
-		return s.toLowerCase().equals( "na" ) || s.toLowerCase().equals( "nan" ) || s.toLowerCase().equals( "none" );
-	}
-
-	public static boolean isInf( String s )
-	{
-		return s.toLowerCase().equals( "inf" );
 	}
 
 	private static Class getColumnType( String cell )
@@ -331,14 +310,18 @@ public class TableColumns
 
 	public static Map< String, List< String > > openAndOrderNewColumns( JTable table, String mergeByColumnName, String newTablePath )
 	{
+		// TODO: this assumes that the ordering column is numeric; is this needed?
 		final ArrayList< Double > orderColumn = getNumericColumnAsDoubleList(
 				table,
 				mergeByColumnName );
 
-		return orderedStringColumnsFromTableFile(
-				newTablePath,
-				null,
-				mergeByColumnName,
-				orderColumn );
+		final Map< String, List< String > > columNameToValues =
+				orderedStringColumnsFromTableFile(
+						newTablePath,
+						null,
+						mergeByColumnName,
+						orderColumn );
+
+		return columNameToValues;
 	}
 }

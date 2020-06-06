@@ -23,6 +23,7 @@ import de.embl.cba.tables.imagesegment.LabelFrameAndImage;
 import de.embl.cba.tables.imagesegment.SegmentUtils;
 import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
+import de.embl.cba.tables.tablerow.TableRowListener;
 import de.embl.cba.tables.view.dialogs.BdvViewSourcesBrowsingAndActionsDialog;
 import ij.gui.GenericDialog;
 import net.imglib2.RealPoint;
@@ -37,6 +38,7 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import java.util.*;
 
 import static de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter.BACKGROUND;
+import static de.embl.cba.tables.TableRows.setTableCell;
 
 // TODO: reconsider what a "segment" needs to be here
 public class SegmentsBdvView < T extends ImageSegment >

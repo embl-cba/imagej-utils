@@ -115,9 +115,9 @@ public class TableUIs
 		return null;
 	}
 
-	public static Map< String, List< String > > openTableForMergingUI( JTable table,
-																	   String tablesLocation,
-																	   String mergeByColumnName ) throws IOException
+	public static Map< String, List< String > > openTableMergingUI( JTable table,
+																	String tablesLocation,
+																	String mergeByColumnName ) throws IOException
 	{
 		String newTablePath = null;
 

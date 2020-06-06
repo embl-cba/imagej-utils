@@ -1,7 +1,5 @@
 package de.embl.cba.tables;
 
-import de.embl.cba.tables.TableColumns;
-import de.embl.cba.tables.Utils;
 import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
 import de.embl.cba.tables.table.ColumnClassAwareTableModel;
 import de.embl.cba.tables.tablerow.TableRow;
@@ -51,8 +49,7 @@ public class Tables
 		try
 		{
 			saveTableWithIOException( table, tableOutputFile );
-		}
-		catch ( IOException e )
+		} catch ( IOException e )
 		{
 			e.printStackTrace();
 		}
@@ -93,7 +90,7 @@ public class Tables
 
 		return createJTableFromStringList( rows, delim );
 	}
-	
+
 	public static List< String > readRows( String path )
 	{
 		BufferedReader br = getReader( path );
@@ -116,8 +113,7 @@ public class Tables
 				rows.add( aRow );
 			br.close();
 			return rows;
-		}
-		catch ( IOException e )
+		} catch ( IOException e )
 		{
 			throw new RuntimeException( e );
 		}
@@ -127,16 +123,15 @@ public class Tables
 	// TODO: put into some other class (e.g. Files)
 	public static BufferedReader getReader( String path )
 	{
-		if ( path.startsWith( "http" )  )
+		if ( path.startsWith( "http" ) )
 		{
 			URL url = null;
 			try
 			{
 				url = new URL( path );
-			}
-			catch ( Exception e )
+			} catch ( Exception e )
 			{
-				throw new RuntimeException( "Could not open URL: " + path  );
+				throw new RuntimeException( "Could not open URL: " + path );
 			}
 
 			try
@@ -145,13 +140,11 @@ public class Tables
 				final InputStreamReader inReader = new InputStreamReader( in );
 				final BufferedReader bufferedReader = new BufferedReader( inReader );
 				return bufferedReader;
-			}
-			catch ( Exception e )
+			} catch ( Exception e )
 			{
-				throw new RuntimeException( "Could not open URL: " + path  );
+				throw new RuntimeException( "Could not open URL: " + path );
 			}
-		}
-		else
+		} else
 		{
 			FileInputStream fin = null;
 			try
@@ -160,7 +153,7 @@ public class Tables
 				return new BufferedReader( new InputStreamReader( fin ) );
 			} catch ( FileNotFoundException e )
 			{
-				throw new RuntimeException( "Could not open file: " + path  );
+				throw new RuntimeException( "Could not open file: " + path );
 			}
 		}
 	}
@@ -181,8 +174,7 @@ public class Tables
 				rows.add( aRow );
 
 			br.close();
-		}
-		catch ( Exception e )
+		} catch ( Exception e )
 		{
 			e.printStackTrace();
 		}
@@ -211,16 +203,13 @@ public class Tables
 			if ( strings.get( 0 ).contains( "\t" ) )
 			{
 				delim = "\t";
-			}
-			else if ( strings.get( 0 ).contains( "," )  )
+			} else if ( strings.get( 0 ).contains( "," ) )
 			{
 				delim = ",";
-			}
-			else if ( strings.get( 0 ).contains( ";" )  )
+			} else if ( strings.get( 0 ).contains( ";" ) )
 			{
 				delim = ";";
-			}
-			else
+			} else
 			{
 				throw new RuntimeException( "Could not identify table delimiter." );
 			}
@@ -269,8 +258,7 @@ public class Tables
 				{
 					final Double numericValue = Utils.parseDouble( stringValue );
 					model.setValueAt( numericValue, iString - 1, iCol );
-				}
-				catch ( Exception e )
+				} catch ( Exception e )
 				{
 					model.setValueAt( stringValue, iString - 1, iCol );
 				}
@@ -283,6 +271,18 @@ public class Tables
 		return new JTable( model );
 	}
 
+	public static boolean isNumeric( String string )
+	{
+		try
+		{
+			Utils.parseDouble( string );
+			return true;
+		}
+		catch ( Exception e )
+		{
+			return false;
+		}
+	}
 
 //	// TODO: replace by more performant column based version (see below)
 //	public static List< TableRowImageSegment > segmentsFromTableFile(

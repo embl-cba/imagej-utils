@@ -1,4 +1,4 @@
-package explore3dViews;
+package explore;
 
 import customnode.CustomMesh;
 import customnode.CustomTriangleMesh;

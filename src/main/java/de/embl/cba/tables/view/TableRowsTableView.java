@@ -18,6 +18,7 @@ import net.imglib2.type.numeric.ARGBType;
 import javax.activation.UnsupportedDataTypeException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
@@ -417,7 +418,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 					{
 						String mergeByColumnName = getMergeByColumnName();
 						// TODO: below should be based on the TableRows and not on the jTable
-						Map< String, List< String > > newColumnsOrdered = TableUIs.openTableForMergingUI( table, tablesForMergingDirectory, mergeByColumnName );
+						Map< String, List< String > > newColumnsOrdered = TableUIs.openTableMergingUI( table, tablesForMergingDirectory, mergeByColumnName );
 						newColumnsOrdered.remove( mergeByColumnName );
 						addColumns( newColumnsOrdered );
 					} catch ( IOException ioOException )
@@ -534,13 +535,15 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 		selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.SelectionColor );
 		selectionColoringModel.setColoringModel( categoricalColoringModel );
+		final RowSorter< ? extends TableModel > rowSorter = table.getRowSorter();
 
 		final Annotator annotator = new Annotator(
 				columnName,
 				tableRows,
 				selectionModel,
 				categoricalColoringModel,
-				selectionColoringModel
+				selectionColoringModel,
+				rowSorter
 		);
 
 		annotator.showDialog();

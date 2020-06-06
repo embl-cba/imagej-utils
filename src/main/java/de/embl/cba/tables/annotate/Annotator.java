@@ -10,10 +10,12 @@ import ij.gui.GenericDialog;
 import net.imglib2.type.numeric.ARGBType;
 
 import javax.swing.*;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 public class Annotator < T extends TableRow > extends JFrame
 {
@@ -22,15 +24,19 @@ public class Annotator < T extends TableRow > extends JFrame
 	private final SelectionModel< T > selectionModel;
 	private final CategoryTableRowColumnColoringModel< T > coloringModel;
 	private final SelectionColoringModel< T > selectionColoringModel;
+	private final RowSorter< ? extends TableModel > rowSorter;
 	private final JPanel panel;
 	private boolean skipNone;
+	private boolean isSingleRowBrowsingMode = false; // TODO: think about how to get out of this mode!
+	private int selectedRowIndex = 0;
 
 	public Annotator(
 			String annotationColumnName,
 			List< T > tableRows,
 			SelectionModel< T > selectionModel,
 			CategoryTableRowColumnColoringModel< T > coloringModel,
-			SelectionColoringModel< T > selectionColoringModel )
+			SelectionColoringModel< T > selectionColoringModel,
+			RowSorter< ? extends TableModel > rowSorter )
 	{
 		super("");
 		this.annotationColumnName = annotationColumnName;
@@ -38,14 +44,16 @@ public class Annotator < T extends TableRow > extends JFrame
 		this.selectionModel = selectionModel;
 		this.coloringModel = coloringModel;
 		this.selectionColoringModel = selectionColoringModel;
+		this.rowSorter = rowSorter;
 		coloringModel.fixedColorMode( true );
 		this.panel = new JPanel();
 	}
 
 	public void showDialog()
 	{
-		addCreateCategoryButton();
 		addAnnotationButtons();
+		panel.add( new JSeparator( SwingConstants.HORIZONTAL ) );
+		addCreateCategoryButton();
 		panel.add( new JSeparator( SwingConstants.HORIZONTAL ) );
 		addTableRowBrowserPanel();
 		addSkipNonePanel();
@@ -65,11 +73,11 @@ public class Annotator < T extends TableRow > extends JFrame
 
 	private void addCreateCategoryButton()
 	{
-		final JButton button = new JButton( "Create Category" );
+		final JButton button = new JButton( "Create new category" );
 		panel.add( button );
 		button.addActionListener( e -> {
 			final GenericDialog gd = new GenericDialog( "" );
-			gd.addStringField( "Category Name", "", 10 );
+			gd.addStringField( "Category name", "", 10 );
 			gd.showDialog();
 			if ( gd.wasCanceled() ) return;
 			addAnnotationButtonPanel( gd.getNextString(), null );
@@ -101,13 +109,29 @@ public class Annotator < T extends TableRow > extends JFrame
 		button.addActionListener( e -> {
 			if ( selectionModel.isEmpty() ) return;
 
-			for ( T row : selectionModel.getSelected() )
-				row.setCell( annotationColumnName, annotationName );
+			final Set< T > selected = selectionModel.getSelected();
 
-			selectionModel.clearSelection();
+			for ( T row : selected )
+			{
+				row.setCell( annotationColumnName, annotationName );
+			}
+
+			if ( selected.size() > 1 )
+				isSingleRowBrowsingMode = false;
+
+			if( ! isSingleRowBrowsingMode )
+			{
+				selectionModel.clearSelection();
+			}
+			else
+			{
+				// Hack to notify all listeners that the coloring might have changed.
+				selectionModel.clearSelection();
+				selectionModel.setSelected( selected, true );
+			}
 		} );
 
-		final JButton changeColor = new JButton( "Change Color" );
+		final JButton changeColor = new JButton( "Change color" );
 		changeColor.addActionListener( e -> {
 			Color color = JColorChooser.showDialog( this.panel, "", null );
 			if ( color == null ) return;
@@ -124,60 +148,81 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 
-		final ListIterator< T > iterator = tableRows.listIterator();
-
-		final JButton previous = new JButton( "Select Previous" );
+		final JButton previous = new JButton( "Select previous" );
 		previous.setFont( new Font("monospaced", Font.PLAIN, 12) );
 		previous.setAlignmentX( Component.CENTER_ALIGNMENT );
 
 		previous.addActionListener( e ->
 		{
-			if ( iterator.hasPrevious() )
+			isSingleRowBrowsingMode = true;
+
+			int currentRowIndex = selectedRowIndex;
+			if ( selectedRowIndex > 0 )
 			{
 				T row = null;
 				if ( skipNone )
 				{
-					while ( iterator.hasPrevious() )
+					while ( selectedRowIndex > 0 )
 					{
-						row = iterator.previous();
+						row = tableRows.get( rowSorter.convertRowIndexToModel( --selectedRowIndex ) );
 						if ( row.getCell( annotationColumnName ).toLowerCase().equals( "none" ) )
+						{
+							row = null;
 							continue;
+						}
 						else
 							break;
+					}
+
+					if ( row == null )
+					{
+						selectedRowIndex = currentRowIndex;
+						return; // None of the previous rows is not None
 					}
 				}
 				else
 				{
-					row = iterator.previous();
+					row = tableRows.get( rowSorter.convertRowIndexToModel( --selectedRowIndex ) );
 				}
 
 				selectRow( row );
 			}
 		} );
 
-		final JButton next = new JButton( "Select Next" );
+		final JButton next = new JButton( "Select next" );
 		next.setFont( new Font("monospaced", Font.PLAIN, 12) );
 		next.setAlignmentX( Component.CENTER_ALIGNMENT );
 
 		next.addActionListener( e ->
 		{
-			if ( iterator.hasNext() )
+			isSingleRowBrowsingMode = true;
+
+			int currentRowIndex = selectedRowIndex;
+			if ( selectedRowIndex < tableRows.size() - 1 )
 			{
 				T row = null;
 				if ( skipNone )
 				{
-					while ( iterator.hasNext() )
+					while ( selectedRowIndex < tableRows.size() )
 					{
-						row = iterator.next();
+						row = tableRows.get( rowSorter.convertRowIndexToModel( ++selectedRowIndex ) );
 						if ( row.getCell( annotationColumnName ).toLowerCase().equals( "none" ) )
+						{
+							row = null;
 							continue;
+						}
 						else
 							break;
+					}
+					if ( row == null )
+					{
+						selectedRowIndex = currentRowIndex;
+						return; // None of the next rows is not None
 					}
 				}
 				else
 				{
-					row = iterator.next();
+					row = tableRows.get( rowSorter.convertRowIndexToModel( ++selectedRowIndex ) );
 				}
 
 				selectRow( row );
@@ -209,7 +254,7 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 
-		final JCheckBox checkBox = new JCheckBox( "Skip None" );
+		final JCheckBox checkBox = new JCheckBox( "Skip \"None\"" );
 
 		checkBox.addActionListener( e -> {
 			skipNone = checkBox.isSelected();
@@ -218,7 +263,6 @@ public class Annotator < T extends TableRow > extends JFrame
 		panel.add( checkBox );
 		this.panel.add( panel );
 	}
-
 
 	private void setButtonColor( JButton button, T tableRow )
 	{
