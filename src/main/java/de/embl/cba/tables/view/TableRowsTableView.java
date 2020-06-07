@@ -39,14 +39,12 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	private JTable table;
 	private int recentlySelectedRowInView;
-	private AssignValuesToSelectedRowsDialog assignObjectAttributesUI;
-	private HelpDialog helpDialog;
 	private ColumnColoringModelCreator< T > columnColoringModelCreator;
 	private MeasureDistance< T > measureDistance;
 	private Component parentComponent;
-	private String mergeByColumnName = null;
-	private String tablesForMergingDirectory = "";
-	private boolean isZeroTransparent;
+
+	private String mergeByColumnName; // for loading additional columns
+	private String tablesDirectory; // for loading additional columns
 
 	private SelectionMode selectionMode = SelectionMode.SelectAndFocus;
 
@@ -403,22 +401,22 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 		menu.add( createSaveColumnsAsMenuItem() );
 
-		menu.add( createAppendTableMenuItem() );
+		menu.add( createLoadColumnsMenuItem() );
 
 		return menu;
     }
 
-	private JMenuItem createAppendTableMenuItem()
+	private JMenuItem createLoadColumnsMenuItem()
 	{
-		final JMenuItem menuItem = new JMenuItem( "Append Table..." );
+		final JMenuItem menuItem = new JMenuItem( "Load Columns..." );
 		menuItem.addActionListener( e ->
 				SwingUtilities.invokeLater( () ->
 				{
 					try
 					{
 						String mergeByColumnName = getMergeByColumnName();
-						// TODO: below should be based on the TableRows and not on the jTable
-						Map< String, List< String > > newColumnsOrdered = TableUIs.openTableMergingUI( table, tablesForMergingDirectory, mergeByColumnName );
+						Map< String, List< String > > newColumnsOrdered = TableUIs.loadColumns( table, tablesDirectory, mergeByColumnName );
+						if ( newColumnsOrdered == null ) return;
 						newColumnsOrdered.remove( mergeByColumnName );
 						addColumns( newColumnsOrdered );
 					} catch ( IOException ioOException )
@@ -445,9 +443,9 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		this.mergeByColumnName = mergeByColumnName;
 	}
 
-	public void setTablesForMergingDirectory( String tablesForMergingDirectory )
+	public void setTablesDirectory( String tablesDirectory )
 	{
-		this.tablesForMergingDirectory = tablesForMergingDirectory;
+		this.tablesDirectory = tablesDirectory;
 	}
 
 	private JMenuItem createSaveTableAsMenuItem()
@@ -464,7 +462,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	{
 		final JMenuItem menuItem = new JMenuItem( "Save Columns as..." );
 		menuItem.addActionListener( e ->
-				SwingUtilities.invokeLater( () -> TableUIs.saveColumnsUI( table ) ) );
+				SwingUtilities.invokeLater( () -> TableUIs.saveColumns( table ) ) );
 
 		return menuItem;
 	}
@@ -851,10 +849,9 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void initHelpDialog()
 	{
-		helpDialog =
-				new HelpDialog(
-						frame,
-						Tables.class.getResource( "/MultiImageSetNavigationHelp.html" ) );
+		new HelpDialog(
+				frame,
+				Tables.class.getResource( "/MultiImageSetNavigationHelp.html" ) );
 	}
 
 	public void close()

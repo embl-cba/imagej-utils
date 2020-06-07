@@ -19,6 +19,10 @@ import static de.embl.cba.tables.FileUtils.resolveTableURL;
 
 public class TableUIs
 {
+
+	public static final String PROJECT = "Project";
+	public static final String FILE_SYSTEM = "File system";
+
 	public static void addColumnUI( TableRowsTableView tableView )
 	{
 		final GenericDialog gd = new GenericDialog( "Add Custom Column" );
@@ -84,7 +88,7 @@ public class TableUIs
 		}
 	}
 
-	public static void saveColumnsUI( JTable table )
+	public static void saveColumns( JTable table )
 	{
 		final ArrayList< String > selectedColumns
 				= selectColumnNamesUI( table, "Select columns" );
@@ -115,36 +119,46 @@ public class TableUIs
 		return null;
 	}
 
-	public static Map< String, List< String > > openTableMergingUI( JTable table,
-																	String tablesLocation,
-																	String mergeByColumnName ) throws IOException
+	// TODO: make own class: ColumnsLoader
+	public static Map< String, List< String > > loadColumns( JTable table,
+															 String tablesDirectory,
+															 String mergeByColumnName ) throws IOException
 	{
-		String newTablePath = null;
-
-		if ( tablesLocation.contains( "raw.githubusercontent" ) )
+		String tablesLocation = null;
+		if ( tablesDirectory != null )
 		{
-			newTablePath = selectGitHubTablePathUI( tablesLocation );
-			if ( newTablePath == null ) return null;
+			final GenericDialog gd = new GenericDialog( "Choose columns source" );
+			gd.addChoice( "Load columns from", new String[]{ PROJECT, FILE_SYSTEM }, PROJECT );
+			gd.showDialog();
+			if ( gd.wasCanceled() ) return null;
+			tablesLocation = gd.getNextChoice();
+		}
+
+		String tablesPath = null;
+		if ( tablesDirectory != null && tablesLocation.equals( PROJECT ) && tablesDirectory.contains( "raw.githubusercontent" ) )
+		{
+			tablesPath = selectGitHubTablePath( tablesDirectory );
+			if ( tablesPath == null ) return null;
 		}
 		else
 		{
-			final JFileChooser jFileChooser = new JFileChooser( tablesLocation );
+			final JFileChooser jFileChooser = new JFileChooser( tablesDirectory );
 
 			if ( jFileChooser.showOpenDialog( null ) == JFileChooser.APPROVE_OPTION )
-				newTablePath = jFileChooser.getSelectedFile().getAbsolutePath();
+				tablesPath = jFileChooser.getSelectedFile().getAbsolutePath();
 		}
 
-		if ( newTablePath == null ) return null;
+		if ( tablesPath == null ) return null;
 
-		if ( newTablePath.startsWith( "http" ) )
-			newTablePath = resolveTableURL( URI.create( newTablePath ) );
+		if ( tablesPath.startsWith( "http" ) )
+			tablesPath = resolveTableURL( URI.create( tablesPath ) );
 
-		Map< String, List< String > > columns = TableColumns.openAndOrderNewColumns( table, mergeByColumnName, newTablePath );
+		Map< String, List< String > > columns = TableColumns.openAndOrderNewColumns( table, mergeByColumnName, tablesPath );
 
 		return columns;
 	}
 
-	public static String selectGitHubTablePathUI( String tablesLocation ) throws IOException
+	public static String selectGitHubTablePath( String tablesLocation ) throws IOException
 	{
 //		final String[] tableNames = getTableNamesFromFile( tablesLocation, "additional_tables.txt" );
 		final GitLocation gitLocation = GitHubUtils.rawUrlToGitLocation( tablesLocation );
