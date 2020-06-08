@@ -444,4 +444,19 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		return new ImagePlus( "ScreenShot", target.bi );
 	}
 
+	// TODO: make show raw data part of the dialog
+	public static void captureViewDialog( BdvHandle bdv, boolean showRawData )
+	{
+		final String pixelUnit = "micrometer";
+		final PixelSpacingDialog dialog = new PixelSpacingDialog( getViewerVoxelSpacing( bdv ), pixelUnit );
+		if ( ! dialog.showDialog() ) return;
+		final ViewCaptureResult viewCaptureResult = captureView(
+				bdv,
+				dialog.getPixelSpacing(),
+				pixelUnit,
+				false );
+		viewCaptureResult.rgbImage.show();
+		if ( showRawData )
+			viewCaptureResult.rawImagesStack.show();
+	}
 }

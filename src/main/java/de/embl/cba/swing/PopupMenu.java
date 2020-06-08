@@ -33,6 +33,13 @@ public class PopupMenu
 		popup.add( menuItem );
 	}
 
+	public void addPopupAction( String actionName, Runnable runnable ) {
+
+		JMenuItem menuItem = new JMenuItem( actionName );
+		menuItem.addActionListener( e -> new Thread( () -> runnable.run() ).start() );
+		popup.add( menuItem );
+	}
+
 	public void show( JComponent display, int x, int y )
 	{
 		this.x = x;

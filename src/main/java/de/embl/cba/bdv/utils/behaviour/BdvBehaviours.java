@@ -8,8 +8,6 @@ import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.bdv.utils.bigwarp.BigWarpLauncher;
 import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
-import de.embl.cba.bdv.utils.capture.PixelSpacingDialog;
-import de.embl.cba.bdv.utils.capture.ViewCaptureResult;
 import de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter;
 import ij.IJ;
 import net.imglib2.FinalRealInterval;
@@ -28,7 +26,7 @@ public class BdvBehaviours
 {
 	public static void addPositionAndViewLoggingBehaviour(
 			BdvHandle bdv,
-			org.scijava.ui.behaviour.util.Behaviours behaviours,
+			Behaviours behaviours,
 			String trigger )
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
@@ -43,24 +41,14 @@ public class BdvBehaviours
 
 	public static void addViewCaptureBehaviour(
 			BdvHandle bdv,
-			org.scijava.ui.behaviour.util.Behaviours behaviours,
+			Behaviours behaviours,
 			String trigger,
 			final boolean showRawData )
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
 			new Thread( () -> {
-				final String pixelUnit = "micrometer";
-				final PixelSpacingDialog dialog = new PixelSpacingDialog( BdvUtils.getViewerVoxelSpacing( bdv ), pixelUnit );
-				if ( ! dialog.showDialog() ) return;
-				final ViewCaptureResult viewCaptureResult = BdvViewCaptures.captureView(
-						bdv,
-						dialog.getPixelSpacing(),
-						pixelUnit,
-						false );
-				viewCaptureResult.rgbImage.show();
-				if ( showRawData )
-					viewCaptureResult.rawImagesStack.show();
+				BdvViewCaptures.captureViewDialog( bdv, showRawData );
 			}).start();
 		}, "capture raw view", trigger ) ;
 	}
@@ -90,7 +78,7 @@ public class BdvBehaviours
 
 	public static void addExportSourcesToVoxelImagesBehaviour(
 			BdvHandle bdvHandle,
-			org.scijava.ui.behaviour.util.Behaviours behaviours,
+			Behaviours behaviours,
 			String trigger )
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
@@ -137,7 +125,7 @@ public class BdvBehaviours
 
 	public static void addAlignSourcesWithBigWarpBehaviour(
 			BdvHandle bdvHandle,
-			org.scijava.ui.behaviour.util.Behaviours behaviours,
+			Behaviours behaviours,
 			String trigger )
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
@@ -161,7 +149,7 @@ public class BdvBehaviours
 
 	public static void addDisplaySettingsBehaviour(
 			BdvHandle bdv,
-			org.scijava.ui.behaviour.util.Behaviours behaviours,
+			Behaviours behaviours,
 			String trigger )
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
