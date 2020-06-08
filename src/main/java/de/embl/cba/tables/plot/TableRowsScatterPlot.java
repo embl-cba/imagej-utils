@@ -3,6 +3,7 @@ package de.embl.cba.tables.plot;
 import bdv.util.*;
 import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.BdvUtils;
+import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealAccessibleSource;
 import de.embl.cba.swing.PopupMenu;
 import de.embl.cba.tables.Outlier;
@@ -215,55 +216,40 @@ public class TableRowsScatterPlot< T extends TableRow >
 		Behaviours behaviours = new Behaviours( new InputTriggerConfig() );
 		behaviours.install( bdvHandle.getTriggerbindings(), "plate viewer" );
 
-		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
-			showPopupMenu( x, y );
-		}, "context menu", "button3", "P" ) ; // "button1",
-	}
+		BdvPopupMenus.addAction( bdvHandle, "Focus closest point",
+				( x, y ) -> {
+					final RealPoint mouse3d = new RealPoint( x,y, 0 );
+					search.search( mouse3d ); // TODO: why is this 3d??
+					final Integer rowIndex = search.getSampler().get();
+					final T tableRow = tableRows.get( rowIndex );
+					selectionModel.focus( tableRow );
+				}
+		);
 
-	private void showPopupMenu( int x, int y )
-	{
-		final PopupMenu popupMenu = new PopupMenu();
+		BdvPopupMenus.addAction( bdvHandle, "Change columns...",
+				( x, y ) -> {
+					lineChoices = new String[]{ GridLinesOverlay.NONE, GridLinesOverlay.Y_NX, GridLinesOverlay.Y_N };
 
-		popupMenu.addPopupAction( "Focus closest point", e ->
-		{
-			new Thread( () -> {
-				final RealPoint mouse3d = getViewerMouse3dPosition();
-				search.search( mouse3d );
-				final Integer rowIndex = search.getSampler().get();
-				final T tableRow = tableRows.get( rowIndex );
-				selectionModel.focus( tableRow );
-			}).start();
-		} );
+					final GenericDialog gd = new GenericDialog( "Column selection" );
+					gd.addChoice( "Column X", columnNames, columnNameX );
+					gd.addChoice( "Column Y", columnNames, columnNameY );
+					gd.addChoice( "Add lines", lineChoices, GridLinesOverlay.NONE );
+					gd.showDialog();
 
-		popupMenu.addPopupAction( "Change columns...", e ->
-		{
-			lineChoices = new String[]{ GridLinesOverlay.NONE, GridLinesOverlay.Y_NX, GridLinesOverlay.Y_N };
+					if ( gd.wasCanceled() ) return;
 
-			new Thread( () -> {
-				final GenericDialog gd = new GenericDialog( "Column selection" );
-				gd.addChoice( "Column X", columnNames, columnNameX );
-				gd.addChoice( "Column Y", columnNames, columnNameY );
-				gd.addChoice( "Add lines", lineChoices, GridLinesOverlay.NONE );
-				gd.showDialog();
+					columnNameX = gd.getNextChoice();
+					columnNameY = gd.getNextChoice();
+					lineOverlay = gd.getNextChoice();
 
-				if ( gd.wasCanceled() ) return;
+					final int xLoc = SwingUtilities.getWindowAncestor( bdvHandle.getViewerPanel() ).getLocationOnScreen().x;
+					final int yLoc = SwingUtilities.getWindowAncestor( bdvHandle.getViewerPanel() ).getLocationOnScreen().y;
 
-				columnNameX = gd.getNextChoice();
-				columnNameY = gd.getNextChoice();
-				lineOverlay = gd.getNextChoice();
+					bdvHandle.close();
 
-				final int xLoc = SwingUtilities.getWindowAncestor( bdvHandle.getViewerPanel() ).getLocationOnScreen().x;
-				final int yLoc = SwingUtilities.getWindowAncestor( bdvHandle.getViewerPanel() ).getLocationOnScreen().y;
-
-				bdvHandle.close();
-
-				createAndShowImage( xLoc, yLoc );
-
-			}).start();
-		} );
-
-
-		popupMenu.show( bdvHandle.getViewerPanel().getDisplay(), x, y );
+					createAndShowImage( xLoc, yLoc );
+				}
+		);
 	}
 
 	private RealPoint getViewerMouse3dPosition()

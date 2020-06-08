@@ -8,13 +8,13 @@ import bdv.viewer.state.ViewerState;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.objects3d.ConnectedComponentExtractorAnd3DViewer;
 import de.embl.cba.bdv.utils.overlays.BdvGrayValuesOverlay;
+import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.sources.ImagePlusFileSource;
 import de.embl.cba.bdv.utils.sources.Metadata;
 import de.embl.cba.bdv.utils.sources.ModifiableRandomAccessibleIntervalSource4D;
 import de.embl.cba.lazyalgorithm.RandomAccessibleIntervalNeighborhoodFilter;
 import de.embl.cba.lazyalgorithm.converter.NeighborhoodNonZeroBoundariesConverter;
-import de.embl.cba.swing.PopupMenu;
 import de.embl.cba.tables.Logger;
 import de.embl.cba.tables.color.*;
 import de.embl.cba.tables.image.ImageSourcesModel;
@@ -24,9 +24,7 @@ import de.embl.cba.tables.imagesegment.LabelFrameAndImage;
 import de.embl.cba.tables.imagesegment.SegmentUtils;
 import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
-import de.embl.cba.tables.tablerow.TableRowListener;
 import de.embl.cba.tables.view.dialogs.BdvViewSourcesBrowsingAndActionsDialog;
-import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import net.imglib2.RealPoint;
 import net.imglib2.algorithm.neighborhood.HyperSphereShape;
@@ -40,7 +38,6 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import java.util.*;
 
 import static de.embl.cba.bdv.utils.converters.SelectableVolatileARGBConverter.BACKGROUND;
-import static de.embl.cba.tables.TableRows.setTableCell;
 
 // TODO: reconsider what a "segment" needs to be here
 public class SegmentsBdvView < T extends ImageSegment >
@@ -527,28 +524,19 @@ public class SegmentsBdvView < T extends ImageSegment >
 		install3DViewBehaviour();
 		installImageSetNavigationBehaviour( );
 
-		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> {
-			showPopupMenu( x, y );
-		}, "context menu", "button3" ) ;
-
+		BdvPopupMenus.addAction( bdv,
+				"Change animation settings...",
+				( x, y ) -> new Thread( () -> changeAnimationSettingsUI() ).start()
+			);
 	}
 
-	private void showPopupMenu( int x, int y )
+	private void changeAnimationSettingsUI()
 	{
-		final PopupMenu popupMenu = new PopupMenu();
-
-		popupMenu.addPopupAction( "Change animation settings...", e ->
-		{
-			new Thread( () -> {
-				final GenericDialog genericDialog = new GenericDialog( "Animation settings");
-				genericDialog.addNumericField( "Animation duration [ms]", segmentFocusAnimationDurationMillis, 0 );
-				genericDialog.showDialog();
-				if ( genericDialog.wasCanceled() ) return;
-				segmentFocusAnimationDurationMillis = (int) genericDialog.getNextNumber();
-			} ).start();
-		} );
-
-		popupMenu.show( bdv.getViewerPanel().getDisplay(), x, y );
+		final GenericDialog genericDialog = new GenericDialog( "Animation settings" );
+		genericDialog.addNumericField( "Animation duration [ms]", segmentFocusAnimationDurationMillis, 0 );
+		genericDialog.showDialog();
+		if ( genericDialog.wasCanceled() ) return;
+		segmentFocusAnimationDurationMillis = ( int ) genericDialog.getNextNumber();
 	}
 
 	private void installRandomColorShufflingBehaviour()
