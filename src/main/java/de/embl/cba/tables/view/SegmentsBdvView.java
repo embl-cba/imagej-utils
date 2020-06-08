@@ -518,9 +518,9 @@ public class SegmentsBdvView < T extends ImageSegment >
 				bdv.getBdvHandle().getTriggerbindings(),
 				segmentsName + "-bdv-select-handler" );
 
-		installSelectionBehaviour( );
-		installSelectNoneBehaviour( );
-		installSelectionColoringModeBehaviour( );
+		installSelectionBehaviour();
+		installSelectNoneBehaviour();
+		installSelectionColoringModeBehaviour();
 		installRandomColorShufflingBehaviour();
 		installShowLabelMaskAsBinaryMaskBehaviour();
 		installShowLabelMaskAsBoundaryBehaviour();

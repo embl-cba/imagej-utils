@@ -164,7 +164,7 @@ public class Annotator < T extends TableRow > extends JFrame
 					while ( selectedRowIndex > 0 )
 					{
 						row = tableRows.get( rowSorter.convertRowIndexToModel( --selectedRowIndex ) );
-						if ( row.getCell( annotationColumnName ).toLowerCase().equals( "none" ) )
+						if ( isNoneOrNan( row ) )
 						{
 							row = null;
 							continue;
@@ -205,7 +205,7 @@ public class Annotator < T extends TableRow > extends JFrame
 					while ( selectedRowIndex < tableRows.size() )
 					{
 						row = tableRows.get( rowSorter.convertRowIndexToModel( ++selectedRowIndex ) );
-						if ( row.getCell( annotationColumnName ).toLowerCase().equals( "none" ) )
+						if ( isNoneOrNan( row ) )
 						{
 							row = null;
 							continue;
@@ -233,6 +233,12 @@ public class Annotator < T extends TableRow > extends JFrame
 		this.panel.add( panel );
 	}
 
+	private boolean isNoneOrNan( T row )
+	{
+		return row.getCell( annotationColumnName ).toLowerCase().equals( "none" )
+			|| row.getCell( annotationColumnName ).toLowerCase().equals( "nan" );
+	}
+
 	private void selectRow( T row )
 	{
 		if ( ! row.getCell( annotationColumnName ).toLowerCase().equals( "none" ) )
@@ -253,8 +259,9 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 
-		final JCheckBox checkBox = new JCheckBox( "Skip \"None\"" );
+		final JCheckBox checkBox = new JCheckBox( "Skip \"None\" & \"NaN\"" );
 		checkBox.setSelected( true );
+		skipNone = checkBox.isSelected();
 
 		checkBox.addActionListener( e -> {
 			skipNone = checkBox.isSelected();
