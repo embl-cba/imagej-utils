@@ -6,7 +6,6 @@ import de.embl.cba.tables.*;
 import de.embl.cba.tables.annotate.Annotator;
 import de.embl.cba.tables.color.*;
 import de.embl.cba.tables.measure.MeasureDistance;
-import de.embl.cba.tables.select.AssignValuesToSelectedRowsDialog;
 import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;

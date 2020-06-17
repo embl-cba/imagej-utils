@@ -142,4 +142,18 @@ public class FileAndUrlUtils
 		}
 	}
 
+	public static void openURI( String uri )
+	{
+		try
+		{
+			java.awt.Desktop.getDesktop().browse( new URI( uri ));
+		} catch ( IOException e )
+		{
+			e.printStackTrace();
+		} catch ( URISyntaxException e )
+		{
+			e.printStackTrace();
+		}
+	}
+
 }

@@ -8,6 +8,7 @@ import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.bdv.utils.bigwarp.BigWarpLauncher;
 import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
+import de.embl.cba.bdv.utils.capture.ViewCaptureDialog;
 import de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter;
 import ij.IJ;
 import net.imglib2.FinalRealInterval;
@@ -40,15 +41,14 @@ public class BdvBehaviours
 	}
 
 	public static void addViewCaptureBehaviour(
-			BdvHandle bdv,
+			BdvHandle bdvHandle,
 			Behaviours behaviours,
-			String trigger,
-			final boolean showRawData )
+			String trigger )
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 		{
 			new Thread( () -> {
-				BdvViewCaptures.captureViewDialog( bdv, showRawData );
+				new ViewCaptureDialog( bdvHandle ).run();
 			}).start();
 		}, "capture raw view", trigger ) ;
 	}

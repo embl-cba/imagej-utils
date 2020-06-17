@@ -1,11 +1,13 @@
 package de.embl.cba.tables.annotate;
 
+import com.sun.imageio.plugins.jpeg.JPEGImageWriter;
 import de.embl.cba.tables.SwingUtils;
 import de.embl.cba.tables.color.CategoryTableRowColumnColoringModel;
 import de.embl.cba.tables.color.ColorUtils;
 import de.embl.cba.tables.color.SelectionColoringModel;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;
+import de.embl.cba.tables.tablerow.TableRowImageSegment;
 import ij.gui.GenericDialog;
 import net.imglib2.type.numeric.ARGBType;
 
@@ -28,6 +30,10 @@ public class Annotator < T extends TableRow > extends JFrame
 	private boolean skipNone;
 	private boolean isSingleRowBrowsingMode = false; // TODO: think about how to get out of this mode!
 	private int selectedRowIndex = 0;
+	private int goToRowIndex;
+	private JTextField goToRowIndexTextField;
+	private HashMap< String, T > annotationToTableRow;
+	private JPanel annotationButtonsPanel;
 
 	public Annotator(
 			String annotationColumnName,
@@ -50,14 +56,21 @@ public class Annotator < T extends TableRow > extends JFrame
 
 	public void showDialog()
 	{
-		addAnnotationButtons();
-		panel.add( new JSeparator( SwingConstants.HORIZONTAL ) );
-		addCreateCategoryButton();
-		panel.add( new JSeparator( SwingConstants.HORIZONTAL ) );
-		addTableRowBrowserPanel();
-		addSkipNonePanel();
+		createDialog();
 		showFrame();
 	}
+
+	private void createDialog()
+	{
+		addCreateCategoryButton();
+		panel.add( new JSeparator( SwingConstants.HORIZONTAL ) );
+		addAnnotationButtons();
+		panel.add( new JSeparator( SwingConstants.HORIZONTAL ) );
+		addTableRowBrowserSelectPanel();
+		addTableRowBrowserSelectPreviousAndNextPanel();
+		addSkipNonePanel();
+	}
+
 
 	private void showFrame()
 	{
@@ -72,20 +85,36 @@ public class Annotator < T extends TableRow > extends JFrame
 
 	private void addCreateCategoryButton()
 	{
+		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 		final JButton button = new JButton( "Create new category" );
+		final JTextField textField = new JTextField( "Class A" );
 		panel.add( button );
+		panel.add( textField );
 		button.addActionListener( e -> {
-			final GenericDialog gd = new GenericDialog( "" );
-			gd.addStringField( "Category name", "", 10 );
-			gd.showDialog();
-			if ( gd.wasCanceled() ) return;
-			addAnnotationButtonPanel( gd.getNextString(), null );
+//			annotationToTableRow.put( textField.getText(), null  );
+
+//			final GenericDialog gd = new GenericDialog( "" );
+//			gd.addStringField( "Category name", "", 10 );
+//			gd.showDialog();
+//			if ( gd.wasCanceled() ) return;
+			addAnnotationButtonPanel( textField.getText(), null );
 			refreshDialog();
 		} );
+		this.panel.add( panel );
 	}
 
 	private void addAnnotationButtons()
 	{
+		annotationButtonsPanel = new JPanel(  );
+		annotationButtonsPanel.setLayout( new BoxLayout(annotationButtonsPanel, BoxLayout.Y_AXIS ) );
+		annotationButtonsPanel.setBorder( BorderFactory.createEmptyBorder(0,10,10,10) );
+		this.panel.add( annotationButtonsPanel );
+
+		final JPanel panel = SwingUtils.horizontalLayoutPanel();
+		panel.add( new JLabel( "Annotate selected segment(s) as:" ) );
+		panel.add( new JLabel( "      " ) );
+		annotationButtonsPanel.add( panel );
+
 		final HashMap< String, T > annotations = getAnnotations();
 		for ( String annotation : annotations.keySet() )
 			addAnnotationButtonPanel( annotation, annotations.get( annotation ) );
@@ -130,7 +159,7 @@ public class Annotator < T extends TableRow > extends JFrame
 			}
 		} );
 
-		final JButton changeColor = new JButton( "Change color" );
+		final JButton changeColor = new JButton( "C" );
 		changeColor.addActionListener( e -> {
 			Color color = JColorChooser.showDialog( this.panel, "", null );
 			if ( color == null ) return;
@@ -140,15 +169,79 @@ public class Annotator < T extends TableRow > extends JFrame
 
 		panel.add( button );
 		panel.add( changeColor );
+		annotationButtonsPanel.add( panel );
+		annotationButtonsPanel.revalidate();
+	}
+
+	private void addTableRowBrowserSelectPreviousAndNextPanel( )
+	{
+		final JPanel panel = SwingUtils.horizontalLayoutPanel();
+		final JButton previous = createSelectPreviousButton();
+		final JButton next = createSelectNextButton();
+		panel.add( previous );
+		panel.add( next );
 		this.panel.add( panel );
 	}
 
-	private void addTableRowBrowserPanel( )
+	private void addTableRowBrowserSelectPanel( )
 	{
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
+		final JButton button = createSelectButton();
+		goToRowIndexTextField = new JTextField( "" );
+		goToRowIndexTextField.setText( "1" );
+		panel.add( button );
+		panel.add( goToRowIndexTextField );
+		this.panel.add( panel );
+	}
 
+	private JButton createSelectNextButton()
+	{
+		final JButton next = new JButton( "Select next" );
+		//next.setFont( new Font("monospaced", Font.PLAIN, 12) );
+		next.setAlignmentX( Component.CENTER_ALIGNMENT );
+
+		next.addActionListener( e ->
+		{
+			isSingleRowBrowsingMode = true;
+
+			int currentRowIndex = selectedRowIndex;
+			if ( selectedRowIndex < tableRows.size() - 1 )
+			{
+				T row = null;
+				if ( skipNone )
+				{
+					while ( selectedRowIndex < tableRows.size() )
+					{
+						row = tableRows.get( rowSorter.convertRowIndexToModel( ++selectedRowIndex ) );
+						if ( isNoneOrNan( row ) )
+						{
+							row = null;
+							continue;
+						}
+						else
+							break;
+					}
+					if ( row == null )
+					{
+						selectedRowIndex = currentRowIndex;
+						return; // None of the next rows is not None
+					}
+				}
+				else
+				{
+					row = tableRows.get( rowSorter.convertRowIndexToModel( ++selectedRowIndex ) );
+				}
+
+				selectRow( row );
+			}
+		} );
+		return next;
+	}
+
+	private JButton createSelectPreviousButton()
+	{
 		final JButton previous = new JButton( "Select previous" );
-		previous.setFont( new Font("monospaced", Font.PLAIN, 12) );
+		//previous.setFont( new Font("monospaced", Font.PLAIN, 12) );
 		previous.setAlignmentX( Component.CENTER_ALIGNMENT );
 
 		previous.addActionListener( e ->
@@ -187,50 +280,47 @@ public class Annotator < T extends TableRow > extends JFrame
 				selectRow( row );
 			}
 		} );
+		return previous;
+	}
 
-		final JButton next = new JButton( "Select next" );
-		next.setFont( new Font("monospaced", Font.PLAIN, 12) );
-		next.setAlignmentX( Component.CENTER_ALIGNMENT );
+	private JButton createSelectButton()
+	{
+		final JButton button = new JButton( "Select segment with label id" );
+		//button.setFont( new Font("monospaced", Font.PLAIN, 12) );
+		button.setAlignmentX( Component.CENTER_ALIGNMENT );
 
-		next.addActionListener( e ->
+		button.addActionListener( e ->
 		{
 			isSingleRowBrowsingMode = true;
 
-			int currentRowIndex = selectedRowIndex;
-			if ( selectedRowIndex < tableRows.size() - 1 )
-			{
-				T row = null;
-				if ( skipNone )
-				{
-					while ( selectedRowIndex < tableRows.size() )
-					{
-						row = tableRows.get( rowSorter.convertRowIndexToModel( ++selectedRowIndex ) );
-						if ( isNoneOrNan( row ) )
-						{
-							row = null;
-							continue;
-						}
-						else
-							break;
-					}
-					if ( row == null )
-					{
-						selectedRowIndex = currentRowIndex;
-						return; // None of the next rows is not None
-					}
-				}
-				else
-				{
-					row = tableRows.get( rowSorter.convertRowIndexToModel( ++selectedRowIndex ) );
-				}
+			T selectedRow = getSelectedRow( );
 
-				selectRow( row );
-			}
+			if ( selectedRow != null )
+				selectRow( selectedRow );
 		} );
+		return button;
+	}
 
-		panel.add( previous );
-		panel.add( next );
-		this.panel.add( panel );
+	private T getSelectedRow()
+	{
+		if ( tableRows.get( 0 ) instanceof TableRowImageSegment ) // TODO: in principle a flaw in logic as it assumes that all tableRows are of same type...
+		{
+			final double selectedLabelId = Double.parseDouble( goToRowIndexTextField.getText() );
+			for ( T tableRow : tableRows )
+			{
+				final double labelId = ( ( TableRowImageSegment ) tableRow ).labelId();
+				if ( labelId == selectedLabelId )
+				{
+					return tableRow;
+				}
+			}
+			throw new UnsupportedOperationException( "Could not find segment with label " + selectedLabelId );
+		}
+		else
+		{
+			final int rowIndex = Integer.parseInt( goToRowIndexTextField.getText() );
+			return tableRows.get( rowSorter.convertRowIndexToModel( rowIndex ) );
+		}
 	}
 
 	private boolean isNoneOrNan( T row )
@@ -283,12 +373,15 @@ public class Annotator < T extends TableRow > extends JFrame
 
 	private HashMap< String, T > getAnnotations()
 	{
-		final HashMap< String, T > annotationToTableRow = new HashMap<>();
-
-		for ( int row = 0; row < tableRows.size(); row++ )
+		if ( annotationToTableRow == null )
 		{
-			final T tableRow = tableRows.get( row );
-			annotationToTableRow.put( tableRow.getCell( annotationColumnName ), tableRow );
+			annotationToTableRow = new HashMap<>();
+
+			for ( int row = 0; row < tableRows.size(); row++ )
+			{
+				final T tableRow = tableRows.get( row );
+				annotationToTableRow.put( tableRow.getCell( annotationColumnName ), tableRow );
+			}
 		}
 
 		return annotationToTableRow;
