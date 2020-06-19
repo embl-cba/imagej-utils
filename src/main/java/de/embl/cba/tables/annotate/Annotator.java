@@ -1,6 +1,5 @@
 package de.embl.cba.tables.annotate;
 
-import com.sun.imageio.plugins.jpeg.JPEGImageWriter;
 import de.embl.cba.tables.SwingUtils;
 import de.embl.cba.tables.color.CategoryTableRowColumnColoringModel;
 import de.embl.cba.tables.color.ColorUtils;
@@ -8,7 +7,6 @@ import de.embl.cba.tables.color.SelectionColoringModel;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.tablerow.TableRowImageSegment;
-import ij.gui.GenericDialog;
 import net.imglib2.type.numeric.ARGBType;
 
 import javax.swing.*;
@@ -29,7 +27,7 @@ public class Annotator < T extends TableRow > extends JFrame
 	private final JPanel panel;
 	private boolean skipNone;
 	private boolean isSingleRowBrowsingMode = false; // TODO: think about how to get out of this mode!
-	private int selectedRowIndex = 0;
+	private int currentlySelectedRowIndex = 0;
 	private int goToRowIndex;
 	private JTextField goToRowIndexTextField;
 	private HashMap< String, T > annotationToTableRow;
@@ -71,7 +69,6 @@ public class Annotator < T extends TableRow > extends JFrame
 		addSkipNonePanel();
 	}
 
-
 	private void showFrame()
 	{
 		this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
@@ -91,12 +88,6 @@ public class Annotator < T extends TableRow > extends JFrame
 		panel.add( button );
 		panel.add( textField );
 		button.addActionListener( e -> {
-//			annotationToTableRow.put( textField.getText(), null  );
-
-//			final GenericDialog gd = new GenericDialog( "" );
-//			gd.addStringField( "Category name", "", 10 );
-//			gd.showDialog();
-//			if ( gd.wasCanceled() ) return;
 			addAnnotationButtonPanel( textField.getText(), null );
 			refreshDialog();
 		} );
@@ -204,15 +195,15 @@ public class Annotator < T extends TableRow > extends JFrame
 		{
 			isSingleRowBrowsingMode = true;
 
-			int currentRowIndex = selectedRowIndex;
-			if ( selectedRowIndex < tableRows.size() - 1 )
+			int rowIndex = currentlySelectedRowIndex;
+			if ( rowIndex < tableRows.size() - 1 )
 			{
 				T row = null;
 				if ( skipNone )
 				{
-					while ( selectedRowIndex < tableRows.size() )
+					while ( rowIndex < tableRows.size() )
 					{
-						row = tableRows.get( rowSorter.convertRowIndexToModel( ++selectedRowIndex ) );
+						row = tableRows.get( rowSorter.convertRowIndexToModel( ++rowIndex ) );
 						if ( isNoneOrNan( row ) )
 						{
 							row = null;
@@ -223,13 +214,12 @@ public class Annotator < T extends TableRow > extends JFrame
 					}
 					if ( row == null )
 					{
-						selectedRowIndex = currentRowIndex;
 						return; // None of the next rows is not None
 					}
 				}
 				else
 				{
-					row = tableRows.get( rowSorter.convertRowIndexToModel( ++selectedRowIndex ) );
+					row = tableRows.get( rowSorter.convertRowIndexToModel( ++rowIndex ) );
 				}
 
 				selectRow( row );
@@ -248,15 +238,16 @@ public class Annotator < T extends TableRow > extends JFrame
 		{
 			isSingleRowBrowsingMode = true;
 
-			int currentRowIndex = selectedRowIndex;
-			if ( selectedRowIndex > 0 )
+			int rowIndex = currentlySelectedRowIndex;
+
+			if ( rowIndex > 0 )
 			{
 				T row = null;
 				if ( skipNone )
 				{
-					while ( selectedRowIndex > 0 )
+					while ( rowIndex > 0 )
 					{
-						row = tableRows.get( rowSorter.convertRowIndexToModel( --selectedRowIndex ) );
+						row = tableRows.get( rowSorter.convertRowIndexToModel( --rowIndex ) );
 						if ( isNoneOrNan( row ) )
 						{
 							row = null;
@@ -268,32 +259,31 @@ public class Annotator < T extends TableRow > extends JFrame
 
 					if ( row == null )
 					{
-						selectedRowIndex = currentRowIndex;
 						return; // None of the previous rows is not None
 					}
 				}
 				else
 				{
-					row = tableRows.get( rowSorter.convertRowIndexToModel( --selectedRowIndex ) );
+					row = tableRows.get( rowSorter.convertRowIndexToModel( --rowIndex ) );
 				}
 
 				selectRow( row );
 			}
 		} );
+
 		return previous;
 	}
 
 	private JButton createSelectButton()
 	{
 		final JButton button = new JButton( "Select segment with label id" );
-		//button.setFont( new Font("monospaced", Font.PLAIN, 12) );
 		button.setAlignmentX( Component.CENTER_ALIGNMENT );
 
 		button.addActionListener( e ->
 		{
 			isSingleRowBrowsingMode = true;
 
-			T selectedRow = getSelectedRow( );
+			T selectedRow = getSelectedRow();
 
 			if ( selectedRow != null )
 				selectRow( selectedRow );
@@ -303,7 +293,8 @@ public class Annotator < T extends TableRow > extends JFrame
 
 	private T getSelectedRow()
 	{
-		if ( tableRows.get( 0 ) instanceof TableRowImageSegment ) // TODO: in principle a flaw in logic as it assumes that all tableRows are of same type...
+		// TODO: in principle a flaw in logic as it assumes that all tableRows are of same type...
+		if ( tableRows.get( 0 ) instanceof TableRowImageSegment )
 		{
 			final double selectedLabelId = Double.parseDouble( goToRowIndexTextField.getText() );
 			for ( T tableRow : tableRows )
@@ -331,6 +322,8 @@ public class Annotator < T extends TableRow > extends JFrame
 
 	private void selectRow( T row )
 	{
+		currentlySelectedRowIndex = row.rowIndex();
+
 		if ( ! row.getCell( annotationColumnName ).toLowerCase().equals( "none" ) )
 		{
 			selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.OnlyShowSelected );
