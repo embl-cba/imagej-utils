@@ -7,6 +7,7 @@ import de.embl.cba.tables.color.SelectionColoringModel;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.tablerow.TableRowImageSegment;
+import ij.IJ;
 import net.imglib2.type.numeric.ARGBType;
 
 import javax.swing.*;
@@ -18,6 +19,8 @@ import java.util.Set;
 
 public class Annotator < T extends TableRow > extends JFrame
 {
+	public static final String LAST = "You are already at the last object in table.";
+	public static final String NO_MORE_SEGMENTS = "No more segments.";
 	private final String annotationColumnName;
 	private final List< T > tableRows;
 	private final SelectionModel< T > selectionModel;
@@ -27,11 +30,10 @@ public class Annotator < T extends TableRow > extends JFrame
 	private final JPanel panel;
 	private boolean skipNone;
 	private boolean isSingleRowBrowsingMode = false; // TODO: think about how to get out of this mode!
-	private int currentlySelectedRowIndex = 0;
-	private int goToRowIndex;
 	private JTextField goToRowIndexTextField;
 	private HashMap< String, T > annotationToTableRow;
 	private JPanel annotationButtonsPanel;
+	private T currentlySelectedRow;
 
 	public Annotator(
 			String annotationColumnName,
@@ -48,6 +50,7 @@ public class Annotator < T extends TableRow > extends JFrame
 		this.coloringModel = coloringModel;
 		this.selectionColoringModel = selectionColoringModel;
 		this.rowSorter = rowSorter;
+		this.currentlySelectedRow = tableRows.get( rowSorter.convertRowIndexToModel( 0 ) );
 		coloringModel.fixedColorMode( true );
 		this.panel = new JPanel();
 	}
@@ -195,13 +198,14 @@ public class Annotator < T extends TableRow > extends JFrame
 		{
 			isSingleRowBrowsingMode = true;
 
-			int rowIndex = currentlySelectedRowIndex;
+			// rowIndex in sorted "units"
+			int rowIndex = rowSorter.convertRowIndexToView( currentlySelectedRow.rowIndex() );
 			if ( rowIndex < tableRows.size() - 1 )
 			{
 				T row = null;
 				if ( skipNone )
 				{
-					while ( rowIndex < tableRows.size() )
+					while ( rowIndex < tableRows.size() - 1 )
 					{
 						row = tableRows.get( rowSorter.convertRowIndexToModel( ++rowIndex ) );
 						if ( isNoneOrNan( row ) )
@@ -210,19 +214,28 @@ public class Annotator < T extends TableRow > extends JFrame
 							continue;
 						}
 						else
+						{
 							break;
+						}
 					}
+
 					if ( row == null )
 					{
-						return; // None of the next rows is not None
+						IJ.showMessage( NO_MORE_SEGMENTS );
+						return; // All following rows are None or NaN
 					}
+
+					selectRow( row, rowIndex );
 				}
 				else
 				{
 					row = tableRows.get( rowSorter.convertRowIndexToModel( ++rowIndex ) );
+					selectRow( row, rowIndex );
 				}
-
-				selectRow( row );
+			}
+			else
+			{
+				IJ.showMessage( NO_MORE_SEGMENTS );
 			}
 		} );
 		return next;
@@ -238,8 +251,8 @@ public class Annotator < T extends TableRow > extends JFrame
 		{
 			isSingleRowBrowsingMode = true;
 
-			int rowIndex = currentlySelectedRowIndex;
-
+			// row index in sorted "units"
+			int rowIndex = rowSorter.convertRowIndexToView( currentlySelectedRow.rowIndex() );
 			if ( rowIndex > 0 )
 			{
 				T row = null;
@@ -259,15 +272,21 @@ public class Annotator < T extends TableRow > extends JFrame
 
 					if ( row == null )
 					{
+						IJ.showMessage( NO_MORE_SEGMENTS );
 						return; // None of the previous rows is not None
 					}
+
+					selectRow( row, rowIndex );
 				}
 				else
 				{
 					row = tableRows.get( rowSorter.convertRowIndexToModel( --rowIndex ) );
+					selectRow( row, rowIndex );
 				}
-
-				selectRow( row );
+			}
+			else
+			{
+				IJ.showMessage( NO_MORE_SEGMENTS );
 			}
 		} );
 
@@ -286,7 +305,7 @@ public class Annotator < T extends TableRow > extends JFrame
 			T selectedRow = getSelectedRow();
 
 			if ( selectedRow != null )
-				selectRow( selectedRow );
+				selectRow( selectedRow, rowSorter.convertRowIndexToView( selectedRow.rowIndex() ) );
 		} );
 		return button;
 	}
@@ -320,9 +339,10 @@ public class Annotator < T extends TableRow > extends JFrame
 			|| row.getCell( annotationColumnName ).toLowerCase().equals( "nan" );
 	}
 
-	private void selectRow( T row )
+	private void selectRow( T row, int sortedRowIndex )
 	{
-		currentlySelectedRowIndex = row.rowIndex();
+		//currentlySelectedRowIndex = sortedRowIndex;
+		currentlySelectedRow = row;
 
 		if ( ! row.getCell( annotationColumnName ).toLowerCase().equals( "none" ) )
 		{

@@ -20,6 +20,7 @@ import mpicbg.spim.data.sequence.TimePoint;
 import mpicbg.spim.data.sequence.TimePoints;
 import net.imglib2.FinalDimensions;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.Intervals;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -138,7 +139,7 @@ public class BdvImagePlusExport
 		final long planeSizeInBytes = imp.getWidth() * imp.getHeight() * imp.getBytesPerPixel();
 		final long ijMaxMemory = IJ.maxMemory();
 		final int numCellCreatorThreads = Math.max( 1, PluginHelper.numThreads() - 1 );
-		final WriteSequenceToHdf5.LoopbackHeuristic loopbackHeuristic =
+		final ExportScalePyramid.LoopbackHeuristic loopbackHeuristic =
 				( originalImg,
 				  factorsToOriginalImg,
 				  previousLevel,
@@ -148,7 +149,7 @@ public class BdvImagePlusExport
 			if ( previousLevel < 0 )
 				return false;
 
-			if ( WriteSequenceToHdf5.numElements( factorsToOriginalImg ) / WriteSequenceToHdf5.numElements( factorsToPreviousLevel ) >= 8 )
+			if ( Intervals.numElements( factorsToOriginalImg ) / Intervals.numElements( factorsToPreviousLevel ) >= 8 )
 				return true;
 
 			if ( isVirtual )
@@ -161,7 +162,7 @@ public class BdvImagePlusExport
 			return false;
 		};
 
-		final WriteSequenceToHdf5.AfterEachPlane afterEachPlane = new WriteSequenceToHdf5.AfterEachPlane()
+		final ExportScalePyramid.AfterEachPlane afterEachPlane = new ExportScalePyramid.AfterEachPlane()
 		{
 			@Override
 			public void afterEachPlane( final boolean usedLoopBack )

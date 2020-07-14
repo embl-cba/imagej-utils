@@ -24,6 +24,7 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
@@ -106,7 +107,7 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 
 
 		final int numCellCreatorThreads = Math.max( 1, PluginHelper.numThreads() - 1 );
-		final WriteSequenceToHdf5.LoopbackHeuristic loopbackHeuristic =
+		ExportScalePyramid.LoopbackHeuristic loopbackHeuristic =
 				( originalImg,
 				  factorsToOriginalImg,
 				  previousLevel,
@@ -116,14 +117,13 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 			if ( previousLevel < 0 )
 				return false;
 
-			if ( WriteSequenceToHdf5.numElements( factorsToOriginalImg )
-					/ WriteSequenceToHdf5.numElements( factorsToPreviousLevel ) >= 8 )
+			if ( Intervals.numElements( factorsToOriginalImg ) / Intervals.numElements( factorsToPreviousLevel ) >= 8 )
 				return true;
 
 			return false;
 		};
 
-		final WriteSequenceToHdf5.AfterEachPlane afterEachPlane = usedLoopBack ->
+		final ExportScalePyramid.AfterEachPlane afterEachPlane = usedLoopBack ->
 		{ };
 
 		final ArrayList< Partition > partitions;
