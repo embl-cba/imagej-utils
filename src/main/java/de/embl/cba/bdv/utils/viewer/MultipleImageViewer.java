@@ -17,8 +17,8 @@ import de.embl.cba.bdv.utils.io.SPIMDataReaders;
 import de.embl.cba.bdv.utils.render.AccumulateAverageProjectorARGB;
 import de.embl.cba.bdv.utils.render.AccumulateEMAndFMProjectorARGB;
 import de.embl.cba.bdv.utils.sources.ImageSource;
-import de.embl.cba.morphometry.registration.platynereis.PlatynereisRegistration;
-import de.embl.cba.morphometry.registration.platynereis.PlatynereisRegistrationSettings;
+//import de.embl.cba.morphometry.registration.platynereis.PlatynereisRegistration;
+//import de.embl.cba.morphometry.registration.platynereis.PlatynereisRegistrationSettings;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;
@@ -52,7 +52,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.WeakHashMap;
 
-import static de.embl.cba.morphometry.registration.platynereis.PlatynereisRegistrationSettings.ThresholdMethod.Huang;
+//import static de.embl.cba.morphometry.registration.platynereis.PlatynereisRegistrationSettings.ThresholdMethod.Huang;
 
 
 /**
@@ -177,37 +177,37 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 
 	public void prealignCurrentPlatynereisXRaySource( boolean showIntermediateResults )
 	{
-		// TODO: make all of this work for non-isotropic data
-		Logger.log( "Registering..." );
-
-		final PlatynereisRegistrationSettings settings = new PlatynereisRegistrationSettings();
-
-		final int currentSource = bdv.getBdvHandle().getViewerPanel().getState().getCurrentSource();
-		final VoxelDimensions voxelDimensions = BdvUtils.getVoxelDimensions( bdv, currentSource );
-		final double[] calibration = new double[ 3 ];
-		voxelDimensions.dimensions( calibration );
-
-		final Source< ? > source = BdvUtils.getSource( bdv, currentSource );
-		final int level = BdvUtils.getLevel( source, settings.registrationResolution );
-
-		settings.showIntermediateResults = false;
-		settings.outputResolution = voxelDimensions.dimension( 0 ); // assuming isotropic
-		settings.invertImage = true;
-		settings.showIntermediateResults = showIntermediateResults;
-		settings.inputCalibration = BdvUtils.getCalibration( source, level );
-		settings.thresholdMethod = Huang;
-		final PlatynereisRegistration< R > registration = new PlatynereisRegistration<>( settings, opService );
-		final RandomAccessibleInterval< R > rai = ( RandomAccessibleInterval< R >) source.getSource( 0, level );
-		registration.run( rai );
-		final AffineTransform3D registrationTransform = registration.getRegistrationTransform( new double[]{1,1,1}, 1);
-
-		applyTransform( source, registrationTransform, "Platynereis registration transform" );
-
-		final TransformedSource transformedSource = ( TransformedSource ) source;
-		transformedSource.setFixedTransform( registrationTransform.copy() );
-		BdvUtils.repaint( bdv );
-
-		BdvUtils.moveToPosition( bdv, new double[]{ 0, 0, 0}, 0, 100 );
+		// TODO: get this functionality in without loading the morphometry plugin
+//		Logger.log( "Registering..." );
+//
+//		final PlatynereisRegistrationSettings settings = new PlatynereisRegistrationSettings();
+//
+//		final int currentSource = bdv.getBdvHandle().getViewerPanel().getState().getCurrentSource();
+//		final VoxelDimensions voxelDimensions = BdvUtils.getVoxelDimensions( bdv, currentSource );
+//		final double[] calibration = new double[ 3 ];
+//		voxelDimensions.dimensions( calibration );
+//
+//		final Source< ? > source = BdvUtils.getSource( bdv, currentSource );
+//		final int level = BdvUtils.getLevel( source, settings.registrationResolution );
+//
+//		settings.showIntermediateResults = false;
+//		settings.outputResolution = voxelDimensions.dimension( 0 ); // assuming isotropic
+//		settings.invertImage = true;
+//		settings.showIntermediateResults = showIntermediateResults;
+//		settings.inputCalibration = BdvUtils.getCalibration( source, level );
+//		settings.thresholdMethod = Huang;
+//		final PlatynereisRegistration< R > registration = new PlatynereisRegistration<>( settings, opService );
+//		final RandomAccessibleInterval< R > rai = ( RandomAccessibleInterval< R >) source.getSource( 0, level );
+//		registration.run( rai );
+//		final AffineTransform3D registrationTransform = registration.getRegistrationTransform( new double[]{1,1,1}, 1);
+//
+//		applyTransform( source, registrationTransform, "Platynereis registration transform" );
+//
+//		final TransformedSource transformedSource = ( TransformedSource ) source;
+//		transformedSource.setFixedTransform( registrationTransform.copy() );
+//		BdvUtils.repaint( bdv );
+//
+//		BdvUtils.moveToPosition( bdv, new double[]{ 0, 0, 0}, 0, 100 );
 	}
 
 	private void applyTransformToCurrentSource(

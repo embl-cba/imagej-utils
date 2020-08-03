@@ -59,7 +59,6 @@ import static de.embl.cba.transforms.utils.Transforms.createBoundingIntervalAfte
 
 public abstract class BdvUtils
 {
-
 	public static final String OVERLAY = "overlay";
 
 	public static < R extends RealType< R > > Source< R > openSource( String path, int sourceIndex )

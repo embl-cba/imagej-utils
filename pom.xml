@@ -4,11 +4,12 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>27.0.1</version>
+		<version>29.1.0</version>
 	</parent>
+	<groupId>de.embl.cba</groupId>
 	<artifactId>imagej-utils</artifactId>
 	<url>https://github.com/tischi/imagej-utils</url>
-	<version>0.5.0</version>
+	<version>0.5.3</version>
 	<name>ImageJ Utilities</name>
 	<description>TODO</description>
 	<inceptionYear>2018</inceptionYear>
@@ -61,43 +62,12 @@
 		<system>None</system>
 	</ciManagement>
 	<properties>
-		<package-name>de.embl.cba.bdv.utils</package-name>
+		<package-name>de.embl.cba</package-name>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>EMBL</license.copyrightOwners>
 		<imagej.app.directory>/Applications/Fiji.app/</imagej.app.directory>
 		<enforcer.skip>true</enforcer.skip>
 	</properties>
-	<!--	<build>-->
-	<!--		<plugins>-->
-	<!--			<plugin>-->
-	<!--				<groupId>org.apache.maven.plugins</groupId>-->
-	<!--				<artifactId>maven-assembly-plugin</artifactId>-->
-	<!--				<executions>-->
-	<!--					<execution>-->
-	<!--						<phase>package</phase>-->
-	<!--						<goals>-->
-	<!--							<goal>single</goal>-->
-	<!--						</goals>-->
-	<!--						<configuration>-->
-	<!--							<archive>-->
-	<!--								<manifest>-->
-	<!--									<mainClass>-->
-	<!--										de.embl.cba.bdv.utils.io.BdvToVoxelGridImageConverter-->
-	<!--									</mainClass>-->
-	<!--								</manifest>-->
-	<!--							</archive>-->
-	<!--							<outputDirectory>-->
-	<!--								/Users/tischer/Documents/imagej-utils/target-->
-	<!--							</outputDirectory>-->
-	<!--							<descriptorRefs>-->
-	<!--								<descriptorRef>jar-with-dependencies</descriptorRef>-->
-	<!--							</descriptorRefs>-->
-	<!--						</configuration>-->
-	<!--					</execution>-->
-	<!--				</executions>-->
-	<!--			</plugin>-->
-	<!--		</plugins>-->
-	<!--	</build>-->
 	<repositories>
 		<!-- for SciJava dependencies -->
 		<repository>
@@ -131,19 +101,25 @@
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2</artifactId>
-			<version>5.8.0</version>
+<!--			<version>5.8.0</version>-->
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-core</artifactId>
 			<!-- Transformed Box Dialog	-->
-			<version>8.0.2-platybrowser</version>
+<!--			<version>8.0.2-platybrowser</version>-->
+		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>spim_data</artifactId>
+<!--			<version>2.2.4</version>-->
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
 			<!-- Transformed Box Dialog	-->
-			<version>1.0.0-beta-18-platybrowser</version>
+<!--			<version>1.0.0-beta-20</version>-->
+<!--			<version>1.0.0-beta-18-platybrowser</version>-->
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
@@ -156,7 +132,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigwarp_fiji</artifactId>
-			<version>5.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ome</groupId>
@@ -172,12 +147,6 @@
 			<groupId>org.itc</groupId>
 			<artifactId>image-transform-converters</artifactId>
 			<version>0.1.1</version>
-		</dependency>
-		<!-- TODO: try to remove. It is only here for the platynereis registration	-->
-		<dependency>
-			<groupId>de.embl.cba</groupId>
-			<artifactId>fiji-plugin-morphometry</artifactId>
-			<version>0.5.4</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
