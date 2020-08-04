@@ -1,5 +1,6 @@
 package develop;
 
+import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.tables.morpholibj.ExploreMorphoLibJLabelImage;
 import de.embl.cba.tables.view.combined.SegmentsTableBdvAnd3dViews;
 import ij.IJ;
@@ -31,6 +32,8 @@ public class DevelopAnnotationCorrection
 				"3d-image-lbl-morpho.csv" );
 
 		final SegmentsTableBdvAnd3dViews views = explore.getTableBdvAnd3dViews();
+
+		BdvUtils.centerBdvWindowLocation( views.getSegmentsBdvView().getBdv() );
 
 		views.getTableRowsTableView().addColumn( "Annotation", new String[]{"None", "A", "B" } );
 		views.getTableRowsTableView().continueAnnotation( "Annotation" );

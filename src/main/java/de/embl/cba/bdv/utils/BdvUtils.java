@@ -49,6 +49,7 @@ import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -1251,17 +1252,16 @@ public abstract class BdvUtils
 	{
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-		final ViewerFrame viewerFrame = getViewerFrame( bdv );
+		final Window viewerFrame = getViewerFrame( bdv );
 
 		viewerFrame.setLocation(
 				screenSize.width / 2 - viewerFrame.getWidth() / 2,
 				0 + 50 );
 	}
 
-	public static ViewerFrame getViewerFrame( BdvHandle bdv )
+	public static Window getViewerFrame( BdvHandle bdv )
 	{
-		return ( ViewerFrame ) bdv.getViewerPanel().getParent()
-				.getParent().getParent().getParent();
+		return SwingUtilities.getWindowAncestor( bdv.getViewerPanel() );
 	}
 
 	public static < R extends RealType< R > & NativeType< R > >
