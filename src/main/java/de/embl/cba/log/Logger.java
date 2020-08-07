@@ -7,15 +7,13 @@ public interface Logger {
     /**
      * whether or not to show debug messages
      *
-     * @param message
+     * @param showDebug
      */
     void setShowDebug( boolean showDebug );
 
 
     /**
      * whether or not to show debug messages
-     *
-     * @param message
      */
     boolean isShowDebug();
 
@@ -38,7 +36,11 @@ public interface Logger {
     /**
      * prints messages that are merely for information, such as progress of computations
      *
-     * @param message
+     * @param header
+     * @param messages
+     * @param startTime
+     * @param counter
+     * @param counterMax
      */
     void progress( String header,
 				   ArrayList< String > messages,
