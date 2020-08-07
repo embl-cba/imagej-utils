@@ -614,7 +614,6 @@ public abstract class BdvDialogs
 	 * The source is used to select the maximal range of the selection.
 	 *
 	 * @param bdvHandle
-	 * @param source
 	 * @param maximalRangeInterval
 	 * @return
 	 */

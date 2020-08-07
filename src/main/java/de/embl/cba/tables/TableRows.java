@@ -118,11 +118,10 @@ public abstract class TableRows
 	 * somehow there should be a notification that the values in the table row have changed.
 	 * and then the TableView should take care of this!!
 	 *
-	 * @param column
-	 * @param row
-	 * @param attribute
-	 * @param table
 	 * @param rowIndex
+	 * @param column
+	 * @param value
+	 * @param table
 	 */
 	public static < T extends TableRow >
 	void setTableCell(
