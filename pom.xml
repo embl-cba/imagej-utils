@@ -125,7 +125,6 @@
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2</artifactId>
-			<!--			<version>5.8.0</version>-->
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
@@ -208,21 +207,14 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-core</artifactId>
-			<!-- Transformed Box Dialog	-->
-<!--			<version>9.0.6-SNAPSHOT</version>-->
-<!--			<version>8.0.2-platybrowser</version>-->
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>spim_data</artifactId>
-			<!--			<version>2.2.4</version>-->
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
-			<!-- Transformed Box Dialog	-->
-<!--			<version>1.0.0-beta-20</version>-->
-<!--			<version>1.0.0-beta-18-platybrowser</version>-->
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
@@ -247,25 +239,12 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-<!--	<distributionManagement>-->
-<!--		<repository>-->
-<!--			<id>bintray-tischi-snapshots</id>-->
-<!--			<name>tischi-snapshots</name>-->
-<!--			<url>https://api.bintray.com/maven/tischi/snapshots/imagej-utils/;publish=1</url>-->
-<!--		</repository>-->
-<!--	</distributionManagement>-->
 	<repositories>
 		<!-- for SciJava dependencies -->
 		<repository>
 			<id>scijava.public</id>
 			<url>https://maven.scijava.org/content/groups/public</url>
 		</repository>
-		<!-- for CBA dependencies -->
-<!--		<repository>-->
-<!--			<id>bintray-tischi-snapshots</id>-->
-<!--			<name>bintray</name>-->
-<!--			<url>https://dl.bintray.com/tischi/snapshots</url>-->
-<!--		</repository>-->
 	</repositories>
 </project>
 
