@@ -22,7 +22,7 @@ public interface SelectionModel< T >
 	 *
 	 * @param object
 	 *            a object.
-	 * @param selected
+	 * @param select
 	 *            selected state to set for specified object.
 	 */
 	public void setSelected( final T object, final boolean select );
@@ -58,7 +58,7 @@ public interface SelectionModel< T >
 	 *
 	 * @param objects
 	 *            the object collection.
-	 * @param selected
+	 * @param select
 	 *            selected state to set for specified object collection.
 	 * @return {@code true} if the select was changed by this call.
 	 */

@@ -792,7 +792,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	}
 
 	/**
-	 * TODO: min & max only make sense for a NumericColoringModel...
+	 * TODO: min &amp; max only make sense for a NumericColoringModel...
 	 *
 	 * @param columnName
 	 * @param coloringLut choose from ColoringLuts
