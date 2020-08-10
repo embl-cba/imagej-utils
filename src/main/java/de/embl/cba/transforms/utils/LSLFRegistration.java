@@ -6,7 +6,7 @@ import bdv.util.BdvOptions;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.io.FileSaver;
-import itc.utilities.CopyUtils;
+import de.embl.cba.util.CopyUtils;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.XmlIoSpimData;

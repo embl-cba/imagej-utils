@@ -7,7 +7,7 @@ import de.embl.cba.bdv.utils.Logger;
 import ij.ImagePlus;
 import ij.io.FileSaver;
 import ij.measure.Calibration;
-import itc.utilities.CopyUtils;
+import de.embl.cba.util.CopyUtils;
 import itc.utilities.IntervalUtils;
 import itc.utilities.VectorUtils;
 import mpicbg.spim.data.SpimData;
