@@ -1,8 +1,8 @@
 /*-
  * #%L
- * image-transform-converters
+ * TODO
  * %%
- * Copyright (C) 2019 - 2020 John Bogovic, Nicolas Chiaruttini, and Christian Tischer
+ * Copyright (C) 2018 - 2020 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
