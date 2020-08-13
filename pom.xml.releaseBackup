@@ -3,18 +3,18 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>de.embl.cba</groupId>
-		<artifactId>pom-embl-cba</artifactId>
-		<version>0.1.01</version>
-		<relativePath>../pom-embl-cba</relativePath>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>29.2.1</version>
 	</parent>
 
+	<groupId>de.embl.cba</groupId>
 	<artifactId>imagej-utils</artifactId>
-	<url>https://github.com/tischi/imagej-utils</url>
-	<version>0.2.16</version>
+	<version>0.5.3-SNAPSHOT</version>
 
-	<name>BigDataViewer Utilities</name>
+	<name>ImageJ Utilities</name>
 	<description>TODO</description>
+	<url>https://github.com/tischi/imagej-utils</url>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
 		<name>EMBL</name>
@@ -43,14 +43,16 @@
 	</developers>
 	<contributors>
 		<contributor>
-			<name>TODO</name>
+			<name>Jan Eglinger</name>
+			<url>https://imagej.net/User:Eglinger</url>
+			<properties><id>imagejan</id></properties>
 		</contributor>
 	</contributors>
 
 	<mailingLists>
 		<mailingList>
-			<name>ImageJ Forum</name>
-			<archive>http://forum.imagej.net/</archive>
+			<name>Image.sc Forum</name>
+			<archive>https://forum.image.sc/</archive>
 		</mailingList>
 	</mailingLists>
 
@@ -62,114 +64,187 @@
 	</scm>
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/imglib/imagej-utils/issues</url>
+		<url>https://github.com/tischi/imagej-utils/issues</url>
 	</issueManagement>
 	<ciManagement>
-		<system>None</system>
+		<system>Travis CI</system>
+		<url>https://travis-ci.com/tischi/imagej-utils</url>
 	</ciManagement>
 
 	<properties>
-		<package-name>de.embl.cba.bdv.utils</package-name>
+		<package-name>de.embl.cba</package-name>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>EMBL</license.copyrightOwners>
-		<imagej.app.directory>/Applications/Fiji.app/</imagej.app.directory>
+
+		<image-transform-converters.version>0.1.3</image-transform-converters.version>
+		<jackson-core.version>2.11.0</jackson-core.version>
+		<metadata-extractor.version>2.11.0</metadata-extractor.version>
+
+		<!-- NB: Deploy releases to the SciJava Maven repository. -->
+		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 	</properties>
 
-
-	<repositories>
-
-		<!-- for SciJava dependencies -->
-		<repository>
-			<id>imagej.public</id>
-			<url>https://maven.imagej.net/content/groups/public</url>
-		</repository>
-
-		<!-- for CBA dependencies -->
-		<repository>
-			<id>bintray-tischi-snapshots</id>
-			<name>bintray</name>
-			<url>https://dl.bintray.com/tischi/snapshots</url>
-		</repository>
-
-	</repositories>
-
 	<dependencies>
-
-		<dependency>
+		<dependency><!-- NB: unused dependency, needed for interactive testing with legacy UI -->
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-legacy</artifactId>
+			<scope>runtime</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-listeners</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-table</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>ui-behaviour</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>vecmath</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>net.imagej</groupId>
-			<artifactId>imagej-common</artifactId>
+			<artifactId>imagej-ops</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-algorithm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-cache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-ij</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-roi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-realtransform</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-ui</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>j3dcore</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>jdom2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>SPIM_Registration</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.drewnoakes</groupId>
+			<artifactId>metadata-extractor</artifactId>
+			<version>${metadata-extractor.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fifesoft</groupId>
+			<artifactId>languagesupport</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>cisd</groupId>
+			<artifactId>jhdf5</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.trove4j</groupId>
+			<artifactId>trove4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigdataviewer-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>spim_data</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
-			<version>1.0.0-beta-12</version>
 		</dependency>
-
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer_fiji</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>3D_Viewer</artifactId>
 		</dependency>
-
-        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>bio-formats_plugins</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>ch.systems.cisd</groupId>
-                    <artifactId>jhdf5</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-		<!-- CBA -->
-
 		<dependency>
-			<groupId>de.embl.cba</groupId>
-			<artifactId>transforms-utils</artifactId>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigwarp_fiji</artifactId>
 		</dependency>
-
-		<!-- FOR BENCHMARKING, MAYBE REMOVE LATER -->
-
 		<dependency>
-			<groupId>de.embl.cba</groupId>
-			<artifactId>imaris-writer</artifactId>
+			<groupId>org.itc</groupId>
+			<artifactId>image-transform-converters</artifactId>
+			<version>${image-transform-converters.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-
-	<distributionManagement>
+	<repositories>
+		<!-- for SciJava dependencies -->
 		<repository>
-			<id>bintray-tischi-snapshots</id>
-			<name>tischi-snapshots</name>
-			<url>https://api.bintray.com/maven/tischi/snapshots/imagej-utils/;publish=1</url>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
 		</repository>
-	</distributionManagement>
-
+	</repositories>
 </project>
 
