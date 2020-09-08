@@ -40,7 +40,9 @@ import net.imglib2.type.Type;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.LinAlgHelpers;
+import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -126,8 +128,26 @@ public abstract class Transforms
 		final RandomAccessibleInterval< T > transformedIntervalView = Views.interval( transformedRA, transformedInterval );
 
 		return transformedIntervalView;
-
 	}
+
+	public enum BorderExtension
+	{
+		ExtendZero,
+		ExtendBorder,
+		ExtendMirror
+	}
+
+	public static < T extends NumericType< T > & NativeType< T > >
+	RandomAccessibleInterval createTransformedView( RandomAccessibleInterval< T > rai, InvertibleRealTransform transform, BorderExtension borderExtension  )
+	{
+		final RandomAccessible transformedRA = createTransformedRaView( rai, transform, new ClampingNLinearInterpolatorFactory(), borderExtension );
+
+		final FinalInterval transformedInterval = createBoundingIntervalAfterTransformation( rai, transform );
+		final RandomAccessibleInterval< T > transformedIntervalView = Views.interval( transformedRA, transformedInterval );
+
+		return transformedIntervalView;
+	}
+
 
 	public static < T extends Type< T > >
 	RandomAccessibleInterval< T > getWithAdjustedOrigin(
@@ -144,10 +164,38 @@ public abstract class Transforms
 	RandomAccessible createTransformedRaView(
 			RandomAccessibleInterval< T > rai,
 			InvertibleRealTransform combinedTransform,
+			InterpolatorFactory interpolatorFactory,
+			BorderExtension borderExtension )
+	{
+		ExtendedRandomAccessibleInterval< T, RandomAccessibleInterval< T > > source = createExtendedRai( rai, borderExtension );
+		RealRandomAccessible rra = Views.interpolate( source, interpolatorFactory );
+		rra = RealViews.transform( rra, combinedTransform );
+		return Views.raster( rra );
+	}
+
+	@NotNull
+	private static < T extends NumericType< T > > ExtendedRandomAccessibleInterval< T, RandomAccessibleInterval< T > > createExtendedRai( RandomAccessibleInterval< T > rai, BorderExtension borderExtension )
+	{
+		switch ( borderExtension )
+		{
+			case ExtendZero:
+				return Views.extendZero( rai );
+			case ExtendBorder:
+				return Views.extendBorder( rai );
+			case ExtendMirror:
+				return Views.extendMirrorDouble( rai );
+			default:
+				return Views.extendZero( rai );
+		}
+	}
+
+	public static < T extends NumericType< T > >
+	RandomAccessible createTransformedRaView(
+			RandomAccessibleInterval< T > rai,
+			InvertibleRealTransform combinedTransform,
 			InterpolatorFactory interpolatorFactory )
 	{
-		RealRandomAccessible rra =
-				Views.interpolate( Views.extendZero( rai ), interpolatorFactory );
+		RealRandomAccessible rra = Views.interpolate( Views.extendZero( rai ), interpolatorFactory );
 		rra = RealViews.transform( rra, combinedTransform );
 		return Views.raster( rra );
 	}
