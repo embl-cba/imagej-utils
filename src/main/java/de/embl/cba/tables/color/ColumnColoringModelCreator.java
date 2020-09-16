@@ -36,6 +36,7 @@ import de.embl.cba.tables.Logger;
 import de.embl.cba.tables.Tables;
 import de.embl.cba.tables.tablerow.TableRow;
 import ij.gui.GenericDialog;
+import net.imglib2.type.numeric.ARGBType;
 
 import javax.swing.*;
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public class ColumnColoringModelCreator< T extends TableRow >
 	{
 			ColoringLuts.BLUE_WHITE_RED,
 			ColoringLuts.VIRIDIS,
-			ColoringLuts.GLASBEY,
+			ColoringLuts.GLASBEY
 	};
 
 	public ColumnColoringModelCreator( JTable table )
@@ -131,11 +132,13 @@ public class ColumnColoringModelCreator< T extends TableRow >
 			case ColoringLuts.GLASBEY:
 				return createCategoricalColoringModel(
 						selectedColumnName,
-						false, new GlasbeyARGBLut() );
+						false,
+						new GlasbeyARGBLut() );
 			case ColoringLuts.GLASBEY + ColoringLuts.ZERO_TRANSPARENT:
 				return createCategoricalColoringModel(
 						selectedColumnName,
-						true, new GlasbeyARGBLut() );
+						true,
+						new GlasbeyARGBLut() );
 		}
 
 		return null;
@@ -154,7 +157,7 @@ public class ColumnColoringModelCreator< T extends TableRow >
 
 	public CategoryTableRowColumnColoringModel< T > createCategoricalColoringModel(
 			String selectedColumnName,
-			boolean isZeroTransparent,
+			boolean isZeroTransparent, // TODO: how does that behave for string values?
 			ARGBLut argbLut )
 	{
 		final CategoryTableRowColumnColoringModel< T > coloringModel
@@ -167,6 +170,12 @@ public class ColumnColoringModelCreator< T extends TableRow >
 			coloringModel.putInputToFixedColor( "0", CategoryTableRowColumnColoringModel.TRANSPARENT );
 			coloringModel.putInputToFixedColor( "0.0", CategoryTableRowColumnColoringModel.TRANSPARENT );
 		}
+
+		// TODO
+		// check it works for missing rows.
+		// for loop through the column for each value put the color
+		// split(-);
+		// coloringModel.putInputToFixedColor( "255-0-", ARGBType.rgba(  ) );
 
 		return coloringModel;
 	}

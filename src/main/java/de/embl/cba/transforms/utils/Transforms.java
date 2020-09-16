@@ -62,7 +62,6 @@ public abstract class Transforms
         return new Translation( translation );
     }
 
-
 	public static AffineTransform3D rotationAroundCenterTransform(
 			double angle,
 			int axis,
@@ -106,7 +105,6 @@ public abstract class Transforms
         }
     }
 
-
     public static < T extends NumericType< T > & NativeType< T > >
 	RandomAccessibleInterval createTransformedView( RandomAccessibleInterval< T > rai,
 													InvertibleRealTransform combinedTransform,
@@ -117,7 +115,19 @@ public abstract class Transforms
 		final RandomAccessibleInterval< T > transformedIntervalView = Views.interval( transformedRA, transformedInterval );
 
 		return transformedIntervalView;
+	}
 
+	public static < T extends NumericType< T > & NativeType< T > >
+	RandomAccessibleInterval createTransformedView( RandomAccessibleInterval< T > rai,
+													InvertibleRealTransform combinedTransform,
+													InterpolatorFactory interpolatorFactory,
+													BorderExtension borderExtension)
+	{
+		final RandomAccessible transformedRA = createTransformedRaView( rai, combinedTransform, interpolatorFactory, borderExtension );
+		final FinalInterval transformedInterval = createBoundingIntervalAfterTransformation( rai, combinedTransform );
+		final RandomAccessibleInterval< T > transformedIntervalView = Views.interval( transformedRA, transformedInterval );
+
+		return transformedIntervalView;
 	}
 
 	public static < T extends NumericType< T > & NativeType< T > >

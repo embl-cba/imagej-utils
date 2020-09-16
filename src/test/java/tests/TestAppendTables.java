@@ -62,9 +62,11 @@ public class TestAppendTables
 				views.getTableRowsTableView().getTable(),
 				ExploreMorphoLibJLabelImage.LABEL );
 
+		final String tableFile = TestAppendTables.class.getResource( "../test-data/3d-image-lbl-morpho-colorMap.csv" ).getFile();
+
 		Map< String, List< String > > columns2 =
 			TableColumns.orderedStringColumnsFromTableFile(
-					TestAppendTables.class.getResource( "../test-data/3d-image-lbl-morpho-unorderedIncompleteAddOn.csv" ).getFile(),
+					tableFile,
 					null,
 					"Label",
 					orderColumn );
