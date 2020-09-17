@@ -59,6 +59,8 @@ import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
+import org.apache.commons.lang.WordUtils;
+import org.jetbrains.annotations.NotNull;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -546,21 +548,22 @@ public class SegmentsBdvView < T extends ImageSegment >
 				segmentsName + "-bdv-select-handler" );
 
 		installSelectionBehaviour();
-		installSelectNoneBehaviour();
+		installUndoSelectionBehaviour();
 		installSelectionColoringModeBehaviour(); // TODO: maybe move to popup menu
 		installRandomColorShufflingBehaviour();
 		installShowLabelMaskAsBinaryMaskBehaviour();
 		installShowLabelMaskAsBoundaryBehaviour();
-		install3DViewBehaviour(); // TODO: maybe move to popup menu
+		// install3DViewBehaviour(); // TODO: maybe move to popup menu
 		installImageSetNavigationBehaviour( );
 
-		addAnimationSettingsPopupMenu();
+		addUndoSelectionPopupMenu();
 		addSelectionColoringModePopupMenu();
+		addAnimationSettingsPopupMenu();
 	}
 
 	private void addAnimationSettingsPopupMenu()
 	{
-		final String actionName = labelsSource.metadata().displayName + " Animation Settings...";
+		final String actionName = getLabelImagePrefix() + "Segment Animation Settings...";
 		popupActionNames.add( actionName );
 		BdvPopupMenus.addAction( bdv,
 				actionName,
@@ -568,9 +571,32 @@ public class SegmentsBdvView < T extends ImageSegment >
 			);
 	}
 
+	// TODO: put all the menu stuff into an own class at some point
+	private void addUndoSelectionPopupMenu()
+	{
+		final String actionName = getLabelImagePrefix() + "Undo Segment Selections" + getShortCutString( selectNoneTrigger );
+		popupActionNames.add( actionName );
+		BdvPopupMenus.addAction( bdv,
+				actionName,
+				( x, y ) -> new Thread( () -> selectNone() ).start()
+		);
+	}
+
+	@NotNull
+	private String getLabelImagePrefix()
+	{
+		return labelsSource.metadata().displayName + ": ";
+	}
+
+	@NotNull
+	private static String getShortCutString( String trigger )
+	{
+		return " [ " + WordUtils.capitalize( trigger ) + " ]";
+	}
+
 	private void addSelectionColoringModePopupMenu()
 	{
-		final String menuName = labelsSource.metadata().displayName + " Selection Coloring Mode";
+		final String menuName = getLabelImagePrefix() + "Selection Coloring Mode";
 
 		final SelectionColoringModel.SelectionColoringMode[] selectionColoringModes = SelectionColoringModel.SelectionColoringMode.values();
 
@@ -710,7 +736,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 		BdvUtils.repaint( bdv );
 	}
 
-	private void installSelectNoneBehaviour( )
+	private void installUndoSelectionBehaviour( )
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 				new Thread( () -> selectNone() ).start(),
