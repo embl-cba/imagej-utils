@@ -161,6 +161,22 @@ public class ColumnColoringModelCreator< T extends TableRow >
 			this.isZeroTransparent = false;
 	}
 
+	private void populateColoringModelFromArgbColumn (String selectedColumnName, CategoryTableRowColumnColoringModel<T> coloringModel) {
+		int selectedColumnIndex = table.getColumnModel().getColumnIndex(selectedColumnName);
+		for (int i = 0; i < table.getRowCount(); i++) {
+			Object argbString = table.getValueAt(i, selectedColumnIndex);
+			String[] splitArgbString = ((String) argbString).split("-");
+
+			int[] argbValues = new int[4];
+			for (int j = 0; j < splitArgbString.length; j++) {
+				argbValues[j] = Integer.parseInt(splitArgbString[j]);
+			}
+
+			coloringModel.putInputToFixedColor(argbString,
+					new ARGBType( ARGBType.rgba( argbValues[1], argbValues[2], argbValues[3], argbValues[0]) ));
+		}
+	}
+
 	public CategoryTableRowColumnColoringModel< T > createCategoricalColoringModel(
 			String selectedColumnName,
 			boolean isZeroTransparent,
@@ -178,19 +194,7 @@ public class ColumnColoringModelCreator< T extends TableRow >
 		}
 
 		if ( argbLut == null) {
-			int selectedColumnIndex = table.getColumnModel().getColumnIndex(selectedColumnName);
-			for (int i = 0; i < table.getRowCount(); i++) {
-				Object rgbaString = table.getValueAt(i, selectedColumnIndex);
-				String[] splitRgbaString = ((String) rgbaString).split("-");
-
-				int[] rgbaValues = new int[4];
-				for (int j = 0; j < splitRgbaString.length; j++) {
-					rgbaValues[j] = Integer.parseInt(splitRgbaString[j]);
-				}
-
-				coloringModel.putInputToFixedColor(rgbaString,
-						new ARGBType( ARGBType.rgba( rgbaValues[1], rgbaValues[2], rgbaValues[3], rgbaValues[0]) ));
-			}
+			populateColoringModelFromArgbColumn(selectedColumnName, coloringModel);
 		}
 
 		return coloringModel;
