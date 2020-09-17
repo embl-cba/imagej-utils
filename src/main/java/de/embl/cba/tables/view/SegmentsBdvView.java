@@ -559,13 +559,19 @@ public class SegmentsBdvView < T extends ImageSegment >
 		addUndoSelectionPopupMenu();
 		addSelectionColoringModePopupMenu();
 		addAnimationSettingsPopupMenu();
+
+		this.close();
 	}
 
 	private void addAnimationSettingsPopupMenu()
 	{
-		final String actionName = getLabelImagePrefix() + "Segment Animation Settings...";
-		popupActionNames.add( actionName );
-		BdvPopupMenus.addAction( bdv,
+		final ArrayList< String > menuNames = new ArrayList<>();
+		menuNames.add( getLabelImageMenuName() );
+		final String actionName = "Segment Animation Settings...";
+		popupActionNames.add( BdvPopupMenus.getCombinedMenuActionName(  menuNames, actionName ) );
+		BdvPopupMenus.addAction(
+				bdv,
+				menuNames,
 				actionName,
 				( x, y ) -> new Thread( () -> changeAnimationSettingsUI() ).start()
 			);
@@ -574,18 +580,45 @@ public class SegmentsBdvView < T extends ImageSegment >
 	// TODO: put all the menu stuff into an own class at some point
 	private void addUndoSelectionPopupMenu()
 	{
-		final String actionName = getLabelImagePrefix() + "Undo Segment Selections" + getShortCutString( selectNoneTrigger );
-		popupActionNames.add( actionName );
-		BdvPopupMenus.addAction( bdv,
+		final ArrayList< String > menuNames = new ArrayList<>();
+		menuNames.add( getLabelImageMenuName() );
+
+		final String actionName = "Undo Segment Selections" + getShortCutString( selectNoneTrigger );
+		popupActionNames.add( BdvPopupMenus.getCombinedMenuActionName(  menuNames, actionName ) );
+		BdvPopupMenus.addAction(
+				bdv,
+				menuNames,
 				actionName,
 				( x, y ) -> new Thread( () -> selectNone() ).start()
 		);
 	}
 
-	@NotNull
-	private String getLabelImagePrefix()
+	private void addSelectionColoringModePopupMenu()
 	{
-		return labelsSource.metadata().displayName + ": ";
+		final ArrayList< String > menuNames = new ArrayList<>();
+		menuNames.add( getLabelImageMenuName() );
+		menuNames.add( "Segment Selection Coloring Mode" );
+
+		final SelectionColoringModel.SelectionColoringMode[] selectionColoringModes = SelectionColoringModel.SelectionColoringMode.values();
+
+		for ( SelectionColoringModel.SelectionColoringMode mode : selectionColoringModes )
+		{
+			final String actionName = mode.toString();
+			popupActionNames.add( BdvPopupMenus.getCombinedMenuActionName( menuNames, actionName ) );
+
+			BdvPopupMenus.addAction(
+					bdv,
+					menuNames,
+					actionName,
+					( x, y ) -> new Thread( () -> selectionColoringModel.setSelectionColoringMode( mode ) ).start()
+			);
+		}
+	}
+
+	@NotNull
+	private String getLabelImageMenuName()
+	{
+		return labelsSource.metadata().displayName;
 	}
 
 	@NotNull
@@ -594,24 +627,6 @@ public class SegmentsBdvView < T extends ImageSegment >
 		return " [ " + WordUtils.capitalize( trigger ) + " ]";
 	}
 
-	private void addSelectionColoringModePopupMenu()
-	{
-		final String menuName = getLabelImagePrefix() + "Selection Coloring Mode";
-
-		final SelectionColoringModel.SelectionColoringMode[] selectionColoringModes = SelectionColoringModel.SelectionColoringMode.values();
-
-		for ( SelectionColoringModel.SelectionColoringMode mode : selectionColoringModes )
-		{
-			final String actionName = mode.toString();
-			popupActionNames.add( BdvPopupMenus.getMenuActionName( menuName, actionName ) );
-
-			BdvPopupMenus.addAction( bdv,
-					menuName,
-					actionName,
-					( x, y ) -> new Thread( () -> selectionColoringModel.setSelectionColoringMode( mode ) ).start()
-			);
-		}
-	}
 
 	private void changeAnimationSettingsUI()
 	{

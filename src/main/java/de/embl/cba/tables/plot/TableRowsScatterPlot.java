@@ -33,7 +33,6 @@ import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealAccessibleSource;
-import de.embl.cba.swing.PopupMenu;
 import de.embl.cba.tables.Outlier;
 import de.embl.cba.tables.Utils;
 import de.embl.cba.tables.color.ColorUtils;
@@ -53,7 +52,6 @@ import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.ui.TransformListener;
 import net.imglib2.util.Intervals;
 import org.apache.commons.lang.mutable.MutableDouble;
-import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
@@ -244,7 +242,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 		Behaviours behaviours = new Behaviours( new InputTriggerConfig() );
 		behaviours.install( bdvHandle.getTriggerbindings(), "plate viewer" );
 
-		BdvPopupMenus.addAction( bdvHandle, "Focus closest point",
+		BdvPopupMenus.addAction( bdvHandle,"Focus closest point",
 				( x, y ) -> {
 					final RealPoint mouse3d = new RealPoint( x,y, 0 );
 					search.search( mouse3d ); // TODO: why is this 3d??
@@ -254,7 +252,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 				}
 		);
 
-		BdvPopupMenus.addAction( bdvHandle, "Change columns...",
+		BdvPopupMenus.addAction( bdvHandle,"Change columns...",
 				( x, y ) -> {
 					lineChoices = new String[]{ GridLinesOverlay.NONE, GridLinesOverlay.Y_NX, GridLinesOverlay.Y_N };
 

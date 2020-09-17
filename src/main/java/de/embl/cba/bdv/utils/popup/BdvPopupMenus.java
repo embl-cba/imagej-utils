@@ -36,22 +36,24 @@ import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public abstract class BdvPopupMenus
 {
 	private static ConcurrentHashMap< BdvHandle, PopupMenu > bdvToPopup = new ConcurrentHashMap<>( );
 
+	public static synchronized void addAction( BdvHandle bdvHandle, List< String > menuNames, String actionName, ClickBehaviour clickBehaviour )
+	{
+		ensurePopupMenuExist( bdvHandle );
+		bdvToPopup.get( bdvHandle ).addPopupAction( menuNames, actionName, clickBehaviour );
+	}
+
 	public static synchronized void addAction( BdvHandle bdvHandle, String actionName, ClickBehaviour clickBehaviour )
 	{
 		ensurePopupMenuExist( bdvHandle );
 		bdvToPopup.get( bdvHandle ).addPopupAction( actionName, clickBehaviour );
-	}
-
-	public static synchronized void addAction( BdvHandle bdvHandle, String menuName, String actionName, ClickBehaviour clickBehaviour )
-	{
-		ensurePopupMenuExist( bdvHandle );
-		bdvToPopup.get( bdvHandle ).addPopupAction( menuName, actionName, clickBehaviour );
 	}
 
 	public static synchronized void removeAction( BdvHandle bdvHandle, String actionName )
@@ -89,8 +91,13 @@ public abstract class BdvPopupMenus
 	}
 
 	@NotNull
-	public static String getMenuActionName( String menuName, String actionName )
+	public static String getCombinedMenuActionName( List< String > menuNames, String actionName )
 	{
-		return menuName + ">" + actionName;
+		return getCombinedMenuName( menuNames, menuNames.size() ) + " > " + actionName;
+	}
+
+	public static String getCombinedMenuName( List< String > menuNames, int depth )
+	{
+		return menuNames.stream().limit( depth + 1 ).collect( Collectors.joining( " > ") );
 	}
 }
