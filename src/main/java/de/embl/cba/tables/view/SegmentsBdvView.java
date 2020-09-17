@@ -556,8 +556,6 @@ public class SegmentsBdvView < T extends ImageSegment >
 
 		addAnimationSettingsPopupMenu();
 		addSelectionColoringModePopupMenu();
-
-		this.close(); // TODO: does it work?
 	}
 
 	private void addAnimationSettingsPopupMenu()
@@ -573,13 +571,13 @@ public class SegmentsBdvView < T extends ImageSegment >
 	private void addSelectionColoringModePopupMenu()
 	{
 		final String menuName = labelsSource.metadata().displayName + " Selection Coloring Mode";
-		popupActionNames.add( menuName );
 
 		final SelectionColoringModel.SelectionColoringMode[] selectionColoringModes = SelectionColoringModel.SelectionColoringMode.values();
 
 		for ( SelectionColoringModel.SelectionColoringMode mode : selectionColoringModes )
 		{
 			final String actionName = mode.toString();
+			popupActionNames.add( BdvPopupMenus.getMenuActionName( menuName, actionName ) );
 
 			BdvPopupMenus.addAction( bdv,
 					menuName,

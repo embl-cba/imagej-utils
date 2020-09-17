@@ -28,6 +28,7 @@
  */
 package de.embl.cba.swing;
 
+import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import org.scijava.ui.behaviour.ClickBehaviour;
 
 import javax.swing.*;
@@ -73,8 +74,10 @@ public class PopupMenu
 
 	public void addPopupAction( String menuName, String actionName, ClickBehaviour clickBehaviour )
 	{
-		if ( actionNameToMenuItem.keySet().contains( actionName ) )
-			throw new UnsupportedOperationException( actionName + " is already registered in this popup menu." );
+		final String menuActionName = BdvPopupMenus.getMenuActionName( menuName, actionName );
+
+		if ( actionNameToMenuItem.keySet().contains( menuActionName ) )
+			throw new UnsupportedOperationException( menuActionName + " is already registered in this popup menu." );
 
 		JMenu menu = getMenu( menuName );
 		JMenuItem menuItem = new JMenuItem( actionName );
@@ -82,8 +85,8 @@ public class PopupMenu
 		menu.add( menuItem );
 		menuItem.addActionListener( e -> new Thread( () -> clickBehaviour.click( x, y ) ).start() );
 		popup.add( menu );
-		actionNameToMenuItem.put( actionName, menu );
-		actionNameToMenu.put( actionName, menu );
+		actionNameToMenuItem.put( menuActionName, menuItem );
+		actionNameToMenu.put( menuActionName, menu );
 	}
 
 	private JMenu getMenu( String menuName )
@@ -98,16 +101,23 @@ public class PopupMenu
 
 	public void removePopupAction( String actionName  )
 	{
-		if ( ! actionName.contains( actionName ) ) return;
+		if ( ! actionNameToMenuItem.keySet().contains( actionName ) ) return;
 		final JMenuItem jMenuItem = actionNameToMenuItem.get( actionName );
-		popup.remove( jMenuItem );
 		if ( actionNameToMenu.containsKey( actionName ) )
 		{
 			final JMenu jMenu = actionNameToMenu.get( actionName );
-			if ( jMenu.getItemCount() == 0 )
+			jMenu.remove( jMenuItem );
+			actionNameToMenuItem.remove( actionName );
+			final int itemCount = jMenu.getItemCount();
+			if ( itemCount == 0 )
 			{
 				popup.remove( jMenu );
 			}
+		}
+		else
+		{
+			popup.remove( jMenuItem );
+			actionNameToMenuItem.remove( actionName );
 		}
 	}
 

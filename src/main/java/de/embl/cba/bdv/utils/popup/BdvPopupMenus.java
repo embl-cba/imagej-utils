@@ -31,6 +31,7 @@ package de.embl.cba.bdv.utils.popup;
 import bdv.util.BdvHandle;
 import de.embl.cba.bdv.utils.capture.ViewCaptureDialog;
 import de.embl.cba.swing.PopupMenu;
+import org.jetbrains.annotations.NotNull;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -85,5 +86,11 @@ public abstract class BdvPopupMenus
 		behaviours.install( bdvHandle.getTriggerbindings(), "popup menu" );
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> popupMenu.show( bdvHandle.getViewerPanel().getDisplay(), x, y ), "show popup menu", "button3", "shift P" ) ;
 		return popupMenu;
+	}
+
+	@NotNull
+	public static String getMenuActionName( String menuName, String actionName )
+	{
+		return menuName + ">" + actionName;
 	}
 }
