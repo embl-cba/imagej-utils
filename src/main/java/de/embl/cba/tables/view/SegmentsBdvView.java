@@ -59,7 +59,6 @@ import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
-import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -559,8 +558,6 @@ public class SegmentsBdvView < T extends ImageSegment >
 		addUndoSelectionPopupMenu();
 		addSelectionColoringModePopupMenu();
 		addAnimationSettingsPopupMenu();
-
-		this.close();
 	}
 
 	private void addAnimationSettingsPopupMenu()
@@ -583,7 +580,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 		final ArrayList< String > menuNames = new ArrayList<>();
 		menuNames.add( getLabelImageMenuName() );
 
-		final String actionName = "Undo Segment Selections" + getShortCutString( selectNoneTrigger );
+		final String actionName = "Undo Segment Selections" + BdvUtils.getShortCutString( selectNoneTrigger );
 		popupActionNames.add( BdvPopupMenus.getCombinedMenuActionName(  menuNames, actionName ) );
 		BdvPopupMenus.addAction(
 				bdv,
@@ -619,12 +616,6 @@ public class SegmentsBdvView < T extends ImageSegment >
 	private String getLabelImageMenuName()
 	{
 		return labelsSource.metadata().displayName;
-	}
-
-	@NotNull
-	private static String getShortCutString( String trigger )
-	{
-		return " [ " + WordUtils.capitalize( trigger ) + " ]";
 	}
 
 
