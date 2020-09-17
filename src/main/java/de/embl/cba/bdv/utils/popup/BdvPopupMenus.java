@@ -31,20 +31,34 @@ package de.embl.cba.bdv.utils.popup;
 import bdv.util.BdvHandle;
 import de.embl.cba.bdv.utils.capture.ViewCaptureDialog;
 import de.embl.cba.swing.PopupMenu;
+import org.jetbrains.annotations.NotNull;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public abstract class BdvPopupMenus
 {
 	private static ConcurrentHashMap< BdvHandle, PopupMenu > bdvToPopup = new ConcurrentHashMap<>( );
 
+	public static synchronized void addAction( BdvHandle bdvHandle, List< String > menuNames, String actionName, ClickBehaviour clickBehaviour )
+	{
+		ensurePopupMenuExist( bdvHandle );
+		bdvToPopup.get( bdvHandle ).addPopupAction( menuNames, actionName, clickBehaviour );
+	}
+
 	public static synchronized void addAction( BdvHandle bdvHandle, String actionName, ClickBehaviour clickBehaviour )
 	{
 		ensurePopupMenuExist( bdvHandle );
 		bdvToPopup.get( bdvHandle ).addPopupAction( actionName, clickBehaviour );
+	}
+
+	public static synchronized void removeAction( BdvHandle bdvHandle, String actionName )
+	{
+		bdvToPopup.get( bdvHandle ).removePopupAction( actionName );
 	}
 
 	public static synchronized void addAction( BdvHandle bdvHandle, String actionName, Runnable runnable )
@@ -74,5 +88,16 @@ public abstract class BdvPopupMenus
 		behaviours.install( bdvHandle.getTriggerbindings(), "popup menu" );
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> popupMenu.show( bdvHandle.getViewerPanel().getDisplay(), x, y ), "show popup menu", "button3", "shift P" ) ;
 		return popupMenu;
+	}
+
+	@NotNull
+	public static String getCombinedMenuActionName( List< String > menuNames, String actionName )
+	{
+		return getCombinedMenuName( menuNames, menuNames.size() ) + " > " + actionName;
+	}
+
+	public static String getCombinedMenuName( List< String > menuNames, int depth )
+	{
+		return menuNames.stream().limit( depth + 1 ).collect( Collectors.joining( " > ") );
 	}
 }

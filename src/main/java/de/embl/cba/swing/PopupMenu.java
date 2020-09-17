@@ -28,17 +28,22 @@
  */
 package de.embl.cba.swing;
 
+import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import org.scijava.ui.behaviour.ClickBehaviour;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
+import java.util.*;
+import java.util.List;
 
 public class PopupMenu
 {
 	private JPopupMenu popup;
 	private int x;
 	private int y;
+	private Map< String, JMenuItem > actionNameToMenuItem;
+	private Map< String, JMenu > menuNameToMenu;
+	private Set< JMenu > menus;
 
 	public PopupMenu()
 	{
@@ -47,6 +52,9 @@ public class PopupMenu
 
 	private void createPopupMenu()
 	{
+		actionNameToMenuItem = new HashMap<>(  );
+		menuNameToMenu = new HashMap<>(  );
+		menus = new HashSet<>(  );
 		popup = new JPopupMenu();
 	}
 
@@ -54,11 +62,89 @@ public class PopupMenu
 		popup.addSeparator();
 	}
 
-	public void addPopupAction( String actionName, ClickBehaviour clickBehaviour ) {
+	public void addPopupAction( String actionName, ClickBehaviour clickBehaviour )
+	{
+		if ( actionNameToMenuItem.keySet().contains( actionName ) )
+			throw new UnsupportedOperationException( actionName + " is already registered in this popup menu." );
 
 		JMenuItem menuItem = new JMenuItem( actionName );
 		menuItem.addActionListener( e -> new Thread( () -> clickBehaviour.click( x, y ) ).start() );
 		popup.add( menuItem );
+		actionNameToMenuItem.put( actionName, menuItem );
+	}
+
+	public void addPopupAction( List< String > menuNames, String actionName, ClickBehaviour clickBehaviour )
+	{
+		final String menuActionName = BdvPopupMenus.getCombinedMenuActionName( menuNames, actionName );
+
+		if ( actionNameToMenuItem.keySet().contains( menuActionName ) )
+			throw new UnsupportedOperationException( menuActionName + " is already registered in this popup menu." );
+
+		JMenu menu = getMenu( menuNames, 0 );
+		popup.add( menu );
+
+		menus.add( menu );
+		for ( int i = 1; i < menuNames.size(); i++ )
+		{
+			final JMenu subMenu = getMenu( menuNames, i );
+			menu.add( subMenu );
+			menus.add( subMenu );
+			menu = subMenu;
+		}
+
+		JMenuItem menuItem = new JMenuItem( actionName );
+		menu.add( menuItem );
+		menuItem.addActionListener( e -> new Thread( () -> clickBehaviour.click( x, y ) ).start() );
+		actionNameToMenuItem.put( menuActionName, menuItem );
+	}
+
+	private JMenu getMenu( List< String > menuNames, int i )
+	{
+		final String combinedMenuName = BdvPopupMenus.getCombinedMenuName( menuNames, i );
+
+		if ( ! menuNameToMenu.containsKey( combinedMenuName ) )
+		{
+			menuNameToMenu.put( combinedMenuName, new JMenu( menuNames.get( i ) ) );
+		}
+
+		return menuNameToMenu.get( combinedMenuName );
+	}
+
+	public void removePopupAction( String actionName  )
+	{
+		if ( ! actionNameToMenuItem.keySet().contains( actionName ) ) return;
+		final JMenuItem jMenuItem = actionNameToMenuItem.get( actionName );
+
+		final Container parent = jMenuItem.getParent();
+		if ( parent instanceof JPopupMenu )
+		{
+			parent.remove( jMenuItem );
+		}
+
+		for ( int i = 0; i < 3; i++ ) // iterate as menus could be nested
+		{
+			removeEmptyMenus();
+		}
+
+		actionNameToMenuItem.remove( actionName );
+	}
+
+	private void removeEmptyMenus()
+	{
+		final ArrayList< JMenu > removed = new ArrayList<>();
+		for ( JMenu menu : menus )
+		{
+			if ( menu.getItemCount() == 0 )
+			{
+				menu.getParent().remove( menu );
+				removed.add( menu );
+			}
+		}
+
+		for ( JMenu menu : removed )
+		{
+			menus.remove( menu );
+		}
 	}
 
 	public void addPopupAction( String actionName, Runnable runnable ) {

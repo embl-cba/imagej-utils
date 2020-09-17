@@ -59,6 +59,7 @@ import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
+import org.jetbrains.annotations.NotNull;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -106,6 +107,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 	private boolean isLabelMaskShownAsBinaryMask;
 	private boolean isLabelMaskShownAsBoundaries;
 	private int labelMaskBoundaryThickness;
+	private Set< String > popupActionNames;
 
 	public SegmentsBdvView(
 			final List< T > segments,
@@ -147,6 +149,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 		this.voxelSpacing3DView = 0.1;
 		this.segmentFocusAnimationDurationMillis = 750;
 		this.currentSources = new HashSet<>( );
+		this.popupActionNames = new HashSet<>( );
 
 		initSegments( segments );
 		initBdvOptions();
@@ -157,7 +160,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 		registerAsSelectionListener( this.selectionModel );
 		registerAsColoringListener( this.selectionColoringModel );
 
-		installBdvBehaviours();
+		installBdvBehavioursAndPopupMenu();
 	}
 
 	public void initSegments( List< T > segments )
@@ -534,7 +537,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 			bdvOptions = bdvOptions.addTo( bdv );
 	}
 
-	private void installBdvBehaviours()
+	private void installBdvBehavioursAndPopupMenu()
 	{
 		segmentsName = segments.toString();
 
@@ -544,24 +547,82 @@ public class SegmentsBdvView < T extends ImageSegment >
 				segmentsName + "-bdv-select-handler" );
 
 		installSelectionBehaviour();
-		installSelectNoneBehaviour();
-		installSelectionColoringModeBehaviour();
+		installUndoSelectionBehaviour();
+		installSelectionColoringModeBehaviour(); // TODO: maybe move to popup menu
 		installRandomColorShufflingBehaviour();
 		installShowLabelMaskAsBinaryMaskBehaviour();
 		installShowLabelMaskAsBoundaryBehaviour();
-		install3DViewBehaviour();
+		// install3DViewBehaviour(); // TODO: maybe move to popup menu
 		installImageSetNavigationBehaviour( );
 
-		BdvPopupMenus.addAction( bdv,
-				"Change animation settings...",
+		addUndoSelectionPopupMenu();
+		addSelectionColoringModePopupMenu();
+		addAnimationSettingsPopupMenu();
+	}
+
+	private void addAnimationSettingsPopupMenu()
+	{
+		final ArrayList< String > menuNames = new ArrayList<>();
+		menuNames.add( getLabelImageMenuName() );
+		final String actionName = "Segment Animation Settings...";
+		popupActionNames.add( BdvPopupMenus.getCombinedMenuActionName(  menuNames, actionName ) );
+		BdvPopupMenus.addAction(
+				bdv,
+				menuNames,
+				actionName,
 				( x, y ) -> new Thread( () -> changeAnimationSettingsUI() ).start()
 			);
 	}
 
+	// TODO: put all the menu stuff into an own class at some point
+	private void addUndoSelectionPopupMenu()
+	{
+		final ArrayList< String > menuNames = new ArrayList<>();
+		menuNames.add( getLabelImageMenuName() );
+
+		final String actionName = "Undo Segment Selections" + BdvUtils.getShortCutString( selectNoneTrigger );
+		popupActionNames.add( BdvPopupMenus.getCombinedMenuActionName(  menuNames, actionName ) );
+		BdvPopupMenus.addAction(
+				bdv,
+				menuNames,
+				actionName,
+				( x, y ) -> new Thread( () -> selectNone() ).start()
+		);
+	}
+
+	private void addSelectionColoringModePopupMenu()
+	{
+		final ArrayList< String > menuNames = new ArrayList<>();
+		menuNames.add( getLabelImageMenuName() );
+		menuNames.add( "Segment Selection Coloring Mode" );
+
+		final SelectionColoringModel.SelectionColoringMode[] selectionColoringModes = SelectionColoringModel.SelectionColoringMode.values();
+
+		for ( SelectionColoringModel.SelectionColoringMode mode : selectionColoringModes )
+		{
+			final String actionName = mode.toString();
+			popupActionNames.add( BdvPopupMenus.getCombinedMenuActionName( menuNames, actionName ) );
+
+			BdvPopupMenus.addAction(
+					bdv,
+					menuNames,
+					actionName,
+					( x, y ) -> new Thread( () -> selectionColoringModel.setSelectionColoringMode( mode ) ).start()
+			);
+		}
+	}
+
+	@NotNull
+	private String getLabelImageMenuName()
+	{
+		return labelsSource.metadata().displayName;
+	}
+
+
 	private void changeAnimationSettingsUI()
 	{
-		final GenericDialog genericDialog = new GenericDialog( "Animation settings" );
-		genericDialog.addNumericField( "Animation duration [ms]", segmentFocusAnimationDurationMillis, 0 );
+		final GenericDialog genericDialog = new GenericDialog( "Segment animation settings" );
+		genericDialog.addNumericField( "Segment Focus Animation Duration [ms]", segmentFocusAnimationDurationMillis, 0 );
 		genericDialog.showDialog();
 		if ( genericDialog.wasCanceled() ) return;
 		segmentFocusAnimationDurationMillis = ( int ) genericDialog.getNextNumber();
@@ -681,7 +742,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 		BdvUtils.repaint( bdv );
 	}
 
-	private void installSelectNoneBehaviour( )
+	private void installUndoSelectionBehaviour( )
 	{
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
 				new Thread( () -> selectNone() ).start(),
@@ -868,6 +929,9 @@ public class SegmentsBdvView < T extends ImageSegment >
 
 	public void close()
 	{
-		// TODO
+		for ( String popupActionName : popupActionNames )
+		{
+			BdvPopupMenus.removeAction( bdv, popupActionName );
+		}
 	}
 }
