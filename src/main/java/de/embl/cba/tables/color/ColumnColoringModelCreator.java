@@ -164,16 +164,18 @@ public class ColumnColoringModelCreator< T extends TableRow >
 	private void populateColoringModelFromArgbColumn (String selectedColumnName, CategoryTableRowColumnColoringModel<T> coloringModel) {
 		int selectedColumnIndex = table.getColumnModel().getColumnIndex(selectedColumnName);
 		for (int i = 0; i < table.getRowCount(); i++) {
-			Object argbString = table.getValueAt(i, selectedColumnIndex);
-			String[] splitArgbString = ((String) argbString).split("-");
+			String argbString = (String) table.getValueAt(i, selectedColumnIndex);
+			if ( !argbString.equals("NaN") & !argbString.equals("None") ) {
+				String[] splitArgbString = argbString.split("-");
 
-			int[] argbValues = new int[4];
-			for (int j = 0; j < splitArgbString.length; j++) {
-				argbValues[j] = Integer.parseInt(splitArgbString[j]);
+				int[] argbValues = new int[4];
+				for (int j = 0; j < splitArgbString.length; j++) {
+					argbValues[j] = Integer.parseInt(splitArgbString[j]);
+				}
+
+				coloringModel.putInputToFixedColor(argbString,
+						new ARGBType(ARGBType.rgba(argbValues[1], argbValues[2], argbValues[3], argbValues[0])));
 			}
-
-			coloringModel.putInputToFixedColor(argbString,
-					new ARGBType( ARGBType.rgba( argbValues[1], argbValues[2], argbValues[3], argbValues[0]) ));
 		}
 	}
 
