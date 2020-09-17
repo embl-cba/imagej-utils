@@ -31,14 +31,15 @@ package de.embl.cba.swing;
 import org.scijava.ui.behaviour.ClickBehaviour;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PopupMenu
 {
 	private JPopupMenu popup;
 	private int x;
 	private int y;
+	private Map< String, JMenuItem > actionNameToMenuItem;
 
 	public PopupMenu()
 	{
@@ -47,6 +48,7 @@ public class PopupMenu
 
 	private void createPopupMenu()
 	{
+		actionNameToMenuItem = new HashMap<>(  );
 		popup = new JPopupMenu();
 	}
 
@@ -54,11 +56,22 @@ public class PopupMenu
 		popup.addSeparator();
 	}
 
-	public void addPopupAction( String actionName, ClickBehaviour clickBehaviour ) {
+	public void addPopupAction( String actionName, ClickBehaviour clickBehaviour )
+	{
+		if ( actionNameToMenuItem.keySet().contains( actionName ) )
+			throw new UnsupportedOperationException( actionName + " is already registered in this popup menu." );
 
 		JMenuItem menuItem = new JMenuItem( actionName );
 		menuItem.addActionListener( e -> new Thread( () -> clickBehaviour.click( x, y ) ).start() );
 		popup.add( menuItem );
+		actionNameToMenuItem.put( actionName, menuItem );
+	}
+
+	public void removePopupAction( String actionName  )
+	{
+		if ( ! actionName.contains( actionName ) ) return;
+		final JMenuItem jMenuItem = actionNameToMenuItem.get( actionName );
+		popup.remove( jMenuItem );
 	}
 
 	public void addPopupAction( String actionName, Runnable runnable ) {

@@ -65,6 +65,7 @@ public class BdvSelectionEventHandler
 	 * Selection of argbconversion (objects) in a label source.
 	 * @param bdv Bdv window in which the source is shown.
 	 */
+	@Deprecated
 	public BdvSelectionEventHandler( Bdv bdv,
 									 SelectableARGBConvertedRealSource selectableSource )
 	{

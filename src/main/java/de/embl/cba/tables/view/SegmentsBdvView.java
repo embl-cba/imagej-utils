@@ -106,6 +106,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 	private boolean isLabelMaskShownAsBinaryMask;
 	private boolean isLabelMaskShownAsBoundaries;
 	private int labelMaskBoundaryThickness;
+	private Set< String > popupActionNames;
 
 	public SegmentsBdvView(
 			final List< T > segments,
@@ -147,6 +148,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 		this.voxelSpacing3DView = 0.1;
 		this.segmentFocusAnimationDurationMillis = 750;
 		this.currentSources = new HashSet<>( );
+		this.popupActionNames = new HashSet<>( );
 
 		initSegments( segments );
 		initBdvOptions();
@@ -157,7 +159,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 		registerAsSelectionListener( this.selectionModel );
 		registerAsColoringListener( this.selectionColoringModel );
 
-		installBdvBehaviours();
+		installBdvBehavioursAndPopupMenu();
 	}
 
 	public void initSegments( List< T > segments )
@@ -534,7 +536,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 			bdvOptions = bdvOptions.addTo( bdv );
 	}
 
-	private void installBdvBehaviours()
+	private void installBdvBehavioursAndPopupMenu()
 	{
 		segmentsName = segments.toString();
 
@@ -545,23 +547,30 @@ public class SegmentsBdvView < T extends ImageSegment >
 
 		installSelectionBehaviour();
 		installSelectNoneBehaviour();
-		installSelectionColoringModeBehaviour();
+		installSelectionColoringModeBehaviour(); // TODO: maybe move to popup menu
 		installRandomColorShufflingBehaviour();
 		installShowLabelMaskAsBinaryMaskBehaviour();
 		installShowLabelMaskAsBoundaryBehaviour();
-		install3DViewBehaviour();
+		install3DViewBehaviour(); // TODO: maybe move to popup menu
 		installImageSetNavigationBehaviour( );
 
+		addAnimationSettingsPopupMenu();
+	}
+
+	private void addAnimationSettingsPopupMenu()
+	{
+		final String actionName = "Change " + labelsSource.metadata().displayName + " Animation Settings...";
+		popupActionNames.add( actionName );
 		BdvPopupMenus.addAction( bdv,
-				"Change animation settings...",
+				actionName,
 				( x, y ) -> new Thread( () -> changeAnimationSettingsUI() ).start()
 			);
 	}
 
 	private void changeAnimationSettingsUI()
 	{
-		final GenericDialog genericDialog = new GenericDialog( "Animation settings" );
-		genericDialog.addNumericField( "Animation duration [ms]", segmentFocusAnimationDurationMillis, 0 );
+		final GenericDialog genericDialog = new GenericDialog( "Segment animation settings" );
+		genericDialog.addNumericField( "Segment Focus Animation Duration [ms]", segmentFocusAnimationDurationMillis, 0 );
 		genericDialog.showDialog();
 		if ( genericDialog.wasCanceled() ) return;
 		segmentFocusAnimationDurationMillis = ( int ) genericDialog.getNextNumber();
@@ -868,6 +877,9 @@ public class SegmentsBdvView < T extends ImageSegment >
 
 	public void close()
 	{
-		// TODO
+		for ( String popupActionName : popupActionNames )
+		{
+			BdvPopupMenus.removeAction( bdv, popupActionName );
+		}
 	}
 }
