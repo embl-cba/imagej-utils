@@ -57,7 +57,8 @@ public class ColumnColoringModelCreator< T extends TableRow >
 	{
 			ColoringLuts.BLUE_WHITE_RED,
 			ColoringLuts.VIRIDIS,
-			ColoringLuts.GLASBEY
+			ColoringLuts.GLASBEY,
+			ColoringLuts.ARGB_COLUMN
 	};
 
 	public ColumnColoringModelCreator( JTable table )
@@ -139,6 +140,11 @@ public class ColumnColoringModelCreator< T extends TableRow >
 						selectedColumnName,
 						true,
 						new GlasbeyARGBLut() );
+			case ColoringLuts.ARGB_COLUMN:
+				return createCategoricalColoringModel(
+						selectedColumnName,
+						false,
+						null);
 		}
 
 		return null;
@@ -157,7 +163,7 @@ public class ColumnColoringModelCreator< T extends TableRow >
 
 	public CategoryTableRowColumnColoringModel< T > createCategoricalColoringModel(
 			String selectedColumnName,
-			boolean isZeroTransparent, // TODO: how does that behave for string values?
+			boolean isZeroTransparent,
 			ARGBLut argbLut )
 	{
 		final CategoryTableRowColumnColoringModel< T > coloringModel
@@ -171,11 +177,21 @@ public class ColumnColoringModelCreator< T extends TableRow >
 			coloringModel.putInputToFixedColor( "0.0", CategoryTableRowColumnColoringModel.TRANSPARENT );
 		}
 
-		// TODO
-		// check it works for missing rows.
-		// for loop through the column for each value put the color
-		// split(-);
-		// coloringModel.putInputToFixedColor( "255-0-", ARGBType.rgba(  ) );
+		if ( argbLut == null) {
+			int selectedColumnIndex = table.getColumnModel().getColumnIndex(selectedColumnName);
+			for (int i = 0; i < table.getRowCount(); i++) {
+				Object rgbaString = table.getValueAt(i, selectedColumnIndex);
+				String[] splitRgbaString = ((String) rgbaString).split("-");
+
+				int[] rgbaValues = new int[4];
+				for (int j = 0; j < splitRgbaString.length; j++) {
+					rgbaValues[j] = Integer.parseInt(splitRgbaString[j]);
+				}
+
+				coloringModel.putInputToFixedColor(rgbaString,
+						new ARGBType( ARGBType.rgba( rgbaValues[1], rgbaValues[2], rgbaValues[3], rgbaValues[0]) ));
+			}
+		}
 
 		return coloringModel;
 	}
