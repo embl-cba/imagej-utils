@@ -40,6 +40,8 @@ public class PopupMenu
 	private int x;
 	private int y;
 	private Map< String, JMenuItem > actionNameToMenuItem;
+	private Map< String, JMenu > menuNameToMenu;
+	private Map< String, JMenu > actionNameToMenu;
 
 	public PopupMenu()
 	{
@@ -49,6 +51,8 @@ public class PopupMenu
 	private void createPopupMenu()
 	{
 		actionNameToMenuItem = new HashMap<>(  );
+		menuNameToMenu = new HashMap<>(  );
+		actionNameToMenu = new HashMap<>(  );
 		popup = new JPopupMenu();
 	}
 
@@ -67,11 +71,44 @@ public class PopupMenu
 		actionNameToMenuItem.put( actionName, menuItem );
 	}
 
+	public void addPopupAction( String menuName, String actionName, ClickBehaviour clickBehaviour )
+	{
+		if ( actionNameToMenuItem.keySet().contains( actionName ) )
+			throw new UnsupportedOperationException( actionName + " is already registered in this popup menu." );
+
+		JMenu menu = getMenu( menuName );
+		JMenuItem menuItem = new JMenuItem( actionName );
+
+		menu.add( menuItem );
+		menuItem.addActionListener( e -> new Thread( () -> clickBehaviour.click( x, y ) ).start() );
+		popup.add( menu );
+		actionNameToMenuItem.put( actionName, menu );
+		actionNameToMenu.put( actionName, menu );
+	}
+
+	private JMenu getMenu( String menuName )
+	{
+		if ( ! menuNameToMenu.containsKey( menuName ) )
+		{
+			menuNameToMenu.put( menuName, new JMenu( menuName ) );
+		}
+
+		return menuNameToMenu.get( menuName );
+	}
+
 	public void removePopupAction( String actionName  )
 	{
 		if ( ! actionName.contains( actionName ) ) return;
 		final JMenuItem jMenuItem = actionNameToMenuItem.get( actionName );
 		popup.remove( jMenuItem );
+		if ( actionNameToMenu.containsKey( actionName ) )
+		{
+			final JMenu jMenu = actionNameToMenu.get( actionName );
+			if ( jMenu.getItemCount() == 0 )
+			{
+				popup.remove( jMenu );
+			}
+		}
 	}
 
 	public void addPopupAction( String actionName, Runnable runnable ) {

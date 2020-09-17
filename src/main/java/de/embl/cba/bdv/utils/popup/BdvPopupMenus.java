@@ -46,6 +46,13 @@ public abstract class BdvPopupMenus
 		ensurePopupMenuExist( bdvHandle );
 		bdvToPopup.get( bdvHandle ).addPopupAction( actionName, clickBehaviour );
 	}
+
+	public static synchronized void addAction( BdvHandle bdvHandle, String menuName, String actionName, ClickBehaviour clickBehaviour )
+	{
+		ensurePopupMenuExist( bdvHandle );
+		bdvToPopup.get( bdvHandle ).addPopupAction( menuName, actionName, clickBehaviour );
+	}
+
 	public static synchronized void removeAction( BdvHandle bdvHandle, String actionName )
 	{
 		bdvToPopup.get( bdvHandle ).removePopupAction( actionName );

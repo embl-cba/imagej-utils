@@ -555,16 +555,38 @@ public class SegmentsBdvView < T extends ImageSegment >
 		installImageSetNavigationBehaviour( );
 
 		addAnimationSettingsPopupMenu();
+		addSelectionColoringModePopupMenu();
+
+		this.close(); // TODO: does it work?
 	}
 
 	private void addAnimationSettingsPopupMenu()
 	{
-		final String actionName = "Change " + labelsSource.metadata().displayName + " Animation Settings...";
+		final String actionName = labelsSource.metadata().displayName + " Animation Settings...";
 		popupActionNames.add( actionName );
 		BdvPopupMenus.addAction( bdv,
 				actionName,
 				( x, y ) -> new Thread( () -> changeAnimationSettingsUI() ).start()
 			);
+	}
+
+	private void addSelectionColoringModePopupMenu()
+	{
+		final String menuName = labelsSource.metadata().displayName + " Selection Coloring Mode";
+		popupActionNames.add( menuName );
+
+		final SelectionColoringModel.SelectionColoringMode[] selectionColoringModes = SelectionColoringModel.SelectionColoringMode.values();
+
+		for ( SelectionColoringModel.SelectionColoringMode mode : selectionColoringModes )
+		{
+			final String actionName = mode.toString();
+
+			BdvPopupMenus.addAction( bdv,
+					menuName,
+					actionName,
+					( x, y ) -> new Thread( () -> selectionColoringModel.setSelectionColoringMode( mode ) ).start()
+			);
+		}
 	}
 
 	private void changeAnimationSettingsUI()
