@@ -108,10 +108,12 @@ public class Logger
 					progress = "\\Update:" + progress;
 				}
 			}
+			IJ.log( progress );
 		}
-
-		IJ.log( progress );
-		System.out.println( progress );
+		else
+		{
+			System.out.println( progress );
+		}
 	}
 
 }
