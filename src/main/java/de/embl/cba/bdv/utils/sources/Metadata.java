@@ -56,6 +56,7 @@ public class Metadata
 	public String segmentsTablePath = null;
 	public List< String > additionalSegmentTableNames = new ArrayList<>(  );
 	public String colorByColumn = null;
+	public double[] valueLimits;
 	public List< Double > selectedSegmentIds = new ArrayList<>(  );
 	public boolean showSelectedSegmentsIn3d = false;
 	public boolean showImageIn3d = false;
