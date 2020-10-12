@@ -73,8 +73,6 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	private MeasureDistance< T > measureDistance;
 	private Component parentComponent;
 
-	private String colorByColumnLUT;
-
 	private String mergeByColumnName; // for loading additional columns
 	private String tablesDirectory; // for loading additional columns
 	private ArrayList<String> additionalTables; // tables from which additional columns are loaded
@@ -472,10 +470,6 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		else
 			aMergeByColumnName = mergeByColumnName;
 		return aMergeByColumnName;
-	}
-
-	public String getColorByColumnLUT() {
-		return colorByColumnLUT;
 	}
 
 	public ArrayList<String> getAdditionalTables() {
@@ -878,8 +872,6 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	 */
 	public void colorByColumn( String columnName, String coloringLut, Double min, Double max )
 	{
-		colorByColumnLUT = coloringLut;
-
 		final ColoringModel< T > coloringModel =
 				columnColoringModelCreator.createColoringModel( columnName, coloringLut, min, max );
 		if ( coloringModel != null )
