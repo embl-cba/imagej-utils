@@ -111,40 +111,47 @@ public class ColumnColoringModelCreator< T extends TableRow >
 						selectedColumnName,
 						false,
 						min, max,
-						new BlueWhiteRedARGBLut( 1000 ) );
+						new BlueWhiteRedARGBLut( 1000 ),
+						coloringLut );
 			case ColoringLuts.BLUE_WHITE_RED + ColoringLuts.ZERO_TRANSPARENT:
 				return createLinearColoringModel(
 						selectedColumnName,
 						true,
 						min, max,
-						new BlueWhiteRedARGBLut( 1000 ) );
+						new BlueWhiteRedARGBLut( 1000 ) ,
+						coloringLut );
 			case ColoringLuts.VIRIDIS:
 				return createLinearColoringModel(
 						selectedColumnName,
 						false,
 						min, max,
-						new ViridisARGBLut() );
+						new ViridisARGBLut(),
+						coloringLut );
 			case ColoringLuts.VIRIDIS + ColoringLuts.ZERO_TRANSPARENT:
 				return createLinearColoringModel(
 						selectedColumnName,
 						true,
 						min, max,
-						new ViridisARGBLut() );
+						new ViridisARGBLut(),
+						coloringLut);
 			case ColoringLuts.GLASBEY:
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						false,
-						new GlasbeyARGBLut() );
+						new GlasbeyARGBLut(),
+						coloringLut);
 			case ColoringLuts.GLASBEY + ColoringLuts.ZERO_TRANSPARENT:
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						true,
-						new GlasbeyARGBLut() );
+						new GlasbeyARGBLut(),
+						coloringLut);
 			case ColoringLuts.ARGB_COLUMN:
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						false,
-						null);
+						null,
+						coloringLut);
 		}
 
 		return null;
@@ -182,12 +189,12 @@ public class ColumnColoringModelCreator< T extends TableRow >
 	public CategoryTableRowColumnColoringModel< T > createCategoricalColoringModel(
 			String selectedColumnName,
 			boolean isZeroTransparent,
-			ARGBLut argbLut )
+			ARGBLut argbLut, String coloringLUTName )
 	{
 		final CategoryTableRowColumnColoringModel< T > coloringModel
 				= new CategoryTableRowColumnColoringModel< >(
 						selectedColumnName,
-						argbLut );
+						argbLut, coloringLUTName);
 
 		if ( isZeroTransparent )
 		{
@@ -207,7 +214,8 @@ public class ColumnColoringModelCreator< T extends TableRow >
 			boolean isZeroTransparent,
 			Double min,
 			Double max,
-			ARGBLut argbLut )
+			ARGBLut argbLut,
+			String coloringLUTName )
 	{
 		if ( ! Tables.isNumeric( table, selectedColumnName ) )
 		{
@@ -225,7 +233,8 @@ public class ColumnColoringModelCreator< T extends TableRow >
 						argbLut,
 						valueSettings,
 						valueRange,
-						isZeroTransparent );
+						isZeroTransparent,
+						coloringLUTName);
 
 		if ( min != null )
 			coloringModel.setMin( min );

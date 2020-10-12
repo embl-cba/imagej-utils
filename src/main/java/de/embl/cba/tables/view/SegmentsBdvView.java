@@ -177,6 +177,10 @@ public class SegmentsBdvView < T extends ImageSegment >
 		return labelSourceIds;
 	}
 
+	public boolean isLabelMaskShownAsBinaryMask() {
+		return isLabelMaskShownAsBinaryMask;
+	}
+
 	public void showSourceSetSelectionDialog()
 	{
 		new BdvViewSourcesBrowsingAndActionsDialog( this );

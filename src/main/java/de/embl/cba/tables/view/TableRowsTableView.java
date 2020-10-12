@@ -125,6 +125,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		this.selectionModel = selectionModel;
 		this.tableName = tableName;
 		this.recentlySelectedRowInView = -1;
+		this.additionalTables = new ArrayList<>();
 
 		if ( selectionModel != null )
 			registerAsSelectionListener( selectionModel );
@@ -594,7 +595,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void continueAnnotation( String columnName )
 	{
-		final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut() );
+		final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut(), ColoringLuts.GLASBEY );
 
 		selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.SelectionColor );
 		selectionColoringModel.setColoringModel( categoricalColoringModel );
@@ -825,6 +826,16 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		{
 			return null;
 		}
+	}
+
+	public String getColoringLUTName () {
+		final ColoringModel< T > coloringModel = selectionColoringModel.getColoringModel();
+		if (coloringModel instanceof ColumnColoringModel) {
+			return ((ColumnColoringModel) coloringModel).getColoringLUTName();
+		} else {
+			return null;
+		}
+
 	}
 
 	private void addColorByColumnMenuItem( JMenu coloringMenu )
