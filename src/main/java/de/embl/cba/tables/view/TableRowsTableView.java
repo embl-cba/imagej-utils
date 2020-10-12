@@ -48,8 +48,11 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static de.embl.cba.tables.TableRows.setTableCell;
 
@@ -70,8 +73,11 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	private MeasureDistance< T > measureDistance;
 	private Component parentComponent;
 
+	private String colorByColumnLUT;
+
 	private String mergeByColumnName; // for loading additional columns
 	private String tablesDirectory; // for loading additional columns
+	private ArrayList<String> additionalTables; // tables from which additional columns are loaded
 
 	private SelectionMode selectionMode = SelectionMode.SelectAndFocus;
 
@@ -442,7 +448,9 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 					try
 					{
 						String mergeByColumnName = getMergeByColumnName();
-						Map< String, List< String > > newColumnsOrdered = TableUIs.loadColumns( table, tablesDirectory, mergeByColumnName );
+						String[] tableNameAndPath = TableUIs.selectTable(tablesDirectory);
+						additionalTables.add(tableNameAndPath[0]);
+						Map< String, List< String > > newColumnsOrdered = TableUIs.loadColumns( table, tableNameAndPath[1], mergeByColumnName );
 						if ( newColumnsOrdered == null ) return;
 						newColumnsOrdered.remove( mergeByColumnName );
 						addColumns( newColumnsOrdered );
@@ -465,7 +473,37 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		return aMergeByColumnName;
 	}
 
-	public void setMergeByColumnName( String mergeByColumnName )
+	public String getColorByColumnLUT() {
+		return colorByColumnLUT;
+	}
+
+	public ArrayList<String> getAdditionalTables() {
+		return additionalTables;
+	}
+
+	public double[] getColorByColumnValueLimits() {
+		ColoringModel coloringModel = selectionColoringModel.getColoringModel();
+		if (coloringModel instanceof NumericColoringModel) {
+			double[] valueLimits = new double[2];
+			NumericColoringModel numericColoringModel = (NumericColoringModel) coloringModel;
+			valueLimits[0] = numericColoringModel.getMin();
+			valueLimits[1] = numericColoringModel.getMax();
+			return valueLimits;
+		} else {
+			return null;
+		}
+	}
+
+	public ArrayList<T> getSelectedLabelIds () {
+		if (selectionModel.getSelected().size() > 0) {
+			ArrayList<T> selectedIDsArray = new ArrayList<>(selectionModel.getSelected());
+			return selectedIDsArray;
+		} else {
+			return null;
+		}
+	}
+
+	public void setMergeByColumnName(String mergeByColumnName )
 	{
 		this.mergeByColumnName = mergeByColumnName;
 	}
@@ -775,7 +813,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		}
 	}
 
-	private String getColoringColumnName()
+	public String getColoringColumnName()
 	{
 		final ColoringModel< T > coloringModel = selectionColoringModel.getColoringModel();
 
@@ -829,6 +867,8 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	 */
 	public void colorByColumn( String columnName, String coloringLut, Double min, Double max )
 	{
+		colorByColumnLUT = coloringLut;
+
 		final ColoringModel< T > coloringModel =
 				columnColoringModelCreator.createColoringModel( columnName, coloringLut, min, max );
 		if ( coloringModel != null )

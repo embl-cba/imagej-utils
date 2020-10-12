@@ -30,12 +30,14 @@ package de.embl.cba.tables;
 
 import de.embl.cba.tables.view.TableRowsTableView;
 import ij.gui.GenericDialog;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -141,14 +143,23 @@ public class TableUIs
 		return null;
 	}
 
+	public static String[] selectTable (String tablesDirectory) throws  IOException {
+		String[] tableNameAndPath = new String[2];
+		String tablePath = selectPathFromProjectOrFileSystem( tablesDirectory, "Table");
+		String tableName  = FilenameUtils.getBaseName(tablePath);
+
+		tableNameAndPath[0] = tableName;
+		tableNameAndPath[1] = tablePath;
+
+		return tableNameAndPath;
+	}
+
 	// TODO: make own class: ColumnsLoader
 	public static Map< String, List< String > > loadColumns( JTable table,
-															 String tablesDirectory,
+															 String newTablePath,
 															 String mergeByColumnName ) throws IOException
 	{
-		String tablesPath = selectPathFromProjectOrFileSystem( tablesDirectory, "Table");
-		Map< String, List< String > > columns = TableColumns.openAndOrderNewColumns( table, mergeByColumnName, tablesPath );
-
+		Map< String, List< String > > columns = TableColumns.openAndOrderNewColumns( table, mergeByColumnName, newTablePath );
 		return columns;
 	}
 
