@@ -143,17 +143,6 @@ public class TableUIs
 		return null;
 	}
 
-	public static String[] selectTable (String tablesDirectory) throws  IOException {
-		String[] tableNameAndPath = new String[2];
-		String tablePath = selectPathFromProjectOrFileSystem( tablesDirectory, "Table");
-		String tableName  = FilenameUtils.getBaseName(tablePath);
-
-		tableNameAndPath[0] = tableName;
-		tableNameAndPath[1] = tablePath;
-
-		return tableNameAndPath;
-	}
-
 	// TODO: make own class: ColumnsLoader
 	public static Map< String, List< String > > loadColumns( JTable table,
 															 String newTablePath,

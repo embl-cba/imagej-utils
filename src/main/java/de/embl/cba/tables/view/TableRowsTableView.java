@@ -41,6 +41,7 @@ import de.embl.cba.tables.tablerow.TableRowListener;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import net.imglib2.type.numeric.ARGBType;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.swing.*;
@@ -54,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 import static de.embl.cba.tables.TableRows.setTableCell;
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
@@ -438,6 +440,11 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		return menu;
     }
 
+    public void addAdditionalTables (String tablePath) {
+		String tableName  = FilenameUtils.getBaseName(tablePath);
+		additionalTables.add(tableName);
+	}
+
 	private JMenuItem createLoadColumnsMenuItem()
 	{
 		final JMenuItem menuItem = new JMenuItem( "Load Columns..." );
@@ -447,9 +454,9 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 					try
 					{
 						String mergeByColumnName = getMergeByColumnName();
-						String[] tableNameAndPath = TableUIs.selectTable(tablesDirectory);
-						additionalTables.add(tableNameAndPath[0]);
-						Map< String, List< String > > newColumnsOrdered = TableUIs.loadColumns( table, tableNameAndPath[1], mergeByColumnName );
+						String tablePath = selectPathFromProjectOrFileSystem( tablesDirectory, "Table");
+						addAdditionalTables(tablePath);
+						Map< String, List< String > > newColumnsOrdered = TableUIs.loadColumns( table, tablePath, mergeByColumnName );
 						if ( newColumnsOrdered == null ) return;
 						newColumnsOrdered.remove( mergeByColumnName );
 						addColumns( newColumnsOrdered );
