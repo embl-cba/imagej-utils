@@ -194,10 +194,10 @@ public class Utils
 		return coordinatesAndValues;
 	}
 
-	public static double sum( List<Double> a ){
-		if (a.size() > 0) {
+	public static double sum( List<Double> values ){
+		if (values.size() > 0) {
 			double sum = 0;
-			for (Double d : a) {
+			for (Double d : values) {
 				sum += d;
 			}
 			return sum;
@@ -205,25 +205,25 @@ public class Utils
 		return 0;
 	}
 
-	public static double mean( List<Double> a ){
-		double sum = sum( a );
+	public static double mean( List<Double> values ){
+		double sum = sum( values );
 		double mean = 0;
-		mean = sum / ( a.size() * 1.0 );
+		mean = sum / ( values.size() * 1.0 );
 		return mean;
 	}
 
-	public static double sdev( List<Double> a, Double mean ){
+	public static double sdev( List<Double> values, Double mean ){
 		double sdev = 0;
-		for( double v : a )
+		for( double v : values )
 			sdev += ( v - mean ) * ( v - mean );
-		sdev /= ( a.size() * 1.0 );
+		sdev /= ( values.size() * 1.0 );
 		sdev = Math.sqrt( sdev );
 		return sdev;
 	}
 
-	public static double median( List<Double> input )
+	public static double median( List<Double> values )
 	{
-		final ArrayList< Double > sorted = new ArrayList<>( input );
+		final ArrayList< Double > sorted = new ArrayList<>( values );
 
 		Collections.sort( sorted );
 
@@ -237,6 +237,25 @@ public class Utils
 		} else {
 			return (sorted.get(middle-1) + sorted.get(middle)) / 2.0;
 		}
+	}
+
+	/**
+	 * Compute the median absolute deviation.
+	 *
+	 * @param values
+	 * @param median
+	 * @return
+	 */
+	public static double mad( List<Double> values, Double median )
+	{
+		final ArrayList< Double > absoluteDeviations = new ArrayList<>();
+
+		for ( Double value : values )
+		{
+			absoluteDeviations.add( Math.abs( value - median ) );
+		}
+
+		return median( absoluteDeviations );
 	}
 
 	public static < T extends RealType< T > & NativeType< T > >

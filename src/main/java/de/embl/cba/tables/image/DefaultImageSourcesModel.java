@@ -70,7 +70,6 @@ public class DefaultImageSourcesModel implements ImageSourcesModel
 			double displayRangeMax
 	)
 	{
-
 		final Metadata metadata = new Metadata( imageId );
 		metadata.modality = flavor;
 		metadata.numSpatialDimensions = numSpatialDimensions;
