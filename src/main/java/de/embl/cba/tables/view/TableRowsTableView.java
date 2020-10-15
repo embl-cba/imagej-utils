@@ -29,6 +29,7 @@
 package de.embl.cba.tables.view;
 
 import bdv.tools.HelpDialog;
+import de.embl.cba.bdv.utils.lut.ARGBLut;
 import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.tables.*;
 import de.embl.cba.tables.annotate.Annotator;
@@ -49,11 +50,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 import static de.embl.cba.tables.TableRows.setTableCell;
@@ -440,7 +439,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		return menu;
     }
 
-    public void addAdditionalTables (String tablePath) {
+    public void addAdditionalTable(String tablePath) {
 		String tableName  = FilenameUtils.getBaseName(tablePath);
 		additionalTables.add(tableName);
 	}
@@ -455,7 +454,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 					{
 						String mergeByColumnName = getMergeByColumnName();
 						String tablePath = selectPathFromProjectOrFileSystem( tablesDirectory, "Table");
-						addAdditionalTables(tablePath);
+						addAdditionalTable(tablePath);
 						Map< String, List< String > > newColumnsOrdered = TableUIs.loadColumns( table, tablePath, mergeByColumnName );
 						if ( newColumnsOrdered == null ) return;
 						newColumnsOrdered.remove( mergeByColumnName );
@@ -596,7 +595,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void continueAnnotation( String columnName )
 	{
-		final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut(), ColoringLuts.GLASBEY );
+		final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut() );
 
 		selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.SelectionColor );
 		selectionColoringModel.setColoringModel( categoricalColoringModel );
@@ -832,7 +831,12 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	public String getColoringLUTName () {
 		final ColoringModel< T > coloringModel = selectionColoringModel.getColoringModel();
 		if (coloringModel instanceof ColumnColoringModel) {
-			return ((ColumnColoringModel) coloringModel).getColoringLUTName();
+			ARGBLut lut = ((ColumnColoringModel) coloringModel).getARGBLut();
+			if (lut == null) {
+				return ColoringLuts.ARGB_COLUMN;
+			} else {
+				return lut.getName();
+			}
 		} else {
 			return null;
 		}

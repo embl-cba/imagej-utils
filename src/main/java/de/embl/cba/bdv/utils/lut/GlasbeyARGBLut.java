@@ -28,6 +28,7 @@
  */
 package de.embl.cba.bdv.utils.lut;
 
+import de.embl.cba.tables.color.ColoringLuts;
 import net.imglib2.type.numeric.ARGBType;
 
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class GlasbeyARGBLut implements IndexARGBLut
 	private static int alpha;
 	private static ArrayList< Integer > indices;
 	private final int numColors;
+	private String name = ColoringLuts.GLASBEY;
 
 	public GlasbeyARGBLut()
 	{
@@ -71,6 +73,16 @@ public class GlasbeyARGBLut implements IndexARGBLut
 	{
 		final int index = x % numColors;
 		return indices.get( index );
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public void setName( String name ) {
+		this.name = name;
 	}
 
 	/**

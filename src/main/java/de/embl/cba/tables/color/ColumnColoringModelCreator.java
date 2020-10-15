@@ -111,47 +111,40 @@ public class ColumnColoringModelCreator< T extends TableRow >
 						selectedColumnName,
 						false,
 						min, max,
-						new BlueWhiteRedARGBLut( 1000 ),
-						coloringLut );
+						new BlueWhiteRedARGBLut( 1000 ) );
 			case ColoringLuts.BLUE_WHITE_RED + ColoringLuts.ZERO_TRANSPARENT:
 				return createLinearColoringModel(
 						selectedColumnName,
 						true,
 						min, max,
-						new BlueWhiteRedARGBLut( 1000 ) ,
-						coloringLut );
+						new BlueWhiteRedARGBLut( 1000 ) );
 			case ColoringLuts.VIRIDIS:
 				return createLinearColoringModel(
 						selectedColumnName,
 						false,
 						min, max,
-						new ViridisARGBLut(),
-						coloringLut );
+						new ViridisARGBLut() );
 			case ColoringLuts.VIRIDIS + ColoringLuts.ZERO_TRANSPARENT:
 				return createLinearColoringModel(
 						selectedColumnName,
 						true,
 						min, max,
-						new ViridisARGBLut(),
-						coloringLut);
+						new ViridisARGBLut() );
 			case ColoringLuts.GLASBEY:
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						false,
-						new GlasbeyARGBLut(),
-						coloringLut);
+						new GlasbeyARGBLut() );
 			case ColoringLuts.GLASBEY + ColoringLuts.ZERO_TRANSPARENT:
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						true,
-						new GlasbeyARGBLut(),
-						coloringLut);
+						new GlasbeyARGBLut() );
 			case ColoringLuts.ARGB_COLUMN:
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						false,
-						null,
-						coloringLut);
+						null );
 		}
 
 		return null;
@@ -189,17 +182,21 @@ public class ColumnColoringModelCreator< T extends TableRow >
 	public CategoryTableRowColumnColoringModel< T > createCategoricalColoringModel(
 			String selectedColumnName,
 			boolean isZeroTransparent,
-			ARGBLut argbLut, String coloringLUTName )
+			ARGBLut argbLut )
 	{
 		final CategoryTableRowColumnColoringModel< T > coloringModel
 				= new CategoryTableRowColumnColoringModel< >(
 						selectedColumnName,
-						argbLut, coloringLUTName);
+						argbLut );
 
 		if ( isZeroTransparent )
 		{
 			coloringModel.putInputToFixedColor( "0", CategoryTableRowColumnColoringModel.TRANSPARENT );
 			coloringModel.putInputToFixedColor( "0.0", CategoryTableRowColumnColoringModel.TRANSPARENT );
+
+			if (argbLut != null) {
+				argbLut.setName(argbLut.getName() + ColoringLuts.ZERO_TRANSPARENT);
+			}
 		}
 
 		if ( argbLut == null) {
@@ -214,8 +211,7 @@ public class ColumnColoringModelCreator< T extends TableRow >
 			boolean isZeroTransparent,
 			Double min,
 			Double max,
-			ARGBLut argbLut,
-			String coloringLUTName )
+			ARGBLut argbLut )
 	{
 		if ( ! Tables.isNumeric( table, selectedColumnName ) )
 		{
@@ -233,8 +229,11 @@ public class ColumnColoringModelCreator< T extends TableRow >
 						argbLut,
 						valueSettings,
 						valueRange,
-						isZeroTransparent,
-						coloringLUTName);
+						isZeroTransparent );
+
+		if ( isZeroTransparent ) {
+			argbLut.setName( argbLut.getName() + ColoringLuts.ZERO_TRANSPARENT );
+		}
 
 		if ( min != null )
 			coloringModel.setMin( min );

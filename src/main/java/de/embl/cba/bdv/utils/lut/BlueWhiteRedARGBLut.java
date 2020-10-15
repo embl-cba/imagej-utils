@@ -28,6 +28,7 @@
  */
 package de.embl.cba.bdv.utils.lut;
 
+import de.embl.cba.tables.color.ColoringLuts;
 import net.imglib2.type.numeric.ARGBType;
 
 public class BlueWhiteRedARGBLut implements ARGBLut
@@ -35,6 +36,7 @@ public class BlueWhiteRedARGBLut implements ARGBLut
 	private static int alpha;
 	private final int[] indices;
 	private final int numColors;
+	private String name = ColoringLuts.BLUE_WHITE_RED;
 
 	public BlueWhiteRedARGBLut( int numColors )
 	{
@@ -61,6 +63,15 @@ public class BlueWhiteRedARGBLut implements ARGBLut
 		return indices[ index ];
 	}
 
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	/**
 	 * Lookup table going from blue to white to red.

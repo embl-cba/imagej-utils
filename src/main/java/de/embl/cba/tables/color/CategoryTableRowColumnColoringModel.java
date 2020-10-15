@@ -52,16 +52,14 @@ public class CategoryTableRowColumnColoringModel< T extends TableRow >
 	private ARGBLut argbLut;
 	private int randomSeed;
 	private boolean fixedColorMode = false;
-	private String coloringLUTName;
 
 	/**
 	 *
 	 * @param argbLut
 	 */
-	public CategoryTableRowColumnColoringModel( String columnName, ARGBLut argbLut, String coloringLUTName )
+	public CategoryTableRowColumnColoringModel( String columnName, ARGBLut argbLut )
 	{
 		this.columnName = columnName;
-		this.coloringLUTName = coloringLUTName;
 		this.argbLut = argbLut;
 		this.inputToRandomColor = new ConcurrentHashMap<>(  );
 		this.inputToFixedColor = new ConcurrentHashMap<>(  );
@@ -139,5 +137,8 @@ public class CategoryTableRowColumnColoringModel< T extends TableRow >
 		return columnName;
 	}
 
-	public String getColoringLUTName() { return coloringLUTName; }
+	@Override
+	public ARGBLut getARGBLut() {
+		return this.argbLut;
+	}
 }
