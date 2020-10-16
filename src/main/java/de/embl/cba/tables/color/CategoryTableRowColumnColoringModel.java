@@ -136,4 +136,9 @@ public class CategoryTableRowColumnColoringModel< T extends TableRow >
 	{
 		return columnName;
 	}
+
+	@Override
+	public ARGBLut getARGBLut() {
+		return this.argbLut;
+	}
 }

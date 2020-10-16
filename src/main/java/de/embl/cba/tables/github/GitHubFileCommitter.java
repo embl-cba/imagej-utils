@@ -33,17 +33,32 @@ public class GitHubFileCommitter
 	private String repository;
 	private String accessToken;
 	private String path;
+	private String branch;
+	private String sha; // needed if updating an existing file
 
 	public GitHubFileCommitter( String repository, String accessToken, String path )
+	{
+		this(repository, accessToken, null, path, null);
+	}
+
+	public GitHubFileCommitter( String repository, String accessToken, String branch, String path )
+	{
+		this(repository, accessToken, branch, path, null);
+	}
+
+	public GitHubFileCommitter( String repository, String accessToken, String branch, String path,
+								String sha)
 	{
 		this.repository = repository;
 		this.accessToken = accessToken;
 		this.path = path;
+		this.branch = branch;
+		this.sha = sha;
 	}
 
 	public void commitStringAsFile( String message, String base64String )
 	{
-		final GitHubFileCommit fileCommit = new GitHubFileCommit( message, base64String );
+		final GitHubFileCommit fileCommit = new GitHubFileCommit( message, base64String, branch, sha);
 		String url = createFileCommitApiUrl( path );
 		final String requestMethod = "PUT";
 		final String json = fileCommit.toString();

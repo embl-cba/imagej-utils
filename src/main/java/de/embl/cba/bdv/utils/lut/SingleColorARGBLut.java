@@ -33,6 +33,7 @@ public class SingleColorARGBLut implements ARGBLut
 	private final int r;
 	private final int g;
 	private final int b;
+	private String name = "SingleColor";
 
 	public SingleColorARGBLut( int r, int g, int b )
 	{
@@ -45,5 +46,15 @@ public class SingleColorARGBLut implements ARGBLut
 	public int getARGB( double x )
 	{
 		return Luts.getARGBIndex( r, g, b, x );
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public void setName(String name) {
+		this.name = name;
 	}
 }

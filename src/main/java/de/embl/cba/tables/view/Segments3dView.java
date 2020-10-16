@@ -479,6 +479,10 @@ public class Segments3dView < T extends ImageSegment >
 		return level;
 	}
 
+	public boolean getShowSelectedSegmentsIn3D () {
+		return this.showSelectedSegmentsIn3D;
+	}
+
 	public synchronized void setShowSelectedSegmentsIn3D( boolean showSelectedSegmentsIn3D )
 	{
 		this.showSelectedSegmentsIn3D = showSelectedSegmentsIn3D;

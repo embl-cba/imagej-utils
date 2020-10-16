@@ -28,6 +28,7 @@
  */
 package de.embl.cba.bdv.utils.lut;
 
+import de.embl.cba.tables.color.ColoringLuts;
 import net.imglib2.type.numeric.ARGBType;
 
 public class ViridisARGBLut implements ARGBLut
@@ -35,6 +36,7 @@ public class ViridisARGBLut implements ARGBLut
 	public static final int NUM_COLORS = 255;
 	private static int alpha;
 	private final int[] indices;
+	private String name = ColoringLuts.VIRIDIS;
 
 	public ViridisARGBLut()
 	{
@@ -57,6 +59,15 @@ public class ViridisARGBLut implements ARGBLut
 		return indices[ index ];
 	}
 
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	/**
 	 * Create lookup table with a  maximally distinct sets of colors (copied

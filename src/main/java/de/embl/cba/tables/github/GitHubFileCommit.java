@@ -28,20 +28,36 @@
  */
 package de.embl.cba.tables.github;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Base64;
 
+@JsonInclude(JsonInclude.Include.NON_NULL) // exclude all null fields from toString()
 public class GitHubFileCommit
 {
 	public String message = "My commit message";
 	public String content = Base64.getEncoder().encodeToString( "Hello World".getBytes() );;
+	public String branch;
+	public String sha; // Needed if updating existing file
 
 	public GitHubFileCommit( String message, String base64String )
 	{
+		this(message, base64String, null, null);
+	}
+
+	public GitHubFileCommit( String message, String base64String, String branch )
+	{
+		this(message, base64String, branch, null);
+	}
+
+	public GitHubFileCommit( String message, String base64String, String branch, String sha)
+	{
 		this.message = message;
 		content = base64String;
+		this.branch = branch;
+		this.sha = sha;
 	}
 
 	@Override

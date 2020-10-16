@@ -146,4 +146,9 @@ public class NumericTableRowColumnColoringModel< T extends TableRow >
 	{
 		return columnName;
 	}
+
+	@Override
+	public ARGBLut getARGBLut() {
+		return this.lut;
+	}
 }

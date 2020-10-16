@@ -30,7 +30,11 @@ package de.embl.cba.tables.github;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
+import de.embl.cba.tables.FileAndUrlUtils;
+import ij.gui.GenericDialog;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public abstract class GitHubUtils
@@ -49,6 +53,24 @@ public abstract class GitHubUtils
 			gitLocation.path += split[ i ] + "/";
 		}
 		return gitLocation;
+	}
+
+	// objectName is used for the dialog labels e.g. 'table', 'bookmark' etc...
+	public static String selectGitHubPathFromDirectory( String directory, String objectName ) throws IOException
+	{
+		final GitLocation gitLocation = GitHubUtils.rawUrlToGitLocation( directory );
+		final ArrayList< String > filePaths = GitHubUtils.getFilePaths( gitLocation );
+		final String[] fileNames = filePaths.stream().map( File::new ).map( File::getName ).toArray( String[]::new );
+
+
+		final GenericDialog gd = new GenericDialog( "Select " + objectName );
+		gd.addChoice( objectName, fileNames, fileNames[ 0 ] );
+		gd.showDialog();
+		if ( gd.wasCanceled() ) return null;
+		final String fileName = gd.getNextChoice();
+		String newFilePath = FileAndUrlUtils.combinePath( directory, fileName );
+
+		return newFilePath;
 	}
 
 	public static ArrayList< String > getFilePaths( GitLocation gitLocation )

@@ -144,7 +144,7 @@ public class ColumnColoringModelCreator< T extends TableRow >
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						false,
-						null);
+						null );
 		}
 
 		return null;
@@ -193,6 +193,10 @@ public class ColumnColoringModelCreator< T extends TableRow >
 		{
 			coloringModel.putInputToFixedColor( "0", CategoryTableRowColumnColoringModel.TRANSPARENT );
 			coloringModel.putInputToFixedColor( "0.0", CategoryTableRowColumnColoringModel.TRANSPARENT );
+
+			if (argbLut != null) {
+				argbLut.setName(argbLut.getName() + ColoringLuts.ZERO_TRANSPARENT);
+			}
 		}
 
 		if ( argbLut == null) {
@@ -226,6 +230,10 @@ public class ColumnColoringModelCreator< T extends TableRow >
 						valueSettings,
 						valueRange,
 						isZeroTransparent );
+
+		if ( isZeroTransparent ) {
+			argbLut.setName( argbLut.getName() + ColoringLuts.ZERO_TRANSPARENT );
+		}
 
 		if ( min != null )
 			coloringModel.setMin( min );
