@@ -28,7 +28,6 @@
  */
 package de.embl.cba.tables;
 
-import de.embl.cba.tables.Tables;
 import ij.gui.GenericDialog;
 
 import javax.swing.*;
@@ -46,8 +45,8 @@ import static de.embl.cba.tables.github.GitHubUtils.selectGitHubPathFromDirector
 public class FileUtils
 {
 	public enum FileLocation {
-		PROJECT,
-		FILE_SYSTEM
+		Project,
+		File_system
 	}
 
 	public static List< File > getFileList(
@@ -72,15 +71,15 @@ public class FileUtils
 		if ( directory != null )
 		{
 			final GenericDialog gd = new GenericDialog( "Choose source" );
-			gd.addChoice( "Load from", new String[]{ FileLocation.PROJECT.toString(),
-					FileLocation.FILE_SYSTEM.toString() }, FileLocation.PROJECT.toString() );
+			gd.addChoice( "Load from", new String[]{ FileLocation.Project.toString(),
+					FileLocation.File_system.toString() }, FileLocation.Project.toString() );
 			gd.showDialog();
 			if ( gd.wasCanceled() ) return null;
 			fileLocation = gd.getNextChoice();
 		}
 
 		String filePath = null;
-		if ( directory != null && fileLocation.equals( FileLocation.PROJECT.toString() ) && directory.contains( "raw.githubusercontent" ) )
+		if ( directory != null && fileLocation.equals( FileLocation.Project.toString() ) && directory.contains( "raw.githubusercontent" ) )
 		{
 			filePath = selectGitHubPathFromDirectory( directory, objectName );
 			if ( filePath == null ) return null;
