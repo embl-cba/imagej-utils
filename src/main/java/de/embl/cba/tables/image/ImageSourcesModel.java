@@ -28,8 +28,6 @@
  */
 package de.embl.cba.tables.image;
 
-import de.embl.cba.tables.image.SourceAndMetadata;
-
 import java.util.Map;
 
 public interface ImageSourcesModel

@@ -107,20 +107,17 @@ public class FileImageSourcesModelFactory< T extends TableRowImageSegment >
 
 			for ( String imageName : imageNames )
 			{
-				final String imagePath =
-						getImagePath( tableRowImageSegment, imageName );
+				final String imagePath = getImagePath( tableRowImageSegment, imageName );
 
 				final String imageId = imagePath;
 
 				if ( ! imageSourcesModel.sources().containsKey( imageId ) )
 				{
-					final Path absoluteImagePath =
-							Tables.getAbsolutePath( imageRootFolder, imagePath );
+					final Path absoluteImagePath = Tables.getAbsolutePath( imageRootFolder, imagePath );
 
 					if ( absoluteImagePath.toFile().exists() )
 					{
-						final String imageDisplayName =
-								absoluteImagePath.getFileName().toString();
+						final String imageDisplayName = absoluteImagePath.getFileName().toString();
 
 						imageSourcesModel.addSourceAndMetadata(
 								imageId,
