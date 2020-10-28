@@ -84,4 +84,31 @@ public class Metadata
 		this.imageId = imageId;
 		imageSetIDs.add( this.imageId );
 	}
+
+	public Metadata copy () {
+		Metadata metadataCopy = new Metadata (this.imageId);
+		metadataCopy.displayName = this.displayName;
+		metadataCopy.color = this.color;
+		metadataCopy.contrastLimits = this.contrastLimits != null ? this.contrastLimits.clone() : null;
+		metadataCopy.imageSetIDs = this.imageSetIDs != null ? new ArrayList<>(this.imageSetIDs) : new ArrayList<>();
+		metadataCopy.type = this.type;
+		metadataCopy.modality = this.modality;
+		metadataCopy.numSpatialDimensions = this.numSpatialDimensions;
+		metadataCopy.showInitially = this.showInitially;
+		metadataCopy.bdvStackSource = this.bdvStackSource;
+		metadataCopy.content = this.content;
+		metadataCopy.segmentsTablePath = this.segmentsTablePath;
+		metadataCopy.additionalSegmentTableNames = this.additionalSegmentTableNames != null ?
+				new ArrayList<>( this.additionalSegmentTableNames ) : new ArrayList<>();
+		metadataCopy.colorByColumn = this.colorByColumn;
+		metadataCopy.valueLimits = this.valueLimits != null ? this.valueLimits.clone() : null;
+		metadataCopy.selectedSegmentIds = this.selectedSegmentIds != null ?
+				new ArrayList<>( this.selectedSegmentIds ) : new ArrayList<>();
+		metadataCopy.showSelectedSegmentsIn3d = this.showSelectedSegmentsIn3d;
+		metadataCopy.showImageIn3d = this.showImageIn3d;
+		metadataCopy.xmlLocation = this.xmlLocation;
+		metadataCopy.views = this.views;
+
+		return metadataCopy;
+	}
 }

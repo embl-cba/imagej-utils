@@ -37,4 +37,7 @@ public interface ARGBLut
 	 * @return ARGB color index
 	 */
 	int getARGB( double x );
+
+	String getName();
+	void setName( String name );
 }

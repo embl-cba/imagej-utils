@@ -29,7 +29,9 @@
 package de.embl.cba.tables;
 
 import de.embl.cba.tables.Tables;
+import ij.gui.GenericDialog;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +41,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static de.embl.cba.tables.github.GitHubUtils.selectGitHubPathFromDirectory;
+
 public class FileUtils
 {
+	public static final String PROJECT = "Project";
+	public static final String FILE_SYSTEM = "File system";
+
 	public static List< File > getFileList(
 			File directory,
 			String fileNameRegExp,
@@ -55,6 +62,40 @@ public class FileUtils
 				recursive );
 
 		return files;
+	}
+
+	// objectName is used for the dialog labels e.g. 'table', 'bookmark' etc...
+	public static String selectPathFromProjectOrFileSystem (String directory, String objectName) throws IOException {
+		String fileLocation = null;
+		if ( directory != null )
+		{
+			final GenericDialog gd = new GenericDialog( "Choose source" );
+			gd.addChoice( "Load from", new String[]{ PROJECT, FILE_SYSTEM }, PROJECT );
+			gd.showDialog();
+			if ( gd.wasCanceled() ) return null;
+			fileLocation = gd.getNextChoice();
+		}
+
+		String filePath = null;
+		if ( directory != null && fileLocation.equals( PROJECT ) && directory.contains( "raw.githubusercontent" ) )
+		{
+			filePath = selectGitHubPathFromDirectory( directory, objectName );
+			if ( filePath == null ) return null;
+		}
+		else
+		{
+			final JFileChooser jFileChooser = new JFileChooser( directory );
+
+			if ( jFileChooser.showOpenDialog( null ) == JFileChooser.APPROVE_OPTION )
+				filePath = jFileChooser.getSelectedFile().getAbsolutePath();
+		}
+
+		if ( filePath == null ) return null;
+
+		if ( filePath.startsWith( "http" ) )
+			filePath = resolveTableURL( URI.create( filePath ) );
+
+		return filePath;
 	}
 
 	public static String resolveTableURL( URI uri )

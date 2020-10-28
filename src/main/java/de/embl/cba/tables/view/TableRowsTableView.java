@@ -29,6 +29,7 @@
 package de.embl.cba.tables.view;
 
 import bdv.tools.HelpDialog;
+import de.embl.cba.bdv.utils.lut.ARGBLut;
 import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.tables.*;
 import de.embl.cba.tables.annotate.Annotator;
@@ -41,6 +42,7 @@ import de.embl.cba.tables.tablerow.TableRowListener;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import net.imglib2.type.numeric.ARGBType;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.swing.*;
@@ -48,9 +50,11 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 import static de.embl.cba.tables.TableRows.setTableCell;
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
@@ -72,6 +76,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	private String mergeByColumnName; // for loading additional columns
 	private String tablesDirectory; // for loading additional columns
+	private ArrayList<String> additionalTables; // tables from which additional columns are loaded
 
 	private SelectionMode selectionMode = SelectionMode.SelectAndFocus;
 
@@ -119,6 +124,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		this.selectionModel = selectionModel;
 		this.tableName = tableName;
 		this.recentlySelectedRowInView = -1;
+		this.additionalTables = new ArrayList<>();
 
 		if ( selectionModel != null )
 			registerAsSelectionListener( selectionModel );
@@ -433,6 +439,11 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		return menu;
     }
 
+    public void addAdditionalTable(String tablePath) {
+		String tableName  = FilenameUtils.getBaseName(tablePath);
+		additionalTables.add(tableName);
+	}
+
 	private JMenuItem createLoadColumnsMenuItem()
 	{
 		final JMenuItem menuItem = new JMenuItem( "Load Columns..." );
@@ -442,7 +453,9 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 					try
 					{
 						String mergeByColumnName = getMergeByColumnName();
-						Map< String, List< String > > newColumnsOrdered = TableUIs.loadColumns( table, tablesDirectory, mergeByColumnName );
+						String tablePath = selectPathFromProjectOrFileSystem( tablesDirectory, "Table");
+						addAdditionalTable(tablePath);
+						Map< String, List< String > > newColumnsOrdered = TableUIs.loadColumns( table, tablePath, mergeByColumnName );
 						if ( newColumnsOrdered == null ) return;
 						newColumnsOrdered.remove( mergeByColumnName );
 						addColumns( newColumnsOrdered );
@@ -465,7 +478,33 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		return aMergeByColumnName;
 	}
 
-	public void setMergeByColumnName( String mergeByColumnName )
+	public ArrayList<String> getAdditionalTables() {
+		return additionalTables;
+	}
+
+	public double[] getColorByColumnValueLimits() {
+		ColoringModel coloringModel = selectionColoringModel.getColoringModel();
+		if (coloringModel instanceof NumericColoringModel) {
+			double[] valueLimits = new double[2];
+			NumericColoringModel numericColoringModel = (NumericColoringModel) coloringModel;
+			valueLimits[0] = numericColoringModel.getMin();
+			valueLimits[1] = numericColoringModel.getMax();
+			return valueLimits;
+		} else {
+			return null;
+		}
+	}
+
+	public ArrayList<T> getSelectedLabelIds () {
+		if (selectionModel.getSelected().size() > 0) {
+			ArrayList<T> selectedIDsArray = new ArrayList<>(selectionModel.getSelected());
+			return selectedIDsArray;
+		} else {
+			return null;
+		}
+	}
+
+	public void setMergeByColumnName(String mergeByColumnName )
 	{
 		this.mergeByColumnName = mergeByColumnName;
 	}
@@ -775,7 +814,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		}
 	}
 
-	private String getColoringColumnName()
+	public String getColoringColumnName()
 	{
 		final ColoringModel< T > coloringModel = selectionColoringModel.getColoringModel();
 
@@ -787,6 +826,21 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		{
 			return null;
 		}
+	}
+
+	public String getColoringLUTName () {
+		final ColoringModel< T > coloringModel = selectionColoringModel.getColoringModel();
+		if (coloringModel instanceof ColumnColoringModel) {
+			ARGBLut lut = ((ColumnColoringModel) coloringModel).getARGBLut();
+			if (lut == null) {
+				return ColoringLuts.ARGB_COLUMN;
+			} else {
+				return lut.getName();
+			}
+		} else {
+			return null;
+		}
+
 	}
 
 	private void addColorByColumnMenuItem( JMenu coloringMenu )

@@ -101,6 +101,18 @@ public abstract class BdvUtils
 		return ( Source ) sources.get( sourceIndex ).getSpimSource();
 	}
 
+	public static ArrayList< ConverterSetup > getConverterSetups(
+			BdvStackSource bdvStackSource )
+	{
+		bdvStackSource.setCurrent();
+		final int sourceIndex = bdvStackSource.getBdvHandle()
+				.getViewerPanel().getVisibilityAndGrouping().getCurrentSource();
+		final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
+		converterSetups.add( bdvStackSource.getBdvHandle()
+				.getSetupAssignments().getConverterSetups().get( sourceIndex ) );
+		return converterSetups;
+	}
+
 	public static Interval getSourceGlobalBoundingInterval( Bdv bdv, int sourceId )
 	{
 		final AffineTransform3D sourceTransform =
