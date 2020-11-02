@@ -67,7 +67,7 @@ public class FileUtils
 
 	// objectName is used for the dialog labels e.g. 'table', 'bookmark' etc...
 	public static String selectPathFromProjectOrFileSystem (String directory, String objectName) throws IOException {
-		String fileLocation = null;
+		FileLocation fileLocation = null;
 		if ( directory != null )
 		{
 			final GenericDialog gd = new GenericDialog( "Choose source" );
@@ -75,11 +75,11 @@ public class FileUtils
 					FileLocation.File_system.toString() }, FileLocation.Project.toString() );
 			gd.showDialog();
 			if ( gd.wasCanceled() ) return null;
-			fileLocation = gd.getNextChoice();
+			fileLocation = FileLocation.valueOf( gd.getNextChoice() );
 		}
 
 		String filePath = null;
-		if ( directory != null && fileLocation.equals( FileLocation.Project.toString() ) && directory.contains( "raw.githubusercontent" ) )
+		if ( directory != null && fileLocation.equals( FileLocation.Project ) && directory.contains( "raw.githubusercontent" ) )
 		{
 			filePath = selectGitHubPathFromDirectory( directory, objectName );
 			if ( filePath == null ) return null;
