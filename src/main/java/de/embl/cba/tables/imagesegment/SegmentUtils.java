@@ -41,7 +41,6 @@ import java.util.Map;
 
 public class SegmentUtils
 {
-
 	public static final String BB_MIN_X = "bb_min_x";
 	public static final String BB_MIN_Y = "bb_min_y";
 	public static final String BB_MIN_Z = "bb_min_z";

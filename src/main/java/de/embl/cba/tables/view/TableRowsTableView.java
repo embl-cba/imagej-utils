@@ -34,6 +34,7 @@ import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.tables.*;
 import de.embl.cba.tables.annotate.Annotator;
 import de.embl.cba.tables.color.*;
+import de.embl.cba.tables.github.RESTCaller;
 import de.embl.cba.tables.measure.MeasureDistance;
 import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
@@ -51,11 +52,14 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 import static de.embl.cba.tables.TableRows.setTableCell;
+import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK;
+import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.TRANSPARENT;
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
 {
@@ -79,6 +83,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	private ArrayList<String> additionalTables; // tables from which additional columns are loaded
 
 	private SelectionMode selectionMode = SelectionMode.SelectAndFocus;
+	private Map< String, ColoringModel< T > > columnNameToColoringModel = new HashMap<>(  );
 
 	public enum SelectionMode
 	{
@@ -595,17 +600,19 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void continueAnnotation( String columnName )
 	{
-		final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut() );
+		if ( ! columnNameToColoringModel.containsKey( columnName ) )
+		{
+			final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut(), DARK );
+			columnNameToColoringModel.put( columnName, categoricalColoringModel );
+		}
 
-		selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.SelectionColor );
-		selectionColoringModel.setColoringModel( categoricalColoringModel );
+		selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.DimNotSelected );
+		selectionColoringModel.setColoringModel( columnNameToColoringModel.get( columnName ) );
 		final RowSorter< ? extends TableModel > rowSorter = table.getRowSorter();
 
 		final Annotator annotator = new Annotator(
 				columnName,
 				tableRows,
-				selectionModel,
-				categoricalColoringModel,
 				selectionColoringModel,
 				rowSorter
 		);

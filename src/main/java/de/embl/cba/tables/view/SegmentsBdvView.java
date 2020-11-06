@@ -497,8 +497,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 	{
 		this.labelsSource = sourceAndMetadata;
 
-		final LabelsARGBConverter labelsARGBConverter =
-				createLabelsARGBConverter( labelsSource );
+		final LabelsARGBConverter labelsARGBConverter = createLabelsARGBConverter( labelsSource );
 
 		this.labelsSourceConverter = labelsARGBConverter;
 

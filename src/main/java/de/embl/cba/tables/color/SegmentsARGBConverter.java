@@ -28,8 +28,6 @@
  */
 package de.embl.cba.tables.color;
 
-import de.embl.cba.tables.color.ColoringModel;
-import de.embl.cba.tables.color.LabelsARGBConverter;
 import de.embl.cba.tables.imagesegment.ImageSegment;
 import de.embl.cba.tables.imagesegment.LabelFrameAndImage;
 import net.imglib2.Volatile;
@@ -39,8 +37,7 @@ import net.imglib2.type.volatiles.VolatileARGBType;
 
 import java.util.Map;
 
-public class SegmentsARGBConverter< T extends ImageSegment >
-		implements LabelsARGBConverter
+public class SegmentsARGBConverter< T extends ImageSegment > implements LabelsARGBConverter
 {
 	private final Map< LabelFrameAndImage, T > labelFrameAndImageToSegment;
 	private final String imageId;

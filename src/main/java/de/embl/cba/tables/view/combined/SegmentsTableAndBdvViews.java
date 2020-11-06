@@ -76,15 +76,8 @@ public class SegmentsTableAndBdvViews
 	private void show( BdvHandle bdv )
 	{
 		selectionModel = new DefaultSelectionModel<>();
-
 		coloringModel = new LazyCategoryColoringModel<>( new GlasbeyARGBLut( 255 ) );
-
-		selectionColoringModel = new SelectionColoringModel<>(
-				coloringModel,
-				selectionModel );
-
-		final DefaultImageSegmentsModel< TableRowImageSegment > imageSegmentsModel
-				= new DefaultImageSegmentsModel<>( tableRowImageSegments, viewName );
+		selectionColoringModel = new SelectionColoringModel<>( coloringModel, selectionModel );
 
 		segmentsBdvView = new SegmentsBdvView< TableRowImageSegment >(
 				tableRowImageSegments,

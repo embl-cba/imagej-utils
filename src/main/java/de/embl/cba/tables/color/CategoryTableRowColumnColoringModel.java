@@ -44,6 +44,7 @@ public class CategoryTableRowColumnColoringModel< T extends TableRow >
 		extends AbstractColoringModel< T > implements CategoryColoringModel< T >, ColumnColoringModel
 {
 	public static final ARGBType TRANSPARENT = new ARGBType( ARGBType.rgba( 0, 0, 0, 0 ) );
+	public static final ARGBType DARK = new ARGBType( ARGBType.rgba( 100, 150, 100, 255 ) );
 
 	// TODO: The maps could go to int instead of ARGBType
 	private Map< Object, ARGBType > inputToFixedColor;
@@ -64,9 +65,6 @@ public class CategoryTableRowColumnColoringModel< T extends TableRow >
 		this.inputToRandomColor = new ConcurrentHashMap<>(  );
 		this.inputToFixedColor = new ConcurrentHashMap<>(  );
 		this.randomSeed = 50;
-		// TODO: make this configurable
-		this.inputToFixedColor.put( "NaN", TRANSPARENT );
-		this.inputToFixedColor.put( "None", TRANSPARENT );
 	}
 
 	@Override

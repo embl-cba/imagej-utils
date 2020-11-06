@@ -185,4 +185,9 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 			setSelectionColoringMode( selectionColoringModes.get( 0 ) );
 		}
 	}
+
+	public SelectionModel< T > getSelectionModel()
+	{
+		return selectionModel;
+	}
 }

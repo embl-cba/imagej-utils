@@ -90,7 +90,6 @@ public abstract class BdvPopupMenus
 		return popupMenu;
 	}
 
-	@NotNull
 	public static String getCombinedMenuActionName( List< String > menuNames, String actionName )
 	{
 		return getCombinedMenuName( menuNames, menuNames.size() ) + " > " + actionName;

@@ -28,6 +28,7 @@
  */
 package de.embl.cba.tables.annotate;
 
+import de.embl.cba.tables.Logger;
 import de.embl.cba.tables.SwingUtils;
 import de.embl.cba.tables.color.CategoryTableRowColumnColoringModel;
 import de.embl.cba.tables.color.ColorUtils;
@@ -53,9 +54,9 @@ public class Annotator < T extends TableRow > extends JFrame
 	private final List< T > tableRows;
 	private final SelectionModel< T > selectionModel;
 	private final CategoryTableRowColumnColoringModel< T > coloringModel;
-	private final SelectionColoringModel< T > selectionColoringModel;
 	private final RowSorter< ? extends TableModel > rowSorter;
 	private final JPanel panel;
+	private final SelectionColoringModel< T > selectionColoringModel;
 	private boolean skipNone;
 	private boolean isSingleRowBrowsingMode = false; // TODO: think about how to get out of this mode!
 	private JTextField goToRowIndexTextField;
@@ -66,17 +67,15 @@ public class Annotator < T extends TableRow > extends JFrame
 	public Annotator(
 			String annotationColumnName,
 			List< T > tableRows,
-			SelectionModel< T > selectionModel,
-			CategoryTableRowColumnColoringModel< T > coloringModel,
 			SelectionColoringModel< T > selectionColoringModel,
 			RowSorter< ? extends TableModel > rowSorter )
 	{
 		super("");
 		this.annotationColumnName = annotationColumnName;
 		this.tableRows = tableRows;
-		this.selectionModel = selectionModel;
-		this.coloringModel = coloringModel;
 		this.selectionColoringModel = selectionColoringModel;
+		this.selectionModel = selectionColoringModel.getSelectionModel();
+		this.coloringModel = ( CategoryTableRowColumnColoringModel ) selectionColoringModel.getColoringModel();
 		this.rowSorter = rowSorter;
 		this.currentlySelectedRow = tableRows.get( rowSorter.convertRowIndexToModel( 0 ) );
 		coloringModel.fixedColorMode( true );
@@ -119,7 +118,13 @@ public class Annotator < T extends TableRow > extends JFrame
 		panel.add( button );
 		panel.add( textField );
 		button.addActionListener( e -> {
-			addAnnotationButtonPanel( textField.getText(), null );
+			String newClassName = textField.getText();
+			if ( getAnnotations().containsKey( newClassName ) )
+			{
+				Logger.error( "Class of name " + newClassName + " exists already.");
+				return;
+			}
+			addAnnotationButtonPanel( newClassName, null );
 			refreshDialog();
 		} );
 		this.panel.add( panel );
@@ -146,18 +151,19 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 
-		final JButton button = new JButton( String.format("%1$15s", annotationName) );
-		button.setFont( new Font("monospaced", Font.PLAIN, 12) );
-		button.setOpaque( true );
-		setButtonColor( button, tableRow );
-		button.setAlignmentX( Component.CENTER_ALIGNMENT );
+		final JButton annotateButton = new JButton( String.format("%1$15s", annotationName) );
+		annotateButton.setFont( new Font("monospaced", Font.PLAIN, 12) );
+		annotateButton.setOpaque( true );
+		setButtonColor( annotateButton, tableRow );
+		annotateButton.setAlignmentX( Component.CENTER_ALIGNMENT );
 
 		final ARGBType argbType = new ARGBType();
 		coloringModel.convert( annotationName, argbType );
-		button.setBackground( ColorUtils.getColor( argbType ) );
+		annotateButton.setBackground( ColorUtils.getColor( argbType ) );
 
-		button.addActionListener( e -> {
-			if ( selectionModel.isEmpty() ) return;
+		annotateButton.addActionListener( e ->
+		{
+			if ( selectionModel.isEmpty() ) return; // nothing selected to be annotated
 
 			final Set< T > selected = selectionModel.getSelected();
 
@@ -166,18 +172,17 @@ public class Annotator < T extends TableRow > extends JFrame
 				row.setCell( annotationColumnName, annotationName );
 			}
 
-			if ( selected.size() > 1 )
-				isSingleRowBrowsingMode = false;
+			if ( selected.size() > 1 ) isSingleRowBrowsingMode = false;
 
-			if( ! isSingleRowBrowsingMode )
+			if( isSingleRowBrowsingMode )
 			{
-				selectionModel.clearSelection();
+				selectionModel.clearSelection(); // Hack to notify all listeners that the coloring might have changed.
+				// select again such that the user could still change its mind
+				selectionModel.setSelected( selected, true );
 			}
 			else
 			{
-				// Hack to notify all listeners that the coloring might have changed.
 				selectionModel.clearSelection();
-				selectionModel.setSelected( selected, true );
 			}
 		} );
 
@@ -185,11 +190,11 @@ public class Annotator < T extends TableRow > extends JFrame
 		changeColor.addActionListener( e -> {
 			Color color = JColorChooser.showDialog( this.panel, "", null );
 			if ( color == null ) return;
-			button.setBackground( color );
+			annotateButton.setBackground( color );
 			coloringModel.putInputToFixedColor( annotationName, ColorUtils.getARGBType( color ) );
 		} );
 
-		panel.add( button );
+		panel.add( annotateButton );
 		panel.add( changeColor );
 		annotationButtonsPanel.add( panel );
 		annotationButtonsPanel.revalidate();
@@ -253,12 +258,12 @@ public class Annotator < T extends TableRow > extends JFrame
 						return; // All following rows are None or NaN
 					}
 
-					selectRow( row, rowIndex );
+					selectRow( row );
 				}
 				else
 				{
 					row = tableRows.get( rowSorter.convertRowIndexToModel( ++rowIndex ) );
-					selectRow( row, rowIndex );
+					selectRow( row );
 				}
 			}
 			else
@@ -304,12 +309,12 @@ public class Annotator < T extends TableRow > extends JFrame
 						return; // None of the previous rows is not None
 					}
 
-					selectRow( row, rowIndex );
+					selectRow( row );
 				}
 				else
 				{
 					row = tableRows.get( rowSorter.convertRowIndexToModel( --rowIndex ) );
-					selectRow( row, rowIndex );
+					selectRow( row );
 				}
 			}
 			else
@@ -329,11 +334,8 @@ public class Annotator < T extends TableRow > extends JFrame
 		button.addActionListener( e ->
 		{
 			isSingleRowBrowsingMode = true;
-
 			T selectedRow = getSelectedRow();
-
-			if ( selectedRow != null )
-				selectRow( selectedRow, rowSorter.convertRowIndexToView( selectedRow.rowIndex() ) );
+			if ( selectedRow != null ) selectRow( selectedRow );
 		} );
 		return button;
 	}
@@ -367,19 +369,20 @@ public class Annotator < T extends TableRow > extends JFrame
 			|| row.getCell( annotationColumnName ).toLowerCase().equals( "nan" );
 	}
 
-	private void selectRow( T row, int sortedRowIndex )
+	private void selectRow( T row )
 	{
 		//currentlySelectedRowIndex = sortedRowIndex;
 		currentlySelectedRow = row;
 
-		if ( ! row.getCell( annotationColumnName ).toLowerCase().equals( "none" ) )
-		{
-			selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.OnlyShowSelected );
-		}
-		else
-		{
-			selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.SelectionColor );
-		}
+
+//		if ( isNoneOrNan( row ) )
+//		{
+//			selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.SelectionColor );
+//		}
+//		else
+//		{
+//			selectionColoringModel.setSelectionColoringMode( SelectionColoringModel.SelectionColoringMode.OnlyShowSelected );
+//		}
 
 		selectionModel.clearSelection();
 		selectionModel.setSelected( row, true );
@@ -391,7 +394,7 @@ public class Annotator < T extends TableRow > extends JFrame
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 
 		final JCheckBox checkBox = new JCheckBox( "Skip \"None\" & \"NaN\"" );
-		checkBox.setSelected( true );
+		checkBox.setSelected( false );
 		skipNone = checkBox.isSelected();
 
 		checkBox.addActionListener( e -> {

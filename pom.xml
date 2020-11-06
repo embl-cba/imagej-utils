@@ -84,6 +84,8 @@
 		<jackson-core.version>2.11.0</jackson-core.version>
 		<metadata-extractor.version>2.11.0</metadata-extractor.version>
 		<mcib3d-core.version>3.96.3</mcib3d-core.version>
+		<bigdataviewer-core.version>9.0.6</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-21</bigdataviewer-vistools.version>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
@@ -166,7 +168,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>${jackson-core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -191,7 +192,6 @@
 		<dependency>
 			<groupId>com.drewnoakes</groupId>
 			<artifactId>metadata-extractor</artifactId>
-			<version>${metadata-extractor.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fifesoft</groupId>
@@ -236,12 +236,10 @@
 		<dependency>
 			<groupId>org.itc</groupId>
 			<artifactId>image-transform-converters</artifactId>
-			<version>${image-transform-converters.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.mcib3d</groupId>
 			<artifactId>mcib3d-core</artifactId>
-			<version>${mcib3d-core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>fr.inra.ijpb</groupId>

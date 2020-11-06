@@ -42,6 +42,8 @@ import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.TRANSPARENT;
+
 public class ColumnColoringModelCreator< T extends TableRow >
 {
 	private final JTable table;
@@ -134,17 +136,17 @@ public class ColumnColoringModelCreator< T extends TableRow >
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						false,
-						new GlasbeyARGBLut() );
+						new GlasbeyARGBLut(), TRANSPARENT );
 			case ColoringLuts.GLASBEY + ColoringLuts.ZERO_TRANSPARENT:
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						true,
-						new GlasbeyARGBLut() );
+						new GlasbeyARGBLut(), TRANSPARENT );
 			case ColoringLuts.ARGB_COLUMN:
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						false,
-						null );
+						null, TRANSPARENT );
 		}
 
 		return null;
@@ -182,17 +184,21 @@ public class ColumnColoringModelCreator< T extends TableRow >
 	public CategoryTableRowColumnColoringModel< T > createCategoricalColoringModel(
 			String selectedColumnName,
 			boolean isZeroTransparent,
-			ARGBLut argbLut )
+			ARGBLut argbLut,
+			ARGBType colorForNoneOrNaN )
 	{
 		final CategoryTableRowColumnColoringModel< T > coloringModel
 				= new CategoryTableRowColumnColoringModel< >(
 						selectedColumnName,
 						argbLut );
 
+		coloringModel.putInputToFixedColor( "NaN", colorForNoneOrNaN );
+		coloringModel.putInputToFixedColor( "None", colorForNoneOrNaN );
+
 		if ( isZeroTransparent )
 		{
-			coloringModel.putInputToFixedColor( "0", CategoryTableRowColumnColoringModel.TRANSPARENT );
-			coloringModel.putInputToFixedColor( "0.0", CategoryTableRowColumnColoringModel.TRANSPARENT );
+			coloringModel.putInputToFixedColor( "0", TRANSPARENT );
+			coloringModel.putInputToFixedColor( "0.0", TRANSPARENT );
 
 			if (argbLut != null) {
 				argbLut.setName(argbLut.getName() + ColoringLuts.ZERO_TRANSPARENT);
@@ -200,7 +206,7 @@ public class ColumnColoringModelCreator< T extends TableRow >
 		}
 
 		if ( argbLut == null) {
-			populateColoringModelFromArgbColumn(selectedColumnName, coloringModel);
+			populateColoringModelFromArgbColumn( selectedColumnName, coloringModel );
 		}
 
 		return coloringModel;
