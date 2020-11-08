@@ -29,6 +29,7 @@
 package de.embl.cba.swing;
 
 import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
+import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import org.scijava.ui.behaviour.ClickBehaviour;
 
 import javax.swing.*;

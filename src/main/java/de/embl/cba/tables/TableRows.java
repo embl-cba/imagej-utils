@@ -28,10 +28,8 @@
  */
 package de.embl.cba.tables;
 
-import de.embl.cba.tables.Utils;
 import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
 import de.embl.cba.tables.tablerow.TableRow;
-import org.fife.rsta.ac.js.Logger;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -124,7 +122,7 @@ public abstract class TableRows
 			}
 			catch ( Exception e )
 			{
-				Logger.logError( "Entered value must be numeric for column: "
+				Logger.error( "Entered value must be numeric for column: "
 						+ column );
 			}
 		}
@@ -176,7 +174,7 @@ public abstract class TableRows
 			}
 			catch ( Exception e )
 			{
-				Logger.logError( "Entered value must be numeric for column: " + column );
+				Logger.error( "Entered value must be numeric for column: " + column );
 			}
 		}
 		else
