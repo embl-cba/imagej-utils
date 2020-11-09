@@ -102,8 +102,7 @@ public class ExploreIntensityImageAndLabelImageAndTable
 
 			views.getSegments3dView().setSegmentFocusZoomLevel( 0.1 );
 			final double pixelWidth = labelImage.getCalibration().pixelWidth;
-			views.getSegments3dView().setVoxelSpacing3DView( pixelWidth );
-
+			views.getSegments3dView().setVoxelSpacing( pixelWidth );
 		}
 	}
 

@@ -68,7 +68,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 public class Segments3dView < T extends ImageSegment >
 {
@@ -255,7 +254,7 @@ public class Segments3dView < T extends ImageSegment >
 		} );
 	}
 
-	public synchronized void updateView( boolean recomputeMeshes )
+	private synchronized void updateView( boolean recomputeMeshes )
 	{
 		contentModificationInProgress = true;
 		updateSelectedSegments( recomputeMeshes );
@@ -362,7 +361,7 @@ public class Segments3dView < T extends ImageSegment >
 
 		Integer level = getLevel( segment, labelsSource, voxelSpacing );
 		double[] voxelSpacings = Utils.getVoxelSpacings( labelsSource ).get( level );
-		log( labelsSource, voxelSpacings );
+		UniverseUtils.logVoxelSpacing( labelsSource, voxelSpacings );
 
 		final RandomAccessibleInterval< ? extends RealType< ? > > labelsRAI = getLabelsRAI( segment, level );
 
@@ -409,11 +408,6 @@ public class Segments3dView < T extends ImageSegment >
 		return meshCoordinates;
 	}
 
-	private static void log( Source< ? > labelsSource, double[] voxelSpacings )
-	{
-		Logger.info( "3D View: Fetching source " + labelsSource.getName() + " at resolution " + Arrays.stream( voxelSpacings ).mapToObj( x -> "" + x ).collect( Collectors.joining( " ," ) ) + " micrometer..." );
-	}
-
 	private Integer getLevel( ImageSegment segment, Source< ? > labelsSource, double voxelSpacing )
 	{
 		Integer level;
@@ -447,22 +441,21 @@ public class Segments3dView < T extends ImageSegment >
 			}
 		}
 
-
 		return level;
 	}
 
-	public boolean isShowSelectedSegments()
+	public boolean showSelectedSegments()
 	{
 		return showSelectedSegments;
 	}
 
-	public synchronized void showSelectedSegments( boolean showSelectedSegments )
+	public synchronized void showSelectedSegments( boolean showSelectedSegments, boolean recomputeMeshes )
 	{
 		this.showSelectedSegments = showSelectedSegments;
 
 		if ( showSelectedSegments )
 		{
-			updateView( false );
+			updateView( recomputeMeshes );
 		}
 		else
 		{
@@ -683,11 +676,7 @@ public class Segments3dView < T extends ImageSegment >
 
 	public void setVoxelSpacing( double voxelSpacing )
 	{
-		if ( this.voxelSpacing != voxelSpacing )
-		{
-			this.voxelSpacing = voxelSpacing;
-			updateView( true );
-		}
+		this.voxelSpacing = voxelSpacing;
 	}
 
 	public double getVoxelSpacing()

@@ -48,6 +48,8 @@ import org.scijava.vecmath.Color3f;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static de.embl.cba.tables.Utils.getVoxelSpacings;
 
@@ -64,7 +66,7 @@ public class UniverseUtils
 			int max )
 	{
 		final Integer level = Utils.getLevel( source, maxNumVoxels );
-		Logger.info( "3D View: Fetching source " + source.getName() + " at resolution " + getVoxelSpacings( source ).get( level ) + " micrometer..." );
+		logVoxelSpacing( source, getVoxelSpacings( source ).get( level ) );
 
 		if ( level == null )
 		{
@@ -149,9 +151,6 @@ public class UniverseUtils
 
 		content.setTransparency( ( float ) transparency );
 		content.setLocked( true );
-
-		//segmentToContent.put( segment, content );
-		//contentToSegment.put( content, segment );
 	}
 
 	public static void showUniverseWindow( Image3DUniverse universe, Component parentComponent )
@@ -201,5 +200,10 @@ public class UniverseUtils
 		if ( level == numLevels ) level = numLevels - 1;
 
 		return level;
+	}
+
+	public static void logVoxelSpacing( Source< ? > labelsSource, double[] voxelSpacings )
+	{
+		Logger.info( "3D View: Fetching source " + labelsSource.getName() + " at resolution " + Arrays.stream( voxelSpacings ).mapToObj( x -> "" + x ).collect( Collectors.joining( " ," ) ) + " micrometer..." );
 	}
 }

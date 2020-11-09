@@ -57,7 +57,7 @@ public class Metadata
 	public List< String > additionalSegmentTableNames = new ArrayList<>(  );
 	public String colorByColumn = null;
 	public double[] valueLimits;
-	public double resolution3dView;
+	public double resolution3dView = 0; // 0 = auto adjust (see Segments3dView and UniverseUtils)
 	public List< Double > selectedSegmentIds = new ArrayList<>(  );
 	public boolean showSelectedSegmentsIn3d = false;
 	public boolean showImageIn3d = false;
