@@ -47,6 +47,9 @@ import net.imglib2.view.Views;
 import org.scijava.vecmath.Color3f;
 
 import java.awt.*;
+import java.util.ArrayList;
+
+import static de.embl.cba.tables.Utils.getVoxelSpacings;
 
 public class UniverseUtils
 {
@@ -61,6 +64,7 @@ public class UniverseUtils
 			int max )
 	{
 		final Integer level = Utils.getLevel( source, maxNumVoxels );
+		Logger.info( "3D View: Fetching source " + source.getName() + " at resolution " + getVoxelSpacings( source ).get( level ) + " micrometer..." );
 
 		if ( level == null )
 		{
@@ -80,23 +84,36 @@ public class UniverseUtils
 			return null;
 		}
 
-
 		final ImagePlus wrap = getImagePlus( source, min, max, level );
-
-
 		final Content content = universe.addContent( wrap, displayType );
-
 		content.setTransparency( transparency );
 		content.setLocked( true );
 		content.setColor( new Color3f( ColorUtils.getColor( argbType ) ) );
-
-		//segmentToContent.put( segment, content );
-		//contentToSegment.put( content, segment );
-
 		universe.setAutoAdjustView( false );
-
 		return content;
 	}
+
+	public static < R extends RealType< R > > Content addSourceToUniverse(
+			Image3DUniverse universe,
+			Source< ? > source,
+			double voxelSpacing,
+			int displayType,
+			ARGBType argbType,
+			float transparency,
+			int min,
+			int max )
+	{
+		final Integer level = getLevel( source, voxelSpacing );
+		Logger.info( "3D View: Fetching source " + source.getName() + " at resolution " + voxelSpacing + " micrometer..." );
+		final ImagePlus wrap = getImagePlus( source, min, max, level );
+		final Content content = universe.addContent( wrap, displayType );
+		content.setTransparency( transparency );
+		content.setLocked( true );
+		content.setColor( new Color3f( ColorUtils.getColor( argbType ) ) );
+		universe.setAutoAdjustView( false );
+		return content;
+	}
+
 
 	private static < R extends RealType< R > > ImagePlus getImagePlus( Source< ? > source, int min, int max, Integer level )
 	{
@@ -112,7 +129,7 @@ public class UniverseUtils
 				new RealUnsignedByteConverter< R >( min, max ),
 				source.getName() );
 
-		final double[] voxelSpacing = Utils.getVoxelSpacings( source ).get( level );
+		final double[] voxelSpacing = getVoxelSpacings( source ).get( level );
 		wrap.getCalibration().pixelWidth = voxelSpacing[ 0 ];
 		wrap.getCalibration().pixelHeight = voxelSpacing[ 1 ];
 		wrap.getCalibration().pixelDepth = voxelSpacing[ 2 ];
@@ -156,5 +173,33 @@ public class UniverseUtils
 				);
 			}
 		}
+	}
+
+	public static int getLevel( Source< ? > source, Double voxelSpacing3DView )
+	{
+		if ( voxelSpacing3DView != null )
+		{
+			ArrayList< double[] > voxelSpacings = getVoxelSpacings( source );
+			int level = getLevel( voxelSpacings, voxelSpacing3DView );
+			return level;
+		}
+		else
+		{
+			return 0; // highest resolution
+		}
+	}
+
+	public static int getLevel( ArrayList< double[] > voxelSpacings, double voxelSpacing3DView )
+	{
+		int level;
+
+		int numLevels = voxelSpacings.size();
+
+		for ( level = 0; level < numLevels; level++ )
+			if ( voxelSpacings.get( level )[ 0 ] >= voxelSpacing3DView ) break;
+
+		if ( level == numLevels ) level = numLevels - 1;
+
+		return level;
 	}
 }

@@ -36,15 +36,15 @@ import java.util.List;
 
 public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 {
-	ColoringModel< T > coloringModel;
-	SelectionModel< T > selectionModel;
+	private ColoringModel< T > coloringModel;
+	private SelectionModel< T > selectionModel;
 
 	private SelectionColoringMode selectionColoringMode;
 	private ARGBType selectionColor;
 	private double brightnessNotSelected;
 
-	public static final ARGBType YELLOW =
-			new ARGBType( ARGBType.rgba( 255, 255, 0, 255 ) );
+	public static final ARGBType YELLOW = new ARGBType( ARGBType.rgba( 255, 255, 0, 255 ) );
+
 	private final List< SelectionColoringMode > selectionColoringModes;
 
 	public enum SelectionColoringMode

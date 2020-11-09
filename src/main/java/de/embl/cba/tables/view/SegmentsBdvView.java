@@ -96,7 +96,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 	private T recentFocus;
 	private ViewerState recentViewerState;
 	private List< ConverterSetup > recentConverterSetups;
-	private double voxelSpacing3DView;
+	// private double voxelSpacing3DView;
 	private Set< SourceAndMetadata< ? extends RealType< ? > > > currentSources;
 	private boolean grayValueOverlayWasFirstSource;
 	private HashMap< LabelFrameAndImage, T > labelFrameAndImageToSegment;
@@ -146,7 +146,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 		this.labelSourceSingleColor = new ARGBType( ARGBType.rgba( 255, 255, 255, 255 ) );;
 		this.isLabelMaskShownAsBinaryMask = false;
 
-		this.voxelSpacing3DView = 0.1;
+		// this.voxelSpacing3DView = 0.1;
 		this.segmentFocusAnimationDurationMillis = 750;
 		this.currentSources = new HashSet<>( );
 		this.popupActionNames = new HashSet<>( );
@@ -297,10 +297,10 @@ public class SegmentsBdvView < T extends ImageSegment >
 		}
 	}
 
-	public void setVoxelSpacing3DView( double voxelSpacing3DView )
-	{
-		this.voxelSpacing3DView = voxelSpacing3DView;
-	}
+//	public void setVoxelSpacing3DView( double voxelSpacing3DView )
+//	{
+//		this.voxelSpacing3DView = voxelSpacing3DView;
+//	}
 
 	/**
 	 * ...will show more sources if required by metadata...
@@ -900,30 +900,30 @@ public class SegmentsBdvView < T extends ImageSegment >
 				segmentsName + "-iterate-select", iterateSelectionModeTrigger );
 	}
 
-	private void install3DViewBehaviour()
-	{
-		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+//	private void install3DViewBehaviour()
+//	{
+//		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
+//
+//				new Thread( () -> {
+//
+//					if ( labelsSource == null ) return;
+//					if ( ! isLabelSourceActive() ) return;
+//					if ( getLabelIdAtCurrentMouseCoordinates( labelsSource ) == BACKGROUND ) return;
+//
+//					viewObjectAtCurrentMouseCoordinatesIn3D( labelsSource );
+//
+//				}).start(),
+//				segmentsName + "-view-3d", viewIn3DTrigger );
+//	}
 
-				new Thread( () -> {
-
-					if ( labelsSource == null ) return;
-					if ( ! isLabelSourceActive() ) return;
-					if ( getLabelIdAtCurrentMouseCoordinates( labelsSource ) == BACKGROUND ) return;
-
-					viewObjectAtCurrentMouseCoordinatesIn3D( labelsSource );
-
-				}).start(),
-				segmentsName + "-view-3d", viewIn3DTrigger );
-	}
-
-	private synchronized void viewObjectAtCurrentMouseCoordinatesIn3D(
-			SourceAndMetadata activeLabelSource )
-	{
-		new ConnectedComponentExtractorAnd3DViewer( activeLabelSource.source() )
-				.extractAndShowIn3D(
-						BdvUtils.getGlobalMouseCoordinates( bdv ),
-						voxelSpacing3DView );
-	}
+//	private synchronized void viewObjectAtCurrentMouseCoordinatesIn3D(
+//			SourceAndMetadata activeLabelSource )
+//	{
+//		new ConnectedComponentExtractorAnd3DViewer( activeLabelSource.source() )
+//				.extractAndShowIn3D(
+//						BdvUtils.getGlobalMouseCoordinates( bdv ),
+//						voxelSpacing3DView );
+//	}
 
 	private int getCurrentTimePoint()
 	{
