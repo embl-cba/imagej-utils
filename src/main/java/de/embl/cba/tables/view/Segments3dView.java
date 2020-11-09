@@ -62,16 +62,13 @@ import org.scijava.java3d.View;
 import org.scijava.vecmath.Color3f;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import static de.embl.cba.tables.Utils.getVoxelSpacings;
+import java.util.stream.Collectors;
 
 public class Segments3dView < T extends ImageSegment >
 {
@@ -82,7 +79,6 @@ public class Segments3dView < T extends ImageSegment >
 
 	private Image3DUniverse universe;
 	private T recentFocus;
-	private double voxelSpacing3DView = 0; // 0 = auto
 	private ConcurrentHashMap< T, Content > segmentToContent;
 	private ConcurrentHashMap< Content, T > contentToSegment;
 	private double transparency;
@@ -96,10 +92,11 @@ public class Segments3dView < T extends ImageSegment >
 	private long maxNumSegmentVoxels;
 	private String objectsName;
 	private Component parentComponent;
-	private boolean showSelectedSegmentsIn3D = true;
+	private boolean showSelectedSegments = true;
 	private ConcurrentHashMap< T, CustomTriangleMesh > segmentToTriangleMesh;
 	private ExecutorService executorService;
-	private boolean forceUpdate = false;
+	private boolean recomputeMeshes = false;
+	private double voxelSpacing = 0; // 0 = auto
 
 	public Segments3dView(
 			final List< T > segments,
@@ -133,7 +130,6 @@ public class Segments3dView < T extends ImageSegment >
 		this.segmentFocusZoomLevel = 0.8;
 		this.segmentFocusDxyMin = 20.0;
 		this.segmentFocusDzMin = 20.0;
-		this.voxelSpacing3DView = 0; // 0 = auto, using maxNumSegmentVoxels
 		this.maxNumSegmentVoxels = 100 * 100 * 100;
 
 		this.objectsName = "";
@@ -158,18 +154,6 @@ public class Segments3dView < T extends ImageSegment >
 	public void setParentComponent( Component parentComponent )
 	{
 		this.parentComponent = parentComponent;
-	}
-
-	public void setVoxelSpacing3DView( double voxelSpacing3DView )
-	{
-		if ( this.voxelSpacing3DView != voxelSpacing3DView )
-		{
-			this.voxelSpacing3DView = voxelSpacing3DView;
-			Logger.info( "3D View: voxel spacing changed => update all sources." );
-			forceUpdate = true;
-			updateAndShowSelectedSegments();
-			forceUpdate = false;
-		}
 	}
 
 	public void setTransparency( double transparency )
@@ -238,15 +222,15 @@ public class Segments3dView < T extends ImageSegment >
 			@Override
 			public synchronized void selectionChanged()
 			{
-				if ( ! showSelectedSegmentsIn3D ) return;
+				if ( ! showSelectedSegments ) return;
 
-				updateAndShowSelectedSegments();
+				updateView( false );
 			}
 
 			@Override
 			public synchronized void focusEvent( T selection )
 			{
-				if ( ! showSelectedSegmentsIn3D ) return;
+				if ( ! showSelectedSegments ) return;
 
 				initUniverseAndListener();
 				if ( universe.getContents().size() == 0 ) return;
@@ -271,10 +255,10 @@ public class Segments3dView < T extends ImageSegment >
 		} );
 	}
 
-	private synchronized void updateAndShowSelectedSegments()
+	public synchronized void updateView( boolean recomputeMeshes )
 	{
 		contentModificationInProgress = true;
-		showSelectedSegments();
+		updateSelectedSegments( recomputeMeshes );
 		removeUnselectedSegments();
 		contentModificationInProgress = false;
 	}
@@ -293,7 +277,7 @@ public class Segments3dView < T extends ImageSegment >
 			removeSegmentFrom3DView( segment );
 	}
 
-	private synchronized void showSelectedSegments()
+	private synchronized void updateSelectedSegments( boolean recomputeMeshes )
 	{
 		final Set< T > selected = selectionModel.getSelected();
 
@@ -301,15 +285,11 @@ public class Segments3dView < T extends ImageSegment >
 
 		for ( T segment : selected )
 		{
-			if ( ! segmentToContent.containsKey( segment ) || forceUpdate )
+			if ( ! segmentToContent.containsKey( segment ) || recomputeMeshes )
 			{
-				if ( forceUpdate ) removeSegmentFrom3DView( segment );
-
-				final CustomTriangleMesh mesh = getCustomTriangleMesh( segment, forceUpdate );
-				if ( mesh != null )
-					addMeshToUniverse( segment, mesh );
-				else
-					Logger.error( "3D View: Error creating mesh of segment " + segment.labelId() );
+				if ( recomputeMeshes ) removeSegmentFrom3DView( segment );
+				final CustomTriangleMesh mesh = createSmoothCustomTriangleMesh( segment, voxelSpacing, recomputeMeshes );
+				addMeshToUniverse( segment, mesh );
 			}
 		}
 	}
@@ -329,7 +309,7 @@ public class Segments3dView < T extends ImageSegment >
 				futures.add(
 						executorService.submit( () ->
 								{
-									final CustomTriangleMesh mesh = getCustomTriangleMesh( segment, forceUpdate );
+									final CustomTriangleMesh mesh = createSmoothCustomTriangleMesh( segment, voxelSpacing, recomputeMeshes );
 									if ( mesh != null )
 										addMeshToUniverse( segment, mesh  );
 									else
@@ -351,49 +331,47 @@ public class Segments3dView < T extends ImageSegment >
 		}
 	}
 
-	private CustomTriangleMesh getCustomTriangleMesh( T segment, boolean forceUpdate )
+	private CustomTriangleMesh createSmoothCustomTriangleMesh( T segment, double voxelSpacing, boolean recomputeMesh )
 	{
-		CustomTriangleMesh triangleMesh = getTriangleMesh( segment, forceUpdate );
-		if ( triangleMesh == null ) return null;
+		CustomTriangleMesh triangleMesh = createCustomTriangleMesh( segment, voxelSpacing, recomputeMesh );
 		MeshEditor.smooth2( triangleMesh, meshSmoothingIterations );
 		return triangleMesh;
 	}
 
-	private CustomTriangleMesh getTriangleMesh( T segment, boolean forceUpdate )
+	private CustomTriangleMesh createCustomTriangleMesh( T segment, double voxelSpacing, boolean recomputeMesh )
 	{
-		if ( segment.getMesh() == null || forceUpdate )
-		{
-			final float[] mesh = createMesh( segment );
-			if ( mesh == null ) return null;
-			else segment.setMesh( mesh );
-		}
-
+		createAndSetMesh( segment, voxelSpacing, recomputeMesh );
 		CustomTriangleMesh triangleMesh = MeshUtils.asCustomTriangleMesh( segment.getMesh() );
 		triangleMesh.setColor( getColor3f( segment ) );
 		return triangleMesh;
 	}
 
-	private float[] createMesh( ImageSegment segment )
+	private void createAndSetMesh( T segment, double voxelSpacing, boolean recomputeMesh )
+	{
+		if ( segment.getMesh() == null || recomputeMesh )
+		{
+			final float[] mesh = createMesh( segment, voxelSpacing );
+			if ( mesh == null ) throw new RuntimeException( "Could not create mesh for segment of image " + segment.labelId() );
+			segment.setMesh( mesh );
+		}
+	}
+
+	private float[] createMesh( ImageSegment segment, double voxelSpacing )
 	{
 		final Source< ? > labelsSource = imageSourcesModel.sources().get( segment.imageId() ).source();
 
-		Integer level = getLevel( segment, labelsSource );
-		if ( level == null ) return null;
-
-		final double[] voxelSpacing = Utils.getVoxelSpacings( labelsSource ).get( level );
-
-		Logger.info( "3D View: Fetching source " + labelsSource.getName() + " at resolution " + voxelSpacing[ level ] + " micrometer..." );
+		Integer level = getLevel( segment, labelsSource, voxelSpacing );
+		double[] voxelSpacings = Utils.getVoxelSpacings( labelsSource ).get( level );
+		log( labelsSource, voxelSpacings );
 
 		final RandomAccessibleInterval< ? extends RealType< ? > > labelsRAI = getLabelsRAI( segment, level );
 
-		if ( segment.boundingBox() == null )
-			setSegmentBoundingBox( segment, labelsRAI, voxelSpacing );
+		if ( segment.boundingBox() == null ) setSegmentBoundingBox( segment, labelsRAI, voxelSpacings );
 
-		FinalInterval boundingBox = getIntervalVoxels( segment.boundingBox(), voxelSpacing );
-
+		FinalInterval boundingBox = intervalInVoxelUnits( segment.boundingBox(), voxelSpacings );
 		final long numElements = Intervals.numElements( boundingBox );
 
-		if ( voxelSpacing3DView == 0 )
+		if ( voxelSpacing == 0 ) // auto-resolution
 		{
 			if ( numElements > maxNumSegmentVoxels )
 			{
@@ -404,8 +382,6 @@ public class Segments3dView < T extends ImageSegment >
 				return null;
 			}
 		}
-
-//		ImageJFunctions.show( ( RandomAccessibleInterval ) Views.interval( labelsRAI, boundingBox ) );
 
 		final MeshExtractor meshExtractor = new MeshExtractor(
 				Views.extendZero( ( RandomAccessibleInterval ) labelsRAI ),
@@ -418,9 +394,9 @@ public class Segments3dView < T extends ImageSegment >
 
 		for ( int i = 0; i < meshCoordinates.length; )
 		{
-			meshCoordinates[ i++ ] *= voxelSpacing[ 0 ];
-			meshCoordinates[ i++ ] *= voxelSpacing[ 1 ];
-			meshCoordinates[ i++ ] *= voxelSpacing[ 2 ];
+			meshCoordinates[ i++ ] *= voxelSpacings[ 0 ];
+			meshCoordinates[ i++ ] *= voxelSpacings[ 1 ];
+			meshCoordinates[ i++ ] *= voxelSpacings[ 2 ];
 		}
 
 		if ( meshCoordinates.length == 0 )
@@ -433,13 +409,18 @@ public class Segments3dView < T extends ImageSegment >
 		return meshCoordinates;
 	}
 
-	private Integer getLevel( ImageSegment segment, Source< ? > labelsSource )
+	private static void log( Source< ? > labelsSource, double[] voxelSpacings )
 	{
-		Integer resolutionLevel;
+		Logger.info( "3D View: Fetching source " + labelsSource.getName() + " at resolution " + Arrays.stream( voxelSpacings ).mapToObj( x -> "" + x ).collect( Collectors.joining( " ," ) ) + " micrometer..." );
+	}
 
-		if ( voxelSpacing3DView != 0 )
+	private Integer getLevel( ImageSegment segment, Source< ? > labelsSource, double voxelSpacing )
+	{
+		Integer level;
+
+		if ( voxelSpacing != 0 )
 		{
-			resolutionLevel = UniverseUtils.getLevel( labelsSource, voxelSpacing3DView );
+			level = UniverseUtils.getLevel( labelsSource, voxelSpacing );
 		}
 		else // auto-resolution
 		{
@@ -448,15 +429,15 @@ public class Segments3dView < T extends ImageSegment >
 				Logger.error( "3D View:\n" +
 						"Automated resolution level selection is enabled, but the segment has no bounding box.\n" +
 						"This combination is currently not possible." );
-				resolutionLevel = null;
+				level = null;
 			}
 			else
 			{
 				final ArrayList< double[] > voxelSpacings = Utils.getVoxelSpacings( labelsSource );
 
-				for ( resolutionLevel = 0; resolutionLevel < voxelSpacings.size(); resolutionLevel++ )
+				for ( level = 0; level < voxelSpacings.size(); level++ )
 				{
-					FinalInterval boundingBox = getIntervalVoxels( segment.boundingBox(), voxelSpacings.get( resolutionLevel ) );
+					FinalInterval boundingBox = intervalInVoxelUnits( segment.boundingBox(), voxelSpacings.get( level ) );
 
 					final long numElements = Intervals.numElements( boundingBox );
 
@@ -467,26 +448,26 @@ public class Segments3dView < T extends ImageSegment >
 		}
 
 
-		return resolutionLevel;
+		return level;
 	}
 
-	public boolean getShowSelectedSegmentsIn3D () {
-		return this.showSelectedSegmentsIn3D;
-	}
-
-	public synchronized void setShowSelectedSegmentsIn3D( boolean showSelectedSegmentsIn3D )
+	public boolean isShowSelectedSegments()
 	{
-		this.showSelectedSegmentsIn3D = showSelectedSegmentsIn3D;
+		return showSelectedSegments;
+	}
 
-		if ( showSelectedSegmentsIn3D )
+	public synchronized void showSelectedSegments( boolean showSelectedSegments )
+	{
+		this.showSelectedSegments = showSelectedSegments;
+
+		if ( showSelectedSegments )
 		{
-			updateAndShowSelectedSegments();
+			updateView( false );
 		}
 		else
 		{
 			removeSelectedSegmentsFromView();
 		}
-
 	}
 
 	private void removeSelectedSegmentsFromView()
@@ -504,8 +485,7 @@ public class Segments3dView < T extends ImageSegment >
 			RandomAccessibleInterval< ? extends RealType< ? > > labelsRAI,
 			double[] voxelSpacing )
 	{
-		final long[] voxelCoordinate =
-				getSegmentCoordinateVoxels( segment, voxelSpacing );
+		final long[] voxelCoordinate = getSegmentCoordinateVoxels( segment, voxelSpacing );
 
 		final FloodFill floodFill = new FloodFill(
 				labelsRAI,
@@ -538,7 +518,7 @@ public class Segments3dView < T extends ImageSegment >
 		return voxelCoordinate;
 	}
 
-	private FinalInterval getIntervalVoxels(
+	private FinalInterval intervalInVoxelUnits(
 			FinalRealInterval realInterval,
 			double[] calibration )
 	{
@@ -546,10 +526,8 @@ public class Segments3dView < T extends ImageSegment >
 		final long[] max = new long[ 3 ];
 		for ( int d = 0; d < 3; d++ )
 		{
-			min[ d ] = (long) ( realInterval.realMin( d )
-					/ calibration[ d ] );
-			max[ d ] = (long) ( realInterval.realMax( d )
-					/ calibration[ d ] );
+			min[ d ] = (long) ( realInterval.realMin( d ) / calibration[ d ] );
+			max[ d ] = (long) ( realInterval.realMax( d ) / calibration[ d ] );
 		}
 		return new FinalInterval( min, max );
 	}
@@ -703,6 +681,19 @@ public class Segments3dView < T extends ImageSegment >
 		return new Color3f( ColorUtils.getColor( argbType ) );
 	}
 
+	public void setVoxelSpacing( double voxelSpacing )
+	{
+		if ( this.voxelSpacing != voxelSpacing )
+		{
+			this.voxelSpacing = voxelSpacing;
+			updateView( true );
+		}
+	}
+
+	public double getVoxelSpacing()
+	{
+		return voxelSpacing;
+	}
 
 	public void close()
 	{
