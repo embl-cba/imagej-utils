@@ -57,6 +57,7 @@ public class Metadata
 	public List< String > additionalSegmentTableNames = new ArrayList<>(  );
 	public String colorByColumn = null;
 	public double[] valueLimits;
+	public double resolution3dView;
 	public List< Double > selectedSegmentIds = new ArrayList<>(  );
 	public boolean showSelectedSegmentsIn3d = false;
 	public boolean showImageIn3d = false;
@@ -102,6 +103,7 @@ public class Metadata
 				new ArrayList<>( this.additionalSegmentTableNames ) : new ArrayList<>();
 		metadataCopy.colorByColumn = this.colorByColumn;
 		metadataCopy.valueLimits = this.valueLimits != null ? this.valueLimits.clone() : null;
+		metadataCopy.resolution3dView = this.resolution3dView;
 		metadataCopy.selectedSegmentIds = this.selectedSegmentIds != null ?
 				new ArrayList<>( this.selectedSegmentIds ) : new ArrayList<>();
 		metadataCopy.showSelectedSegmentsIn3d = this.showSelectedSegmentsIn3d;
