@@ -192,6 +192,7 @@ public class ColumnColoringModelCreator< T extends TableRow >
 						selectedColumnName,
 						argbLut );
 
+		coloringModel.putInputToFixedColor( "Infinity", colorForNoneOrNaN );
 		coloringModel.putInputToFixedColor( "NaN", colorForNoneOrNaN );
 		coloringModel.putInputToFixedColor( "None", colorForNoneOrNaN );
 
