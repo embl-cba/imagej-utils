@@ -10,7 +10,7 @@
 
 	<groupId>de.embl.cba</groupId>
 	<artifactId>imagej-utils</artifactId>
-	<version>0.5.6-SNAPSHOT</version>
+	<version>0.5.10-SNAPSHOT</version>
 
 	<name>ImageJ Utilities</name>
 	<description>TODO</description>
@@ -80,7 +80,8 @@
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>EMBL</license.copyrightOwners>
 
-		<bigdataviewer-core.version>9.1.0</bigdataviewer-core.version>
+		<bigdataviewer-core.version>10.0.2</bigdataviewer-core.version>
+		<bigdataviewer-vistools.version>1.0.0-beta-25</bigdataviewer-vistools.version>
 		<image-transform-converters.version>0.1.3</image-transform-converters.version>
 		<mcib3d-core.version>3.96.3</mcib3d-core.version>
 
@@ -105,7 +106,8 @@
         <dependency>
             <groupId>sc.fiji</groupId>
             <artifactId>bigdataviewer-vistools</artifactId>
-        </dependency>
+			<version>${bigdataviewer-vistools.version}</version>
+		</dependency>
         <dependency>
             <groupId>sc.fiji</groupId>
             <artifactId>bigdataviewer_fiji</artifactId>

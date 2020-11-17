@@ -28,13 +28,11 @@
  */
 package de.embl.cba.bdv.utils.behaviour;
 
-import bdv.BehaviourTransformEventHandler;
-import bdv.BehaviourTransformEventHandlerFactory;
+
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.ui.TransformEventHandler;
 import net.imglib2.ui.TransformEventHandlerFactory;
 import net.imglib2.ui.TransformListener;
-import net.imglib2.util.LinAlgHelpers;
 import org.scijava.ui.behaviour.Behaviour;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.DragBehaviour;
@@ -50,27 +48,27 @@ import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
  * @author Stephan Saalfeld
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
-public class BehaviourTransformEventHandler3DWithoutRotation implements BehaviourTransformEventHandler< AffineTransform3D >
+public class TransformEventHandler3DWithoutRotation implements TransformEventHandler< AffineTransform3D >
 {
 	public static TransformEventHandlerFactory< AffineTransform3D > factory()
 	{
 		return new BehaviourTransformEventHandler3DFactory();
 	}
 
-	public static class BehaviourTransformEventHandler3DFactory implements BehaviourTransformEventHandlerFactory< AffineTransform3D >
+	public static class BehaviourTransformEventHandler3DFactory implements TransformEventHandlerFactory< AffineTransform3D >
 	{
 		private InputTriggerConfig config = new InputTriggerConfig();
 
-		@Override
-		public void setConfig( final InputTriggerConfig config )
-		{
-			this.config = config;
-		}
+//		@Override
+//		public void setConfig( final InputTriggerConfig config )
+//		{
+//			this.config = config;
+//		}
 
 		@Override
-		public BehaviourTransformEventHandler3DWithoutRotation create( final TransformListener< AffineTransform3D > transformListener )
+		public TransformEventHandler3DWithoutRotation create( final TransformListener< AffineTransform3D > transformListener )
 		{
-			return new BehaviourTransformEventHandler3DWithoutRotation( transformListener, config );
+			return new TransformEventHandler3DWithoutRotation( transformListener, config );
 		}
 	}
 
@@ -114,7 +112,7 @@ public class BehaviourTransformEventHandler3DWithoutRotation implements Behaviou
 
 	protected final Behaviours behaviours;
 
-	public BehaviourTransformEventHandler3DWithoutRotation( final TransformListener< AffineTransform3D > listener, final InputTriggerConfig config )
+	public TransformEventHandler3DWithoutRotation( final TransformListener< AffineTransform3D > listener, final InputTriggerConfig config )
 	{
 		this.listener = listener;
 
@@ -158,11 +156,11 @@ public class BehaviourTransformEventHandler3DWithoutRotation implements Behaviou
 		}
 	}
 
-	@Override
-	public void install( final TriggerBehaviourBindings bindings )
-	{
-		behaviours.install( bindings, "transform" );
-	}
+//	@Override
+//	public void install( final TriggerBehaviourBindings bindings )
+//	{
+//		behaviours.install( bindings, "transform" );
+//	}
 
 	@Override
 	public AffineTransform3D getTransform()
@@ -430,7 +428,7 @@ public class BehaviourTransformEventHandler3DWithoutRotation implements Behaviou
 		@Override
 		public void click( final int x, final int y )
 		{
-			BehaviourTransformEventHandler3DWithoutRotation.this.axis = axis;
+			TransformEventHandler3DWithoutRotation.this.axis = axis;
 		}
 	}
 

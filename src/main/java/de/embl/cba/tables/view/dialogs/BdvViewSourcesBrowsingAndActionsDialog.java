@@ -30,6 +30,7 @@ package de.embl.cba.tables.view.dialogs;
 
 import bdv.cache.CacheControl;
 import bdv.util.Prefs;
+import bdv.viewer.SynchronizedViewerState;
 import bdv.viewer.ViewerPanel;
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
@@ -151,7 +152,7 @@ public class BdvViewSourcesBrowsingAndActionsDialog extends JPanel
 	// TODO move to imagej-utils or bdv-playground
 	public static void saveScreenShot( final File outputFile, ViewerPanel viewer )
 	{
-		final ViewerState renderState = viewer.getState();
+		final SynchronizedViewerState renderState = viewer.state();
 		final int canvasW = viewer.getDisplay().getWidth();
 		final int canvasH = viewer.getDisplay().getHeight();
 
@@ -195,9 +196,12 @@ public class BdvViewSourcesBrowsingAndActionsDialog extends JPanel
 		}
 
 		final MyTarget target = new MyTarget();
-		final MultiResolutionRenderer renderer = new MultiResolutionRenderer(
-				target, new PainterThread( null ), new double[] { 1 }, 0, false, 1, null, false,
-				viewer.getOptionValues().getAccumulateProjectorFactory(), new CacheControl.Dummy() );
+		final MultiResolutionRenderer renderer =  null;
+
+		// TODO: fix this
+//				new MultiResolutionRenderer(
+//				target, () -> {}, new double[] { 1 }, 0, 1, null, false,
+//				viewer.getOptionValues().getAccumulateProjectorFactory(), new CacheControl.Dummy() );
 
 		int minTimepointIndex = 0;
 		int maxTimepointIndex = 0;

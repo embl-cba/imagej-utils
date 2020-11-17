@@ -536,7 +536,6 @@ public abstract class BdvUtils
 						duration );
 
 		bdv.getBdvHandle().getViewerPanel().setTransformAnimator( similarityTransformAnimator );
-		bdv.getBdvHandle().getViewerPanel().transformChanged( newViewerTransform );
 	}
 
 	public static void changeBdvViewerTransform(
@@ -1098,7 +1097,6 @@ public abstract class BdvUtils
 							durationMillis );
 
 			bdv.getBdvHandle().getViewerPanel().setTransformAnimator( similarityTransformAnimator );
-			bdv.getBdvHandle().getViewerPanel().transformChanged( currentViewerTransform );
 		}
 	}
 
@@ -1124,7 +1122,6 @@ public abstract class BdvUtils
 						durationMillis );
 
 		bdv.getBdvHandle().getViewerPanel().setTransformAnimator( similarityTransformAnimator );
-		bdv.getBdvHandle().getViewerPanel().transformChanged( currentViewerTransform );
 	}
 
 	public static AffineTransform3D getTranslatedViewerTransform( Bdv bdv, double[] position, AffineTransform3D currentViewerTransform )

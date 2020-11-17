@@ -532,7 +532,6 @@ public class SegmentsBdvView < T extends ImageSegment >
 	{
 		bdvOptions = BdvOptions.options();
 
-
 		if ( imageSourcesModel.is2D() )
 			bdvOptions = bdvOptions.is2D();
 

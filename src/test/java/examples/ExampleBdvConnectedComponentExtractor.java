@@ -33,7 +33,7 @@ import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.objects3d.ConnectedComponentExtractor;
-import de.embl.cba.bdv.utils.behaviour.BehaviourTransformEventHandler3DLeftMouseDrag;
+import de.embl.cba.bdv.utils.behaviour.TransformEventHandler3DLeftMouseDrag;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij3d.Content;
@@ -54,8 +54,7 @@ public class ExampleBdvConnectedComponentExtractor
 		final ARGBConvertedRealSource labelsSource = Examples.getSelectable3DSource();
 
 		final BdvStackSource< VolatileARGBType > bdvStackSource =
-				BdvFunctions.show( labelsSource,
-						BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandler3DLeftMouseDrag.BehaviourTransformEventHandler3DFactory() ) );
+				BdvFunctions.show( labelsSource, BdvOptions.options());
 
 		final ConnectedComponentExtractor ConnectedComponentExtractor = new ConnectedComponentExtractor(
 				bdvStackSource.getSources().get( 0 ).getSpimSource(),

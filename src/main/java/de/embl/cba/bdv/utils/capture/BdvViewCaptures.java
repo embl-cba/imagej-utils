@@ -28,13 +28,13 @@
  */
 package de.embl.cba.bdv.utils.capture;
 
-import bdv.cache.CacheControl;
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvHandle;
 import bdv.util.Prefs;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 
+import bdv.viewer.SynchronizedViewerState;
 import bdv.viewer.ViewerPanel;
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
@@ -338,7 +338,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 
 	private static void saveScreenShot( final File outputFile, ViewerPanel viewer, int width, int height )
 	{
-		final ViewerState renderState = viewer.getState();
+		final SynchronizedViewerState renderState = viewer.state();
 
 		final AffineTransform3D affine = new AffineTransform3D();
 		renderState.getViewerTransform( affine );
@@ -376,9 +376,12 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		}
 
 		final MyTarget target = new MyTarget();
-		final MultiResolutionRenderer renderer = new MultiResolutionRenderer(
-				target, new PainterThread( null ), new double[] { 1 }, 0, false, 1, null, false,
-				viewer.getOptionValues().getAccumulateProjectorFactory(), new CacheControl.Dummy() );
+		final MultiResolutionRenderer renderer = null;
+		// TODO: use BdvPlayground
+
+//		new MultiResolutionRenderer(
+//				target, new PainterThread( null ), new double[] { 1 }, 0, false, 1, null, false,
+//				viewer.getOptionValues().getAccumulateProjectorFactory(), new CacheControl.Dummy() );
 
 		int minTimepointIndex = 0;
 		int maxTimepointIndex = 0;
@@ -399,8 +402,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 
 			try
 			{
-				ImageIO.write( target.bi, "jpg",
-						FileUtils.changeExtension( outputFile, "jpg" ) );
+				ImageIO.write( target.bi, "jpg", FileUtils.changeExtension( outputFile, "jpg" ) );
 			} catch ( IOException e )
 			{
 				e.printStackTrace();
@@ -415,7 +417,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 
 	public static ImagePlus getSimpleScreenShot( ViewerPanel viewer, int width, int height )
 	{
-		final ViewerState renderState = viewer.getState();
+		final SynchronizedViewerState renderState = viewer.state();
 
 		final AffineTransform3D affine = new AffineTransform3D();
 		renderState.getViewerTransform( affine );
@@ -453,9 +455,11 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		}
 
 		final MyTarget target = new MyTarget();
-		final MultiResolutionRenderer renderer = new MultiResolutionRenderer(
-				target, new PainterThread( null ), new double[] { 1 }, 0, false, 1, null, false,
-				viewer.getOptionValues().getAccumulateProjectorFactory(), new CacheControl.Dummy() );
+		final MultiResolutionRenderer renderer = null;
+
+//		new MultiResolutionRenderer(
+//				target, new PainterThread( null ), new double[] { 1 }, 0, false, 1, null, false,
+//				viewer.getOptionValues().getAccumulateProjectorFactory(), new CacheControl.Dummy() );
 
 		renderState.setCurrentTimepoint( viewer.getState().getCurrentTimepoint() );
 		renderer.requestRepaint();

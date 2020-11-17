@@ -30,6 +30,7 @@ package de.embl.cba.tables.plot;
 
 import bdv.util.*;
 import bdv.viewer.Source;
+import bdv.viewer.TransformListener;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealAccessibleSource;
@@ -49,7 +50,6 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.volatiles.VolatileARGBType;
-import net.imglib2.ui.TransformListener;
 import net.imglib2.util.Intervals;
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -164,13 +164,10 @@ public class TableRowsScatterPlot< T extends TableRow >
 		bdvHandle.getViewerPanel().addTransformListener( new TransformListener< AffineTransform3D >()
 		{
 			@Override
-			public void transformChanged( AffineTransform3D affineTransform3D )
+			public void transformChanged( AffineTransform3D transform )
 			{
-				synchronized ( this )
-				{
-					viewerTransform = affineTransform3D;
-					createViewerSearchTree( viewerTransform );
-				}
+				viewerTransform = transform;
+				createViewerSearchTree( viewerTransform );
 			}
 		} );
 	}
@@ -461,8 +458,9 @@ public class TableRowsScatterPlot< T extends TableRow >
 						.is2D()
 						.frameTitle( name )
 						.preferredSize( Globals.proposedComponentWindowWidth(), Globals.proposedComponentWindowWidth() )
-						.transformEventHandlerFactory( new BehaviourTransformEventHandlerPlanar
-						.BehaviourTransformEventHandlerPlanarFactory() ) );
+						 );
+
+		// .transformEventHandlerFactory( new TransformEventHandlerPlanar.BehaviourTransformEventHandlerPlanarFactory() )
 
 		bdvHandle = scatterPlotBdvSource.getBdvHandle();
 
