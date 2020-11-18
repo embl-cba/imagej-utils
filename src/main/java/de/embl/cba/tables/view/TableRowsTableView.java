@@ -34,7 +34,6 @@ import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.tables.*;
 import de.embl.cba.tables.annotate.Annotator;
 import de.embl.cba.tables.color.*;
-import de.embl.cba.tables.github.RESTCaller;
 import de.embl.cba.tables.measure.MeasureDistance;
 import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
@@ -59,7 +58,6 @@ import java.util.Map;
 import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 import static de.embl.cba.tables.TableRows.setTableCell;
 import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK;
-import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.TRANSPARENT;
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
 {
@@ -367,7 +365,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 		menu.add( createStartNewAnnotationMenuItem() );
 
-		menu.add( createContinueExistingAnnotationMenuItem() );
+		menu.add( createContinueAnnotationMenuItem() );
 
 		return menu;
 	}
@@ -553,26 +551,27 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	{
 		final JMenuItem menuItem = new JMenuItem( "Start new annotation..." );
 
-		menuItem.addActionListener( e ->
-				SwingUtilities.invokeLater( () ->
-						startNewAnnotation() ) );
+		menuItem.addActionListener( e -> showNewAnnotationDialog() );
 
 		return menuItem;
 	}
 
-	private JMenuItem createContinueExistingAnnotationMenuItem()
+	private JMenuItem createContinueAnnotationMenuItem()
 	{
 		final JMenuItem menuItem = new JMenuItem( "Continue annotation..." );
 
-		menuItem.addActionListener( e ->
-				SwingUtilities.invokeLater( () ->
-						{
-							final String annotationColumn = TableUIs.selectColumnNameUI( table, "Annotation column" );
-							continueAnnotation( annotationColumn );
-						}
-						) );
+		menuItem.addActionListener( e -> showContinueAnnotationDialog() );
 
 		return menuItem;
+	}
+
+	public void showContinueAnnotationDialog()
+	{
+		SwingUtilities.invokeLater( () ->
+		{
+			final String annotationColumn = TableUIs.selectColumnNameUI( table, "Annotation column" );
+			continueAnnotation( annotationColumn );
+		});
 	}
 
 	private void selectAll()
@@ -586,16 +585,19 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	}
 
-	private void startNewAnnotation()
+	public void showNewAnnotationDialog()
 	{
-		final GenericDialog gd = new GenericDialog( "" );
-		gd.addStringField( "Annotation column name", "", 30 );
-		gd.showDialog();
-		if( gd.wasCanceled() ) return;
-		final String columnName = gd.getNextString();
-		this.addColumn( columnName, "None" );
+		SwingUtilities.invokeLater( () ->
+		{
+			final GenericDialog gd = new GenericDialog( "" );
+			gd.addStringField( "Annotation column name", "", 30 );
+			gd.showDialog();
+			if ( gd.wasCanceled() ) return;
+			final String columnName = gd.getNextString();
+			this.addColumn( columnName, "None" );
 
-		continueAnnotation( columnName );
+			continueAnnotation( columnName );
+		});
 	}
 
 	public void continueAnnotation( String columnName )
