@@ -41,19 +41,24 @@ import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.tablerow.TableRowListener;
 import ij.IJ;
 import ij.gui.GenericDialog;
+import mpicbg.spim.data.generic.sequence.BasicViewDescription;
 import net.imglib2.type.numeric.ARGBType;
 import org.apache.commons.io.FilenameUtils;
+import spim.fiji.spimdata.explorer.popup.BDVPopup;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.swing.*;
+import javax.swing.event.MouseInputAdapter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 import static de.embl.cba.tables.TableRows.setTableCell;
@@ -80,8 +85,9 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	private String tablesDirectory; // for loading additional columns
 	private ArrayList<String> additionalTables; // tables from which additional columns are loaded
 
-	private SelectionMode selectionMode = SelectionMode.SelectAndFocus;
+	private SelectionMode selectionMode = SelectionMode.FocusOnly;
 	private Map< String, ColoringModel< T > > columnNameToColoringModel = new HashMap<>(  );
+	private boolean controlDown;
 
 	public enum SelectionMode
 	{
@@ -698,43 +704,55 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void installSelectionModelNotification()
 	{
+		table.addMouseListener( new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked( MouseEvent e )
+			{
+				controlDown = e.isControlDown();
+			}
+		} );
+
 		table.getSelectionModel().addListSelectionListener( e ->
-				SwingUtilities.invokeLater( () ->
+			SwingUtilities.invokeLater( () ->
+			{
+				if ( selectionMode.equals( SelectionMode.None ) ) return;
+
+				if ( e.getValueIsAdjusting() ) return;
+
+				final int selectedRowInView = table.getSelectedRow();
+
+				if ( selectedRowInView == -1 ) return;
+
+				if ( selectedRowInView == recentlySelectedRowInView ) return;
+
+				recentlySelectedRowInView = selectedRowInView;
+
+				final int row = table.convertRowIndexToModel( recentlySelectedRowInView );
+
+				final T object = tableRows.get( row );
+
+				selectionMode = controlDown ? SelectionMode.SelectAndDeselectAndFocusSelected : SelectionMode.FocusOnly;
+
+				if ( selectionMode.equals( SelectionMode.FocusOnly ) )
 				{
-					if ( selectionMode.equals( SelectionMode.None ) ) return;
-
-					if ( e.getValueIsAdjusting() ) return;
-
-					final int selectedRowInView = table.getSelectedRow();
-
-					if ( selectedRowInView == -1 ) return;
-
-					if ( selectedRowInView == recentlySelectedRowInView ) return;
-
-					recentlySelectedRowInView = selectedRowInView;
-
-					final int row = table.convertRowIndexToModel( recentlySelectedRowInView );
-
-					final T object = tableRows.get( row );
-
-					if ( selectionMode.equals( SelectionMode.FocusOnly ) )
-					{
+					selectionModel.focus( object );
+				}
+				else if ( selectionMode.equals( SelectionMode.SelectAndFocus ) ) // TODO: currently this option cannot be reached
+				{
+					selectionModel.setSelected( object, true );
+					selectionModel.focus( object );
+				}
+				else if ( selectionMode.equals( SelectionMode.SelectAndDeselectAndFocusSelected ) )
+				{
+					selectionModel.toggle( object );
+					if ( selectionModel.isSelected( object ) )
 						selectionModel.focus( object );
-					}
-					else if ( selectionMode.equals( SelectionMode.SelectAndFocus ) )
-					{
-						selectionModel.setSelected( object, true );
-						selectionModel.focus( object );
-					}
-					else if ( selectionMode.equals( SelectionMode.SelectAndDeselectAndFocusSelected ) )
-					{
-						selectionModel.toggle( object );
-						if ( selectionModel.isSelected( object ) )
-							selectionModel.focus( object );
-					}
+				}
 
-					table.repaint();
-				}) );
+				table.repaint();
+			})
+		);
 	}
 
 	public void registerAsSelectionListener( SelectionModel< T > selectionModel )
@@ -946,6 +964,8 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		this.setVisible( false );
 	}
 
+	// TODO: Currently not functional
+	@Deprecated
 	public void setSelectionMode( SelectionMode selectionMode )
 	{
 		this.selectionMode = selectionMode;
