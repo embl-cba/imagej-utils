@@ -34,7 +34,6 @@ import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.tables.*;
 import de.embl.cba.tables.annotate.Annotator;
 import de.embl.cba.tables.color.*;
-import de.embl.cba.tables.github.RESTCaller;
 import de.embl.cba.tables.measure.MeasureDistance;
 import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
@@ -58,8 +57,7 @@ import java.util.Map;
 
 import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 import static de.embl.cba.tables.TableRows.setTableCell;
-import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK;
-import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.TRANSPARENT;
+import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK_GREY;
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
 {
@@ -602,7 +600,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	{
 		if ( ! columnNameToColoringModel.containsKey( columnName ) )
 		{
-			final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut(), DARK );
+			final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut(), DARK_GREY );
 			columnNameToColoringModel.put( columnName, categoricalColoringModel );
 		}
 
