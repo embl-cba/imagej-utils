@@ -93,6 +93,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	{
 		None,
 		FocusOnly,
+		@Deprecated
 		SelectAndFocus,
 		SelectAndDeselectAndFocusSelected
 	}
