@@ -54,8 +54,8 @@ import java.util.Set;
 
 import static de.embl.cba.tables.imagesegment.SegmentPropertyColumnsSelectionDialog.NO_COLUMN_SELECTED;
 
-@Plugin(type = Command.class, menuPath =
-		"Plugins>Segmentation>Explore>Explore Objects Table" )
+@Deprecated
+// @Plugin(type = Command.class, menuPath = "Plugins>Segmentation>Explore>Explore Objects Table" )
 public class ExploreObjectsTableCommand implements Command
 {
 	public static final String DEFAULT = "Path_";

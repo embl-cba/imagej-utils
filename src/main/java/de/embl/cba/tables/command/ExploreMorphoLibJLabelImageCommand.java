@@ -34,9 +34,8 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-
-@Plugin(type = Command.class,
-		menuPath = "Plugins>Segmentation>Explore>Explore MorphoLibJ Segmentation" )
+@Deprecated
+// @Plugin(type = Command.class, menuPath = "Plugins>Segmentation>Explore>Explore MorphoLibJ Segmentation" )
 public class ExploreMorphoLibJLabelImageCommand implements Command
 {
 

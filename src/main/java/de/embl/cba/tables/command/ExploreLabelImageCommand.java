@@ -41,14 +41,15 @@ import de.embl.cba.tables.imagesegment.LazyImageSegmentsModel;
 import de.embl.cba.tables.select.DefaultSelectionModel;
 import de.embl.cba.tables.select.SelectionModel;
 import ij.ImagePlus;
+import kotlin.internal.DynamicExtension;
 import net.imglib2.type.numeric.RealType;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 
-@Plugin(type = Command.class,
-		menuPath = "Plugins>Segmentation>Explore>Explore Label Image" )
+@Deprecated
+//@Plugin(type = Command.class, menuPath = "Plugins>Segmentation>Explore>Explore Label Image" )
 public class ExploreLabelImageCommand < R extends RealType< R > > implements Command
 {
 	@Parameter ( label = "Label image" )

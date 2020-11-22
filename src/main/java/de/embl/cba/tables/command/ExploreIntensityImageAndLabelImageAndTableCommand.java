@@ -36,8 +36,8 @@ import org.scijava.plugin.Plugin;
 import java.io.File;
 
 
-@Plugin(type = Command.class,
-		menuPath = "Plugins>Segmentation>Explore>Explore Intensity Image and Label Image and Table" )
+@Deprecated
+//@Plugin(type = Command.class, menuPath = "Plugins>Segmentation>Explore>Explore Intensity Image and Label Image and Table" )
 public class ExploreIntensityImageAndLabelImageAndTableCommand implements Command
 {
 

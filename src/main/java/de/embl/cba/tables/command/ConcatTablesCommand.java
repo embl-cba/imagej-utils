@@ -43,8 +43,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-
-@Plugin(type = Command.class, menuPath = "Plugins>Tables>Concatenate Tables" )
+@Deprecated
+//@Plugin(type = Command.class, menuPath = "Plugins > Tables > Concatenate Tables" )
 public class ConcatTablesCommand< R extends RealType< R > > implements Command
 {
 	@Parameter ( label = "Input directory", style = "directory" )
@@ -75,6 +75,4 @@ public class ConcatTablesCommand< R extends RealType< R > > implements Command
 
 		Logger.info( "Done!" );
 	}
-
-
 }
