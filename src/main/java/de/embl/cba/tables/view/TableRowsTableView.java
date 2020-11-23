@@ -158,7 +158,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void showTableAndMenu( Component parentComponent )
 	{
-		this.parentComponent = parentComponent;
+		this.parentComponent = SwingUtilities.getWindowAncestor( parentComponent );
 		showTableAndMenu();
 	}
 
@@ -635,7 +635,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		{
 			frame.setLocation(
 					parentComponent.getLocationOnScreen().x,
-					parentComponent.getLocationOnScreen().y + parentComponent.getHeight() + 10
+					parentComponent.getLocationOnScreen().y + parentComponent.getHeight() + 30
 			);
 
 
@@ -643,7 +643,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 			frame.setPreferredSize( new Dimension(
 					parentComponent.getWidth(),
-					screenSize.height - parentComponent.getHeight() - 50  ) );
+					screenSize.height - ( parentComponent.getHeight() + parentComponent.getLocationOnScreen().y ) - 50  ) );
 		}
 
 		//Display the window.

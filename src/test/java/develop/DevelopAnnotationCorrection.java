@@ -61,8 +61,7 @@ public class DevelopAnnotationCorrection
 
 		final SegmentsTableBdvAnd3dViews views = explore.getTableBdvAnd3dViews();
 
-		BdvUtils.centerBdvWindowLocation( views.getSegmentsBdvView().getBdv() );
-
+		//BdvUtils.centerBdvWindowLocation( views.getSegmentsBdvView().getBdv() );
 		views.getTableRowsTableView().addColumn( "Annotation", new String[]{"None", "A", "B" } );
 		views.getTableRowsTableView().continueAnnotation( "Annotation" );
 	}
