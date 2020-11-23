@@ -42,8 +42,11 @@ import net.imglib2.type.numeric.ARGBType;
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Annotator < T extends TableRow > extends JFrame
@@ -63,6 +66,9 @@ public class Annotator < T extends TableRow > extends JFrame
 	private HashMap< String, T > annotationToTableRow;
 	private JPanel annotationButtonsPanel;
 	private T currentlySelectedRow;
+	private HashMap< String, Character > annotationNameToKeyboardShortcut = new HashMap<>();
+	private KeyEventDispatcher dispatcher;
+	private KeyboardFocusManager manager;
 
 	public Annotator(
 			String annotationColumnName,
@@ -86,6 +92,42 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		createDialog();
 		showFrame();
+		addKeyEventDispatcher();
+	}
+
+	private void addKeyEventDispatcher()
+	{
+		manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+		dispatcher = new KeyEventDispatcher()
+		{
+			@Override
+			public boolean dispatchKeyEvent( KeyEvent e )
+			{
+				if ( e.getID() == KeyEvent.KEY_PRESSED )
+				{
+					for ( Map.Entry< String, Character > entry : annotationNameToKeyboardShortcut.entrySet() )
+					{
+						final String annotationName = entry.getKey();
+						final Character shortCut = entry.getValue();
+
+						char keyChar = e.getKeyChar();
+
+						if ( shortCut.equals( keyChar ) )
+						{
+							annotateSelectedObjects( annotationName );
+						}
+					}
+				} else if ( e.getID() == KeyEvent.KEY_RELEASED )
+				{
+
+				} else if ( e.getID() == KeyEvent.KEY_TYPED )
+				{
+
+				}
+				return false;
+			}
+		};
+		manager.addKeyEventDispatcher( dispatcher );
 	}
 
 	private void createDialog()
@@ -108,6 +150,13 @@ public class Annotator < T extends TableRow > extends JFrame
 		this.setLocation( MouseInfo.getPointerInfo().getLocation().x, MouseInfo.getPointerInfo().getLocation().y );
 		this.pack();
 		this.setVisible( true );
+		this.setFocusable( true );
+		this.addWindowListener(new java.awt.event.WindowAdapter() {
+			@Override
+			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+				manager.removeKeyEventDispatcher( dispatcher );
+			}
+		});
 	}
 
 	private void addCreateCategoryButton()
@@ -119,13 +168,17 @@ public class Annotator < T extends TableRow > extends JFrame
 		panel.add( textField );
 		button.addActionListener( e -> {
 			String newClassName = textField.getText();
-			if ( getAnnotations().containsKey( newClassName ) )
+			if ( annotationNameToKeyboardShortcut.containsKey( newClassName ) )
 			{
-				Logger.error( "Class of name " + newClassName + " exists already.");
+				Logger.error( "Category " + newClassName + " exists already.\n" +
+						"Please choose another name.");
 				return;
 			}
-			addAnnotationButtonPanel( newClassName, null );
-			refreshDialog();
+			else
+			{
+				addAnnotationButtonPanel( newClassName, null );
+				refreshDialog();
+			}
 		} );
 		this.panel.add( panel );
 	}
@@ -151,7 +204,10 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 
-		final JButton annotateButton = new JButton( String.format("%1$15s", annotationName) );
+		int numAnnotations = annotationNameToKeyboardShortcut.size();
+		annotationNameToKeyboardShortcut.put( annotationName, Character.forDigit( numAnnotations, 10 ) );
+
+		final JButton annotateButton = new JButton( String.format("%1$15s", annotationName + " ["+ annotationNameToKeyboardShortcut.get( annotationName ) + "]") );
 		annotateButton.setFont( new Font("monospaced", Font.PLAIN, 12) );
 		annotateButton.setOpaque( true );
 		setButtonColor( annotateButton, tableRow );
@@ -163,28 +219,9 @@ public class Annotator < T extends TableRow > extends JFrame
 
 		annotateButton.addActionListener( e ->
 		{
-			if ( selectionModel.isEmpty() ) return; // nothing selected to be annotated
-
-			final Set< T > selected = selectionModel.getSelected();
-
-			for ( T row : selected )
-			{
-				row.setCell( annotationColumnName, annotationName );
-			}
-
-			if ( selected.size() > 1 ) isSingleRowBrowsingMode = false;
-
-			if( isSingleRowBrowsingMode )
-			{
-				selectionModel.clearSelection(); // Hack to notify all listeners that the coloring might have changed.
-				// select again such that the user could still change its mind
-				selectionModel.setSelected( selected, true );
-			}
-			else
-			{
-				selectionModel.clearSelection();
-			}
+			annotateSelectedObjects( annotationName );
 		} );
+
 
 		final JButton changeColor = new JButton( "C" );
 		changeColor.addActionListener( e -> {
@@ -198,6 +235,31 @@ public class Annotator < T extends TableRow > extends JFrame
 		panel.add( changeColor );
 		annotationButtonsPanel.add( panel );
 		annotationButtonsPanel.revalidate();
+	}
+
+	private void annotateSelectedObjects( String annotationName )
+	{
+		if ( selectionModel.isEmpty() ) return; // nothing selected to be annotated
+
+		final Set< T > selected = selectionModel.getSelected();
+
+		for ( T row : selected )
+		{
+			row.setCell( annotationColumnName, annotationName );
+		}
+
+		if ( selected.size() > 1 ) isSingleRowBrowsingMode = false;
+
+		if( isSingleRowBrowsingMode )
+		{
+			selectionModel.clearSelection(); // Hack to notify all listeners that the coloring might have changed.
+			// select again such that the user could still change its mind
+			selectionModel.setSelected( selected, true );
+		}
+		else
+		{
+			selectionModel.clearSelection();
+		}
 	}
 
 	private void addTableRowBrowserSelectPreviousAndNextPanel( )
