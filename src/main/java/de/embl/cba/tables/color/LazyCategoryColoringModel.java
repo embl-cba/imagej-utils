@@ -66,8 +66,8 @@ public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > i
 	{
 		if( ! inputToColorMap.keySet().contains( input ) )
 		{
-			//final double random = createRandom( inputToColorMap.size() + 1 );
-			inputToColorMap.put( input, new ARGBType( argbLut.getARGB( inputToColorMap.size() + 1  ) ) );
+			final double random = createRandom( inputToColorMap.size() + 1 );
+			inputToColorMap.put( input, new ARGBType( argbLut.getARGB( random  ) ) );
 		}
 
 		output.set( inputToColorMap.get( input ).get() );

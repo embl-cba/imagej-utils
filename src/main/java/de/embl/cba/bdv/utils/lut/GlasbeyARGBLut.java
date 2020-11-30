@@ -69,9 +69,9 @@ public class GlasbeyARGBLut implements IndexARGBLut
 	}
 
 	@Override
-	public int getARGB( int x )
+	public int getARGB( int i )
 	{
-		final int index = x % numColors;
+		final int index = i % numColors;
 		return indices.get( index );
 	}
 

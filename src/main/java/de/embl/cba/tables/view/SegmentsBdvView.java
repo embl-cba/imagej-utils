@@ -483,7 +483,6 @@ public class SegmentsBdvView < T extends ImageSegment >
 		}
 	}
 
-
 	/**
 	 * Currently, the logic is that there can be only one labels source
 	 * within this SegmentsBdvView class. Thus, creation of the labels source
@@ -492,8 +491,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 	 * @param sourceAndMetadata
 	 * @return
 	 */
-	private Source asLabelsSource(
-			SourceAndMetadata< ? extends RealType< ? > > sourceAndMetadata )
+	private Source asLabelsSource( SourceAndMetadata< ? extends RealType< ? > > sourceAndMetadata )
 	{
 		this.labelsSource = sourceAndMetadata;
 
@@ -501,8 +499,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 
 		this.labelsSourceConverter = labelsARGBConverter;
 
-		final ARGBConvertedRealSource convertedRealSource =
-				new ARGBConvertedRealSource( sourceAndMetadata.source(), labelsARGBConverter );
+		final ARGBConvertedRealSource convertedRealSource = new ARGBConvertedRealSource( sourceAndMetadata.source(), labelsARGBConverter );
 
 		return convertedRealSource;
 	}
