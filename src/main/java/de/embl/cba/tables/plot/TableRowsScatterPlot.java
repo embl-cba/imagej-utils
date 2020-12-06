@@ -44,6 +44,7 @@ import de.embl.cba.tables.view.Globals;
 import ij.gui.GenericDialog;
 import net.imglib2.*;
 import net.imglib2.neighborsearch.NearestNeighborSearchOnKDTree;
+import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
@@ -74,7 +75,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 	private ArrayList< Integer > indices;
 	private double viewerPointSize;
 	private Source< VolatileARGBType > argbSource;
-	private NearestNeighborSearchOnKDTree< Integer > search;
+	private RadiusNeighborSearchOnKDTree< Integer > search;
 	private String columnNameX;
 	private String columnNameY;
 	private BdvStackSource< VolatileARGBType > scatterPlotBdvSource;
@@ -84,7 +85,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 	private double viewerAspectRatio = 1.0;
 	private RealRandomAccessibleIntervalSource indexSource;
 	private FinalRealInterval dataInterval;
-	private double[] dataRanges;
 	private double dataAspectRatio;
 	private ArrayList< RealPoint> viewerPoints;
 	private AffineTransform3D viewerTransform;
@@ -132,21 +132,23 @@ public class TableRowsScatterPlot< T extends TableRow >
 			throw new UnsupportedOperationException( "Cannot create scatter plot \"" + name + "\", because there is no valid data point." );
 		}
 
-		createSearchTree();
+		search = createSearchTree( points, indices );
 
-		setViewerAspectRatio();
+		viewerAspectRatio = viewerAspectRatio( dataAspectRatio );
 
-		setViewerPointSize();
+		viewerPointSize = 7;
 
-		BiConsumer< RealLocalizable, IntType > biConsumer = createPlotFunction();
+		BiConsumer< RealLocalizable, IntType > indexFromLocation = createPlotFunction( viewerPointSize, viewerTransform, search );
 
-		createSource( biConsumer );
+		createSource( indexFromLocation );
 
 		showSource();
 
 		registerAsViewerTransformListener();
 
-		setViewerTransform();
+		viewerTransform = viewerTransform( bdvHandle, dataInterval, viewerAspectRatio );
+
+		bdvHandle.getViewerPanel().setCurrentViewerTransform( viewerTransform );
 
 		installBdvBehaviours();
 
@@ -175,14 +177,11 @@ public class TableRowsScatterPlot< T extends TableRow >
 		} );
 	}
 
-	private void setViewerPointSize()
+	private static double viewerAspectRatio( double dataAspectRatio )
 	{
-		viewerPointSize = 7; // TODO: ?
-	}
+		double viewerAspectRatio = 1 / dataAspectRatio;
 
-	private void setViewerAspectRatio()
-	{
-		viewerAspectRatio = 1 / dataAspectRatio;
+		return viewerAspectRatio;
 
 //		if ( dataAspectRatio < 0.2  || dataAspectRatio > 1 / 0.2 )
 //		{
@@ -194,12 +193,12 @@ public class TableRowsScatterPlot< T extends TableRow >
 //		}
 	}
 
-	private void createSearchTree()
+	private static RadiusNeighborSearchOnKDTree< Integer > createSearchTree( ArrayList< RealPoint > points, ArrayList< Integer > indices )
 	{
 		// Give a copy because the order of the list is changed by the KDTree
 		final ArrayList< RealPoint > copy = new ArrayList<>( points );
 		final KDTree< Integer > kdTree = new KDTree<>( indices, copy );
-		search = new NearestNeighborSearchOnKDTree<>( kdTree );
+		return new RadiusNeighborSearchOnKDTree<>( kdTree );
 	}
 
 	private void createViewerSearchTree( AffineTransform3D transform3D )
@@ -210,7 +209,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 		}
 
 		final KDTree< Integer > kdTree = new KDTree<>( indices, viewerPoints );
-		search = new NearestNeighborSearchOnKDTree<>( kdTree );
+		this.search = new RadiusNeighborSearchOnKDTree<>( kdTree );
 	}
 
 	private void addSelectedPointsOverlay()
@@ -245,8 +244,8 @@ public class TableRowsScatterPlot< T extends TableRow >
 		BdvPopupMenus.addAction( bdvHandle,"Focus closest point",
 				( x, y ) -> {
 					final RealPoint mouse3d = new RealPoint( x,y, 0 );
-					search.search( mouse3d ); // TODO: why is this 3d??
-					final Integer rowIndex = search.getSampler().get();
+					search.search( mouse3d, viewerPointSize, true ); // TODO: why is this 3d??
+					final Integer rowIndex = search.getSampler( 0 ).get();
 					final T tableRow = tableRows.get( rowIndex );
 					selectionModel.focus( tableRow );
 				}
@@ -298,6 +297,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 		return dataPosition;
 	}
 
+	// TODO: why is this so complicated?
 	public void fetchDataPoints( String columnNameX, String columnNameY )
 	{
 		points = new ArrayList<>();
@@ -330,6 +330,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 			y = getDouble( tableRow.getCell( columnNameY ), yLabelToIndex, yCategoricalIndex );
 			if ( y == null ) continue;
 
+			// TODO: why is this 3D?
 			points.add( new RealPoint( x, y, 0 ) );
 			viewerPoints.add( new RealPoint( 0, 0, 0 ) );
 			indices.add( rowIndex );
@@ -347,14 +348,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 				yMax * 1.1,
 				0 );
 
-		dataRanges = new double[ 2 ];
-		for ( int d = 0; d < 2; d++ )
-		{
-			dataRanges[ d ] = dataInterval.realMax( d ) - dataInterval.realMin( d );
-		}
-
-		dataAspectRatio = dataRanges[ 1 ] / dataRanges[ 0 ];
-
+		dataAspectRatio = (dataInterval.realMax( 1 ) - dataInterval.realMin( 1 )) / (dataInterval.realMax( 0 ) - dataInterval.realMin( 0 ));
 	}
 
 	private Double getDouble( String cell, HashMap< String, Double > stringToDouble, MutableDouble nextIndex )
@@ -401,37 +395,30 @@ public class TableRowsScatterPlot< T extends TableRow >
 		}
 	}
 
-	public BiConsumer< RealLocalizable, IntType > createPlotFunction()
+	private static BiConsumer< RealLocalizable, IntType > createPlotFunction( final double viewerPointSize, AffineTransform3D viewerTransform, RadiusNeighborSearchOnKDTree< Integer > search )
 	{
-		final double squaredViewerPointSize = viewerPointSize * viewerPointSize;
 		final RealPoint dataPoint = new RealPoint( 0, 0, 0 );
-		final RealPoint viewerPoint = new RealPoint( 0, 0, 0 );
+		final RealPoint pixelLocation = new RealPoint( 0, 0, 0 );
 
 		return ( p, t ) ->
 		{
-			synchronized ( this )
+			synchronized ( search ) //?
 			{
-				if ( viewerTransform == null ) return;
-
+				// TODO: why do I need this?
 				for ( int d = 0; d < 2; d++ )
 				{
 					dataPoint.setPosition( p.getDoublePosition( d ), d );
 				}
 
-				viewerTransform.apply( dataPoint, viewerPoint );
+				viewerTransform.apply( dataPoint, pixelLocation );
 
-				search.search( viewerPoint );
+				search.search( pixelLocation, viewerPointSize, false );
 
-				final double sqrDistance = sqrDistance( viewerPoint, search.getPosition() );
-
-				if ( sqrDistance < squaredViewerPointSize  )
-				{
-					t.set( search.getSampler().get() );
-				}
+				if ( search.numNeighbors() == 0 )
+					t.setZero();
 				else
-				{
-					t.set( -1 );
-				}
+					t.set( search.getSampler( 0 ).get() );
+
 			}
 		};
 	}
@@ -492,17 +479,16 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 		//scatterSource.getInterpolatedSource(  )
 
-		final ListItemsARGBConverter< T > converter =
-				new ListItemsARGBConverter( tableRows, coloringModel );
+		final ListItemsARGBConverter< T > converter = new ListItemsARGBConverter( tableRows, coloringModel );
 
 		converter.getIndexToColor().put( -1, ColorUtils.getARGBType( Color.GRAY ).get() );
 
 		argbSource = new ARGBConvertedRealAccessibleSource( indexSource, converter );
 	}
 
-	public void setViewerTransform()
+	public AffineTransform3D viewerTransform( BdvHandle bdvHandle, FinalRealInterval dataInterval, double viewerAspectRatio )
 	{
-		viewerTransform = new AffineTransform3D();
+		AffineTransform3D viewerTransform = new AffineTransform3D();
 		// bdvHandle.getViewerPanel().getState().getViewerTransform( viewerTransform );
 
 		AffineTransform3D reflectY = new AffineTransform3D();
@@ -511,7 +497,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 		final AffineTransform3D scale = new AffineTransform3D();
 
-		final double scaleX = 1.0 * BdvUtils.getBdvWindowWidth( bdvHandle ) / dataRanges[ 0 ];
+		final double scaleX = 1.0 * BdvUtils.getBdvWindowWidth( bdvHandle ) / ( dataInterval.realMax( 0 ) - dataInterval.realMin( 0 ) );
 
 		final double zoom = 1.0;
 		scale.scale( zoom * scaleX, zoom * scaleX * viewerAspectRatio, 1.0  );
@@ -519,14 +505,14 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 		FinalRealInterval scaledBounds = viewerTransform.estimateBounds( dataInterval );
 
-		shiftViewerTransformToDataCenter();
+		shiftViewerTransformToDataCenter( viewerTransform, dataInterval, bdvHandle );
 
 		FinalRealInterval finalBounds = viewerTransform.estimateBounds( dataInterval );
 
-		bdvHandle.getViewerPanel().setCurrentViewerTransform( viewerTransform );
+		return viewerTransform;
 	}
 
-	public void shiftViewerTransformToDataCenter()
+	private static void shiftViewerTransformToDataCenter( AffineTransform3D viewerTransform, FinalRealInterval dataInterval, BdvHandle bdvHandle )
 	{
 		FinalRealInterval bounds = viewerTransform.estimateBounds( dataInterval );
 		final AffineTransform3D translate = new AffineTransform3D();
