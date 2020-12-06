@@ -4,7 +4,7 @@ import net.imglib2.*;
 import net.imglib2.interpolation.InterpolatorFactory;
 import net.imglib2.neighborsearch.RadiusNeighborSearch;
 import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
-import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.NumericType;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -14,7 +14,7 @@ import java.util.function.DoubleUnaryOperator;
  *
  * @param <T>
  */
-public class RBFInterpolator<T extends RealType<T> > extends RealPoint implements RealRandomAccess< T >
+public class RBFInterpolator< T extends NumericType<T> > extends RealPoint implements RealRandomAccess< T >
 {
 	final static protected double minThreshold = Double.MIN_VALUE * 1000;
 
@@ -22,30 +22,30 @@ public class RBFInterpolator<T extends RealType<T> > extends RealPoint implement
 
 	final protected KDTree< T > tree;
 
-	final T value;
+	final T type;
 
 	double searchRadius;
 
-	final DoubleUnaryOperator rbf;  // from squaredDistance to weight
+	final DoubleUnaryOperator intensityComputer;  // from squaredDistance to weight
 
 	final boolean normalize;
 
 	public RBFInterpolator(
 			final KDTree< T > tree,
-			final DoubleUnaryOperator rbf,
+			final DoubleUnaryOperator intensityComputer,
 			final double searchRadius,
 			final boolean normalize,
-			T t )
+			T type )
 	{
 		super( tree.numDimensions() );
 
-		this.rbf = rbf;
+		this.intensityComputer = intensityComputer;
 		this.tree = tree;
 		this.search = new RadiusNeighborSearchOnKDTree< T >( tree );
 		this.normalize = normalize;
 		this.searchRadius = searchRadius;
 
-		this.value = t.copy();
+		this.type = type;
 	}
 	
 	public void setRadius( final double radius )
@@ -66,45 +66,30 @@ public class RBFInterpolator<T extends RealType<T> > extends RealPoint implement
 	@Override
 	public T get()
 	{
-		search.search( this, searchRadius, false );
+		search.search( this, searchRadius, true );
 
-		if ( search.numNeighbors() == 0 )
-			value.setZero();
+		T copy = type.copy();
+
+		if ( search.numNeighbors() > 0 )
+		{
+			final Sampler< T > sampler = search.getSampler( 0 );
+			final T value = sampler.get();
+			final double weight = intensityComputer.applyAsDouble( search.getSquareDistance( 0 ) );
+			copy.set( value );
+			copy.mul( weight );
+			return copy;
+		}
 		else
 		{
-			double sumIntensity = 0;
-			double sumWeights = 0;
-
-			for ( int i = 0; i < search.numNeighbors(); ++i )
-			{
-				final Sampler< T > sampler = search.getSampler( i );
-
-				if ( sampler == null )
-					break;
-
-				final T t = sampler.get();
-				final double weight = rbf.applyAsDouble( search.getSquareDistance( i ) );
-
-				if( normalize )
-					sumWeights += weight;
-
-				sumIntensity += t.getRealDouble() * weight;
-			}
-
-			if( normalize )
-				value.setReal( sumIntensity / sumWeights );
-			else
-				value.setReal( sumIntensity );
+			copy.setZero();
+			return copy;
 		}
-
-		return value;
 	}
 
 	@Override
 	public RBFInterpolator< T > copy()
 	{
-		return new RBFInterpolator< T >( tree,
-				rbf, searchRadius, normalize, value );
+		return new RBFInterpolator< T >( tree, intensityComputer, searchRadius, normalize, type );
 	}
 
 	@Override
@@ -113,29 +98,29 @@ public class RBFInterpolator<T extends RealType<T> > extends RealPoint implement
 		return copy();
 	}
 
-	public static class RBFInterpolatorFactory<T extends RealType<T> > implements InterpolatorFactory< T, KDTree< T > >
+	public static class RBFInterpolatorFactory< T extends NumericType<T> > implements InterpolatorFactory< T, KDTree< T > >
 	{
 		final double searchRad;
-		final DoubleUnaryOperator rbf;
+		final DoubleUnaryOperator intensityComputer;
 		final boolean normalize;
-		T val;
+		T defaultValue;
 
 		public RBFInterpolatorFactory( 
-				final DoubleUnaryOperator rbf,
+				final DoubleUnaryOperator intensityComputer,
 				final double sr, 
 				final boolean normalize, 
-				T t )
+				T defaultValue )
 		{
 			this.searchRad = sr;
-			this.rbf = rbf;
+			this.intensityComputer = intensityComputer;
 			this.normalize = normalize;
-			this.val = t;
+			this.defaultValue = defaultValue;
 		}
 
 		@Override
 		public RBFInterpolator<T> create( final KDTree< T > tree )
 		{
-			return new RBFInterpolator<T>( tree, rbf, searchRad, false, val );
+			return new RBFInterpolator<T>( tree, intensityComputer, searchRad, normalize, defaultValue );
 		}
 
 		@Override
