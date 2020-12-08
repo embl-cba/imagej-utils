@@ -14,15 +14,8 @@ import static java.lang.Math.exp;
 
 public abstract class RefractiveIndexMismatchCorrections
 {
-	public class Settings
-	{
-		public double pixelCalibrationMicrometer;
-		public double intensityDecayLengthMicrometer;
-		public double coverslipPositionMicrometer;
-		public double intensityOffset;
-	}
 
-	public static double getIntensityCorrectionFactor( long z, Settings settings )
+	public static double getIntensityCorrectionFactor( long z, RefractiveIndexMismatchCorrectionSettings settings )
 	{
 		/*
 		f( 10 ) = 93; f( 83 ) = 30;
@@ -53,7 +46,7 @@ public abstract class RefractiveIndexMismatchCorrections
 	}
 
 	public static < T extends RealType< T > & NativeType< T > >
-	void correctIntensity( RandomAccessibleInterval< T > rai, Settings settings )
+	void correctIntensity( RandomAccessibleInterval< T > rai, RefractiveIndexMismatchCorrectionSettings settings )
 	{
 		for ( long z = rai.min( Z ); z <= rai.max( Z ); ++z )
 		{
@@ -81,7 +74,7 @@ public abstract class RefractiveIndexMismatchCorrections
 	}
 
 	public static <T extends RealType<T> & NativeType< T > >
-	RandomAccessibleInterval< T > createIntensityCorrectedImages( RandomAccessibleInterval< T > images, Settings settings )
+	RandomAccessibleInterval< T > createIntensityCorrectedImages( RandomAccessibleInterval< T > images, RefractiveIndexMismatchCorrectionSettings settings )
 	{
 		ArrayList< RandomAccessibleInterval< T > > correctedImages = new ArrayList<>(  );
 
@@ -100,7 +93,7 @@ public abstract class RefractiveIndexMismatchCorrections
 
 	public static < T extends RealType< T > & NativeType< T > > 
 	RandomAccessibleInterval< T > createIntensityCorrectedChannel( RandomAccessibleInterval< T > image,
-			Settings settings )
+			RefractiveIndexMismatchCorrectionSettings settings )
 	{
 		settings.intensityOffset = getIntensityOffset( image );
 		final RandomAccessibleInterval< T > intensityCorrectedChannel = Utils.copyAsArrayImg( image );
