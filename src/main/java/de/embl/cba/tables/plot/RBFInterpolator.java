@@ -4,6 +4,7 @@ import net.imglib2.*;
 import net.imglib2.interpolation.InterpolatorFactory;
 import net.imglib2.neighborsearch.RadiusNeighborSearch;
 import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.NumericType;
 
 import java.util.function.DoubleUnaryOperator;
@@ -70,6 +71,11 @@ public class RBFInterpolator< T extends NumericType<T> > extends RealPoint imple
 
 		T copy = type.copy();
 
+		AffineTransform3D affineTransform3D = new AffineTransform3D();
+
+		RealPoint dataPoint = new RealPoint( 3 );
+		affineTransform3D.apply( this, dataPoint );
+
 		if ( search.numNeighbors() > 0 )
 		{
 			final Sampler< T > sampler = search.getSampler( 0 );
@@ -103,24 +109,24 @@ public class RBFInterpolator< T extends NumericType<T> > extends RealPoint imple
 		final double searchRad;
 		final DoubleUnaryOperator intensityComputer;
 		final boolean normalize;
-		T defaultValue;
+		T type;
 
 		public RBFInterpolatorFactory( 
 				final DoubleUnaryOperator intensityComputer,
 				final double sr, 
 				final boolean normalize, 
-				T defaultValue )
+				T type )
 		{
 			this.searchRad = sr;
 			this.intensityComputer = intensityComputer;
 			this.normalize = normalize;
-			this.defaultValue = defaultValue;
+			this.type = type;
 		}
 
 		@Override
 		public RBFInterpolator<T> create( final KDTree< T > tree )
 		{
-			return new RBFInterpolator<T>( tree, intensityComputer, searchRad, normalize, defaultValue );
+			return new RBFInterpolator<T>( tree, intensityComputer, searchRad, normalize, type );
 		}
 
 		@Override

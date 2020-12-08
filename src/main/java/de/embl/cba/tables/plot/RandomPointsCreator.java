@@ -3,22 +3,21 @@ package de.embl.cba.tables.plot;
 import net.imglib2.RealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.type.numeric.NumericType;
-import net.imglib2.type.numeric.RealType;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 public class RandomPointsCreator < T extends NumericType< T > >
 {
-	private final T type;
+	private final T fixedValue;
 	private int n;
 	private RealInterval interval;
 	private ArrayList< RealPoint > randomPointList;
 	private ArrayList< T > fixedValueList;
 
-	public RandomPointsCreator( T type, int n, RealInterval interval )
+	public RandomPointsCreator( T fixedValue, int n, RealInterval interval )
 	{
-		this.type = type;
+		this.fixedValue = fixedValue;
 		this.n = n;
 		this.interval = interval;
 		createRandomPoints();
@@ -47,10 +46,7 @@ public class RandomPointsCreator < T extends NumericType< T > >
 				p.setPosition( offset[ d ] + rand.nextDouble() * widths[ d ], d );
 
 			randomPointList.add( p );
-
-			T value = type.copy();
-
-			fixedValueList.add( value );
+			fixedValueList.add( fixedValue.copy() );
 		}
 	}
 
@@ -59,7 +55,7 @@ public class RandomPointsCreator < T extends NumericType< T > >
 		return randomPointList;
 	}
 
-	public ArrayList< T > getValueList()
+	public ArrayList< T > getFixedValueList()
 	{
 		return fixedValueList;
 	}

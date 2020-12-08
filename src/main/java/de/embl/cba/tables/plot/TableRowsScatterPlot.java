@@ -168,7 +168,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 			@Override
 			public void transformChanged( AffineTransform3D affineTransform3D )
 			{
-				synchronized ( this )
+				synchronized ( this ) // TODO: This cannot work!
 				{
 					viewerTransform = affineTransform3D;
 					createViewerSearchTree( viewerTransform );
