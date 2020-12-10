@@ -125,8 +125,6 @@ public class SegmentsTableAndBdvViews
 	private void scatterPlotView( BdvHandle bdv, SelectionColoringModel< TableRowImageSegment > selectionColoringModel, String[] columns )
 	{
 		new Thread( () -> {
-			final ArrayList< String > columnNames = new ArrayList<>( tableRowImageSegments.get( 0 ).getColumnNames() );
-
 			final TableRowsScatterPlot< TableRowImageSegment > scatterPlotView =
 					new TableRowsScatterPlot(
 							tableRowImageSegments,

@@ -63,7 +63,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/tischi/imagej-utils</connection>
 		<developerConnection>scm:git:git@github.com:tischi/imagej-utils</developerConnection>
-		<tag>imagej-utils-0.5.5</tag>
+		<tag>imagej-utils</tag>
 		<url>https://github.com/tischi/imagej-utils</url>
 	</scm>
 	<issueManagement>
