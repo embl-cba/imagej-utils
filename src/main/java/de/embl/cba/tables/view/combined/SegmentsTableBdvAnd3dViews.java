@@ -105,13 +105,9 @@ public class SegmentsTableBdvAnd3dViews
 			final TableRowsScatterPlot< TableRowImageSegment > scatterPlotView =
 					new TableRowsScatterPlot(
 							tableRowImageSegments,
-							viewName,
 							selectionColoringModel,
-							selectionModel,
 							new String[]{ columnNames.get( 0 ), columnNames.get( 1 )},
-							new double[]{ 1.0, -1.0},
-							GridLinesOverlay.NONE,
-							15 );
+							new double[]{ 1.0, -1.0} );
 
 			scatterPlotView.show( bdv.getViewerPanel() );
 		}).start();

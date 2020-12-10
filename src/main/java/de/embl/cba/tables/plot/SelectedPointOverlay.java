@@ -140,10 +140,10 @@ public class SelectedPointOverlay < T extends TableRow > extends BdvOverlay impl
 			}
 		}
 
-		final double x = plotView.getLocation( selection.getCell( columnNames[ 0 ] ), 0 );
-		final double y = plotView.getLocation( selection.getCell( columnNames[ 1 ] ), 1 );
-		selectedPoint = new RealPoint( x, y );
-		centerViewer( selectedPoint, 2000 );
+//		final double x = plotView.getLocation( selection.getCell( columnNames[ 0 ] ), 0 );
+//		final double y = plotView.getLocation( selection.getCell( columnNames[ 1 ] ), 1 );
+//		selectedPoint = new RealPoint( x, y );
+//		centerViewer( selectedPoint, 2000 );
 	}
 }
 

@@ -35,25 +35,22 @@ import de.embl.cba.tables.*;
 import de.embl.cba.tables.annotate.Annotator;
 import de.embl.cba.tables.color.*;
 import de.embl.cba.tables.measure.MeasureDistance;
+import de.embl.cba.tables.plot.ScatterPlotDialog;
+import de.embl.cba.tables.plot.TableRowsScatterPlot;
 import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.tablerow.TableRowListener;
 import ij.IJ;
 import ij.gui.GenericDialog;
-import mpicbg.spim.data.generic.sequence.BasicViewDescription;
 import net.imglib2.type.numeric.ARGBType;
 import org.apache.commons.io.FilenameUtils;
-import spim.fiji.spimdata.explorer.popup.BDVPopup;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.swing.*;
-import javax.swing.event.MouseInputAdapter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -179,7 +176,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		if ( selectionColoringModel != null)
 			configureTableRowColoring();
 
-		createMenuAndShow();
+		createAndShowMenu();
 	}
 
 	private void configureTableRowColoring()
@@ -350,6 +347,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		{
 			menuBar.add( createColoringMenu() );
 			menuBar.add( createAnnotateMenu() );
+			menuBar.add( createPlotMenu() );
 		}
 
 		// menuBar.add( createMeasureMenu() ); // TODO: finish implementing this
@@ -373,6 +371,15 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		menu.add( createStartNewAnnotationMenuItem() );
 
 		menu.add( createContinueExistingAnnotationMenuItem() );
+
+		return menu;
+	}
+
+	private JMenu createPlotMenu()
+	{
+		JMenu menu = new JMenu( "Plot" );
+
+		menu.add( createScatterPlotMenuItem() );
 
 		return menu;
 	}
@@ -402,15 +409,37 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		final JMenuItem menuItem = new JMenuItem( "Show Segmentation Image Help" );
 		menuItem.addActionListener( e ->
 			{
-			final HelpDialog helpDialog = new HelpDialog(
+				final HelpDialog helpDialog = new HelpDialog(
 					frame,
 					Tables.class.getResource( "/SegmentationImageActionsHelp.html" ) );
-			helpDialog.setVisible( true );
+				helpDialog.setVisible( true );
 			}
 		);
 		return menuItem;
 	}
 
+
+	private JMenuItem createScatterPlotMenuItem()
+	{
+		initHelpDialog();
+		final JMenuItem menuItem = new JMenuItem( "2D Scatter Plot..." );
+		menuItem.addActionListener( e ->
+			{
+				SwingUtilities.invokeLater( () ->
+				{
+					String[] columnNames = getColumnNames().stream().toArray( String[]::new );
+					ScatterPlotDialog dialog = new ScatterPlotDialog( columnNames, new String[]{ columnNames[ 0 ], columnNames[ 1 ] }, new double[]{ 1.0, 1.0 } );
+
+					if ( dialog.show() )
+					{
+						TableRowsScatterPlot< T > scatterPlot = new TableRowsScatterPlot<>( tableRows, selectionColoringModel, dialog.getSelectedColumns(), dialog.getScaleFactors() );
+						scatterPlot.show( null );
+					}
+				});
+			}
+		);
+		return menuItem;
+	}
 	// TODO: This does not always make sense. Should be added only on demand
 	private JMenuItem createShowNavigationHelpMenuItem()
 	{
@@ -625,7 +654,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		annotator.showDialog();
 	}
 
-	private void createMenuAndShow()
+	private void createAndShowMenu()
 	{
 		frame = new JFrame( tableName );
 		createMenuBar();
