@@ -33,8 +33,6 @@ import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.tables.color.LazyCategoryColoringModel;
 import de.embl.cba.tables.color.SelectionColoringModel;
 import de.embl.cba.tables.image.ImageSourcesModel;
-import de.embl.cba.tables.imagesegment.DefaultImageSegmentsModel;
-import de.embl.cba.tables.plot.GridLinesOverlay;
 import de.embl.cba.tables.plot.TableRowsScatterPlot;
 import de.embl.cba.tables.select.DefaultSelectionModel;
 import de.embl.cba.tables.select.SelectionModel;
@@ -42,7 +40,6 @@ import de.embl.cba.tables.tablerow.TableRowImageSegment;
 import de.embl.cba.tables.view.SegmentsBdvView;
 import de.embl.cba.tables.view.TableRowsTableView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SegmentsTableAndBdvViews
@@ -130,7 +127,8 @@ public class SegmentsTableAndBdvViews
 							tableRowImageSegments,
 							selectionColoringModel,
 							columns,
-							new double[]{ 1.0, -1.0} );
+							new double[]{ 1.0, 1.0},
+							1.0 );
 
 			scatterPlotView.show( bdv.getViewerPanel() );
 		}).start();

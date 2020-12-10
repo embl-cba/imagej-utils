@@ -428,11 +428,11 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 				SwingUtilities.invokeLater( () ->
 				{
 					String[] columnNames = getColumnNames().stream().toArray( String[]::new );
-					ScatterPlotDialog dialog = new ScatterPlotDialog( columnNames, new String[]{ columnNames[ 0 ], columnNames[ 1 ] }, new double[]{ 1.0, 1.0 } );
+					ScatterPlotDialog dialog = new ScatterPlotDialog( columnNames, new String[]{ columnNames[ 0 ], columnNames[ 1 ] }, new double[]{ 1.0, 1.0 }, 1.0 );
 
 					if ( dialog.show() )
 					{
-						TableRowsScatterPlot< T > scatterPlot = new TableRowsScatterPlot<>( tableRows, selectionColoringModel, dialog.getSelectedColumns(), dialog.getScaleFactors() );
+						TableRowsScatterPlot< T > scatterPlot = new TableRowsScatterPlot<>( tableRows, selectionColoringModel, dialog.getSelectedColumns(), dialog.getScaleFactors(), dialog.getDotSizeScaleFactor() );
 						scatterPlot.show( null );
 					}
 				});

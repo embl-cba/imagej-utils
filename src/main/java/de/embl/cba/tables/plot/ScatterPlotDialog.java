@@ -1,6 +1,5 @@
 package de.embl.cba.tables.plot;
 
-import de.embl.cba.tables.tablerow.TableRow;
 import ij.gui.GenericDialog;
 
 public class ScatterPlotDialog
@@ -8,12 +7,14 @@ public class ScatterPlotDialog
 	private final String[] columnNames;
 	private final String[] selectedColumnNames;
 	private final double[] scaleFactors;
+	private double dotSizeScaleFactor;
 
-	public ScatterPlotDialog( String[] columnNames, String[] selectedColumnNames, double[] scaleFactors )
+	public ScatterPlotDialog( String[] columnNames, String[] selectedColumnNames, double[] scaleFactors, double dotSizeScaleFactor )
 	{
 		this.columnNames = columnNames;
 		this.selectedColumnNames = selectedColumnNames;
 		this.scaleFactors = scaleFactors;
+		this.dotSizeScaleFactor = dotSizeScaleFactor;
 	}
 
 	public boolean show()
@@ -30,6 +31,7 @@ public class ScatterPlotDialog
 			gd.addNumericField( "Scale Factor " + xy[ d ], scaleFactors[ d ] );
 		}
 
+		gd.addNumericField( "Dot Size Scale Factor", dotSizeScaleFactor );
 		//gd.addChoice( "Add lines", lineChoices, GridLinesOverlay.NONE );
 		gd.showDialog();
 
@@ -40,6 +42,7 @@ public class ScatterPlotDialog
 			selectedColumnNames[ d ] = gd.getNextChoice();
 			scaleFactors[ d ] = gd.getNextNumber();
 		}
+		dotSizeScaleFactor = gd.getNextNumber();
 
 		return true;
 	}
@@ -52,5 +55,10 @@ public class ScatterPlotDialog
 	public double[] getScaleFactors()
 	{
 		return scaleFactors;
+	}
+
+	public double getDotSizeScaleFactor()
+	{
+		return dotSizeScaleFactor;
 	}
 }

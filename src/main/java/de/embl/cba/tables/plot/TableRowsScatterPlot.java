@@ -57,22 +57,24 @@ public class TableRowsScatterPlot< T extends TableRow >
 	private String[] selectedColumns;
 	private SelectedPointOverlay selectedPointOverlay;
 	private double[] scaleFactors;
+	private double dotSizeScaleFactor;
 	private BdvHandle bdvHandle;
 
 	public TableRowsScatterPlot(
 			List< T > tableRows,
 			SelectionColoringModel< T > selectionColoringModel,
 			String[] selectedColumns,
-			double[] scaleFactors )
+			double[] scaleFactors,
+			double dotSizeScaleFactor )
 	{
 		this.tableRows = tableRows;
 		this.selectionColoringModel = selectionColoringModel;
 		this.selectionModel = selectionColoringModel.getSelectionModel();
 		this.selectedColumns = selectedColumns;
 		this.scaleFactors = scaleFactors;
-		//this.axisLabelsFontSize = axisLabelsFontSize;
+		this.dotSizeScaleFactor = dotSizeScaleFactor;
 
-		//numTableRows = tableRows.size();
+		//this.axisLabelsFontSize = axisLabelsFontSize;
 		//this.lineOverlay = lineOverlay;
 	}
 
@@ -97,7 +99,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 		double[] min = kdTreeSupplier.getMin();
 		double[] max = kdTreeSupplier.getMax();
 
-		Supplier< BiConsumer< RealPoint, ARGBType > > biConsumerSupplier = new RealPointARGBTypeBiConsumerSupplier<>( kdTreeSupplier, selectionColoringModel, ( min[ 0 ] - max[ 0 ] ) / 100.0 );
+		Supplier< BiConsumer< RealPoint, ARGBType > > biConsumerSupplier = new RealPointARGBTypeBiConsumerSupplier<>( kdTreeSupplier, selectionColoringModel,  dotSizeScaleFactor *( min[ 0 ] - max[ 0 ] ) / 100.0 );
 
 		FunctionRealRandomAccessible< ARGBType > randomAccessible = new FunctionRealRandomAccessible( 2, biConsumerSupplier, ARGBType::new );
 
@@ -162,14 +164,15 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> focusClosestPoint( search ), "Focus closest point", "ctrl button1" ) ;
 
-		BdvPopupMenus.addAction( bdvHandle,"Change columns...",
+		BdvPopupMenus.addAction( bdvHandle,"Reconfigure...",
 				( x, y ) -> {
 
-					ScatterPlotDialog dialog = new ScatterPlotDialog( tableRows.get( 0 ).getColumnNames().stream().toArray( String[]::new ), selectedColumns, scaleFactors );
+					ScatterPlotDialog dialog = new ScatterPlotDialog( tableRows.get( 0 ).getColumnNames().stream().toArray( String[]::new ), selectedColumns, scaleFactors, dotSizeScaleFactor );
 					if ( dialog.show() )
 					{
 						selectedColumns = dialog.getSelectedColumns();
 						scaleFactors = dialog.getScaleFactors();
+						dotSizeScaleFactor = dialog.getDotSizeScaleFactor();
 
 						final int xLoc = SwingUtilities.getWindowAncestor( bdvHandle.getViewerPanel() ).getLocationOnScreen().x;
 						final int yLoc = SwingUtilities.getWindowAncestor( bdvHandle.getViewerPanel() ).getLocationOnScreen().y;
@@ -213,8 +216,13 @@ public class TableRowsScatterPlot< T extends TableRow >
 		return BdvFunctions.show(
 				randomAccessible,
 				interval,
-				selectedColumns[ 0 ] + " " + selectedColumns[ 1 ],
-				BdvOptions.options().numRenderingThreads( 1 ).is2D() ).getBdvHandle();
+				getPlotName( selectedColumns ),
+				BdvOptions.options().numRenderingThreads( 1 ).is2D().frameTitle( getPlotName( selectedColumns ) ) ).getBdvHandle();
+	}
+
+	private static String getPlotName( String[] selectedColumns )
+	{
+		return selectedColumns[ 0 ] + " - " + selectedColumns[ 1 ];
 	}
 
 
