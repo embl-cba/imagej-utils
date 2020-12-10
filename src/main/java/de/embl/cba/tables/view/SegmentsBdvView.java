@@ -59,7 +59,6 @@ import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
-import org.jetbrains.annotations.NotNull;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -615,12 +614,10 @@ public class SegmentsBdvView < T extends ImageSegment >
 		}
 	}
 
-	@NotNull
 	private String getLabelImageMenuName()
 	{
 		return labelsSource.metadata().displayName;
 	}
-
 
 	private void changeAnimationSettingsUI()
 	{

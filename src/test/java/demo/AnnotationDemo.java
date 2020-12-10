@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package develop;
+package demo;
 
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.tables.morpholibj.ExploreMorphoLibJLabelImage;
@@ -36,7 +36,7 @@ import ij.ImagePlus;
 import net.imagej.ImageJ;
 import tests.Test3DView;
 
-public class DevelopAnnotationCorrection
+public class AnnotationDemo
 {
 	public static void main( String[] args )
 	{

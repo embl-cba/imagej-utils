@@ -80,9 +80,10 @@
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>EMBL</license.copyrightOwners>
 
-		<bigdataviewer-core.version>9.1.0</bigdataviewer-core.version>
+<!--		<bigdataviewer-core.version>9.1.0</bigdataviewer-core.version>-->
 		<image-transform-converters.version>0.1.3</image-transform-converters.version>
 		<mcib3d-core.version>3.96.3</mcib3d-core.version>
+		<j3dcore.version>1.6.0-scijava-2</j3dcore.version>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
@@ -100,8 +101,12 @@
         <dependency>
             <groupId>sc.fiji</groupId>
             <artifactId>bigdataviewer-core</artifactId>
-            <version>${bigdataviewer-core.version}</version>
+<!--            //<version>${bigdataviewer-core.version}</version>-->
         </dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-listeners</artifactId>
+		</dependency>
         <dependency>
             <groupId>sc.fiji</groupId>
             <artifactId>bigdataviewer-vistools</artifactId>
@@ -115,14 +120,34 @@
 			<artifactId>imagej-legacy</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>sc.fiji</groupId>-->
+<!--			<artifactId>bigwarp_fiji</artifactId>-->
+<!--		</dependency>-->
 		<dependency>
-			<groupId>sc.fiji</groupId>
-			<artifactId>bigwarp_fiji</artifactId>
+			<groupId>ome</groupId>
+			<artifactId>bio-formats_plugins</artifactId>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>ome</groupId>-->
+<!--			<artifactId>formats-api</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>ome</groupId>-->
+<!--			<artifactId>formats-gpl</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.openmicroscopy</groupId>-->
+<!--			<artifactId>ome-common</artifactId>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.itc</groupId>
 			<artifactId>image-transform-converters</artifactId>
 			<version>${image-transform-converters.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>3D_Viewer</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.mcib3d</groupId>

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package develop;
+package demo;
 
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.tables.morpholibj.ExploreMorphoLibJLabelImage;
@@ -37,7 +37,7 @@ import ij.ImagePlus;
 import net.imagej.ImageJ;
 import tests.Test3DView;
 
-public class DevelopScatterPlot
+public class ScatterPlotDemo
 {
 	public static void main( String[] args )
 	{
@@ -58,7 +58,8 @@ public class DevelopScatterPlot
 		final ExploreMorphoLibJLabelImage explore = new ExploreMorphoLibJLabelImage(
 				intensities,
 				labels,
-				"3d-image-lbl-morpho.csv" );
+				"3d-image-lbl-morpho.csv",
+				false );
 
 		final SegmentsTableAndBdvViews views = explore.getTableAndBdvViews();
 		BdvUtils.centerBdvWindowLocation( views.getSegmentsBdvView().getBdv() );

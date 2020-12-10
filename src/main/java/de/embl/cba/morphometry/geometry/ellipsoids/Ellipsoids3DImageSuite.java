@@ -35,7 +35,6 @@ import mcib3d.geom.Objects3DPopulation;
 import mcib3d.image3d.ImageByte;
 import net.imglib2.realtransform.AffineTransform3D;
 
-
 public abstract class Ellipsoids3DImageSuite
 {
 	public static EllipsoidVectors fitEllipsoid( ImagePlus mask )
@@ -53,7 +52,6 @@ public abstract class Ellipsoids3DImageSuite
 		return ellipsoidVectors;
 	}
 
-
 	public static AffineTransform3D createShortestAxisAlignmentTransform( EllipsoidVectors ellipsoidVectors )
 	{
 		AffineTransform3D translation = new AffineTransform3D();
@@ -68,7 +66,6 @@ public abstract class Ellipsoids3DImageSuite
 
 		return combinedTransform;
 	}
-
 
 	public static AffineTransform3D createAlignmentTransform( EllipsoidVectors ellipsoidVectors )
 	{
@@ -91,7 +88,4 @@ public abstract class Ellipsoids3DImageSuite
 
 		return transform3D;
 	}
-
-
-
 }

@@ -34,12 +34,15 @@ import de.embl.cba.tables.color.LazyCategoryColoringModel;
 import de.embl.cba.tables.color.SelectionColoringModel;
 import de.embl.cba.tables.image.ImageSourcesModel;
 import de.embl.cba.tables.imagesegment.DefaultImageSegmentsModel;
+import de.embl.cba.tables.plot.GridLinesOverlay;
+import de.embl.cba.tables.plot.TableRowsScatterPlot;
 import de.embl.cba.tables.select.DefaultSelectionModel;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRowImageSegment;
 import de.embl.cba.tables.view.SegmentsBdvView;
 import de.embl.cba.tables.view.TableRowsTableView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SegmentsTableAndBdvViews
@@ -112,6 +115,31 @@ public class SegmentsTableAndBdvViews
 	public TableRowsTableView< TableRowImageSegment > getTableRowsTableView()
 	{
 		return tableRowsTableView;
+	}
+
+	public void showScatterPlot()
+	{
+		scatterPlotView( segmentsBdvView.getBdv(), selectionColoringModel );
+	}
+
+	private void scatterPlotView( BdvHandle bdv, SelectionColoringModel< TableRowImageSegment > selectionColoringModel )
+	{
+		new Thread( () -> {
+			final ArrayList< String > columnNames = new ArrayList<>( tableRowImageSegments.get( 0 ).getColumnNames() );
+
+			final TableRowsScatterPlot< TableRowImageSegment > scatterPlotView =
+					new TableRowsScatterPlot(
+							tableRowImageSegments,
+							viewName,
+							selectionColoringModel,
+							selectionModel,
+							columnNames.get( 0 ),
+							columnNames.get( 1 ),
+							GridLinesOverlay.NONE,
+							15 );
+
+			scatterPlotView.show( bdv.getViewerPanel() );
+		}).start();
 	}
 
 	public void close()

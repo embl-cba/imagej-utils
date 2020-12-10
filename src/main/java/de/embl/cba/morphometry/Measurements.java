@@ -339,7 +339,6 @@ public class Measurements
 
 	}
 
-
 	public static void measureMorpholibJFeatures(
 			HashMap< Integer, Map< String, Object > > objectMeasurements,
 			LabelRegion labelRegion )

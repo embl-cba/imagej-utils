@@ -34,7 +34,6 @@ import bdv.util.BdvHandle;
 import de.embl.cba.bdv.utils.BdvDialogs;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
-import de.embl.cba.bdv.utils.bigwarp.BigWarpLauncher;
 import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
 import de.embl.cba.bdv.utils.capture.ViewCaptureDialog;
 import de.embl.cba.bdv.utils.export.BdvRealSourceToVoxelImageExporter;
@@ -149,30 +148,6 @@ public class BdvBehaviours
 
 			}).start();
 		}, "ExportSourcesToVoxelImages", trigger ) ;
-	}
-
-	public static void addAlignSourcesWithBigWarpBehaviour(
-			BdvHandle bdvHandle,
-			Behaviours behaviours,
-			String trigger )
-	{
-		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) ->
-		{
-			new Thread( () ->
-			{
-				final List< Integer > sourceIndices = BdvUtils.getSourceIndiciesVisibleInCurrentViewerWindow( bdvHandle, true );
-
-				if ( ! BigWarpLauncher.Dialog.showDialog( bdvHandle, sourceIndices ) ) return;
-				new BigWarpLauncher(
-						bdvHandle,
-						BigWarpLauncher.Dialog.movingVolatileSource,
-						BigWarpLauncher.Dialog.fixedVolatileSource,
-						BigWarpLauncher.Dialog.displayRangeMovingSource,
-						BigWarpLauncher.Dialog.displayRangeFixedSource
-				);
-
-			}).start();
-		}, "AlignSourcesWithBigWarp", trigger ) ;
 	}
 
 	public static void addDisplaySettingsBehaviour(

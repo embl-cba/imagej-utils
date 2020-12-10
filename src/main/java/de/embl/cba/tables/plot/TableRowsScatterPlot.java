@@ -138,15 +138,15 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 		viewerPointSize = 7;
 
-		BiConsumer< RealLocalizable, IntType > indexFromLocation = createPlotFunction( viewerPointSize, viewerTransform, search );
+		BiConsumer< RealLocalizable, IntType > indexFromLocation = createPlotFunction( viewerPointSize, search );
 
 		createSource( indexFromLocation );
 
 		showSource();
 
-		registerAsViewerTransformListener();
-
 		viewerTransform = viewerTransform( bdvHandle, dataInterval, viewerAspectRatio );
+
+		registerAsViewerTransformListener();
 
 		bdvHandle.getViewerPanel().setCurrentViewerTransform( viewerTransform );
 
@@ -156,9 +156,9 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 		addGridLinesOverlay();
 
-		addAxisTickLabelsOverlay();
+		//addAxisTickLabelsOverlay();
 
-		addSelectedPointsOverlay();
+		//addSelectedPointsOverlay();
 	}
 
 	private void registerAsViewerTransformListener()
@@ -395,7 +395,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 		}
 	}
 
-	private static BiConsumer< RealLocalizable, IntType > createPlotFunction( final double viewerPointSize, AffineTransform3D viewerTransform, RadiusNeighborSearchOnKDTree< Integer > search )
+	private BiConsumer< RealLocalizable, IntType > createPlotFunction( final double viewerPointSize, RadiusNeighborSearchOnKDTree< Integer > search )
 	{
 		final RealPoint dataPoint = new RealPoint( 0, 0, 0 );
 		final RealPoint pixelLocation = new RealPoint( 0, 0, 0 );
@@ -418,7 +418,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 					t.setZero();
 				else
 					t.set( search.getSampler( 0 ).get() );
-
 			}
 		};
 	}
