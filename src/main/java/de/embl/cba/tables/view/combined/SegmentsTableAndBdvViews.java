@@ -117,12 +117,12 @@ public class SegmentsTableAndBdvViews
 		return tableRowsTableView;
 	}
 
-	public void showScatterPlot()
+	public void showScatterPlot( String colX, String colY )
 	{
-		scatterPlotView( segmentsBdvView.getBdv(), selectionColoringModel );
+		scatterPlotView( segmentsBdvView.getBdv(), selectionColoringModel, colX, colY );
 	}
 
-	private void scatterPlotView( BdvHandle bdv, SelectionColoringModel< TableRowImageSegment > selectionColoringModel )
+	private void scatterPlotView( BdvHandle bdv, SelectionColoringModel< TableRowImageSegment > selectionColoringModel, String colX, String colY )
 	{
 		new Thread( () -> {
 			final ArrayList< String > columnNames = new ArrayList<>( tableRowImageSegments.get( 0 ).getColumnNames() );
@@ -133,8 +133,8 @@ public class SegmentsTableAndBdvViews
 							viewName,
 							selectionColoringModel,
 							selectionModel,
-							columnNames.get( 0 ),
-							columnNames.get( 1 ),
+							colX,
+							colY,
 							GridLinesOverlay.NONE,
 							15 );
 

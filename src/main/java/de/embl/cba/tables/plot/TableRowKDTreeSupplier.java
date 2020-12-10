@@ -67,8 +67,11 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 			y = Utils.parseDouble( tableRow.getCell( colY ) );
 			if ( y.isNaN() || y.isInfinite() ) continue;
 
-			dataPoints.add( new RealPoint( x, y, 0 ) );
+			dataPoints.add( new RealPoint( x, y ) );
 			dataPointTableRows.add( tableRow );
 		}
+
+		if ( dataPoints.size() == 0 )
+			throw new UnsupportedOperationException( "Cannot create scatter plot, because there is no valid data point." );
 	}
 }

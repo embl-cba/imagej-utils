@@ -43,11 +43,11 @@ import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.view.Globals;
 import ij.gui.GenericDialog;
 import net.imglib2.*;
-import net.imglib2.neighborsearch.NearestNeighborSearchOnKDTree;
 import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.ui.TransformListener;
@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public class TableRowsScatterPlot< T extends TableRow >
 {
@@ -111,10 +112,10 @@ public class TableRowsScatterPlot< T extends TableRow >
 		this.selectionModel = selectionModel;
 		this.columnNameX = columnNameX;
 		this.columnNameY = columnNameY;
+		this.axisLabelsFontSize = axisLabelsFontSize;
 
 		numTableRows = tableRows.size();
 		columnNames = tableRows.get( 0 ).getColumnNames().stream().toArray( String[]::new );
-		this.axisLabelsFontSize = axisLabelsFontSize;
 
 		coloringModel.listeners().add( () -> {
 			bdvHandle.getViewerPanel().requestRepaint();
@@ -123,38 +124,47 @@ public class TableRowsScatterPlot< T extends TableRow >
 		this.lineOverlay = lineOverlay;
 	}
 
-	private void createAndShowImage( int x, int y )
+	public void show( JComponent parentComponent )
 	{
-		fetchDataPoints( columnNameX, columnNameY );
-
-		if ( points.size() < 1 )
+		if ( parentComponent != null )
 		{
-			throw new UnsupportedOperationException( "Cannot create scatter plot \"" + name + "\", because there is no valid data point." );
+			JFrame topFrame = ( JFrame ) SwingUtilities.getWindowAncestor( parentComponent );
+			final int x = topFrame.getLocationOnScreen().x + parentComponent.getWidth() + 10;
+			final int y = topFrame.getLocationOnScreen().y;
+			createAndShowScatterPlot( x, y );
 		}
+		else
+		{
+			createAndShowScatterPlot( 10, 10 );
+		}
+	}
 
-		search = createSearchTree( points, indices );
+	private void createAndShowScatterPlot( int x, int y )
+	{
+		//viewerAspectRatio = viewerAspectRatio( dataAspectRatio );
 
-		viewerAspectRatio = viewerAspectRatio( dataAspectRatio );
+		//viewerPointSize = 7;
 
-		viewerPointSize = 7;
+		//BiConsumer< RealLocalizable, IntType > indexFromLocation = createPlotFunction( viewerPointSize, search );
 
-		BiConsumer< RealLocalizable, IntType > indexFromLocation = createPlotFunction( viewerPointSize, search );
+		TableRowKDTreeSupplier< T > kdTreeSupplier = new TableRowKDTreeSupplier<>( tableRows, columnNameX, columnNameY );
+		Supplier< BiConsumer< RealPoint, ARGBType > > biConsumerSupplier = new RealPointARGBTypeBiConsumerSupplier<>( kdTreeSupplier, coloringModel, 5.0 );
 
-		createSource( indexFromLocation );
+		FunctionRealRandomAccessible< ARGBType > randomAccessible = new FunctionRealRandomAccessible( 2, biConsumerSupplier, ARGBType::new );
 
-		showSource();
+		show( randomAccessible, FinalInterval.createMinMax( 0, 0, 0, 10, 10, 0 ) );
 
-		viewerTransform = viewerTransform( bdvHandle, dataInterval, viewerAspectRatio );
-
-		registerAsViewerTransformListener();
-
-		bdvHandle.getViewerPanel().setCurrentViewerTransform( viewerTransform );
-
-		installBdvBehaviours();
-
-		setWindowPosition( x, y );
-
-		addGridLinesOverlay();
+//		viewerTransform = viewerTransform( bdvHandle, dataInterval, viewerAspectRatio );
+//
+//		registerAsViewerTransformListener();
+//
+//		bdvHandle.getViewerPanel().setCurrentViewerTransform( viewerTransform );
+//
+//		installBdvBehaviours();
+//
+//		setWindowPosition( x, y );
+//
+//		addGridLinesOverlay();
 
 		//addAxisTickLabelsOverlay();
 
@@ -272,7 +282,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 					bdvHandle.close();
 
-					createAndShowImage( xLoc, yLoc );
+					createAndShowScatterPlot( xLoc, yLoc );
 				}
 		);
 	}
@@ -298,7 +308,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 	}
 
 	// TODO: why is this so complicated?
-	public void fetchDataPoints( String columnNameX, String columnNameY )
+	private void fetchDataPoints( String columnNameX, String columnNameY )
 	{
 		points = new ArrayList<>();
 		viewerPoints = new ArrayList<>();
@@ -437,22 +447,19 @@ public class TableRowsScatterPlot< T extends TableRow >
 		return distSqr;
 	}
 
-	private void showSource()
+	private void show( FunctionRealRandomAccessible< ARGBType > randomAccessible, FinalInterval interval )
 	{
 		Prefs.showMultibox( false );
 
-		scatterPlotBdvSource = BdvFunctions.show(
-				argbSource,
-				BdvOptions.options()
-						.is2D()
-						.frameTitle( name )
-						.preferredSize( Globals.proposedComponentWindowWidth(), Globals.proposedComponentWindowWidth() )
-						.transformEventHandlerFactory( new BehaviourTransformEventHandlerPlanar
-						.BehaviourTransformEventHandlerPlanarFactory() ) );
+		BdvFunctions.show(
+				randomAccessible,
+				interval,
+				"scatter plot",
+				BdvOptions.options().numRenderingThreads( 1 ).is2D() );
 
-		bdvHandle = scatterPlotBdvSource.getBdvHandle();
+//		bdvHandle = scatterPlotBdvSource.getBdvHandle();
 
-		scatterPlotBdvSource.setDisplayRange( 0, 255);
+		//scatterPlotBdvSource.setDisplayRange( 0, 255);
 	}
 
 	public void createSource( BiConsumer< RealLocalizable, IntType > biConsumer )
@@ -528,20 +535,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 		viewerTransform.preConcatenate( translate2 );
 	}
 
-	public void show( JComponent component )
-	{
-		if ( component != null )
-		{
-			JFrame topFrame = ( JFrame ) SwingUtilities.getWindowAncestor( component );
-			final int x = topFrame.getLocationOnScreen().x + component.getWidth() + 10;
-			final int y = topFrame.getLocationOnScreen().y;
-			createAndShowImage( x, y );
-		}
-		else
-		{
-			createAndShowImage( 10, 10 );
-		}
-	}
+
 
 	public void setWindowPosition( int x, int y )
 	{

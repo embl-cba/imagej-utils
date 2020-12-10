@@ -6,19 +6,19 @@ import net.imglib2.KDTree;
 import net.imglib2.RealPoint;
 import net.imglib2.Sampler;
 import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
-import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-public class RealPointARGBBiConsumerSupplier < T extends TableRow > implements Supplier< BiConsumer< RealPoint, ARGBType > >
+public class RealPointARGBTypeBiConsumerSupplier< T extends TableRow > implements Supplier< BiConsumer< RealPoint, ARGBType > >
 {
 	private final Supplier< KDTree< T > > kdTreeSupplier;
 	private final ColoringModel< T > coloringModel;
 	private final double radius;
+	private int n = 0;
 
-	public RealPointARGBBiConsumerSupplier( Supplier< KDTree< T > > kdTreeSupplier, ColoringModel< T > coloringModel, final double radius )
+	public RealPointARGBTypeBiConsumerSupplier( Supplier< KDTree< T > > kdTreeSupplier, ColoringModel< T > coloringModel, final double radius )
 	{
 		this.kdTreeSupplier = kdTreeSupplier;
 		this.coloringModel = coloringModel;
@@ -28,16 +28,17 @@ public class RealPointARGBBiConsumerSupplier < T extends TableRow > implements S
 	@Override
 	public BiConsumer< RealPoint, ARGBType > get()
 	{
-		return new RealPointARGBBiConsumer( kdTreeSupplier.get(), coloringModel, radius );
+		System.out.println( ++n );
+		return new RealPointARGBTypeBiConsumer( kdTreeSupplier.get(), coloringModel, radius );
 	}
 
-	class RealPointARGBBiConsumer implements BiConsumer< RealPoint, ARGBType >
+	class RealPointARGBTypeBiConsumer implements BiConsumer< RealPoint, ARGBType >
 	{
 		private final RadiusNeighborSearchOnKDTree< T > search;
 		private final ColoringModel< T > coloringModel;
 		private final double radius;
 
-		public RealPointARGBBiConsumer( KDTree< T > kdTree, ColoringModel< T > coloringModel, double radius )
+		public RealPointARGBTypeBiConsumer( KDTree< T > kdTree, ColoringModel< T > coloringModel, double radius )
 		{
 			search = new RadiusNeighborSearchOnKDTree<>( kdTree );
 			this.coloringModel = coloringModel;
