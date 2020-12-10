@@ -63,6 +63,6 @@ public class ScatterPlotDemo
 
 		final SegmentsTableAndBdvViews views = explore.getTableAndBdvViews();
 		BdvUtils.centerBdvWindowLocation( views.getSegmentsBdvView().getBdv() );
-		views.showScatterPlot( "Label", "Label");
+		views.showScatterPlot( new String[]{"Label", "Label"});
 	}
 }

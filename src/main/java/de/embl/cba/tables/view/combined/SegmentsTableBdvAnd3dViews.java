@@ -108,8 +108,8 @@ public class SegmentsTableBdvAnd3dViews
 							viewName,
 							selectionColoringModel,
 							selectionModel,
-							columnNames.get( 0 ),
-							columnNames.get( 1 ),
+							new String[]{ columnNames.get( 0 ), columnNames.get( 1 )},
+							new double[]{ 1.0, -1.0},
 							GridLinesOverlay.NONE,
 							15 );
 

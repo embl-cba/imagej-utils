@@ -49,8 +49,7 @@ public class SelectedPointOverlay < T extends TableRow > extends BdvOverlay impl
 {
 	private final BdvHandle bdvHandle;
 	private final SelectionModel< T > selectionModel;
-	private final String columnNameX;
-	private final String columnNameY;
+	private final String[] columnNames;
 	private final TableRowsScatterPlot< T > plotView;
 	private RealPoint selectedPoint;
 	private int selectionCircleWidth;
@@ -60,8 +59,7 @@ public class SelectedPointOverlay < T extends TableRow > extends BdvOverlay impl
 		super();
 		this.bdvHandle = plotView.getBdvHandle();
 		this.selectionModel = plotView.getSelectionModel();
-		this.columnNameX = plotView.getColumnNameX();
-		this.columnNameY = plotView.getColumnNameY();
+		this.columnNames = plotView.getSelectedColumns();
 		this.plotView = plotView;
 
 		selectionCircleWidth = 20;
@@ -142,8 +140,8 @@ public class SelectedPointOverlay < T extends TableRow > extends BdvOverlay impl
 			}
 		}
 
-		final double x = plotView.getLocation( selection.getCell( columnNameX ), 0 );
-		final double y = plotView.getLocation( selection.getCell( columnNameY ), 1 );
+		final double x = plotView.getLocation( selection.getCell( columnNames[ 0 ] ), 0 );
+		final double y = plotView.getLocation( selection.getCell( columnNames[ 1 ] ), 1 );
 		selectedPoint = new RealPoint( x, y );
 		centerViewer( selectedPoint, 2000 );
 	}

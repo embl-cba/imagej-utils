@@ -29,35 +29,23 @@
 package de.embl.cba.tables.plot;
 
 import bdv.util.*;
-import bdv.viewer.Source;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
-import de.embl.cba.bdv.utils.sources.ARGBConvertedRealAccessibleSource;
-import de.embl.cba.tables.Outlier;
 import de.embl.cba.tables.Utils;
-import de.embl.cba.tables.color.ColorUtils;
-import de.embl.cba.tables.color.ListItemsARGBConverter;
 import de.embl.cba.tables.color.SelectionColoringModel;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;
-import de.embl.cba.tables.view.Globals;
 import ij.gui.GenericDialog;
 import net.imglib2.*;
-import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
+import net.imglib2.neighborsearch.NearestNeighborSearchOnKDTree;
 import net.imglib2.position.FunctionRealRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.volatiles.VolatileARGBType;
-import net.imglib2.ui.TransformListener;
-import net.imglib2.util.Intervals;
-import org.apache.commons.lang.mutable.MutableDouble;
+import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,43 +54,36 @@ import java.util.function.Supplier;
 
 public class TableRowsScatterPlot< T extends TableRow >
 {
+	private final int n = 2;
+
 	private final List< T > tableRows;
-	private Interval dataPlotInterval;
 	private int numTableRows;
 	private final SelectionColoringModel< T > coloringModel;
 	private final SelectionModel< T > selectionModel;
-	private BdvHandle bdvHandle;
 	private ArrayList< RealPoint > points;
 	private ArrayList< Integer > indices;
-	private double viewerPointSize;
-	private Source< VolatileARGBType > argbSource;
-	private RadiusNeighborSearchOnKDTree< Integer > search;
-	private String columnNameX;
-	private String columnNameY;
-	private BdvStackSource< VolatileARGBType > scatterPlotBdvSource;
-	private final String[] columnNames;
+
+	private final String[] selectedColumns;
 	private String[] lineChoices;
 	private String lineOverlay;
-	private double viewerAspectRatio = 1.0;
-	private RealRandomAccessibleIntervalSource indexSource;
 	private FinalRealInterval dataInterval;
-	private double dataAspectRatio;
 	private ArrayList< RealPoint> viewerPoints;
-	private AffineTransform3D viewerTransform;
 	private String name;
 	private HashMap< String, Double > xLabelToIndex;
 	private HashMap< String, Double > yLabelToIndex;
 	private SelectedPointOverlay selectedPointOverlay;
 	private ArrayList< HashMap< String, Double > > labelsToIndices;
+	private final double[] scaleFactors;
 	private int axisLabelsFontSize;
+	private BdvHandle bdvHandle;
 
 	public TableRowsScatterPlot(
 			List< T > tableRows,
 			String name,
 			SelectionColoringModel< T > coloringModel,
 			SelectionModel< T > selectionModel,
-			String columnNameX,
-			String columnNameY,
+			String[] selectedColumns,
+			double[] scaleFactors,
 			String lineOverlay,
 			int axisLabelsFontSize )
 	{
@@ -110,17 +91,11 @@ public class TableRowsScatterPlot< T extends TableRow >
 		this.name = name;
 		this.coloringModel = coloringModel;
 		this.selectionModel = selectionModel;
-		this.columnNameX = columnNameX;
-		this.columnNameY = columnNameY;
+		this.selectedColumns = selectedColumns;
+		this.scaleFactors = scaleFactors;
 		this.axisLabelsFontSize = axisLabelsFontSize;
 
 		numTableRows = tableRows.size();
-		columnNames = tableRows.get( 0 ).getColumnNames().stream().toArray( String[]::new );
-
-		coloringModel.listeners().add( () -> {
-			bdvHandle.getViewerPanel().requestRepaint();
-		} );
-
 		this.lineOverlay = lineOverlay;
 	}
 
@@ -141,18 +116,21 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 	private void createAndShowScatterPlot( int x, int y )
 	{
-		//viewerAspectRatio = viewerAspectRatio( dataAspectRatio );
+		TableRowKDTreeSupplier< T > kdTreeSupplier = new TableRowKDTreeSupplier<>( tableRows, selectedColumns, scaleFactors );
+		double[] min = kdTreeSupplier.getMin();
+		double[] max = kdTreeSupplier.getMax();
 
-		//viewerPointSize = 7;
-
-		//BiConsumer< RealLocalizable, IntType > indexFromLocation = createPlotFunction( viewerPointSize, search );
-
-		TableRowKDTreeSupplier< T > kdTreeSupplier = new TableRowKDTreeSupplier<>( tableRows, columnNameX, columnNameY );
-		Supplier< BiConsumer< RealPoint, ARGBType > > biConsumerSupplier = new RealPointARGBTypeBiConsumerSupplier<>( kdTreeSupplier, coloringModel, 5.0 );
+		Supplier< BiConsumer< RealPoint, ARGBType > > biConsumerSupplier = new RealPointARGBTypeBiConsumerSupplier<>( kdTreeSupplier, coloringModel, ( min[ 0 ] - max[ 0 ] ) / 100.0 );
 
 		FunctionRealRandomAccessible< ARGBType > randomAccessible = new FunctionRealRandomAccessible( 2, biConsumerSupplier, ARGBType::new );
 
-		show( randomAccessible, FinalInterval.createMinMax( 0, 0, 0, 10, 10, 0 ) );
+		bdvHandle = show( randomAccessible, FinalInterval.createMinMax( (long) min[ 0 ], (long) min[ 1 ], 0, (long) Math.ceil( max[ 0 ] ), (long) Math.ceil( max[ 1 ] ), 0 ) );
+
+		coloringModel.listeners().add( () -> {
+			bdvHandle.getViewerPanel().requestRepaint();
+		} );
+
+		installBdvBehaviours( new NearestNeighborSearchOnKDTree< T >( kdTreeSupplier.get() ) );
 
 //		viewerTransform = viewerTransform( bdvHandle, dataInterval, viewerAspectRatio );
 //
@@ -160,7 +138,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 //
 //		bdvHandle.getViewerPanel().setCurrentViewerTransform( viewerTransform );
 //
-//		installBdvBehaviours();
+
 //
 //		setWindowPosition( x, y );
 //
@@ -171,56 +149,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 		//addSelectedPointsOverlay();
 	}
 
-	private void registerAsViewerTransformListener()
-	{
-		bdvHandle.getViewerPanel().addTransformListener( new TransformListener< AffineTransform3D >()
-		{
-			@Override
-			public void transformChanged( AffineTransform3D affineTransform3D )
-			{
-				synchronized ( this ) // TODO: This cannot work!
-				{
-					viewerTransform = affineTransform3D;
-					createViewerSearchTree( viewerTransform );
-				}
-			}
-		} );
-	}
-
-	private static double viewerAspectRatio( double dataAspectRatio )
-	{
-		double viewerAspectRatio = 1 / dataAspectRatio;
-
-		return viewerAspectRatio;
-
-//		if ( dataAspectRatio < 0.2  || dataAspectRatio > 1 / 0.2 )
-//		{
-//			viewerAspectRatio = 1 / dataAspectRatio;
-//		}
-//		else
-//		{
-//			viewerAspectRatio = 1.0;
-//		}
-	}
-
-	private static RadiusNeighborSearchOnKDTree< Integer > createSearchTree( ArrayList< RealPoint > points, ArrayList< Integer > indices )
-	{
-		// Give a copy because the order of the list is changed by the KDTree
-		final ArrayList< RealPoint > copy = new ArrayList<>( points );
-		final KDTree< Integer > kdTree = new KDTree<>( indices, copy );
-		return new RadiusNeighborSearchOnKDTree<>( kdTree );
-	}
-
-	private void createViewerSearchTree( AffineTransform3D transform3D )
-	{
-		for ( int i = 0; i < points.size(); i++ )
-		{
-			transform3D.apply( points.get( i ), viewerPoints.get( i ) );
-		}
-
-		final KDTree< Integer > kdTree = new KDTree<>( indices, viewerPoints );
-		this.search = new RadiusNeighborSearchOnKDTree<>( kdTree );
-	}
 
 	private void addSelectedPointsOverlay()
 	{
@@ -232,12 +160,12 @@ public class TableRowsScatterPlot< T extends TableRow >
 		BdvFunctions.showOverlay( selectedPointOverlay, "selected point overlay", BdvOptions.options().addTo( bdvHandle ).is2D() );
 	}
 
-	private void addGridLinesOverlay()
-	{
-		GridLinesOverlay gridLinesOverlay = new GridLinesOverlay( bdvHandle, columnNameX, columnNameY, dataPlotInterval, lineOverlay, axisLabelsFontSize );
-
-		BdvFunctions.showOverlay( gridLinesOverlay, "grid lines overlay", BdvOptions.options().addTo( bdvHandle ).is2D() );
-	}
+//	private void addGridLinesOverlay()
+//	{
+//		GridLinesOverlay gridLinesOverlay = new GridLinesOverlay( bdvHandle, columnNames, columnNameY, dataPlotInterval, lineOverlay, axisLabelsFontSize );
+//
+//		BdvFunctions.showOverlay( gridLinesOverlay, "grid lines overlay", BdvOptions.options().addTo( bdvHandle ).is2D() );
+//	}
 
 	private void addAxisTickLabelsOverlay()
 	{
@@ -246,36 +174,44 @@ public class TableRowsScatterPlot< T extends TableRow >
 		BdvFunctions.showOverlay( scatterPlotGridLinesOverlay, "axis tick labels overlay", BdvOptions.options().addTo( bdvHandle ).is2D() );
 	}
 
-	private void installBdvBehaviours()
+	private void installBdvBehaviours( NearestNeighborSearchOnKDTree< T > search )
 	{
 		Behaviours behaviours = new Behaviours( new InputTriggerConfig() );
-		behaviours.install( bdvHandle.getTriggerbindings(), "plate viewer" );
+		behaviours.install( bdvHandle.getTriggerbindings(), "scatter plot " + name );
 
-		BdvPopupMenus.addAction( bdvHandle,"Focus closest point",
-				( x, y ) -> {
-					final RealPoint mouse3d = new RealPoint( x,y, 0 );
-					search.search( mouse3d, viewerPointSize, true ); // TODO: why is this 3d??
-					final Integer rowIndex = search.getSampler( 0 ).get();
-					final T tableRow = tableRows.get( rowIndex );
-					selectionModel.focus( tableRow );
-				}
+		BdvPopupMenus.addAction( bdvHandle,"Focus closest point [ Ctrl Left-Click ]",
+				( x, y ) -> focusClosestPoint( search )
 		);
+
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> focusClosestPoint( search ), "Focus closest point", "ctrl button1" ) ;
 
 		BdvPopupMenus.addAction( bdvHandle,"Change columns...",
 				( x, y ) -> {
+					final String[] xy = { "X", "Y " };
+					final String[] columns = tableRows.get( 0 ).getColumnNames().stream().toArray( String[]::new );
+
 					lineChoices = new String[]{ GridLinesOverlay.NONE, GridLinesOverlay.Y_NX, GridLinesOverlay.Y_N };
 
 					final GenericDialog gd = new GenericDialog( "Column selection" );
-					gd.addChoice( "Column X", columnNames, columnNameX );
-					gd.addChoice( "Column Y", columnNames, columnNameY );
-					gd.addChoice( "Add lines", lineChoices, GridLinesOverlay.NONE );
+
+					for ( int d = 0; d < n; d++ )
+					{
+						gd.addChoice( "Column " + xy[ d ], columns, selectedColumns[ d ] );
+						gd.addNumericField( "Scale Factor " + xy[ d ], scaleFactors[ d ] );
+					}
+
+					//gd.addChoice( "Add lines", lineChoices, GridLinesOverlay.NONE );
 					gd.showDialog();
 
 					if ( gd.wasCanceled() ) return;
 
-					columnNameX = gd.getNextChoice();
-					columnNameY = gd.getNextChoice();
-					lineOverlay = gd.getNextChoice();
+					for ( int d = 0; d < 2; d++ )
+					{
+						selectedColumns[ d ] = gd.getNextChoice();
+						scaleFactors[ d ] = gd.getNextNumber();
+					}
+
+					lineOverlay = GridLinesOverlay.NONE; //gd.getNextChoice();
 
 					final int xLoc = SwingUtilities.getWindowAncestor( bdvHandle.getViewerPanel() ).getLocationOnScreen().x;
 					final int yLoc = SwingUtilities.getWindowAncestor( bdvHandle.getViewerPanel() ).getLocationOnScreen().y;
@@ -285,6 +221,20 @@ public class TableRowsScatterPlot< T extends TableRow >
 					createAndShowScatterPlot( xLoc, yLoc );
 				}
 		);
+	}
+
+	private synchronized void focusClosestPoint( NearestNeighborSearchOnKDTree< T > search )
+	{
+		final RealPoint realPoint = new RealPoint( 3 );
+		bdvHandle.getViewerPanel().getGlobalMouseCoordinates( realPoint );
+		RealPoint realPoint2d = new RealPoint( realPoint.getDoublePosition( 0 ), realPoint.getDoublePosition( 1 ) );
+		search.search( realPoint2d );
+		final T tableRow = search.getSampler().get();
+
+		if ( tableRow != null )
+			selectionModel.focus( search.getSampler().get() );
+		else
+			throw new RuntimeException( "No closest point found." );
 	}
 
 	private RealPoint getViewerMouse3dPosition()
@@ -305,80 +255,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 		bdvHandle.getViewerPanel().getGlobalMouseCoordinates( global3dLocation );
 		final RealPoint dataPosition = new RealPoint( global3dLocation.getDoublePosition( 0 ), global3dLocation.getDoublePosition( 1 ) );
 		return dataPosition;
-	}
-
-	// TODO: why is this so complicated?
-	private void fetchDataPoints( String columnNameX, String columnNameY )
-	{
-		points = new ArrayList<>();
-		viewerPoints = new ArrayList<>();
-		indices = new ArrayList<>();
-
-		Double x, y;
-		Double xMax=-Double.MAX_VALUE,yMax=-Double.MAX_VALUE,xMin=Double.MAX_VALUE,yMin=Double.MAX_VALUE;
-
-		xLabelToIndex = new HashMap<>();
-		MutableDouble xCategoricalIndex = new MutableDouble( 0.0 );
-
-		yLabelToIndex = new HashMap<>();
-		MutableDouble yCategoricalIndex = new MutableDouble( 0.0 );
-
-		labelsToIndices = new ArrayList<>();
-		labelsToIndices.add( xLabelToIndex );
-		labelsToIndices.add( yLabelToIndex );
-
-		for ( int rowIndex = 0; rowIndex < numTableRows; rowIndex++ )
-		{
-			final T tableRow = tableRows.get( rowIndex );
-
-			if ( tableRow instanceof Outlier )
-				if ( ( ( Outlier ) tableRow ).isOutlier() )
-					continue;
-
-			x = getDouble( tableRow.getCell( columnNameX ), xLabelToIndex, xCategoricalIndex );
-			if ( x == null ) continue;
-			y = getDouble( tableRow.getCell( columnNameY ), yLabelToIndex, yCategoricalIndex );
-			if ( y == null ) continue;
-
-			// TODO: why is this 3D?
-			points.add( new RealPoint( x, y, 0 ) );
-			viewerPoints.add( new RealPoint( 0, 0, 0 ) );
-			indices.add( rowIndex );
-			if ( x > xMax ) xMax = x;
-			if ( y > yMax ) yMax = y;
-			if ( x < xMin ) xMin = x;
-			if ( y < yMin ) yMin = y;
-		}
-
-		dataInterval = FinalRealInterval.createMinMax(
-				xMin * 0.9,
-				yMin * 0.9,
-				0,
-				xMax * 1.1,
-				yMax * 1.1,
-				0 );
-
-		dataAspectRatio = (dataInterval.realMax( 1 ) - dataInterval.realMin( 1 )) / (dataInterval.realMax( 0 ) - dataInterval.realMin( 0 ));
-	}
-
-	private Double getDouble( String cell, HashMap< String, Double > stringToDouble, MutableDouble nextIndex )
-	{
-		try
-		{
-			Double x = Utils.parseDouble( cell );
-			if ( x.isNaN() ) return null;
-			return x;
-		}
-		catch ( Exception e )
-		{
-			if ( ! stringToDouble.containsKey( cell ) )
-			{
-				stringToDouble.put( cell, nextIndex.doubleValue() );
-				nextIndex.increment();
-			}
-
-			return stringToDouble.get( cell );
-		}
 	}
 
 	public Double getLocation( String cell, int dimension )
@@ -405,33 +281,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 		}
 	}
 
-	private BiConsumer< RealLocalizable, IntType > createPlotFunction( final double viewerPointSize, RadiusNeighborSearchOnKDTree< Integer > search )
-	{
-		final RealPoint dataPoint = new RealPoint( 0, 0, 0 );
-		final RealPoint pixelLocation = new RealPoint( 0, 0, 0 );
-
-		return ( p, t ) ->
-		{
-			synchronized ( search ) //?
-			{
-				// TODO: why do I need this?
-				for ( int d = 0; d < 2; d++ )
-				{
-					dataPoint.setPosition( p.getDoublePosition( d ), d );
-				}
-
-				viewerTransform.apply( dataPoint, pixelLocation );
-
-				search.search( pixelLocation, viewerPointSize, false );
-
-				if ( search.numNeighbors() == 0 )
-					t.setZero();
-				else
-					t.set( search.getSampler( 0 ).get() );
-			}
-		};
-	}
-
 	final public static double sqrDistance( final RealLocalizable position1, final RealLocalizable position2 )
 	{
 		double distSqr = 0;
@@ -447,50 +296,17 @@ public class TableRowsScatterPlot< T extends TableRow >
 		return distSqr;
 	}
 
-	private void show( FunctionRealRandomAccessible< ARGBType > randomAccessible, FinalInterval interval )
+	private static BdvHandle show( FunctionRealRandomAccessible< ARGBType > randomAccessible, FinalInterval interval )
 	{
 		Prefs.showMultibox( false );
 
-		BdvFunctions.show(
+		return BdvFunctions.show(
 				randomAccessible,
 				interval,
 				"scatter plot",
-				BdvOptions.options().numRenderingThreads( 1 ).is2D() );
-
-//		bdvHandle = scatterPlotBdvSource.getBdvHandle();
-
-		//scatterPlotBdvSource.setDisplayRange( 0, 255);
+				BdvOptions.options().numRenderingThreads( 1 ).is2D() ).getBdvHandle();
 	}
 
-	public void createSource( BiConsumer< RealLocalizable, IntType > biConsumer )
-	{
-		dataPlotInterval = Intervals.smallestContainingInterval( dataInterval );
-		dataPlotInterval = Intervals.expand( dataPlotInterval, (int) ( 10 * viewerPointSize ) );
-
-		// make 3D
-		dataPlotInterval = FinalInterval.createMinMax(
-				dataPlotInterval.min( 0 ),
-				dataPlotInterval.min( 1 ),
-				0,
-				dataPlotInterval.max( 0 ),
-				dataPlotInterval.max( 1 ),
-				0 );
-
-		final FunctionRealRandomAccessible< IntType > fra = new FunctionRealRandomAccessible< IntType >( 2, biConsumer, IntType::new );
-
-		// make 3D
-		final RealRandomAccessible< IntType > rra = RealViews.addDimension( fra );
-
-		indexSource = new RealRandomAccessibleIntervalSource( rra, dataPlotInterval, new IntType(  ), name );
-
-		//scatterSource.getInterpolatedSource(  )
-
-		final ListItemsARGBConverter< T > converter = new ListItemsARGBConverter( tableRows, coloringModel );
-
-		converter.getIndexToColor().put( -1, ColorUtils.getARGBType( Color.GRAY ).get() );
-
-		argbSource = new ARGBConvertedRealAccessibleSource( indexSource, converter );
-	}
 
 	public AffineTransform3D viewerTransform( BdvHandle bdvHandle, FinalRealInterval dataInterval, double viewerAspectRatio )
 	{
@@ -536,7 +352,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 	}
 
 
-
 	public void setWindowPosition( int x, int y )
 	{
 		BdvUtils.getViewerFrame( bdvHandle ).setLocation( x, y );
@@ -562,13 +377,8 @@ public class TableRowsScatterPlot< T extends TableRow >
 		return points;
 	}
 
-	public String getColumnNameX()
+	public String[] getSelectedColumns()
 	{
-		return columnNameX;
-	}
-
-	public String getColumnNameY()
-	{
-		return columnNameY;
+		return selectedColumns;
 	}
 }

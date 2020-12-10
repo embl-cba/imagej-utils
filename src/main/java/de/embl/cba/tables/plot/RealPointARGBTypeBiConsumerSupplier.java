@@ -28,7 +28,7 @@ public class RealPointARGBTypeBiConsumerSupplier< T extends TableRow > implement
 	@Override
 	public BiConsumer< RealPoint, ARGBType > get()
 	{
-		System.out.println( ++n );
+		//System.out.println( ++n );
 		return new RealPointARGBTypeBiConsumer( kdTreeSupplier.get(), coloringModel, radius );
 	}
 
