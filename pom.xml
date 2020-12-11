@@ -106,7 +106,7 @@
         <dependency>
             <groupId>sc.fiji</groupId>
             <artifactId>bigdataviewer-core</artifactId>
-<!--            //<version>${bigdataviewer-core.version}</version>-->
+            <version>${bigdataviewer-core.version}</version>
         </dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>

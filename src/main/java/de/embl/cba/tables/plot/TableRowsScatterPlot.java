@@ -29,11 +29,13 @@
 package de.embl.cba.tables.plot;
 
 import bdv.util.*;
+import de.embl.cba.DebugHelper;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import de.embl.cba.tables.color.SelectionColoringModel;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;
+import ij.IJ;
 import net.imglib2.*;
 import net.imglib2.neighborsearch.NearestNeighborSearchOnKDTree;
 import net.imglib2.position.FunctionRealRandomAccessible;
@@ -103,6 +105,16 @@ public class TableRowsScatterPlot< T extends TableRow >
 		TableRowKDTreeSupplier< T > kdTreeSupplier = new TableRowKDTreeSupplier<>( tableRows, selectedColumns, scaleFactors );
 		double[] min = kdTreeSupplier.getMin();
 		double[] max = kdTreeSupplier.getMax();
+
+		double aspectRatio = ( max[ 1 ] - min[ 1 ] ) / ( max[ 0 ] - min[ 0 ] );
+		if ( aspectRatio > 10 || aspectRatio < 0.1 )
+		{
+			IJ.showMessage( "The aspect ratio, (yMax-yMin)/(xMax-xMin), of your data is " + aspectRatio + "." +
+					"\nIn order to see anything you may have to scale either the x or y values" +
+					"\nsuch that this ratio becomes closer to one." +
+					"\nYou can do so by right-clicking into the scatter plot" +
+					"\nand selecting \"Reconfigure...\"");
+		}
 
 		Supplier< BiConsumer< RealPoint, ARGBType > > biConsumerSupplier = new RealPointARGBTypeBiConsumerSupplier<>( kdTreeSupplier, selectionColoringModel,  dotSizeScaleFactor *( min[ 0 ] - max[ 0 ] ) / 100.0 );
 
@@ -216,18 +228,18 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 	private static BdvHandle show( FunctionRealRandomAccessible< ARGBType > randomAccessible, FinalInterval interval, String[] selectedColumns )
 	{
-		//Prefs.showMultibox( false );
+		Prefs.showMultibox( false );
 
 		return BdvFunctions.show(
 				randomAccessible,
 				interval,
 				getPlotName( selectedColumns ),
-				BdvOptions.options().numRenderingThreads( 1 ).is2D().frameTitle( getPlotName( selectedColumns ) ) ).getBdvHandle();
+				BdvOptions.options().is2D().numRenderingThreads( 1 ).frameTitle( getPlotName( selectedColumns ) ) ).getBdvHandle();
 	}
 
 	private static String getPlotName( String[] selectedColumns )
 	{
-		return selectedColumns[ 0 ] + " - " + selectedColumns[ 1 ];
+		return "x: " + selectedColumns[ 0 ] + ", y: " + selectedColumns[ 1 ];
 	}
 
 

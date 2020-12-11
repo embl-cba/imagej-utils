@@ -1,5 +1,6 @@
 package de.embl.cba.tables.plot;
 
+import de.embl.cba.DebugHelper;
 import de.embl.cba.tables.Outlier;
 import de.embl.cba.tables.Utils;
 import de.embl.cba.tables.tablerow.TableRow;
@@ -9,11 +10,13 @@ import net.imglib2.RealPoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< KDTree< T  > >
 {
 	final private int n = 2;
+	AtomicInteger i = new AtomicInteger( 0 );
 
 	ArrayList< RealPoint > dataPoints;
 	private ArrayList< T > dataPointTableRows;
@@ -38,6 +41,8 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 	@Override
 	public KDTree< T > get()
 	{
+		//System.out.println( i.incrementAndGet() );
+		//DebugHelper.printStackTrace( 10 );
 		final KDTree< T > kdTree = new KDTree<>( new ArrayList<>( dataPointTableRows ), new ArrayList<>( dataPoints ) );
 		return kdTree;
 	}
@@ -58,6 +63,7 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 		int size = tableRows.size();
 
 		Double[] xy = new Double[ 2 ];
+		boolean isNumber;
 
 		for ( int i = 0; i < size; i++ )
 		{
@@ -67,10 +73,15 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 				if ( ( ( Outlier ) tableRow ).isOutlier() )  // From plateViewer for Corona screening project
 					continue;
 
+			isNumber = true;
 			for ( int d = 0; d < n; d++ )
 			{
 				xy[ d ] = Utils.parseDouble( tableRow.getCell( columns[ d ] ) );
-				if ( xy[ d ].isNaN() || xy[ d ].isInfinite() ) continue;
+				if ( xy[ d ].isNaN() || xy[ d ].isInfinite() )
+				{
+					isNumber = false;
+					break;
+				}
 
 				xy[ d ] *= scaleFactors[ d ];
 
@@ -78,8 +89,11 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 				if ( xy[ d ] > max[ d ] ) max[ d ] = xy[ d ];
 			}
 
-			dataPoints.add( new RealPoint( xy[ 0 ], xy[ 1 ] ) );
-			dataPointTableRows.add( tableRow );
+			if ( isNumber )
+			{
+				dataPoints.add( new RealPoint( xy[ 0 ], xy[ 1 ] ) );
+				dataPointTableRows.add( tableRow );
+			}
 		}
 
 		if ( dataPoints.size() == 0 )
