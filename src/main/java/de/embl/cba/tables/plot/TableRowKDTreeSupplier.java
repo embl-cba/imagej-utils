@@ -7,19 +7,20 @@ import de.embl.cba.tables.tablerow.TableRow;
 import net.imglib2.KDTree;
 import net.imglib2.RealPoint;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< KDTree< T  > >
 {
 	final private int n = 2;
 	AtomicInteger i = new AtomicInteger( 0 );
 
-	ArrayList< RealPoint > dataPoints;
+	private ArrayList< RealPoint > dataPoints;
 	private ArrayList< T > dataPointTableRows;
+	private Map< T, RealPoint > tableRowToRealPoint;
 	double[] min = new double[ n ];
 	double[] max = new double[ n ];
 
@@ -29,6 +30,9 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 		Arrays.fill( max, - Double.MAX_VALUE );
 
 		initialiseDataPoints( tableRows, columns, scaleFactors );
+
+		tableRowToRealPoint = IntStream.range( 0, dataPoints.size() ).boxed()
+				.collect( Collectors.toMap( i -> dataPointTableRows.get( i ), i -> dataPoints.get( i )));
 	}
 
 	/**
@@ -108,5 +112,10 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 	public double[] getMax()
 	{
 		return max;
+	}
+
+	public Map< T, RealPoint > getTableRowToRealPoint()
+	{
+		return tableRowToRealPoint;
 	}
 }

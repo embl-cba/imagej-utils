@@ -80,25 +80,21 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 		switch ( selectionColoringMode )
 		{
 			case DimNotSelected:
-
 				if ( ! isSelected )
 					dim( output, brightnessNotSelected );
 				break;
 
 			case OnlyShowSelected:
-
 				if ( ! isSelected )
 					dim( output, 0.0 );
 				break;
 
 			case SelectionColor:
-
 				if ( isSelected )
 					output.set( selectionColor );
 				break;
 
 			case SelectionColorAndDimNotSelected:
-
 				if ( isSelected )
 					output.set( selectionColor );
 				else

@@ -29,10 +29,10 @@
 package de.embl.cba.tables.plot;
 
 import bdv.util.*;
-import de.embl.cba.DebugHelper;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import de.embl.cba.tables.color.SelectionColoringModel;
+import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;
 import ij.IJ;
@@ -47,6 +47,7 @@ import org.scijava.ui.behaviour.util.Behaviours;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -61,6 +62,8 @@ public class TableRowsScatterPlot< T extends TableRow >
 	private double[] scaleFactors;
 	private double dotSizeScaleFactor;
 	private BdvHandle bdvHandle;
+	private Map< T, RealPoint > tableRowToRealPoint;
+	private T recentFocus;
 
 	public TableRowsScatterPlot(
 			List< T > tableRows,
@@ -105,6 +108,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 		TableRowKDTreeSupplier< T > kdTreeSupplier = new TableRowKDTreeSupplier<>( tableRows, selectedColumns, scaleFactors );
 		double[] min = kdTreeSupplier.getMin();
 		double[] max = kdTreeSupplier.getMax();
+		tableRowToRealPoint = kdTreeSupplier.getTableRowToRealPoint();
 
 		double aspectRatio = ( max[ 1 ] - min[ 1 ] ) / ( max[ 0 ] - min[ 0 ] );
 		if ( aspectRatio > 10 || aspectRatio < 0.1 )
@@ -128,6 +132,8 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 		installBdvBehaviours( new NearestNeighborSearchOnKDTree< T >( kdTreeSupplier.get() ) );
 
+		registerAsSelectionListener();
+
 //		viewerTransform = viewerTransform( bdvHandle, dataInterval, viewerAspectRatio );
 //
 //		registerAsViewerTransformListener();
@@ -145,15 +151,32 @@ public class TableRowsScatterPlot< T extends TableRow >
 		//addSelectedPointsOverlay();
 	}
 
-
-	private void addSelectedPointsOverlay()
+	private void registerAsSelectionListener()
 	{
-		if ( selectedPointOverlay != null )
-			selectedPointOverlay.close();
+		selectionColoringModel.getSelectionModel().listeners().add( new SelectionListener< T >()
+		{
+			@Override
+			public void selectionChanged()
+			{
 
-		selectedPointOverlay = new SelectedPointOverlay( this );
+			}
 
-		BdvFunctions.showOverlay( selectedPointOverlay, "selected point overlay", BdvOptions.options().addTo( bdvHandle ).is2D() );
+			@Override
+			public void focusEvent( T selection )
+			{
+				if ( selection == recentFocus )
+				{
+					return;
+				}
+				else
+				{
+					recentFocus = selection;
+					double[] location = new double[ 3 ];
+					tableRowToRealPoint.get( selection ).localize( location );
+					BdvUtils.moveToPosition( bdvHandle, location, 0, 500 );
+				}
+			}
+		} );
 	}
 
 //	private void addGridLinesOverlay()
@@ -175,11 +198,18 @@ public class TableRowsScatterPlot< T extends TableRow >
 		Behaviours behaviours = new Behaviours( new InputTriggerConfig() );
 		behaviours.install( bdvHandle.getTriggerbindings(), "scatterplot" + selectedColumns[ 0 ] + selectedColumns[ 1 ] );
 
-		BdvPopupMenus.addAction( bdvHandle,"Focus closest point [ Ctrl Left-Click ]",
-				( x, y ) -> focusClosestPoint( search )
+		BdvPopupMenus.addAction( bdvHandle,"Focus closest point [Left-Click ]",
+				( x, y ) -> focusAndSelectClosestPoint( search, true )
 		);
 
-		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> focusClosestPoint( search ), "Focus closest point", "ctrl button1" ) ;
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> focusAndSelectClosestPoint( search, true ), "Focus closest point", "button1" ) ;
+
+
+		BdvPopupMenus.addAction( bdvHandle,"Select closest point [ Ctrl Left-Click ]",
+				( x, y ) -> focusAndSelectClosestPoint( search, false )
+		);
+
+		behaviours.behaviour( ( ClickBehaviour ) ( x, y ) -> focusAndSelectClosestPoint( search, false ), "Select closest point", "ctrl button1" ) ;
 
 		BdvPopupMenus.addAction( bdvHandle,"Reconfigure...",
 				( x, y ) -> {
@@ -200,30 +230,38 @@ public class TableRowsScatterPlot< T extends TableRow >
 		);
 	}
 
-	private synchronized void focusClosestPoint( NearestNeighborSearchOnKDTree< T > search )
+	private synchronized void focusAndSelectClosestPoint( NearestNeighborSearchOnKDTree< T > search, boolean focusOnly )
+	{
+		final T selection = searchClosestPoint( search );
+
+		if ( selection != null )
+		{
+			if ( focusOnly )
+			{
+				recentFocus = selection;
+				selectionModel.focus( selection );
+			}
+			else
+			{
+				selectionModel.toggle( selection );
+				if ( selectionModel.isSelected( selection ) )
+				{
+					recentFocus = selection;
+					selectionModel.focus( selection );
+				}
+			}
+		}
+		else
+			throw new RuntimeException( "No closest point found." );
+	}
+
+	private T searchClosestPoint( NearestNeighborSearchOnKDTree< T > search )
 	{
 		final RealPoint realPoint = new RealPoint( 3 );
 		bdvHandle.getViewerPanel().getGlobalMouseCoordinates( realPoint );
 		RealPoint realPoint2d = new RealPoint( realPoint.getDoublePosition( 0 ), realPoint.getDoublePosition( 1 ) );
 		search.search( realPoint2d );
-		final T tableRow = search.getSampler().get();
-
-		if ( tableRow != null )
-			selectionModel.focus( search.getSampler().get() );
-		else
-			throw new RuntimeException( "No closest point found." );
-	}
-
-	private RealPoint getViewerMouse3dPosition()
-	{
-		final RealPoint mouse2d = new RealPoint( 0, 0 );
-		bdvHandle.getViewerPanel().getMouseCoordinates( mouse2d );
-		final RealPoint mouse3d = new RealPoint( 3 );
-		for ( int d = 0; d < 2; d++ )
-		{
-			mouse3d.setPosition( mouse2d.getDoublePosition( d ), d );
-		}
-		return mouse3d;
+		return search.getSampler().get();
 	}
 
 	private static BdvHandle show( FunctionRealRandomAccessible< ARGBType > randomAccessible, FinalInterval interval, String[] selectedColumns )
@@ -241,51 +279,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 	{
 		return "x: " + selectedColumns[ 0 ] + ", y: " + selectedColumns[ 1 ];
 	}
-
-
-	public AffineTransform3D viewerTransform( BdvHandle bdvHandle, FinalRealInterval dataInterval, double viewerAspectRatio )
-	{
-		AffineTransform3D viewerTransform = new AffineTransform3D();
-		// bdvHandle.getViewerPanel().getState().getViewerTransform( viewerTransform );
-
-		AffineTransform3D reflectY = new AffineTransform3D();
-		reflectY.set( -1.0, 1, 1 );
-		viewerTransform.preConcatenate( reflectY );
-
-		final AffineTransform3D scale = new AffineTransform3D();
-
-		final double scaleX = 1.0 * BdvUtils.getBdvWindowWidth( bdvHandle ) / ( dataInterval.realMax( 0 ) - dataInterval.realMin( 0 ) );
-
-		final double zoom = 1.0;
-		scale.scale( zoom * scaleX, zoom * scaleX * viewerAspectRatio, 1.0  );
-		viewerTransform.preConcatenate( scale );
-
-		FinalRealInterval scaledBounds = viewerTransform.estimateBounds( dataInterval );
-
-		shiftViewerTransformToDataCenter( viewerTransform, dataInterval, bdvHandle );
-
-		FinalRealInterval finalBounds = viewerTransform.estimateBounds( dataInterval );
-
-		return viewerTransform;
-	}
-
-	private static void shiftViewerTransformToDataCenter( AffineTransform3D viewerTransform, FinalRealInterval dataInterval, BdvHandle bdvHandle )
-	{
-		FinalRealInterval bounds = viewerTransform.estimateBounds( dataInterval );
-		final AffineTransform3D translate = new AffineTransform3D();
-		translate.translate( - ( bounds.realMin( 0 ) ), - ( bounds.realMin( 1 ) ), 0 );
-		viewerTransform.preConcatenate( translate );
-		bounds = viewerTransform.estimateBounds( dataInterval );
-
-		final double[] translation = new double[ 2 ];
-		translation[ 0 ] = 0.5 * ( BdvUtils.getBdvWindowWidth( bdvHandle ) - bounds.realMax( 0 ) );
-		translation[ 1 ] = 0.5 * ( BdvUtils.getBdvWindowHeight( bdvHandle ) - bounds.realMax( 1 ));
-
-		final AffineTransform3D translate2 = new AffineTransform3D();
-		translate2.translate( translation[ 0 ], translation[ 1 ], 0 );
-		viewerTransform.preConcatenate( translate2 );
-	}
-
 
 	public void setWindowPosition( int x, int y )
 	{

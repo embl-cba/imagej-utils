@@ -107,6 +107,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 	private boolean isLabelMaskShownAsBoundaries;
 	private int labelMaskBoundaryThickness;
 	private Set< String > popupActionNames;
+	private int numRenderingThreads = 1; // TODO: add to constructor
 
 	public SegmentsBdvView(
 			final List< T > segments,
@@ -529,8 +530,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 
 	private void initBdvOptions( )
 	{
-		bdvOptions = BdvOptions.options();
-
+		bdvOptions = BdvOptions.options().numRenderingThreads( numRenderingThreads );
 
 		if ( imageSourcesModel.is2D() )
 			bdvOptions = bdvOptions.is2D();

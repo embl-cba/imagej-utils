@@ -55,6 +55,12 @@ public class RealPointARGBTypeBiConsumerSupplier< T extends TableRow > implement
 				final Sampler< T > sampler = search.getSampler( 0 );
 				final T tableRow = sampler.get();
 				coloringModel.convert( tableRow, argbType );
+
+				// The coloring model uses the alpha value to adjust the brightness.
+				// Since the default renderer in BDV ignores this we multiply the rgb values accordingly
+				final int alpha = ARGBType.alpha( argbType.get() );
+				if( alpha < 255 )
+					argbType.mul( alpha / 255.0 );
 			}
 			else
 			{
