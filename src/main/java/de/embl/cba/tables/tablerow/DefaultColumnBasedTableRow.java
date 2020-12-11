@@ -28,6 +28,7 @@
  */
 package de.embl.cba.tables.tablerow;
 
+import de.embl.cba.tables.select.Listeners;
 import de.embl.cba.tables.tablerow.ColumnBasedTableRow;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public class DefaultColumnBasedTableRow implements ColumnBasedTableRow
 {
 	private final int row;
 	private final Map< String, List< String > > columns;
+	Listeners.SynchronizedList< TableRowListener > listeners = new Listeners.SynchronizedList<>( );
 
 	public DefaultColumnBasedTableRow( int row, Map< String, List< String > > columns )
 	{
@@ -48,6 +50,12 @@ public class DefaultColumnBasedTableRow implements ColumnBasedTableRow
 	public Map< String, List< String > > getColumns()
 	{
 		return columns;
+	}
+
+	@Override
+	public Listeners< TableRowListener > listeners()
+	{
+		return listeners;
 	}
 
 	@Override

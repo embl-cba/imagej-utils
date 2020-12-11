@@ -104,9 +104,7 @@ public class TableColumns
 		return stringColumnsFromTableFile( path, null );
 	}
 
-	public static Map< String, List< String > > stringColumnsFromTableFile(
-			final String path,
-			String delim )
+	public static Map< String, List< String > > stringColumnsFromTableFile( final String path, String delim )
 	{
 		final List< String > rowsInTableIncludingHeader = Tables.readRows( path );
 

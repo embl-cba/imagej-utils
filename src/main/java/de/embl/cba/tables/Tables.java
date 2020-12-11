@@ -30,6 +30,8 @@ package de.embl.cba.tables;
 
 import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
 import de.embl.cba.tables.table.ColumnClassAwareTableModel;
+import de.embl.cba.tables.tablerow.ColumnBasedTableRow;
+import de.embl.cba.tables.tablerow.DefaultColumnBasedTableRow;
 import de.embl.cba.tables.tablerow.TableRow;
 import org.scijava.table.GenericTable;
 
@@ -823,5 +825,27 @@ public class Tables
 		}
 
 		return new JTable( newModel );
+	}
+
+	public static List< ColumnBasedTableRow > columnBasedTableRowsFromColumns( final Map< String, List< String > > columnNamesToColumns )
+	{
+		final List< ColumnBasedTableRow > columnBasedTableRows = new ArrayList<>();
+
+		final int numRows = columnNamesToColumns.values().iterator().next().size();
+
+		for ( int row = 0; row < numRows; row++ )
+		{
+			final DefaultColumnBasedTableRow tableRow = new DefaultColumnBasedTableRow( row, columnNamesToColumns );
+
+			columnBasedTableRows.add( tableRow );
+		}
+
+		return columnBasedTableRows;
+	}
+
+	public static List< ColumnBasedTableRow > open( String path )
+	{
+		Map< String, List< String > > columnNameToColumn = TableColumns.stringColumnsFromTableFile( path );
+		return columnBasedTableRowsFromColumns( columnNameToColumn );
 	}
 }

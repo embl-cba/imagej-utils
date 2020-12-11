@@ -78,6 +78,11 @@ public class TableRowsScatterPlot< T extends TableRow >
 		//this.lineOverlay = lineOverlay;
 	}
 
+	public void show()
+	{
+		show( null );
+	}
+
 	public void show( JComponent parentComponent )
 	{
 		if ( parentComponent != null )
