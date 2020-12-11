@@ -816,10 +816,11 @@ public class Tables
 
 		for ( String columnName : selectedColumns )
 		{
-			final int columnIndex = table.getColumnModel().getColumnIndex( columnName );
+			int viewIndex = table.getColumnModel().getColumnIndex( columnName );
+			int modelIndex = table.convertColumnIndexToModel( viewIndex );
 			final Object[] objects = new Object[ rowCount ];
 			for ( int rowIndex = 0; rowIndex < objects.length; rowIndex++ )
-				objects[ rowIndex ] = model.getValueAt( rowIndex, columnIndex );
+				objects[ rowIndex ] = model.getValueAt( rowIndex, modelIndex );
 
 			newModel.addColumn( columnName, objects );
 		}

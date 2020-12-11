@@ -114,8 +114,7 @@ public class TableUIs
 
 	public static void saveColumns( JTable table )
 	{
-		final ArrayList< String > selectedColumns
-				= selectColumnNamesUI( table, "Select columns" );
+		final ArrayList< String > selectedColumns = selectColumnNamesUI( table, "Select columns" );
 
 		final JTable newTable = Tables.createNewTableFromSelectedColumns( table, selectedColumns );
 
