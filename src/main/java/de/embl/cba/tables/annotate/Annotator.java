@@ -61,7 +61,8 @@ public class Annotator < T extends TableRow > extends JFrame
 	private boolean isSingleRowBrowsingMode = false; // TODO: think about how to get out of this mode!
 	private JTextField goToRowIndexTextField;
 	private HashMap< String, T > annotationToTableRow;
-	private JPanel annotationButtonsPanel;
+	private JPanel annotationButtonsContainer;
+	private JScrollPane annotationButtonsScrollPane;
 	private T currentlySelectedRow;
 
 	public Annotator(
@@ -90,6 +91,9 @@ public class Annotator < T extends TableRow > extends JFrame
 
 	private void createDialog()
 	{
+		this.setContentPane( panel );
+		panel.setOpaque( true ); //content panes must be opaque
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
 		addCreateCategoryButton();
 		panel.add( new JSeparator( SwingConstants.HORIZONTAL ) );
 		addAnnotationButtons();
@@ -97,16 +101,16 @@ public class Annotator < T extends TableRow > extends JFrame
 		addTableRowBrowserSelectPanel();
 		addTableRowBrowserSelectPreviousAndNextPanel();
 		addSkipNonePanel();
+		// this has to be done at the end, to make the packing work correctly
+		// otherwise, continuing an annotation with many categories will be packed to a size too large
+		// for the screen
+		addAnnotationButtonPanels();
 	}
 
 	private void showFrame()
 	{
 		this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-		panel.setOpaque( true ); //content panes must be opaque
-		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
-		this.setContentPane( panel );
 		this.setLocation( MouseInfo.getPointerInfo().getLocation().x, MouseInfo.getPointerInfo().getLocation().y );
-		this.pack();
 		this.setVisible( true );
 	}
 
@@ -125,14 +129,13 @@ public class Annotator < T extends TableRow > extends JFrame
 				return;
 			}
 			addAnnotationButtonPanel( newClassName, null );
-			refreshDialog();
 		} );
 		this.panel.add( panel );
 	}
 
 	private void addAnnotationButtons()
 	{
-		annotationButtonsPanel = new JPanel(  );
+		JPanel annotationButtonsPanel = new JPanel(  );
 		annotationButtonsPanel.setLayout( new BoxLayout(annotationButtonsPanel, BoxLayout.Y_AXIS ) );
 		annotationButtonsPanel.setBorder( BorderFactory.createEmptyBorder(0,10,10,10) );
 		this.panel.add( annotationButtonsPanel );
@@ -142,6 +145,17 @@ public class Annotator < T extends TableRow > extends JFrame
 		panel.add( new JLabel( "      " ) );
 		annotationButtonsPanel.add( panel );
 
+		annotationButtonsScrollPane = new JScrollPane( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+		annotationButtonsScrollPane.setBorder(BorderFactory.createEmptyBorder());
+		annotationButtonsPanel.add( annotationButtonsScrollPane );
+
+		annotationButtonsContainer = new JPanel();
+		annotationButtonsContainer.setLayout( new BoxLayout( annotationButtonsContainer, BoxLayout.PAGE_AXIS ));
+		annotationButtonsContainer.setBorder( BorderFactory.createEmptyBorder() );
+		annotationButtonsScrollPane.setViewportView( annotationButtonsContainer );
+	}
+
+	private void addAnnotationButtonPanels() {
 		final HashMap< String, T > annotations = getAnnotations();
 		for ( String annotation : annotations.keySet() )
 			addAnnotationButtonPanel( annotation, annotations.get( annotation ) );
@@ -196,8 +210,8 @@ public class Annotator < T extends TableRow > extends JFrame
 
 		panel.add( annotateButton );
 		panel.add( changeColor );
-		annotationButtonsPanel.add( panel );
-		annotationButtonsPanel.revalidate();
+		annotationButtonsContainer.add( panel );
+		refreshDialog();
 	}
 
 	private void addTableRowBrowserSelectPreviousAndNextPanel( )
@@ -435,6 +449,14 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		panel.revalidate();
 		panel.repaint();
-		this.pack();
+		// scroll to bottom, so any new panels are visible
+		annotationButtonsScrollPane.validate();
+		JScrollBar vertical = annotationButtonsScrollPane.getVerticalScrollBar();
+		vertical.setValue( vertical.getMaximum() );
+
+		// scroll pane resizes up to five annotations, then requires user resizing
+		if ( annotationButtonsContainer.getComponentCount() < 6 ) {
+			this.pack();
+		}
 	}
 }
