@@ -13,10 +13,17 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+
+/**
+ * Note: Turns out this does not really need to be a Supplier as
+ * we only need one KDTree and not multiple, but it also does not
+ * hurt, so I left it like this.
+ *
+ * @param <T>
+ */
 public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< KDTree< T  > >
 {
 	final private int n = 2;
-	AtomicInteger i = new AtomicInteger( 0 );
 
 	private ArrayList< RealPoint > dataPoints;
 	private ArrayList< T > dataPointTableRows;
@@ -45,9 +52,8 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 	@Override
 	public KDTree< T > get()
 	{
-		//System.out.println( i.incrementAndGet() );
-		//DebugHelper.printStackTrace( 10 );
 		final KDTree< T > kdTree = new KDTree<>( new ArrayList<>( dataPointTableRows ), new ArrayList<>( dataPoints ) );
+
 		return kdTree;
 	}
 

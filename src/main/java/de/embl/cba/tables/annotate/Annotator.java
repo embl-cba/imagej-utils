@@ -102,8 +102,8 @@ public class Annotator < T extends TableRow > extends JFrame
 		addTableRowBrowserSelectPreviousAndNextPanel();
 		addSkipNonePanel();
 		// this has to be done at the end, to make the packing work correctly
-		// otherwise, continuing an annotation with many categories will be packed to a size too large
-		// for the screen
+		// otherwise, continuing an annotation with many categories will be
+		// packed to a size too large for the screen
 		addAnnotationButtonPanels();
 	}
 
@@ -135,10 +135,10 @@ public class Annotator < T extends TableRow > extends JFrame
 
 	private void addAnnotationButtons()
 	{
-		JPanel annotationButtonsPanel = new JPanel(  );
+		JPanel annotationButtonsPanel = new JPanel( );
 		annotationButtonsPanel.setLayout( new BoxLayout(annotationButtonsPanel, BoxLayout.Y_AXIS ) );
 		annotationButtonsPanel.setBorder( BorderFactory.createEmptyBorder(0,10,10,10) );
-		this.panel.add( annotationButtonsPanel );
+		panel.add( annotationButtonsPanel );
 
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 		panel.add( new JLabel( "Annotate selected segment(s) as:" ) );
@@ -146,7 +146,7 @@ public class Annotator < T extends TableRow > extends JFrame
 		annotationButtonsPanel.add( panel );
 
 		annotationButtonsScrollPane = new JScrollPane( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
-		annotationButtonsScrollPane.setBorder(BorderFactory.createEmptyBorder());
+		annotationButtonsScrollPane.setBorder( BorderFactory.createEmptyBorder() );
 		annotationButtonsPanel.add( annotationButtonsScrollPane );
 
 		annotationButtonsContainer = new JPanel();
@@ -449,6 +449,7 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		panel.revalidate();
 		panel.repaint();
+
 		// scroll to bottom, so any new panels are visible
 		annotationButtonsScrollPane.validate();
 		JScrollBar vertical = annotationButtonsScrollPane.getVerticalScrollBar();

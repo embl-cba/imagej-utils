@@ -106,6 +106,8 @@ public class TableRowsScatterPlot< T extends TableRow >
 	private void createAndShowScatterPlot( int x, int y )
 	{
 		TableRowKDTreeSupplier< T > kdTreeSupplier = new TableRowKDTreeSupplier<>( tableRows, selectedColumns, scaleFactors );
+
+		KDTree< T > kdTree = kdTreeSupplier.get();
 		double[] min = kdTreeSupplier.getMin();
 		double[] max = kdTreeSupplier.getMax();
 		tableRowToRealPoint = kdTreeSupplier.getTableRowToRealPoint();
@@ -120,7 +122,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 					"\nand selecting \"Reconfigure...\"");
 		}
 
-		Supplier< BiConsumer< RealPoint, ARGBType > > biConsumerSupplier = new RealPointARGBTypeBiConsumerSupplier<>( kdTreeSupplier, selectionColoringModel,  dotSizeScaleFactor *( min[ 0 ] - max[ 0 ] ) / 100.0 );
+		Supplier< BiConsumer< RealPoint, ARGBType > > biConsumerSupplier = new RealPointARGBTypeBiConsumerSupplier<>( kdTree, selectionColoringModel,  dotSizeScaleFactor *( min[ 0 ] - max[ 0 ] ) / 100.0 );
 
 		FunctionRealRandomAccessible< ARGBType > randomAccessible = new FunctionRealRandomAccessible( 2, biConsumerSupplier, ARGBType::new );
 
@@ -130,7 +132,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 			bdvHandle.getViewerPanel().requestRepaint();
 		} );
 
-		installBdvBehaviours( new NearestNeighborSearchOnKDTree< T >( kdTreeSupplier.get() ) );
+		installBdvBehaviours( new NearestNeighborSearchOnKDTree< T >( kdTree ) );
 
 		registerAsSelectionListener();
 
@@ -142,7 +144,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 //
 
 //
-//		setWindowPosition( x, y );
+		setWindowPosition( x, y );
 //
 //		addGridLinesOverlay();
 
@@ -158,7 +160,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 			@Override
 			public void selectionChanged()
 			{
-
+				bdvHandle.getViewerPanel().requestRepaint();
 			}
 
 			@Override
@@ -272,7 +274,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 				randomAccessible,
 				interval,
 				getPlotName( selectedColumns ),
-				BdvOptions.options().is2D().numRenderingThreads( 1 ).frameTitle( getPlotName( selectedColumns ) ) ).getBdvHandle();
+				BdvOptions.options().is2D().frameTitle( getPlotName( selectedColumns ) ) ).getBdvHandle();
 	}
 
 	private static String getPlotName( String[] selectedColumns )
