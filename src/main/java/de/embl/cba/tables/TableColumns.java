@@ -31,11 +31,14 @@ package de.embl.cba.tables;
 import de.embl.cba.tables.Tables;
 import de.embl.cba.tables.Utils;
 import ij.measure.ResultsTable;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.swing.*;
 import javax.swing.table.TableModel;
+import java.io.File;
 import java.util.*;
+import java.util.regex.Matcher;
 
 public class TableColumns
 {
@@ -106,9 +109,19 @@ public class TableColumns
 
 	public static Map< String, List< String > > stringColumnsFromTableFile( final String path, String delim )
 	{
-		final List< String > rowsInTableIncludingHeader = Tables.readRows( path );
+		List< String > rowsInTableIncludingHeader = Tables.readRows( path );
 
-		delim = Tables.autoDelim( delim, rowsInTableIncludingHeader );
+		try {
+			delim = Tables.autoDelim(delim, rowsInTableIncludingHeader);
+		} catch (RuntimeException e) {
+			// on Windows, relative paths in a .csv file aren't followed
+			// so we feed the absolute path directly, replacing any separators
+			String relativePath = rowsInTableIncludingHeader.get(0);
+			relativePath = relativePath.replaceAll( "[/\\\\]+", Matcher.quoteReplacement(File.separator) );
+			String absolutePath = FileAndUrlUtils.combinePath( new File( path ).getParent(), relativePath );
+			rowsInTableIncludingHeader = Tables.readRows( absolutePath );
+			delim = Tables.autoDelim( delim, rowsInTableIncludingHeader );
+		}
 
 		List< String > columnNames = Tables.getColumnNames( rowsInTableIncludingHeader, delim );
 
