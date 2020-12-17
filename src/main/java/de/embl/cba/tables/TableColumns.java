@@ -109,19 +109,9 @@ public class TableColumns
 
 	public static Map< String, List< String > > stringColumnsFromTableFile( final String path, String delim )
 	{
-		List< String > rowsInTableIncludingHeader = Tables.readRows( path );
+		final List< String > rowsInTableIncludingHeader = Tables.readRows( path );
 
-		try {
-			delim = Tables.autoDelim(delim, rowsInTableIncludingHeader);
-		} catch (RuntimeException e) {
-			// on Windows, relative paths in a .csv file aren't followed
-			// so we feed the absolute path directly, replacing any separators
-			String relativePath = rowsInTableIncludingHeader.get(0);
-			relativePath = relativePath.replaceAll( "[/\\\\]+", Matcher.quoteReplacement(File.separator) );
-			String absolutePath = FileAndUrlUtils.combinePath( new File( path ).getParent(), relativePath );
-			rowsInTableIncludingHeader = Tables.readRows( absolutePath );
-			delim = Tables.autoDelim( delim, rowsInTableIncludingHeader );
-		}
+		delim = Tables.autoDelim( delim, rowsInTableIncludingHeader );
 
 		List< String > columnNames = Tables.getColumnNames( rowsInTableIncludingHeader, delim );
 

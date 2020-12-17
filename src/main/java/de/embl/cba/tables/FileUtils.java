@@ -111,14 +111,25 @@ public class FileUtils
 		return uri.toString();
 	}
 
-	public static boolean isRelativePath( String tablePath )
+	public static String resolveTablePath ( String path )
 	{
-		final BufferedReader reader = Tables.getReader( tablePath );
-		final String firstLine;
-		try
+		try {
+			while ( isRelativePath( path ) ) {
+				String relativePath = getRelativePath(path);
+				path = new File( new File( path ).getParent(), relativePath ).getCanonicalPath();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return path;
+	}
+
+	public static boolean isRelativePath( String tablePath )  {
+		try ( final BufferedReader reader = Tables.getReader(tablePath) )
 		{
-			firstLine = reader.readLine();
-			return firstLine.startsWith( ".." );
+			final String firstLine = reader.readLine();
+			return firstLine.startsWith("..");
 		}
 		catch ( IOException e )
 		{
@@ -127,10 +138,8 @@ public class FileUtils
 		}
 	}
 
-	public static String getRelativePath( String tablePath )
-	{
-		final BufferedReader reader = Tables.getReader( tablePath );
-		try
+	public static String getRelativePath( String tablePath ) {
+		try( final BufferedReader reader = Tables.getReader( tablePath ) )
 		{
 			String link = reader.readLine();
 			return link;
@@ -140,7 +149,6 @@ public class FileUtils
 			e.printStackTrace();
 			return null;
 		}
-
 	}
 
 	public static void populateFileList(
