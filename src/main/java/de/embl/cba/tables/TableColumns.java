@@ -31,14 +31,11 @@ package de.embl.cba.tables;
 import de.embl.cba.tables.Tables;
 import de.embl.cba.tables.Utils;
 import ij.measure.ResultsTable;
-import org.apache.commons.io.FilenameUtils;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.swing.*;
 import javax.swing.table.TableModel;
-import java.io.File;
 import java.util.*;
-import java.util.regex.Matcher;
 
 public class TableColumns
 {
