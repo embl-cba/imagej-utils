@@ -46,7 +46,6 @@ import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 
 public class TableUIs
 {
-
 	public static void addColumnUI( TableRowsTableView tableView )
 	{
 		final GenericDialog gd = new GenericDialog( "Add Custom Column" );

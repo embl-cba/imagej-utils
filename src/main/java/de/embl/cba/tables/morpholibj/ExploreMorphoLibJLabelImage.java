@@ -119,11 +119,6 @@ public class ExploreMorphoLibJLabelImage
 
 		final ImageSourcesModel imageSourcesModel = createImageSourcesModel();
 
-		tableAndBdvViews = new SegmentsTableAndBdvViews(
-				tableRowImageSegments,
-				imageSourcesModel,
-				resultsTableTitle );
-
 		if ( enable3DView && numSpatialDimensions == 3 )
 		{
 			tableBdvAnd3dViews = new SegmentsTableBdvAnd3dViews(
@@ -132,6 +127,13 @@ public class ExploreMorphoLibJLabelImage
 					resultsTableTitle );
 
 			tableBdvAnd3dViews.getSegments3dView().setSegmentFocusZoomLevel( 0.01 );
+		}
+		else
+		{
+			tableAndBdvViews = new SegmentsTableAndBdvViews(
+					tableRowImageSegments,
+					imageSourcesModel,
+					resultsTableTitle );
 		}
 	}
 

@@ -13,7 +13,7 @@
 	<version>0.5.7-SNAPSHOT</version>
 
 	<name>ImageJ Utilities</name>
-	<description>TODO</description>
+	<description>Various Java code for ImageJ</description>
 	<url>https://github.com/tischi/imagej-utils</url>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
@@ -89,7 +89,6 @@
 		<mcib3d-core.version>3.96.3</mcib3d-core.version>
 		<j3dcore.version>1.6.0-scijava-2</j3dcore.version>
 
-
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 	</properties>
@@ -117,10 +116,6 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-listeners</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>sc.fiji</groupId>
-            <artifactId>bigdataviewer-vistools</artifactId>
-        </dependency>
         <dependency>
             <groupId>sc.fiji</groupId>
             <artifactId>bigdataviewer_fiji</artifactId>

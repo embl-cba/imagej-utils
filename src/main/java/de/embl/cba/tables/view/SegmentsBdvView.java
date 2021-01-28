@@ -609,7 +609,21 @@ public class SegmentsBdvView < T extends ImageSegment >
 					bdv,
 					menuNames,
 					actionName,
-					( x, y ) -> new Thread( () -> selectionColoringModel.setSelectionColoringMode( mode ) ).start()
+					( x, y ) -> new Thread( () ->
+					{
+						if ( mode.equals( SelectionColoringModel.SelectionColoringMode.DimNotSelected ) )
+						{
+							GenericDialog gd = new GenericDialog( "Dimming" );
+							gd.addNumericField( "Dimming level [0.0 - 1.0]", selectionColoringModel.getBrightnessNotSelected() );
+							gd.showDialog();
+							if ( gd.wasCanceled() ) return;
+							selectionColoringModel.setSelectionColoringMode( mode, gd.getNextNumber() );
+						}
+						else
+						{
+							selectionColoringModel.setSelectionColoringMode( mode );
+						}
+					} ).start()
 			);
 		}
 	}

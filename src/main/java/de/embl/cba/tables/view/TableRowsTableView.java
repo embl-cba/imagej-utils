@@ -627,6 +627,11 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		gd.showDialog();
 		if( gd.wasCanceled() ) return;
 		final String columnName = gd.getNextString();
+		if ( getColumnNames().contains( columnName ) )
+		{
+			Logger.error( "\"" +columnName + "\" exists already as a column name, please choose another one." );
+			return;
+		}
 		this.addColumn( columnName, "None" );
 
 		continueAnnotation( columnName );
@@ -685,6 +690,8 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void addColumn( String column, Object defaultValue )
 	{
+		if ( getColumnNames().contains( column ) )
+			throw new RuntimeException( column + " exists already, please choose another name." );
 		Tables.addColumn( table.getModel(), column, defaultValue );
 		TableRows.addColumn( tableRows, column, defaultValue );
 	}
