@@ -429,7 +429,9 @@ public class Segments3dView < T extends ImageSegment >
 			{
 				final ArrayList< double[] > voxelSpacings = Utils.getVoxelSpacings( labelsSource );
 
-				for ( level = 0; level < voxelSpacings.size(); level++ )
+				final int numLevels = voxelSpacings.size();
+
+				for ( level = 0; level < numLevels; level++ )
 				{
 					FinalInterval boundingBox = intervalInVoxelUnits( segment.boundingBox(), voxelSpacings.get( level ) );
 
@@ -438,6 +440,8 @@ public class Segments3dView < T extends ImageSegment >
 					if ( numElements <= maxNumSegmentVoxels )
 						break;
 				}
+
+				if ( level == numLevels ) level = numLevels - 1;
 			}
 		}
 
