@@ -374,11 +374,10 @@ public class Segments3dView < T extends ImageSegment >
 		{
 			if ( numElements > maxNumSegmentVoxels )
 			{
-				Logger.error( "3D View:\n" +
+				Logger.info( "# 3D View:\n" +
 						"The bounding box of the selected segment has " + numElements + " voxels.\n" +
-						"The maximum enabled number is " + maxNumSegmentVoxels + ".\n" +
-						"Thus the image segment will not be displayed in 3D." );
-				return null;
+						"The maximum recommended number is however only " + maxNumSegmentVoxels + ".\n" +
+						"It can take a bit of time to load...." );
 			}
 		}
 

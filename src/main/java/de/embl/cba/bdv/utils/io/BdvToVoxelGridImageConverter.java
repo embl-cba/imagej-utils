@@ -199,7 +199,7 @@ public class BdvToVoxelGridImageConverter< T extends RealType< T > & NativeType<
 						Views.addDimension( rai, 0, 0 ),
 						0, 0 );
 
-		new BdvRaiXYZCTExport< T >().export(
+		new BdvRaiXYZCTExporter< T >().export(
 				raiXYZCT,
 				imageTitle,
 				pathWithoutExtension,

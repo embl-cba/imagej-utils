@@ -61,11 +61,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
+public class BdvRaiXYZCTExporter< T extends RealType< T >  & NativeType< T > >
 {
-
 	public static final int CHANNEL_DIM = 3;
 	public static final int TIME_DIM = 4;
+
+	private ProgressWriter progressWriter = new ProgressWriterBdv();
+
+	public void setProgressWriter( ProgressWriter progressWriter )
+	{
+		this.progressWriter = progressWriter;
+	}
 
 	public void export(
 			RandomAccessibleInterval< T > raiXYZCT,
@@ -76,7 +82,6 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 			double[] translation // TODO: replace by AffineTransform3D
 	)
 	{
-
 		raiXYZCT = Views.zeroMin( raiXYZCT ); // below code does not save pixels at negative coordinates....
 
 		final File hdf5File = new File( filePathWithoutExtension + ".h5" );
@@ -92,9 +97,7 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 				ProposeMipmaps.proposeMipmaps(
 						new BasicViewSetup( 0, "", imageSize, voxelSize ) );
 
-
-		final ProgressWriter progressWriter = new ProgressWriterBdv();
-		progressWriter.out().println( "starting export..." );
+		progressWriter.out().println( "Starting export..." );
 
 		final BasicImgLoader imgLoader = new RaiXYZCTLoader( raiXYZCT, calibration, calibrationUnit );
 
@@ -132,7 +135,6 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 
 		for ( final BasicViewSetup setup : seq.getViewSetupsOrdered() )
 			perSetupExportMipmapInfo.put( setup.getId(), mipmapInfo );
-
 
 		final int numCellCreatorThreads = Math.max( 1, PluginHelper.numThreads() - 1 );
 		ExportScalePyramid.LoopbackHeuristic loopbackHeuristic =
@@ -174,7 +176,7 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 		progressWriter.out().println( "done" );
 	}
 
-	public AffineTransform3D getSourceTransform3D(
+	private AffineTransform3D getSourceTransform3D(
 			double[] calibration,
 			double[] translation )
 	{
@@ -189,7 +191,7 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 		return sourceTransform;
 	}
 
-	public void writeXml(
+	private void writeXml(
 			File hdf5File,
 			File xmlFile,
 			ProgressWriter progressWriter,
@@ -224,14 +226,14 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 		}
 	}
 
-	public String getPixelUnit( String calibrationUnit )
+	private String getPixelUnit( String calibrationUnit )
 	{
 		String punit = calibrationUnit;
 		if ( punit == null || punit.isEmpty() ) punit = "px";
 		return punit;
 	}
 
-	public FinalDimensions getFinalDimensions( RandomAccessibleInterval< T > rai )
+	private FinalDimensions getFinalDimensions( RandomAccessibleInterval< T > rai )
 	{
 		long[] dimensions = new long[ rai.numDimensions() ];
 		rai.dimensions( dimensions );
@@ -343,7 +345,5 @@ public class BdvRaiXYZCTExport< T extends RealType< T >  & NativeType< T > >
 			};
 		}
 	}
-
-
 
 }
