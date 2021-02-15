@@ -10,7 +10,7 @@
 
 	<groupId>de.embl.cba</groupId>
 	<artifactId>imagej-utils</artifactId>
-	<version>0.5.9-SNAPSHOT</version>
+	<version>0.5.10-SNAPSHOT</version>
 
 	<name>ImageJ Utilities</name>
 	<description>Various Java code for ImageJ</description>
