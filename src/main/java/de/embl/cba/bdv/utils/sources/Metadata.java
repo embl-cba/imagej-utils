@@ -63,6 +63,7 @@ public class Metadata
 	public boolean showImageIn3d = false;
 	public String xmlLocation = null;
 	public SegmentsTableBdvAnd3dViews views = null;
+	public double[] addedTransform;
 
 	public enum Modality
 	{
