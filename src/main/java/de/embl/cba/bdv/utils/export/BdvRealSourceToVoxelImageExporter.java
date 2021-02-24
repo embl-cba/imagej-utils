@@ -36,6 +36,7 @@ import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.bdv.utils.RandomAccessibleIntervalUtils;
+import de.embl.cba.io.MetaImage_Writer;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.io.FileSaver;
@@ -74,11 +75,13 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 	private final ExportDataType exportDataType;
 	private int numThreads;
 	private String outputDirectory;
+	private List<String> sourceNames;
 
 	public enum ExportModality
 	{
 		ShowImages,
-		SaveAsTiffVolumes
+		SaveAsTiffVolumes,
+		SaveAsMhdVolumes
 	}
 
 	public enum ExportDataType
@@ -162,6 +165,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		this.numThreads = numThreads;
 //		this.baseType = baseType;
 		this.progress = progress;
+		setSourceNames();
 	}
 
 	public void export()
@@ -184,7 +188,7 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 			{
 				long volumeStartTimeMillis = System.currentTimeMillis();
 
-				String name = source.getName();
+				String name = sourceNames.get( i );
 				if ( tMax - tMin > 0 )
 					name += "--T" + String.format( "%1$05d", t );
 				Logger.log( "Exporting: " + name  );
@@ -194,18 +198,31 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 
 				RandomAccessibleInterval< T > rai = getCroppedAndRasteredRAI( source, t, level );
 
+				ImagePlus imagePlusVolume;
 				switch ( exportModality )
 				{
 					case ShowImages:
 						timepoints.add( rai );
 						break;
 					case SaveAsTiffVolumes:
-						ImagePlus imagePlusVolume = asImagePlus( rai, name );
+						imagePlusVolume = asImagePlus( rai, name );
 						Logger.log( "Loading and converting to output voxel space done in [ms]: " + ( System.currentTimeMillis() - volumeStartTimeMillis ));
 						final String path = outputDirectory + File.separator + name + ".tif";
 						Logger.log( "Save as Tiff to path: " + path ) ;
 						final FileSaver fileSaver = new FileSaver( imagePlusVolume );
 						fileSaver.saveAsTiff( path );
+						// try to free memory
+						rai = null;
+						imagePlusVolume = null;
+						System.gc();
+						break;
+					case SaveAsMhdVolumes:
+						imagePlusVolume = asImagePlus( rai, name );
+						Logger.log( "Loading and converting to output voxel space done in [ms]: " + ( System.currentTimeMillis() - volumeStartTimeMillis ));
+						String filenameWithExtension = name + ".mhd";
+						Logger.log( "Save as Mhd to path: " + outputDirectory + File.separator + filenameWithExtension ) ;
+						MetaImage_Writer writer = new MetaImage_Writer();
+						writer.save( imagePlusVolume, outputDirectory, filenameWithExtension );
 						// try to free memory
 						rai = null;
 						imagePlusVolume = null;
@@ -368,6 +385,22 @@ public class BdvRealSourceToVoxelImageExporter< T extends RealType< T > & Native
 		}
 
 		outputVoxelInterval = new FinalInterval( min, max );
+	}
+
+	private void setSourceNames()
+	{
+		sourceNames = new ArrayList<>();
+
+		for ( int i : sourceIndices )
+		{
+			final Source< ? > source = sacs.get( i ).getSpimSource();
+			sourceNames.add( source.getName() );
+		}
+	}
+
+	public void setSourceNames( List<String> names )
+	{
+		sourceNames = names;
 	}
 
 	private void setRenderResolutionTransform( )
