@@ -46,7 +46,7 @@ public class FileUtils
 {
 	public enum FileLocation {
 		Project,
-		File_system
+		FileSystem
 	}
 
 	public static List< File > getFileList(
@@ -72,7 +72,7 @@ public class FileUtils
 		{
 			final GenericDialog gd = new GenericDialog( "Choose source" );
 			gd.addChoice( "Load from", new String[]{ FileLocation.Project.toString(),
-					FileLocation.File_system.toString() }, FileLocation.Project.toString() );
+					FileLocation.FileSystem.toString() }, FileLocation.Project.toString() );
 			gd.showDialog();
 			if ( gd.wasCanceled() ) return null;
 			fileLocation = FileLocation.valueOf( gd.getNextChoice() );
