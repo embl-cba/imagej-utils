@@ -28,12 +28,10 @@
  */
 package de.embl.cba.tables.plot;
 
-import bdv.util.*;
-<<<<<<< HEAD
-import bdv.viewer.Source;
-import bdv.viewer.TransformListener;
-=======
->>>>>>> master
+import bdv.util.BdvFunctions;
+import bdv.util.BdvHandle;
+import bdv.util.BdvOptions;
+import bdv.util.Prefs;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import de.embl.cba.tables.color.SelectionColoringModel;
@@ -41,20 +39,13 @@ import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;
 import ij.IJ;
-import net.imglib2.*;
+import net.imglib2.FinalInterval;
+import net.imglib2.KDTree;
+import net.imglib2.RealPoint;
 import net.imglib2.neighborsearch.NearestNeighborSearchOnKDTree;
 import net.imglib2.position.FunctionRealRandomAccessible;
-import net.imglib2.realtransform.AffineTransform3D;
-<<<<<<< HEAD
-import net.imglib2.realtransform.RealViews;
-import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.volatiles.VolatileARGBType;
-import net.imglib2.util.Intervals;
-import org.apache.commons.lang.mutable.MutableDouble;
-=======
 import net.imglib2.type.numeric.ARGBType;
 import org.scijava.ui.behaviour.ClickBehaviour;
->>>>>>> master
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
 
@@ -171,12 +162,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 		selectionColoringModel.getSelectionModel().listeners().add( new SelectionListener< T >()
 		{
 			@Override
-<<<<<<< HEAD
-			public void transformChanged( AffineTransform3D transform )
-			{
-				viewerTransform = transform;
-				createViewerSearchTree( viewerTransform );
-=======
 			public void selectionChanged()
 			{
 				bdvHandle.getViewerPanel().requestRepaint();
@@ -196,7 +181,6 @@ public class TableRowsScatterPlot< T extends TableRow >
 					tableRowToRealPoint.get( selection ).localize( location );
 					BdvUtils.moveToPosition( bdvHandle, location, 0, 500 );
 				}
->>>>>>> master
 			}
 		} );
 	}
@@ -279,29 +263,11 @@ public class TableRowsScatterPlot< T extends TableRow >
 
 	private T searchClosestPoint( NearestNeighborSearchOnKDTree< T > search )
 	{
-<<<<<<< HEAD
-		Prefs.showMultibox( false );
-
-		scatterPlotBdvSource = BdvFunctions.show(
-				argbSource,
-				BdvOptions.options()
-						.is2D()
-						.frameTitle( name )
-						.preferredSize( Globals.proposedComponentWindowWidth(), Globals.proposedComponentWindowWidth() )
-						 );
-
-		// .transformEventHandlerFactory( new TransformEventHandlerPlanar.BehaviourTransformEventHandlerPlanarFactory() )
-
-		bdvHandle = scatterPlotBdvSource.getBdvHandle();
-
-		scatterPlotBdvSource.setDisplayRange( 0, 255);
-=======
 		final RealPoint realPoint = new RealPoint( 3 );
 		bdvHandle.getViewerPanel().getGlobalMouseCoordinates( realPoint );
 		RealPoint realPoint2d = new RealPoint( realPoint.getDoublePosition( 0 ), realPoint.getDoublePosition( 1 ) );
 		search.search( realPoint2d );
 		return search.getSampler().get();
->>>>>>> master
 	}
 
 	private static BdvHandle show( FunctionRealRandomAccessible< ARGBType > randomAccessible, FinalInterval interval, String[] selectedColumns )

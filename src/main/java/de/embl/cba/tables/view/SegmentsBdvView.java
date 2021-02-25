@@ -527,11 +527,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 
 	private void initBdvOptions( )
 	{
-<<<<<<< HEAD
-		bdvOptions = BdvOptions.options();
-=======
 		bdvOptions = BdvOptions.options().numRenderingThreads( numRenderingThreads );
->>>>>>> master
 
 		if ( imageSourcesModel.is2D() )
 			bdvOptions = bdvOptions.is2D();
