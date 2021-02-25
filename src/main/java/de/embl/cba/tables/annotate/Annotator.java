@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -37,16 +37,14 @@ import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.tablerow.TableRowImageSegment;
 import ij.IJ;
-import ij.gui.GenericDialog;
 import net.imglib2.type.numeric.ARGBType;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.util.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public class Annotator < T extends TableRow > extends JFrame
 {
@@ -61,15 +59,11 @@ public class Annotator < T extends TableRow > extends JFrame
 	private final SelectionColoringModel< T > selectionColoringModel;
 	private boolean skipNone;
 	private boolean isSingleRowBrowsingMode = false; // TODO: think about how to get out of this mode!
+	private JTextField goToRowIndexTextField;
 	private HashMap< String, T > annotationToTableRow;
 	private JPanel annotationButtonsContainer;
 	private JScrollPane annotationButtonsScrollPane;
 	private T currentlySelectedRow;
-	private HashMap< String, Character > annotationNameToKeyboardShortcut = new HashMap<>();
-	private KeyEventDispatcher dispatcher;
-	private KeyboardFocusManager manager;
-	final private static int buttonWidth = 30;
-	final private static int buttonHeight = 10;
 
 	public Annotator(
 			String annotationColumnName,
@@ -93,42 +87,6 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		createDialog();
 		showFrame();
-		addKeyEventDispatcher();
-	}
-
-	private void addKeyEventDispatcher()
-	{
-		manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-		dispatcher = new KeyEventDispatcher()
-		{
-			@Override
-			public boolean dispatchKeyEvent( KeyEvent e )
-			{
-				if ( e.getID() == KeyEvent.KEY_PRESSED )
-				{
-					for ( Map.Entry< String, Character > entry : annotationNameToKeyboardShortcut.entrySet() )
-					{
-						final String annotationName = entry.getKey();
-						final Character shortCut = entry.getValue();
-
-						char keyChar = e.getKeyChar();
-
-						if ( shortCut.equals( keyChar ) )
-						{
-							annotateSelectedObjects( annotationName );
-						}
-					}
-				} else if ( e.getID() == KeyEvent.KEY_RELEASED )
-				{
-
-				} else if ( e.getID() == KeyEvent.KEY_TYPED )
-				{
-
-				}
-				return false;
-			}
-		};
-		manager.addKeyEventDispatcher( dispatcher );
 	}
 
 	private void createDialog()
@@ -138,7 +96,7 @@ public class Annotator < T extends TableRow > extends JFrame
 		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
 		addCreateCategoryButton();
 		panel.add( new JSeparator( SwingConstants.HORIZONTAL ) );
-		addAnnotationPanel();
+		addAnnotationButtons();
 		panel.add( new JSeparator( SwingConstants.HORIZONTAL ) );
 		addTableRowBrowserSelectPanel();
 		addTableRowBrowserSelectPreviousAndNextPanel();
@@ -154,13 +112,6 @@ public class Annotator < T extends TableRow > extends JFrame
 		this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 		this.setLocation( MouseInfo.getPointerInfo().getLocation().x, MouseInfo.getPointerInfo().getLocation().y );
 		this.setVisible( true );
-		this.setFocusable( true );
-		this.addWindowListener(new java.awt.event.WindowAdapter() {
-			@Override
-			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-				manager.removeKeyEventDispatcher( dispatcher );
-			}
-		});
 	}
 
 	private void addCreateCategoryButton()
@@ -172,26 +123,17 @@ public class Annotator < T extends TableRow > extends JFrame
 		panel.add( textField );
 		button.addActionListener( e -> {
 			String newClassName = textField.getText();
-			if ( annotationNameToKeyboardShortcut.containsKey( newClassName ) )
+			if ( getAnnotations().containsKey( newClassName ) )
 			{
-				Logger.error( "Category " + newClassName + " exists already.\n" +
-						"Please choose another name.");
+				Logger.error( "Class of name " + newClassName + " exists already.");
 				return;
 			}
-<<<<<<< HEAD
-			else
-			{
-				addAnnotationButtonPanel( newClassName, null );
-				refreshDialog();
-			}
-=======
 			addAnnotationButtonPanel( newClassName, null );
->>>>>>> master
 		} );
 		this.panel.add( panel );
 	}
 
-	private void addAnnotationPanel()
+	private void addAnnotationButtons()
 	{
 		JPanel annotationButtonsPanel = new JPanel( );
 		annotationButtonsPanel.setLayout( new BoxLayout(annotationButtonsPanel, BoxLayout.Y_AXIS ) );
@@ -223,117 +165,53 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 
-		annotationNameToKeyboardShortcut.put( annotationName, Character.forDigit( annotationNameToKeyboardShortcut.size() + 1, 10 ) );
+		final JButton annotateButton = new JButton( String.format("%1$15s", annotationName) );
+		annotateButton.setFont( new Font("monospaced", Font.PLAIN, 12) );
+		annotateButton.setOpaque( true );
+		setButtonColor( annotateButton, tableRow );
+		annotateButton.setAlignmentX( Component.CENTER_ALIGNMENT );
 
-		final JButton annotateButton = createAnnotateButton( annotationName, tableRow );
-		final JButton shortcutButton = createShortcutButton( annotationName );
-		final JButton colorButton = createColorButton( annotationName, annotateButton );
+		final ARGBType argbType = new ARGBType();
+		coloringModel.convert( annotationName, argbType );
+		annotateButton.setBackground( ColorUtils.getColor( argbType ) );
 
-		panel.add( annotateButton );
-		panel.add( shortcutButton );
-		panel.add( colorButton );
+		annotateButton.addActionListener( e ->
+		{
+			if ( selectionModel.isEmpty() ) return; // nothing selected to be annotated
 
-		annotationButtonsPanel.add( panel );
-		annotationButtonsPanel.revalidate();
-	}
+			final Set< T > selected = selectionModel.getSelected();
 
-	private JButton createShortcutButton( String annotationName )
-	{
-		final JButton shortcutButton = new JButton( shortcutText( annotationNameToKeyboardShortcut.get( annotationName ) ) );
-		shortcutButton.addActionListener( e -> {
-			GenericDialog gd = new GenericDialog( "Keyboard Shortcut" );
-			gd.addStringField( "Shortcut for category: " + annotationName + " ", String.valueOf( annotationNameToKeyboardShortcut.get( annotationName ) ), 1 );
-			gd.showDialog();
-			if ( gd.wasCanceled() ) return;
-			char shortcut = gd.getNextString().charAt( 0 );
-			if ( annotationNameToKeyboardShortcut.values().contains( shortcut ) )
+			for ( T row : selected )
 			{
-				Logger.error( shortcutText( shortcut ) + " is already used.\nPlease choose another shortcut." );
-				return;
+				row.setCell( annotationColumnName, annotationName );
+			}
+
+			if ( selected.size() > 1 ) isSingleRowBrowsingMode = false;
+
+			if( isSingleRowBrowsingMode )
+			{
+				selectionModel.clearSelection(); // Hack to notify all listeners that the coloring might have changed.
+				// select again such that the user could still change its mind
+				selectionModel.setSelected( selected, true );
 			}
 			else
 			{
-				annotationNameToKeyboardShortcut.put( annotationName, shortcut );
-				shortcutButton.setText( shortcutText( shortcut ) );
+				selectionModel.clearSelection();
 			}
-		});
-		shortcutButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ) );
-		return shortcutButton;
-	}
+		} );
 
-	@NotNull
-	private String shortcutText( Character character )
-	{
-		return "[ " + character + " ]";
-	}
-
-	@NotNull
-	private JButton createColorButton( String annotationName, JButton annotateButton )
-	{
-		final JButton colorButton = new JButton( "C" );
-		colorButton.addActionListener( e -> {
+		final JButton changeColor = new JButton( "C" );
+		changeColor.addActionListener( e -> {
 			Color color = JColorChooser.showDialog( this.panel, "", null );
 			if ( color == null ) return;
 			annotateButton.setBackground( color );
 			coloringModel.putInputToFixedColor( annotationName, ColorUtils.getARGBType( color ) );
 		} );
-		colorButton.setPreferredSize( new Dimension( buttonWidth, buttonHeight ) );
-		return colorButton;
-	}
 
-<<<<<<< HEAD
-	@NotNull
-	private JButton createAnnotateButton( String annotationName, T tableRow )
-	{
-		final JButton annotateButton = new JButton( createButtonLabel( annotationName ) );
-		annotateButton.setFont( new Font("monospaced", Font.PLAIN, 12) );
-		annotateButton.setOpaque( true );
-		setButtonColor( annotateButton, tableRow );
-		annotateButton.setAlignmentX( Component.CENTER_ALIGNMENT );
-		final ARGBType argbType = new ARGBType();
-		coloringModel.convert( annotationName, argbType );
-		annotateButton.setBackground( ColorUtils.getColor( argbType ) );
-		annotateButton.addActionListener( e ->
-		{
-			annotateSelectedObjects( annotationName );
-		} );
-		return annotateButton;
-	}
-
-	private String createButtonLabel( String annotationName )
-	{
-		return String.format("%1$15s", annotationName ); // + " ["+ annotationNameToKeyboardShortcut.get( annotationName ) + "]");
-	}
-
-	private void annotateSelectedObjects( String annotationName )
-	{
-		if ( selectionModel.isEmpty() ) return; // nothing selected to be annotated
-
-		final Set< T > selected = selectionModel.getSelected();
-
-		for ( T row : selected )
-		{
-			row.setCell( annotationColumnName, annotationName );
-		}
-
-		if ( selected.size() > 1 ) isSingleRowBrowsingMode = false;
-
-		if( isSingleRowBrowsingMode )
-		{
-			selectionModel.clearSelection(); // Hack to notify all listeners that the coloring might have changed.
-			// select again such that the user could still change its mind
-			selectionModel.setSelected( selected, true );
-		}
-		else
-		{
-			selectionModel.clearSelection();
-		}
-=======
 		panel.add( annotateButton );
 		panel.add( changeColor );
 		annotationButtonsContainer.add( panel );
 		refreshDialog();
->>>>>>> master
 	}
 
 	private void addTableRowBrowserSelectPreviousAndNextPanel( )
@@ -348,17 +226,12 @@ public class Annotator < T extends TableRow > extends JFrame
 
 	private void addTableRowBrowserSelectPanel( )
 	{
-		JTextField labelIdTextField = new JTextField(  "      1" );
-		//labelIdTextField.setPreferredSize( new Dimension( 40, 10 ) );
-		JComboBox imageComboBox = new JComboBox< >( getSegmentImageIds().toArray( new String[0] ) );
-
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
-		final JButton button = createSelectButton( labelIdTextField, imageComboBox );
+		final JButton button = createSelectButton();
+		goToRowIndexTextField = new JTextField( "" );
+		goToRowIndexTextField.setText( "1" );
 		panel.add( button );
-		//panel.add( new JLabel( "with label id" ) );
-		panel.add( labelIdTextField );
-		//panel.add( new JLabel( "from image" ) );
-		panel.add( imageComboBox );
+		panel.add( goToRowIndexTextField );
 		this.panel.add( panel );
 	}
 
@@ -467,61 +340,47 @@ public class Annotator < T extends TableRow > extends JFrame
 		return previous;
 	}
 
-	private JButton createSelectButton( JTextField labelIdTextField, JComboBox< String > imageComboBox )
+	private JButton createSelectButton()
 	{
-		final JButton button = new JButton( "Select segment " );
+		final JButton button = new JButton( "Select segment with label id" );
 		button.setAlignmentX( Component.CENTER_ALIGNMENT );
 
 		button.addActionListener( e ->
 		{
 			isSingleRowBrowsingMode = true;
-			T selectedRow = getSelectedRow( labelIdTextField, imageComboBox );
+			T selectedRow = getSelectedRow();
 			if ( selectedRow != null ) selectRow( selectedRow );
 		} );
 		return button;
 	}
 
-	private T getSelectedRow( JTextField labelIdTextField, JComboBox< String > imageComboBox )
+	private T getSelectedRow()
 	{
 		// TODO: in principle a flaw in logic as it assumes that all tableRows are of same type...
 		if ( tableRows.get( 0 ) instanceof TableRowImageSegment )
 		{
-			final double selectedLabelId = Double.parseDouble( labelIdTextField.getText() );
-			Object selectedImage = imageComboBox.getSelectedItem();
+			final double selectedLabelId = Double.parseDouble( goToRowIndexTextField.getText() );
 			for ( T tableRow : tableRows )
 			{
-				// TODO: This assumes that T instanceof TableRowImageSegment
-				TableRowImageSegment tableRowImageSegment = ( TableRowImageSegment ) tableRow;
-				if ( tableRowImageSegment.labelId() == selectedLabelId &&
-						tableRowImageSegment.imageId().equals( selectedImage ))
+				final double labelId = ( ( TableRowImageSegment ) tableRow ).labelId();
+				if ( labelId == selectedLabelId )
 				{
 					return tableRow;
 				}
 			}
-			throw new UnsupportedOperationException( "Could not find segment with label " + selectedLabelId + " within image " + selectedImage );
+			throw new UnsupportedOperationException( "Could not find segment with label " + selectedLabelId );
 		}
 		else
 		{
-			final int rowIndex = Integer.parseInt( labelIdTextField.getText() );
+			final int rowIndex = Integer.parseInt( goToRowIndexTextField.getText() );
 			return tableRows.get( rowSorter.convertRowIndexToModel( rowIndex ) );
 		}
-	}
-
-	private Set< String > getSegmentImageIds()
-	{
-		HashSet< String > imageIds = new HashSet<>();
-		for ( T tableRow : tableRows )
-		{
-			TableRowImageSegment tableRowImageSegment = ( TableRowImageSegment ) tableRow;
-			imageIds.add( tableRowImageSegment.imageId() );
-		}
-		return imageIds;
 	}
 
 	private boolean isNoneOrNan( T row )
 	{
 		return row.getCell( annotationColumnName ).toLowerCase().equals( "none" )
-			|| row.getCell( annotationColumnName ).toLowerCase().equals( "nan" );
+				|| row.getCell( annotationColumnName ).toLowerCase().equals( "nan" );
 	}
 
 	private void selectRow( T row )

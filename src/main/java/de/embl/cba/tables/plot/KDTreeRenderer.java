@@ -28,14 +28,12 @@
  */
 package de.embl.cba.tables.plot;
 
+import bdv.TransformEventHandler2D;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
-import bdv.util.BehaviourTransformEventHandlerPlanar;
 import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import net.imglib2.*;
-import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
@@ -119,8 +117,7 @@ public class KDTreeRenderer<T extends NumericType<T>,P extends RealLocalizable >
 		RealRandomAccessible< T > img = renderer.getRealRandomAccessible( 1.0, renderer::intensity );
 
 		// visualize
-		BdvStackSource< T > bdvStackSource = BdvFunctions.show( img, interval, "Render points", BdvOptions.options().transformEventHandlerFactory( new BehaviourTransformEventHandlerPlanar
-				.BehaviourTransformEventHandlerPlanarFactory() ) );
+		BdvStackSource< T > bdvStackSource = BdvFunctions.show( img, interval, "Render points", BdvOptions.options().transformEventHandlerFactory( TransformEventHandler2D::new ) );
 
 
 		//bdv.setDisplayRange( 0, 1.0 );

@@ -59,11 +59,7 @@ import java.util.List;
 
 import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 import static de.embl.cba.tables.TableRows.setTableCell;
-<<<<<<< HEAD
-import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK;
-=======
 import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK_GREY;
->>>>>>> master
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
 {
@@ -627,19 +623,6 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void showNewAnnotationDialog()
 	{
-<<<<<<< HEAD
-		SwingUtilities.invokeLater( () ->
-		{
-			final GenericDialog gd = new GenericDialog( "" );
-			gd.addStringField( "Annotation column name", "", 30 );
-			gd.showDialog();
-			if ( gd.wasCanceled() ) return;
-			final String columnName = gd.getNextString();
-			this.addColumn( columnName, "None" );
-
-			continueAnnotation( columnName );
-		});
-=======
 		final GenericDialog gd = new GenericDialog( "" );
 		gd.addStringField( "Annotation column name", "", 30 );
 		gd.showDialog();
@@ -653,7 +636,6 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		this.addColumn( columnName, "None" );
 
 		continueAnnotation( columnName );
->>>>>>> master
 	}
 
 	public void continueAnnotation( String columnName )
