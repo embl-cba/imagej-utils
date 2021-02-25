@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -46,7 +46,6 @@ import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 
 public class TableUIs
 {
-
 	public static void addColumnUI( TableRowsTableView tableView )
 	{
 		final GenericDialog gd = new GenericDialog( "Add Custom Column" );
@@ -114,8 +113,7 @@ public class TableUIs
 
 	public static void saveColumns( JTable table )
 	{
-		final ArrayList< String > selectedColumns
-				= selectColumnNamesUI( table, "Select columns" );
+		final ArrayList< String > selectedColumns = selectColumnNamesUI( table, "Select columns" );
 
 		final JTable newTable = Tables.createNewTableFromSelectedColumns( table, selectedColumns );
 

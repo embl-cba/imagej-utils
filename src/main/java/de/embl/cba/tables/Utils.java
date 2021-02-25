@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -72,9 +72,7 @@ public class Utils
 			if ( numElements <= maxNumVoxels )
 				return level;
 		}
-
 		return null;
-
 	}
 
 	public static Source< ? > getSource( SpimData spimData, int sourceIndex )
@@ -102,17 +100,24 @@ public class Utils
 			}
 		}
 	}
+
+	/**
+	 * Note: It is important not(!) to catch the Double.parseDouble error inside of this function,
+	 * because this error is used by other functions as an indicator whether the
+	 * cell is numeric.
+	 *
+	 * @param cell
+	 * @return
+	 */
 	public static Double parseDouble( String cell )
 	{
-		Double value;
 		if ( cell.toLowerCase().equals( "nan" ) || cell.equals( "" ) )
-			value = Double.NaN;
+			return Double.NaN;
 		else if ( cell.toLowerCase().equals( "inf" ) )
-			value = Double.POSITIVE_INFINITY;
+			return Double.POSITIVE_INFINITY;
 		else if ( cell.toLowerCase().equals( "-inf" ) )
-			value = Double.NEGATIVE_INFINITY;
+			return Double.NEGATIVE_INFINITY;
 		else
-			value = Double.parseDouble( cell );
-		return value;
+			return Double.parseDouble( cell );
 	}
 }

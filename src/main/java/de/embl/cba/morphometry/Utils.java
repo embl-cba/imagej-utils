@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -144,19 +144,32 @@ public class Utils
 			RandomAccessibleInterval< T > rai,
 			double maxAxisDist,
 			int axis,
+			double axisMin, // calibrated
+			double axisMax,
 			double calibration )
 	{
 		final CoordinatesAndValues coordinatesAndValues = new CoordinatesAndValues();
 
-		for ( long coordinate = rai.min( axis ); coordinate <= rai.max( axis ); ++coordinate )
+		final double xMin = axisMin / calibration;
+		final double xMax = axisMax / calibration;
+		for ( long x = ( long ) xMin; x <= ( long ) xMax; ++x )
 		{
-			final IntervalView< T > intensitySlice = Views.hyperSlice( rai, axis, coordinate );
-			coordinatesAndValues.coordinates.add( (double) coordinate * calibration );
-			coordinatesAndValues.values.add(
-					computeAverage( intensitySlice, maxAxisDist, calibration ) );
+			final IntervalView< T > intensitySlice = Views.hyperSlice( rai, axis, x );
+			coordinatesAndValues.coordinates.add( (double) x * calibration );
+			coordinatesAndValues.values.add( computeAverage( intensitySlice, maxAxisDist, calibration ) );
 		}
 
 		return coordinatesAndValues;
+	}
+
+	public static < T extends RealType< T > & NativeType< T > >
+	CoordinatesAndValues computeAverageIntensitiesAlongAxis(
+			RandomAccessibleInterval< T > rai,
+			double maxAxisDist,
+			int axis,
+			double calibration )
+	{
+		return computeAverageIntensitiesAlongAxis( rai, maxAxisDist, axis, rai.min( axis ) * calibration, rai.max( axis ) * calibration, calibration );
 	}
 
 	public static long countNonZeroPixelsAlongAxis(

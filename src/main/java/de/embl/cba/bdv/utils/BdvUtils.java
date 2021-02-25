@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -77,7 +77,6 @@ import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.apache.commons.lang.WordUtils;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -1501,7 +1500,6 @@ public abstract class BdvUtils
 		return view.toString().replace( "3d-affine: (", "" ).replace( ")", "" );
 	}
 
-	@NotNull
 	public static String getShortCutString( String trigger )
 	{
 		return " [ " + WordUtils.capitalize( trigger ) + " ]";

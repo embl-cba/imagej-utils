@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -63,6 +63,7 @@ public class Metadata
 	public boolean showImageIn3d = false;
 	public String xmlLocation = null;
 	public SegmentsTableBdvAnd3dViews views = null;
+	public double[] addedTransform;
 
 	public enum Modality
 	{
@@ -86,7 +87,7 @@ public class Metadata
 		imageSetIDs.add( this.imageId );
 	}
 
-	public Metadata copy () {
+	public Metadata copy() {
 		Metadata metadataCopy = new Metadata (this.imageId);
 		metadataCopy.displayName = this.displayName;
 		metadataCopy.color = this.color;
@@ -110,6 +111,7 @@ public class Metadata
 		metadataCopy.showImageIn3d = this.showImageIn3d;
 		metadataCopy.xmlLocation = this.xmlLocation;
 		metadataCopy.views = this.views;
+		metadataCopy.addedTransform = this.addedTransform;
 
 		return metadataCopy;
 	}

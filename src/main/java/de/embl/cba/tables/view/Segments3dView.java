@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -374,11 +374,10 @@ public class Segments3dView < T extends ImageSegment >
 		{
 			if ( numElements > maxNumSegmentVoxels )
 			{
-				Logger.error( "3D View:\n" +
+				Logger.info( "# 3D View:\n" +
 						"The bounding box of the selected segment has " + numElements + " voxels.\n" +
-						"The maximum enabled number is " + maxNumSegmentVoxels + ".\n" +
-						"Thus the image segment will not be displayed in 3D." );
-				return null;
+						"The maximum recommended number is however only " + maxNumSegmentVoxels + ".\n" +
+						"It can take a bit of time to load...." );
 			}
 		}
 
@@ -429,7 +428,9 @@ public class Segments3dView < T extends ImageSegment >
 			{
 				final ArrayList< double[] > voxelSpacings = Utils.getVoxelSpacings( labelsSource );
 
-				for ( level = 0; level < voxelSpacings.size(); level++ )
+				final int numLevels = voxelSpacings.size();
+
+				for ( level = 0; level < numLevels; level++ )
 				{
 					FinalInterval boundingBox = intervalInVoxelUnits( segment.boundingBox(), voxelSpacings.get( level ) );
 
@@ -438,6 +439,8 @@ public class Segments3dView < T extends ImageSegment >
 					if ( numElements <= maxNumSegmentVoxels )
 						break;
 				}
+
+				if ( level == numLevels ) level = numLevels - 1;
 			}
 		}
 

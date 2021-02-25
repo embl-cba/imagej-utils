@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -211,22 +211,6 @@ public class SegmentUtils
 		}
 
 		return columnBasedTableRowImageSegments;
-	}
-
-	public static List< ColumnBasedTableRow > columnBasedTableRowsFromColumns( final Map< String, List< String > > columnNamesToColumns )
-	{
-		final List< ColumnBasedTableRow > columnBasedTableRows = new ArrayList<>();
-
-		final int numRows = columnNamesToColumns.values().iterator().next().size();
-
-		for ( int row = 0; row < numRows; row++ )
-		{
-			final DefaultColumnBasedTableRow tableRow = new DefaultColumnBasedTableRow( row, columnNamesToColumns );
-
-			columnBasedTableRows.add( tableRow );
-		}
-
-		return columnBasedTableRows;
 	}
 
 	public static < T extends ImageSegment >

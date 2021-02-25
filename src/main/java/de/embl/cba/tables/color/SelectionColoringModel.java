@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -49,7 +49,6 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 
 	public enum SelectionColoringMode
 	{
-		OnlyShowSelected,
 		SelectionColor,
 		SelectionColorAndDimNotSelected,
 		DimNotSelected
@@ -64,7 +63,7 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 		this.selectionColoringModes = Arrays.asList( SelectionColoringMode.values() );
 
 		this.selectionColor = YELLOW;
-		this.brightnessNotSelected = 0.1;
+		this.brightnessNotSelected = 0.2;
 		this.selectionColoringMode = SelectionColoringMode.DimNotSelected;
 	}
 
@@ -80,70 +79,60 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 		switch ( selectionColoringMode )
 		{
 			case DimNotSelected:
-
 				if ( ! isSelected )
-					dim( output, brightnessNotSelected );
-				break;
-
-			case OnlyShowSelected:
-
-				if ( ! isSelected )
-					dim( output, 0.0 );
+					dim( output );
 				break;
 
 			case SelectionColor:
-
 				if ( isSelected )
 					output.set( selectionColor );
 				break;
 
 			case SelectionColorAndDimNotSelected:
-
 				if ( isSelected )
 					output.set( selectionColor );
 				else
-					dim( output, brightnessNotSelected );
+					dim( output );
 				break;
 
 			default:
 				break;
 		}
-
 	}
 
-	public void dim( ARGBType output, double brightnessNotSelected )
+	/**
+	 * Implements dimming via alpha
+	 *
+	 * @param output
+	 */
+	private void dim( ARGBType output )
 	{
 		final int colorIndex = output.get();
-		output.set( ARGBType.rgba(
-				ARGBType.red( colorIndex ),
-				ARGBType.green( colorIndex ),
-				ARGBType.blue( colorIndex ),
-				brightnessNotSelected * 255 )  );
+
+		output.set(
+				ARGBType.rgba(
+						ARGBType.red( colorIndex ),
+						ARGBType.green( colorIndex ),
+						ARGBType.blue( colorIndex ),
+						brightnessNotSelected * 255 )
+		);
 	}
 
 	public void setSelectionColoringMode( SelectionColoringMode selectionColoringMode )
 	{
 		this.selectionColoringMode = selectionColoringMode;
+		notifyColoringListeners();
+	}
 
-		switch ( selectionColoringMode )
-		{
-			case DimNotSelected:
-				brightnessNotSelected = 0.2;
-				selectionColor = null;
-				break;
-			case OnlyShowSelected:
-				brightnessNotSelected = 0.0;
-				selectionColor = null;
-				break;
-			case SelectionColor:
-				brightnessNotSelected = 1.0;
-				selectionColor = YELLOW;
-				break;
-			case SelectionColorAndDimNotSelected:
-				brightnessNotSelected = 0.2;
-				selectionColor = YELLOW;
-				break;
-		}
+	public void setSelectionColoringMode( SelectionColoringMode selectionColoringMode, double brightnessNotSelected )
+	{
+		this.selectionColoringMode = selectionColoringMode;
+
+		// ensure value between 0 and 1
+		brightnessNotSelected = Math.min( 1.0, brightnessNotSelected );
+		brightnessNotSelected = Math.max( 0.0, brightnessNotSelected );
+		this.brightnessNotSelected = brightnessNotSelected;
+
 		notifyColoringListeners();
 	}
 
@@ -189,5 +178,10 @@ public class SelectionColoringModel < T > extends AbstractColoringModel< T >
 	public SelectionModel< T > getSelectionModel()
 	{
 		return selectionModel;
+	}
+
+	public double getBrightnessNotSelected()
+	{
+		return brightnessNotSelected;
 	}
 }

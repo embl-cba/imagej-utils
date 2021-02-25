@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,7 +33,7 @@ import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.tables.color.LazyCategoryColoringModel;
 import de.embl.cba.tables.color.SelectionColoringModel;
 import de.embl.cba.tables.image.ImageSourcesModel;
-import de.embl.cba.tables.imagesegment.DefaultImageSegmentsModel;
+import de.embl.cba.tables.plot.TableRowsScatterPlot;
 import de.embl.cba.tables.select.DefaultSelectionModel;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRowImageSegment;
@@ -112,6 +112,26 @@ public class SegmentsTableAndBdvViews
 	public TableRowsTableView< TableRowImageSegment > getTableRowsTableView()
 	{
 		return tableRowsTableView;
+	}
+
+	public void showScatterPlot( String[] columns )
+	{
+		scatterPlotView( segmentsBdvView.getBdv(), selectionColoringModel, columns );
+	}
+
+	private void scatterPlotView( BdvHandle bdv, SelectionColoringModel< TableRowImageSegment > selectionColoringModel, String[] columns )
+	{
+		new Thread( () -> {
+			final TableRowsScatterPlot< TableRowImageSegment > scatterPlotView =
+					new TableRowsScatterPlot(
+							tableRowImageSegments,
+							selectionColoringModel,
+							columns,
+							new double[]{ 1.0, 1.0},
+							1.0 );
+
+			scatterPlotView.show( bdv.getViewerPanel() );
+		}).start();
 	}
 
 	public void close()

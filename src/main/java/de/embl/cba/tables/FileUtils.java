@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -46,7 +46,7 @@ public class FileUtils
 {
 	public enum FileLocation {
 		Project,
-		File_system
+		FileSystem
 	}
 
 	public static List< File > getFileList(
@@ -72,7 +72,7 @@ public class FileUtils
 		{
 			final GenericDialog gd = new GenericDialog( "Choose source" );
 			gd.addChoice( "Load from", new String[]{ FileLocation.Project.toString(),
-					FileLocation.File_system.toString() }, FileLocation.Project.toString() );
+					FileLocation.FileSystem.toString() }, FileLocation.Project.toString() );
 			gd.showDialog();
 			if ( gd.wasCanceled() ) return null;
 			fileLocation = FileLocation.valueOf( gd.getNextChoice() );
@@ -111,14 +111,25 @@ public class FileUtils
 		return uri.toString();
 	}
 
-	public static boolean isRelativePath( String tablePath )
+	public static String resolveTablePath ( String path )
 	{
-		final BufferedReader reader = Tables.getReader( tablePath );
-		final String firstLine;
-		try
+		try {
+			while ( isRelativePath( path ) ) {
+				String relativePath = getRelativePath(path);
+				path = new File( new File( path ).getParent(), relativePath ).getCanonicalPath();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return path;
+	}
+
+	public static boolean isRelativePath( String tablePath )  {
+		try ( final BufferedReader reader = Tables.getReader(tablePath) )
 		{
-			firstLine = reader.readLine();
-			return firstLine.startsWith( ".." );
+			final String firstLine = reader.readLine();
+			return firstLine.startsWith("..");
 		}
 		catch ( IOException e )
 		{
@@ -127,10 +138,8 @@ public class FileUtils
 		}
 	}
 
-	public static String getRelativePath( String tablePath )
-	{
-		final BufferedReader reader = Tables.getReader( tablePath );
-		try
+	public static String getRelativePath( String tablePath ) {
+		try( final BufferedReader reader = Tables.getReader( tablePath ) )
 		{
 			String link = reader.readLine();
 			return link;
@@ -140,7 +149,6 @@ public class FileUtils
 			e.printStackTrace();
 			return null;
 		}
-
 	}
 
 	public static void populateFileList(

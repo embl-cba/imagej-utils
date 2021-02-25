@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -59,7 +59,6 @@ import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
-import org.jetbrains.annotations.NotNull;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.util.Behaviours;
@@ -108,6 +107,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 	private boolean isLabelMaskShownAsBoundaries;
 	private int labelMaskBoundaryThickness;
 	private Set< String > popupActionNames;
+	private int numRenderingThreads = 1; // TODO: add to constructor
 
 	public SegmentsBdvView(
 			final List< T > segments,
@@ -527,7 +527,11 @@ public class SegmentsBdvView < T extends ImageSegment >
 
 	private void initBdvOptions( )
 	{
+<<<<<<< HEAD
 		bdvOptions = BdvOptions.options();
+=======
+		bdvOptions = BdvOptions.options().numRenderingThreads( numRenderingThreads );
+>>>>>>> master
 
 		if ( imageSourcesModel.is2D() )
 			bdvOptions = bdvOptions.is2D();
@@ -606,17 +610,29 @@ public class SegmentsBdvView < T extends ImageSegment >
 					bdv,
 					menuNames,
 					actionName,
-					( x, y ) -> new Thread( () -> selectionColoringModel.setSelectionColoringMode( mode ) ).start()
+					( x, y ) -> new Thread( () ->
+					{
+						if ( mode.equals( SelectionColoringModel.SelectionColoringMode.DimNotSelected ) )
+						{
+							GenericDialog gd = new GenericDialog( "Dimming" );
+							gd.addNumericField( "Dimming level [0.0 - 1.0]", selectionColoringModel.getBrightnessNotSelected() );
+							gd.showDialog();
+							if ( gd.wasCanceled() ) return;
+							selectionColoringModel.setSelectionColoringMode( mode, gd.getNextNumber() );
+						}
+						else
+						{
+							selectionColoringModel.setSelectionColoringMode( mode );
+						}
+					} ).start()
 			);
 		}
 	}
 
-	@NotNull
 	private String getLabelImageMenuName()
 	{
 		return labelsSource.metadata().displayName;
 	}
-
 
 	private void changeAnimationSettingsUI()
 	{

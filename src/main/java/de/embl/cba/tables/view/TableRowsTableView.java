@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,6 +35,8 @@ import de.embl.cba.tables.*;
 import de.embl.cba.tables.annotate.Annotator;
 import de.embl.cba.tables.color.*;
 import de.embl.cba.tables.measure.MeasureDistance;
+import de.embl.cba.tables.plot.ScatterPlotDialog;
+import de.embl.cba.tables.plot.TableRowsScatterPlot;
 import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.TableRow;
@@ -49,15 +51,19 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
 import static de.embl.cba.tables.TableRows.setTableCell;
+<<<<<<< HEAD
 import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK;
+=======
+import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK_GREY;
+>>>>>>> master
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
 {
@@ -80,13 +86,15 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	private String tablesDirectory; // for loading additional columns
 	private ArrayList<String> additionalTables; // tables from which additional columns are loaded
 
-	private SelectionMode selectionMode = SelectionMode.SelectAndFocus;
+	private SelectionMode selectionMode = SelectionMode.FocusOnly;
 	private Map< String, ColoringModel< T > > columnNameToColoringModel = new HashMap<>(  );
+	private boolean controlDown;
 
 	public enum SelectionMode
 	{
 		None,
 		FocusOnly,
+		@Deprecated
 		SelectAndFocus,
 		SelectAndDeselectAndFocusSelected
 	}
@@ -172,7 +180,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		if ( selectionColoringModel != null)
 			configureTableRowColoring();
 
-		createMenuAndShow();
+		createAndShowMenu();
 	}
 
 	private void configureTableRowColoring()
@@ -343,6 +351,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		{
 			menuBar.add( createColoringMenu() );
 			menuBar.add( createAnnotateMenu() );
+			menuBar.add( createPlotMenu() );
 		}
 
 		// menuBar.add( createMeasureMenu() ); // TODO: finish implementing this
@@ -366,6 +375,15 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		menu.add( createStartNewAnnotationMenuItem() );
 
 		menu.add( createContinueAnnotationMenuItem() );
+
+		return menu;
+	}
+
+	private JMenu createPlotMenu()
+	{
+		JMenu menu = new JMenu( "Plot" );
+
+		menu.add( createScatterPlotMenuItem() );
 
 		return menu;
 	}
@@ -395,15 +413,37 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		final JMenuItem menuItem = new JMenuItem( "Show Segmentation Image Help" );
 		menuItem.addActionListener( e ->
 			{
-			final HelpDialog helpDialog = new HelpDialog(
+				final HelpDialog helpDialog = new HelpDialog(
 					frame,
 					Tables.class.getResource( "/SegmentationImageActionsHelp.html" ) );
-			helpDialog.setVisible( true );
+				helpDialog.setVisible( true );
 			}
 		);
 		return menuItem;
 	}
 
+
+	private JMenuItem createScatterPlotMenuItem()
+	{
+		initHelpDialog();
+		final JMenuItem menuItem = new JMenuItem( "2D Scatter Plot..." );
+		menuItem.addActionListener( e ->
+			{
+				SwingUtilities.invokeLater( () ->
+				{
+					String[] columnNames = getColumnNames().stream().toArray( String[]::new );
+					ScatterPlotDialog dialog = new ScatterPlotDialog( columnNames, new String[]{ columnNames[ 0 ], columnNames[ 1 ] }, new double[]{ 1.0, 1.0 }, 1.0 );
+
+					if ( dialog.show() )
+					{
+						TableRowsScatterPlot< T > scatterPlot = new TableRowsScatterPlot<>( tableRows, selectionColoringModel, dialog.getSelectedColumns(), dialog.getScaleFactors(), dialog.getDotSizeScaleFactor() );
+						scatterPlot.show( null );
+					}
+				});
+			}
+		);
+		return menuItem;
+	}
 	// TODO: This does not always make sense. Should be added only on demand
 	private JMenuItem createShowNavigationHelpMenuItem()
 	{
@@ -587,6 +627,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void showNewAnnotationDialog()
 	{
+<<<<<<< HEAD
 		SwingUtilities.invokeLater( () ->
 		{
 			final GenericDialog gd = new GenericDialog( "" );
@@ -598,13 +639,28 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 			continueAnnotation( columnName );
 		});
+=======
+		final GenericDialog gd = new GenericDialog( "" );
+		gd.addStringField( "Annotation column name", "", 30 );
+		gd.showDialog();
+		if( gd.wasCanceled() ) return;
+		final String columnName = gd.getNextString();
+		if ( getColumnNames().contains( columnName ) )
+		{
+			Logger.error( "\"" +columnName + "\" exists already as a column name, please choose another one." );
+			return;
+		}
+		this.addColumn( columnName, "None" );
+
+		continueAnnotation( columnName );
+>>>>>>> master
 	}
 
 	public void continueAnnotation( String columnName )
 	{
 		if ( ! columnNameToColoringModel.containsKey( columnName ) )
 		{
-			final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut(), DARK );
+			final CategoryTableRowColumnColoringModel< T > categoricalColoringModel = columnColoringModelCreator.createCategoricalColoringModel( columnName, false, new GlasbeyARGBLut(), DARK_GREY );
 			columnNameToColoringModel.put( columnName, categoricalColoringModel );
 		}
 
@@ -622,7 +678,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		annotator.showDialog();
 	}
 
-	private void createMenuAndShow()
+	private void createAndShowMenu()
 	{
 		frame = new JFrame( tableName );
 		createMenuBar();
@@ -653,6 +709,8 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void addColumn( String column, Object defaultValue )
 	{
+		if ( getColumnNames().contains( column ) )
+			throw new RuntimeException( column + " exists already, please choose another name." );
 		Tables.addColumn( table.getModel(), column, defaultValue );
 		TableRows.addColumn( tableRows, column, defaultValue );
 	}
@@ -702,43 +760,55 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	public void installSelectionModelNotification()
 	{
+		table.addMouseListener( new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked( MouseEvent e )
+			{
+				controlDown = e.isControlDown();
+			}
+		} );
+
 		table.getSelectionModel().addListSelectionListener( e ->
-				SwingUtilities.invokeLater( () ->
+			SwingUtilities.invokeLater( () ->
+			{
+				if ( selectionMode.equals( SelectionMode.None ) ) return;
+
+				if ( e.getValueIsAdjusting() ) return;
+
+				final int selectedRowInView = table.getSelectedRow();
+
+				if ( selectedRowInView == -1 ) return;
+
+				if ( selectedRowInView == recentlySelectedRowInView ) return;
+
+				recentlySelectedRowInView = selectedRowInView;
+
+				final int row = table.convertRowIndexToModel( recentlySelectedRowInView );
+
+				final T object = tableRows.get( row );
+
+				selectionMode = controlDown ? SelectionMode.SelectAndDeselectAndFocusSelected : SelectionMode.FocusOnly;
+
+				if ( selectionMode.equals( SelectionMode.FocusOnly ) )
 				{
-					if ( selectionMode.equals( SelectionMode.None ) ) return;
-
-					if ( e.getValueIsAdjusting() ) return;
-
-					final int selectedRowInView = table.getSelectedRow();
-
-					if ( selectedRowInView == -1 ) return;
-
-					if ( selectedRowInView == recentlySelectedRowInView ) return;
-
-					recentlySelectedRowInView = selectedRowInView;
-
-					final int row = table.convertRowIndexToModel( recentlySelectedRowInView );
-
-					final T object = tableRows.get( row );
-
-					if ( selectionMode.equals( SelectionMode.FocusOnly ) )
-					{
+					selectionModel.focus( object );
+				}
+				else if ( selectionMode.equals( SelectionMode.SelectAndFocus ) ) // TODO: currently this option cannot be reached
+				{
+					selectionModel.setSelected( object, true );
+					selectionModel.focus( object );
+				}
+				else if ( selectionMode.equals( SelectionMode.SelectAndDeselectAndFocusSelected ) )
+				{
+					selectionModel.toggle( object );
+					if ( selectionModel.isSelected( object ) )
 						selectionModel.focus( object );
-					}
-					else if ( selectionMode.equals( SelectionMode.SelectAndFocus ) )
-					{
-						selectionModel.setSelected( object, true );
-						selectionModel.focus( object );
-					}
-					else if ( selectionMode.equals( SelectionMode.SelectAndDeselectAndFocusSelected ) )
-					{
-						selectionModel.toggle( object );
-						if ( selectionModel.isSelected( object ) )
-							selectionModel.focus( object );
-					}
+				}
 
-					table.repaint();
-				}) );
+				table.repaint();
+			})
+		);
 	}
 
 	public void registerAsSelectionListener( SelectionModel< T > selectionModel )
@@ -950,6 +1020,8 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		this.setVisible( false );
 	}
 
+	// TODO: Currently not functional
+	@Deprecated
 	public void setSelectionMode( SelectionMode selectionMode )
 	{
 		this.selectionMode = selectionMode;

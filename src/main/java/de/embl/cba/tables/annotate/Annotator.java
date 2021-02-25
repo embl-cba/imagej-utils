@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -62,7 +62,8 @@ public class Annotator < T extends TableRow > extends JFrame
 	private boolean skipNone;
 	private boolean isSingleRowBrowsingMode = false; // TODO: think about how to get out of this mode!
 	private HashMap< String, T > annotationToTableRow;
-	private JPanel annotationButtonsPanel;
+	private JPanel annotationButtonsContainer;
+	private JScrollPane annotationButtonsScrollPane;
 	private T currentlySelectedRow;
 	private HashMap< String, Character > annotationNameToKeyboardShortcut = new HashMap<>();
 	private KeyEventDispatcher dispatcher;
@@ -132,6 +133,9 @@ public class Annotator < T extends TableRow > extends JFrame
 
 	private void createDialog()
 	{
+		this.setContentPane( panel );
+		panel.setOpaque( true ); //content panes must be opaque
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
 		addCreateCategoryButton();
 		panel.add( new JSeparator( SwingConstants.HORIZONTAL ) );
 		addAnnotationPanel();
@@ -139,16 +143,16 @@ public class Annotator < T extends TableRow > extends JFrame
 		addTableRowBrowserSelectPanel();
 		addTableRowBrowserSelectPreviousAndNextPanel();
 		addSkipNonePanel();
+		// this has to be done at the end, to make the packing work correctly
+		// otherwise, continuing an annotation with many categories will be
+		// packed to a size too large for the screen
+		addAnnotationButtonPanels();
 	}
 
 	private void showFrame()
 	{
 		this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-		panel.setOpaque( true ); //content panes must be opaque
-		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
-		this.setContentPane( panel );
 		this.setLocation( MouseInfo.getPointerInfo().getLocation().x, MouseInfo.getPointerInfo().getLocation().y );
-		this.pack();
 		this.setVisible( true );
 		this.setFocusable( true );
 		this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -174,27 +178,42 @@ public class Annotator < T extends TableRow > extends JFrame
 						"Please choose another name.");
 				return;
 			}
+<<<<<<< HEAD
 			else
 			{
 				addAnnotationButtonPanel( newClassName, null );
 				refreshDialog();
 			}
+=======
+			addAnnotationButtonPanel( newClassName, null );
+>>>>>>> master
 		} );
 		this.panel.add( panel );
 	}
 
 	private void addAnnotationPanel()
 	{
-		annotationButtonsPanel = new JPanel(  );
+		JPanel annotationButtonsPanel = new JPanel( );
 		annotationButtonsPanel.setLayout( new BoxLayout(annotationButtonsPanel, BoxLayout.Y_AXIS ) );
 		annotationButtonsPanel.setBorder( BorderFactory.createEmptyBorder(0,10,10,10) );
-		this.panel.add( annotationButtonsPanel );
+		panel.add( annotationButtonsPanel );
 
 		final JPanel panel = SwingUtils.horizontalLayoutPanel();
 		panel.add( new JLabel( "Annotate selected segment(s) as:" ) );
 		panel.add( new JLabel( "      " ) );
 		annotationButtonsPanel.add( panel );
 
+		annotationButtonsScrollPane = new JScrollPane( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+		annotationButtonsScrollPane.setBorder( BorderFactory.createEmptyBorder() );
+		annotationButtonsPanel.add( annotationButtonsScrollPane );
+
+		annotationButtonsContainer = new JPanel();
+		annotationButtonsContainer.setLayout( new BoxLayout( annotationButtonsContainer, BoxLayout.PAGE_AXIS ));
+		annotationButtonsContainer.setBorder( BorderFactory.createEmptyBorder() );
+		annotationButtonsScrollPane.setViewportView( annotationButtonsContainer );
+	}
+
+	private void addAnnotationButtonPanels() {
 		final HashMap< String, T > annotations = getAnnotations();
 		for ( String annotation : annotations.keySet() )
 			addAnnotationButtonPanel( annotation, annotations.get( annotation ) );
@@ -262,6 +281,7 @@ public class Annotator < T extends TableRow > extends JFrame
 		return colorButton;
 	}
 
+<<<<<<< HEAD
 	@NotNull
 	private JButton createAnnotateButton( String annotationName, T tableRow )
 	{
@@ -308,6 +328,12 @@ public class Annotator < T extends TableRow > extends JFrame
 		{
 			selectionModel.clearSelection();
 		}
+=======
+		panel.add( annotateButton );
+		panel.add( changeColor );
+		annotationButtonsContainer.add( panel );
+		refreshDialog();
+>>>>>>> master
 	}
 
 	private void addTableRowBrowserSelectPreviousAndNextPanel( )
@@ -564,6 +590,15 @@ public class Annotator < T extends TableRow > extends JFrame
 	{
 		panel.revalidate();
 		panel.repaint();
-		this.pack();
+
+		// scroll to bottom, so any new panels are visible
+		annotationButtonsScrollPane.validate();
+		JScrollBar vertical = annotationButtonsScrollPane.getVerticalScrollBar();
+		vertical.setValue( vertical.getMaximum() );
+
+		// scroll pane resizes up to five annotations, then requires user resizing
+		if ( annotationButtonsContainer.getComponentCount() < 6 ) {
+			this.pack();
+		}
 	}
 }

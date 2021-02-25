@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,21 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface ColumnBasedTableRow
+public interface ColumnBasedTableRow extends TableRow
 {
-	String getCell( String columnName );
-
-	void setCell( String columnName, String value );
-
-	Set< String > getColumnNames();
-
 	Map< String, List< String > > getColumns();
-
-	/**
-	 * The index of the row in the underlying table.
-	 * TODO: Maybe this is not needed...
-	 *
-	 * @return row index
-	 */
-	int rowIndex();
 }

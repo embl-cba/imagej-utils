@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,43 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package develop;
+package de.embl.cba;
 
-import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.tables.morpholibj.ExploreMorphoLibJLabelImage;
-import de.embl.cba.tables.view.combined.SegmentsTableBdvAnd3dViews;
-import ij.IJ;
-import ij.ImagePlus;
-import net.imagej.ImageJ;
-import tests.Test3DView;
+import java.io.PrintStream;
 
-public class DevelopAnnotationCorrection
+public class DebugHelper
 {
-	public static void main( String[] args )
+	public static void printStackTrace( String ... unlessContains )
 	{
-		final ImageJ ij = new ImageJ();
-		ij.ui().showUI();
+		printStackTrace( System.out, 3, -1, unlessContains );
+	}
 
-		final ImagePlus intensities = IJ.openImage(
-				Test3DView.class.getResource(
-						"../test-data/3d-image.zip" ).getFile() );
+	public static void printStackTrace( int maxDepth, String ... unlessContains )
+	{
+		printStackTrace( System.out, 3, maxDepth, unlessContains );
+	}
 
-		final ImagePlus labels = IJ.openImage(
-				Test3DView.class.getResource(
-						"../test-data/3d-image-lbl.zip" ).getFile() );
+	public static void printStackTrace( PrintStream out, int maxDepth, String ... unlessContains )
+	{
+		printStackTrace( out, 3, maxDepth, unlessContains );
+	}
 
-		IJ.open( Test3DView.class.getResource(
-				"../test-data/3d-image-lbl-morpho.csv" ).getFile() );
+	public static void printStackTrace( PrintStream out, int startDepth, int maxDepth, String ... unlessContains )
+	{
+		final StackTraceElement[] trace = Thread.currentThread().getStackTrace();
 
-		final ExploreMorphoLibJLabelImage explore = new ExploreMorphoLibJLabelImage(
-				intensities,
-				labels,
-				"3d-image-lbl-morpho.csv" );
+		for ( StackTraceElement element : trace )
+		{
+			final String traceLine = element.toString();
+			for ( String template : unlessContains )
+				if ( traceLine.contains( template ) )
+					return;
+		}
 
-		final SegmentsTableBdvAnd3dViews views = explore.getTableBdvAnd3dViews();
+		final int len = ( maxDepth < 0 )
+				? trace.length
+				: Math.min( startDepth + maxDepth, trace.length );
+		for ( int i = startDepth; i < len; ++i )
+		{
+			final String prefix = ( i == startDepth ) ? "" : "    at ";
+			out.println( prefix + trace[ i ].toString() );
+		}
 
-		//BdvUtils.centerBdvWindowLocation( views.getSegmentsBdvView().getBdv() );
-		views.getTableRowsTableView().addColumn( "Annotation", new String[]{"None", "A", "B" } );
-		views.getTableRowsTableView().continueAnnotation( "Annotation" );
+		out.println();
 	}
 }

@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -64,6 +64,7 @@ public class ExploreMorphoLibJLabelImage
 	private final ImagePlus intensityImage;
 	private final ImagePlus labelImage;
 	private final String resultsTableTitle;
+	private final boolean enable3DView;
 
 	private HashMap< String, ij.measure.ResultsTable > titleToResultsTable;
 	private ij.measure.ResultsTable resultsTable;
@@ -78,9 +79,19 @@ public class ExploreMorphoLibJLabelImage
 			ImagePlus labelImage,
 			String resultsTableTitle )
 	{
+		this( intensityImage, labelImage, resultsTableTitle, true );
+	}
+
+	public ExploreMorphoLibJLabelImage(
+			ImagePlus intensityImage,
+			ImagePlus labelImage,
+			String resultsTableTitle,
+			boolean enable3DView )
+	{
 		this.intensityImage = intensityImage;
 		this.labelImage = labelImage;
 		this.resultsTableTitle = resultsTableTitle;
+		this.enable3DView = enable3DView;
 		run();
 	}
 
@@ -108,14 +119,7 @@ public class ExploreMorphoLibJLabelImage
 
 		final ImageSourcesModel imageSourcesModel = createImageSourcesModel();
 
-		if ( numSpatialDimensions == 2 )
-		{
-			tableAndBdvViews = new SegmentsTableAndBdvViews(
-					tableRowImageSegments,
-					imageSourcesModel,
-					resultsTableTitle );
-		}
-		else
+		if ( enable3DView && numSpatialDimensions == 3 )
 		{
 			tableBdvAnd3dViews = new SegmentsTableBdvAnd3dViews(
 					tableRowImageSegments,
@@ -123,6 +127,13 @@ public class ExploreMorphoLibJLabelImage
 					resultsTableTitle );
 
 			tableBdvAnd3dViews.getSegments3dView().setSegmentFocusZoomLevel( 0.01 );
+		}
+		else
+		{
+			tableAndBdvViews = new SegmentsTableAndBdvViews(
+					tableRowImageSegments,
+					imageSourcesModel,
+					resultsTableTitle );
 		}
 	}
 

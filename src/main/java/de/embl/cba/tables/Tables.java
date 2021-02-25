@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,6 +30,8 @@ package de.embl.cba.tables;
 
 import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
 import de.embl.cba.tables.table.ColumnClassAwareTableModel;
+import de.embl.cba.tables.tablerow.ColumnBasedTableRow;
+import de.embl.cba.tables.tablerow.DefaultColumnBasedTableRow;
 import de.embl.cba.tables.tablerow.TableRow;
 import org.scijava.table.GenericTable;
 
@@ -814,14 +816,37 @@ public class Tables
 
 		for ( String columnName : selectedColumns )
 		{
-			final int columnIndex = table.getColumnModel().getColumnIndex( columnName );
+			int viewIndex = table.getColumnModel().getColumnIndex( columnName );
+			int modelIndex = table.convertColumnIndexToModel( viewIndex );
 			final Object[] objects = new Object[ rowCount ];
 			for ( int rowIndex = 0; rowIndex < objects.length; rowIndex++ )
-				objects[ rowIndex ] = model.getValueAt( rowIndex, columnIndex );
+				objects[ rowIndex ] = model.getValueAt( rowIndex, modelIndex );
 
 			newModel.addColumn( columnName, objects );
 		}
 
 		return new JTable( newModel );
+	}
+
+	public static List< ColumnBasedTableRow > columnBasedTableRowsFromColumns( final Map< String, List< String > > columnNamesToColumns )
+	{
+		final List< ColumnBasedTableRow > columnBasedTableRows = new ArrayList<>();
+
+		final int numRows = columnNamesToColumns.values().iterator().next().size();
+
+		for ( int row = 0; row < numRows; row++ )
+		{
+			final DefaultColumnBasedTableRow tableRow = new DefaultColumnBasedTableRow( row, columnNamesToColumns );
+
+			columnBasedTableRows.add( tableRow );
+		}
+
+		return columnBasedTableRows;
+	}
+
+	public static List< ColumnBasedTableRow > open( String path )
+	{
+		Map< String, List< String > > columnNameToColumn = TableColumns.stringColumnsFromTableFile( path );
+		return columnBasedTableRowsFromColumns( columnNameToColumn );
 	}
 }

@@ -1,8 +1,8 @@
 /*-
  * #%L
- * TODO
+ * Various Java code for ImageJ
  * %%
- * Copyright (C) 2018 - 2020 EMBL
+ * Copyright (C) 2018 - 2021 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -62,7 +62,6 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.volatiles.VolatileARGBType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
-import org.janelia.utility.ui.RepeatingReleasedEventsFixer;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -170,8 +169,6 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		BdvBehaviours.addExportSourcesToVoxelImagesBehaviour( bdv, behaviours, "ctrl E" );
 
 		BdvBehaviours.addSourceBrowsingBehaviour( bdv, behaviours );
-
-		BdvBehaviours.addAlignSourcesWithBigWarpBehaviour( bdv, behaviours, "ctrl B");
 
 		addPlatynereisRegistrationBehaviour( behaviours );
 
@@ -368,7 +365,7 @@ public class MultipleImageViewer< R extends RealType< R > & NativeType< R > >
 		initHelpDialog();
 
 		// TODO: maybe this helps with Bdv sometimes becoming non-responsive for keyboard shortcuts?
-		new RepeatingReleasedEventsFixer().install();
+		//new RepeatingReleasedEventsFixer().install();
 
 		this.blendingMode = blendingMode;
 
