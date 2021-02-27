@@ -112,7 +112,7 @@ public class ExampleViewCapture
 	{
 		// get current transform
 		AffineTransform3D view = new AffineTransform3D();
-		bdvHandle.getViewerPanel().getState().getViewerTransform(view);
+		bdvHandle.getViewerPanel().state().getViewerTransform(view);
 
 		final AffineTransform3D rotate = new AffineTransform3D();
 		rotate.rotate( 1, 45.0 / Math.PI );
@@ -122,7 +122,7 @@ public class ExampleViewCapture
 		view = view.preConcatenate(rotate);
 
 		// submit to BDV
-		bdvHandle.getViewerPanel().setCurrentViewerTransform(view);
+		bdvHandle.getViewerPanel().state().setViewerTransform( view );
 	}
 
 

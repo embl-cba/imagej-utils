@@ -34,6 +34,7 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.SliderPanelDouble;
 import bdv.util.*;
 import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
 import bdv.viewer.VisibilityAndGrouping;
 import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.converters.LinearARGBConverter;
@@ -57,45 +58,6 @@ public abstract class BdvDialogs
 {
 	private static JFrame displaySettingsFrame;
 
-	public static void addSourceDisplaySettingsUI( JPanel panel,
-												   String name,
-												   Bdv bdv,
-												   Integer sourceIndex,
-												   Color color )
-	{
-
-		final ArrayList< Integer > indices = new ArrayList<>();
-		indices.add( sourceIndex );
-
-		addSourcesDisplaySettingsUI(  panel,
-				 name,
-				 bdv,
-				 indices,
-				 color, 0.0, 65535.0 );
-
-	}
-
-	public static JPanel getSourceDisplaySettingsPanel(
-			Bdv bdv,
-			String name,
-			Integer sourceIndex,
-			Color color,
-			double rangeMin,
-			double rangeMax )
-	{
-		final ArrayList< Integer > indices = new ArrayList<>();
-		indices.add( sourceIndex );
-
-		final JPanel panel = getSourcesDisplaySettingsPanel(
-				bdv,
-				name,
-				indices,
-				color,
-				rangeMin,
-				rangeMax );
-
-		return panel;
-	}
 
 	/**
 	 * Show display setting for single source
@@ -557,8 +519,8 @@ public abstract class BdvDialogs
 	{
 		final java.util.List< ConverterSetup > converterSetups =
 				bdv.getBdvHandle().getSetupAssignments().getConverterSetups();
-		final java.util.List< SourceState< ? > > sources =
-				bdv.getBdvHandle().getViewerPanel().getState().getSources();
+
+		final List< SourceAndConverter< ? > > sources = bdv.getBdvHandle().getViewerPanel().state().getSources();
 		final List< Integer > nonOverlaySourceIndices =
 				BdvUtils.getNonOverlaySourceIndices( bdv, sources );
 		ArrayList< Color > defaultColors = BdvUtils.getColors( nonOverlaySourceIndices );
@@ -658,10 +620,10 @@ public abstract class BdvDialogs
 		final AffineTransform3D boxTransform = new AffineTransform3D();
 
 		final int currentTimepoint =
-				bdvHandle.getViewerPanel().getState().getCurrentTimepoint();
+				bdvHandle.getViewerPanel().state().getCurrentTimepoint();
 
 		final int numTimepoints =
-				bdvHandle.getViewerPanel().getState().getNumTimepoints();
+				bdvHandle.getViewerPanel().state().getNumTimepoints();
 
 		final TransformedRealBoxSelectionDialog.Result result = BdvFunctions.selectRealBox(
 				bdvHandle,

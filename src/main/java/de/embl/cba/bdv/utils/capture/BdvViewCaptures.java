@@ -31,14 +31,10 @@ package de.embl.cba.bdv.utils.capture;
 import bdv.tools.transformation.TransformedSource;
 import bdv.util.BdvHandle;
 import bdv.util.Prefs;
-import bdv.viewer.Interpolation;
-import bdv.viewer.Source;
+import bdv.viewer.*;
 
-import bdv.viewer.SynchronizedViewerState;
-import bdv.viewer.ViewerPanel;
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
-import bdv.viewer.state.ViewerState;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.FileUtils;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
@@ -59,7 +55,6 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.ui.PainterThread;
 import net.imglib2.ui.RenderTarget;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
@@ -72,6 +67,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static de.embl.cba.bdv.utils.BdvUtils.*;
 
@@ -100,7 +96,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 			boolean checkSourceIntersectionWithViewerPlaneOnlyIn2D )
 	{
 		final AffineTransform3D viewerTransform = new AffineTransform3D();
-		bdv.getViewerPanel().getState().getViewerTransform( viewerTransform );
+		bdv.getViewerPanel().state().getViewerTransform( viewerTransform );
 
 		final double viewerVoxelSpacing = getViewerVoxelSpacing( bdv );
 		double dxy = pixelSpacing / viewerVoxelSpacing;
@@ -116,25 +112,25 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		final ArrayList< Boolean > isSegmentations = new ArrayList<>();
 		final ArrayList< double[] > displayRanges = new ArrayList<>();
 
-		final List< Integer > sourceIndices = getVisibleSourceIndices( bdv );
+		final Set< SourceAndConverter< ? > > visibleSources = getVisibleSources( bdv );
 
-		final int t = bdv.getViewerPanel().getState().getCurrentTimepoint();
+		final int t = bdv.getViewerPanel().state().getCurrentTimepoint();
 
 		final RandomAccessibleInterval< ARGBType > argbCapture
 				= ArrayImgs.argbs( captureWidth, captureHeight );
 
-		for ( int sourceIndex : sourceIndices )
+		for ( SourceAndConverter< ? > sourceAndConverter : visibleSources )
 		{
+			final Source< ? > source = sourceAndConverter.getSpimSource();
 			if ( checkSourceIntersectionWithViewerPlaneOnlyIn2D )
-				if ( ! BdvUtils.isSourceIntersectingCurrentViewIn2D( bdv, sourceIndex ) ) continue;
+				if ( ! BdvUtils.isSourceIntersectingCurrentViewIn2D( bdv, source ) ) continue;
 			else
-				if ( ! BdvUtils.isSourceIntersectingCurrentView( bdv, sourceIndex ) ) continue;
+				if ( ! BdvUtils.isSourceIntersectingCurrentView( bdv, source ) ) continue;
 
 			final RandomAccessibleInterval< UnsignedShortType > realCapture
 					= ArrayImgs.unsignedShorts( captureWidth, captureHeight );
 
-			Source< ? > source = getSource( bdv, sourceIndex );
-			final Converter converter = (Converter) getConverter( bdv, sourceIndex );
+			final Converter converter = sourceAndConverter.getConverter();
 
 			final int level = getLevel( source, pixelSpacing );
 			final AffineTransform3D sourceTransform =
@@ -218,16 +214,13 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 					if ( b > 255 )
 						b = 255;
 
-
 					argbCaptureAccess.get().set( ARGBType.rgba( r, g, b, a ) );
-
-
 				}
 			});
 
 			captures.add( realCapture );
 			// colors.add( getSourceColor( bdv, sourceIndex ) ); Not used, show GrayScale
-			displayRanges.add( BdvUtils.getDisplayRange( bdv, sourceIndex) );
+			displayRanges.add( BdvUtils.getDisplayRange( bdv, sourceAndConverter ) );
 		}
 
 		final double[] voxelSpacing = new double[ 3 ];
@@ -461,7 +454,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 //				target, new PainterThread( null ), new double[] { 1 }, 0, false, 1, null, false,
 //				viewer.getOptionValues().getAccumulateProjectorFactory(), new CacheControl.Dummy() );
 
-		renderState.setCurrentTimepoint( viewer.getState().getCurrentTimepoint() );
+		renderState.setCurrentTimepoint( viewer.state().getCurrentTimepoint() );
 		renderer.requestRepaint();
 		renderer.paint( renderState );
 

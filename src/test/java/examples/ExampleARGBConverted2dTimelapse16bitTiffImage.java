@@ -70,7 +70,7 @@ public class ExampleARGBConverted2dTimelapse16bitTiffImage
 		show.setDisplayRange( 0, 3 );
 
 		final int numTimepoints =
-				show.getBdvHandle().getViewerPanel().getState().getNumTimepoints();
+				show.getBdvHandle().getViewerPanel().state().getNumTimepoints();
 
 		int a = 1;
 

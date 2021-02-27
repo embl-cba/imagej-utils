@@ -32,6 +32,7 @@ import bdv.util.BdvFunctions;
 import bdv.util.BdvHandle;
 import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
+import bdv.viewer.SourceAndConverter;
 import de.embl.cba.bdv.utils.BdvDialogs;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.measure.PixelValueStatistics;
@@ -80,13 +81,12 @@ public class ExamplePixelStatisticsOfVisibleSources
 				BdvOptions.options().is2D().addTo( bdv ) );
 		stackSource1.setDisplayRange( 0, 300 );
 
-		final HashMap< Integer, PixelValueStatistics > statistics = BdvUtils.getPixelValueStatisticsOfActiveSources( bdv, new RealPoint( 100, 100, 0 ), 3, 0 );
+		final HashMap< SourceAndConverter< ? >, PixelValueStatistics > statistics = BdvUtils.getPixelValueStatisticsOfActiveSources( bdv, new RealPoint( 100, 100, 0 ), 3, 0 );
 
-		for ( Map.Entry< Integer, PixelValueStatistics > entry : statistics.entrySet() )
+		for ( Map.Entry< SourceAndConverter< ? >, PixelValueStatistics > entry : statistics.entrySet() )
 		{
 			System.out.println( entry.getKey() );
 			System.out.println( entry.getValue() );
-
 		}
 	}
 

@@ -253,7 +253,7 @@ public class BdvSelectionEventHandler
 
 	private int getCurrentTimepoint()
 	{
-		return bdv.getBdvHandle().getViewerPanel().getState().getCurrentTimepoint();
+		return bdv.getBdvHandle().getViewerPanel().state().getCurrentTimepoint();
 	}
 
 	private boolean isNewSelection( double selected, int timepoint )

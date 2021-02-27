@@ -63,10 +63,10 @@ public class BdvBoundingBoxDialog< R extends RealType< R > & NativeType< R > >
         final AffineTransform3D boxTransform = new AffineTransform3D();
 
         final int currentTimepoint =
-                bdvHandle.getViewerPanel().getState().getCurrentTimepoint();
+                bdvHandle.getViewerPanel().state().getCurrentTimepoint();
 
         final int numTimepoints =
-                bdvHandle.getViewerPanel().getState().getNumTimepoints();
+                bdvHandle.getViewerPanel().state().getNumTimepoints();
 
         return BdvFunctions.selectRealBox(
                 bdvHandle,

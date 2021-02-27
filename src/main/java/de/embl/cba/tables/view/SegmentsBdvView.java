@@ -34,8 +34,6 @@ import bdv.viewer.Source;
 import bdv.viewer.state.SourceState;
 import bdv.viewer.state.ViewerState;
 import de.embl.cba.bdv.utils.BdvUtils;
-import de.embl.cba.bdv.utils.objects3d.ConnectedComponentExtractorAnd3DViewer;
-import de.embl.cba.bdv.utils.overlays.BdvGrayValuesOverlay;
 import de.embl.cba.bdv.utils.popup.BdvPopupMenus;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.sources.ImagePlusFileSource;
@@ -184,14 +182,6 @@ public class SegmentsBdvView < T extends ImageSegment >
 	public void showSourceSetSelectionDialog()
 	{
 		new BdvViewSourcesBrowsingAndActionsDialog( this );
-	}
-
-	public void addGrayValueOverlay()
-	{
-		// TODO: put this to lower right corner not to interfere with the scale bar
-		new BdvGrayValuesOverlay( bdv, 20 ).getBdvOverlaySource();
-		grayValueOverlayWasFirstSource = false;
-		//hasGrayValueOverlay = true;
 	}
 
 	public ImageSourcesModel getImageSourcesModel()
@@ -438,7 +428,6 @@ public class SegmentsBdvView < T extends ImageSegment >
 		{
 			return false;
 		}
-
 	}
 
 	public int getNumTimePoints( Source< ? > source )
@@ -935,7 +924,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 
 	private int getCurrentTimePoint()
 	{
-		return bdv.getBdvHandle().getViewerPanel().getState().getCurrentTimepoint();
+		return bdv.getBdvHandle().getViewerPanel().state().getCurrentTimepoint();
 	}
 
 	public void close()

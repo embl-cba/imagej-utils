@@ -33,7 +33,6 @@ import bdv.util.BdvOptions;
 import bdv.util.BdvStackSource;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
 import de.embl.cba.bdv.utils.objects3d.ConnectedComponentExtractor;
-import de.embl.cba.bdv.utils.behaviour.TransformEventHandler3DLeftMouseDrag;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij3d.Content;

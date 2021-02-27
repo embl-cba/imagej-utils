@@ -28,33 +28,22 @@
  */
 package tests;
 
-import bdv.util.*;
+import bdv.util.BdvFunctions;
+import bdv.util.BdvStackSource;
+import bdv.util.RandomAccessibleIntervalSource;
 import de.embl.cba.bdv.utils.capture.BdvViewCaptures;
-import de.embl.cba.bdv.utils.capture.PixelSpacingDialog;
-import examples.Utils;
-import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
-import mpicbg.spim.data.XmlIoSpimData;
 import net.imagej.ImageJ;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayCursor;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.IntArray;
-import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.util.Util;
-import net.imglib2.view.IntervalView;
-import net.imglib2.view.Views;
-import org.junit.Test;
-import org.scijava.ui.behaviour.ClickBehaviour;
-import org.scijava.ui.behaviour.io.InputTriggerConfig;
-import org.scijava.ui.behaviour.util.Behaviours;
 
 import java.io.File;
-import java.util.List;
 
 public class TestViewCapture < R extends RealType< R > >
 {

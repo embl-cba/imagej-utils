@@ -72,7 +72,7 @@ public class ExampleSimpleViewCaptureBehaviour
 ////		stackSource.setColor( new ARGBType( ARGBType.rgba( 0, 255, 0, 0 ) ) );
 ////
 ////		final AffineTransform3D vt = new AffineTransform3D();
-////		bdv.getViewerPanel().getState().getViewerTransform( vt );
+////		bdv.getViewerPanel().state().getViewerTransform( vt );
 ////		vt.set( 0, 2, 3 );
 ////		bdv.getViewerPanel().setCurrentViewerTransform( vt );
 
