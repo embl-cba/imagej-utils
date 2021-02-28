@@ -33,10 +33,8 @@ import bdv.tools.boundingbox.TransformedRealBoxSelectionDialog;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.SliderPanelDouble;
 import bdv.util.*;
-import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.VisibilityAndGrouping;
-import bdv.viewer.state.SourceState;
 import de.embl.cba.bdv.utils.converters.LinearARGBConverter;
 import ij.IJ;
 import ij.gui.GenericDialog;
@@ -70,6 +68,7 @@ public abstract class BdvDialogs
 	 * @param rangeMax
 	 * @return
 	 */
+	@Deprecated
 	public static JPanel getSourceDisplaySettingsPanel(
 			Bdv bdv,
 			String name,
@@ -92,7 +91,8 @@ public abstract class BdvDialogs
 		return panel;
 	}
 
-
+	@Deprecated
+	// Use normal BDV UI instead
 	public static JPanel getSourceDisplaySettingsPanel(
 			Bdv bdv,
 			Integer sourceIndex,
@@ -254,6 +254,8 @@ public abstract class BdvDialogs
 		return colorButton;
 	}
 
+	@Deprecated
+	// Don't use sourceIndex anymore!
 	public static JButton createBrightnessButton( int[] buttonDimensions,
 												  String name, Bdv bdv,
 												  Integer sourceIndex,
@@ -266,8 +268,8 @@ public abstract class BdvDialogs
 				indices, rangeMin, rangeMax );
 	}
 
-
-
+	@Deprecated
+	// Don't use sourceIndex anymore!
 	public static JButton createBrightnessButton( int[] buttonDimensions,
 												  String name, Bdv bdv,
 												  ArrayList< Integer > sourceIndices,
@@ -285,9 +287,7 @@ public abstract class BdvDialogs
 
 			for ( int i : sourceIndices )
 			{
-				converterSetups.add( bdv.getBdvHandle()
-						.getSetupAssignments()
-						.getConverterSetups().get( i ) );
+				converterSetups.add( bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( i ) );
 			}
 
 			showBrightnessDialog( name,
@@ -313,8 +313,7 @@ public abstract class BdvDialogs
 
 		button.addActionListener( e ->
 		{
-			final ArrayList< ConverterSetup > converterSetups
-					= getConverterSetups( bdvStackSource );
+			final List converterSetups = bdvStackSource.getConverterSetups();
 
 			showBrightnessDialog(
 					name,
@@ -326,35 +325,10 @@ public abstract class BdvDialogs
 		return button;
 	}
 
-	private static ArrayList< ConverterSetup > getConverterSetups(
-			BdvStackSource bdvStackSource )
-	{
-		bdvStackSource.setCurrent();
-		final int sourceIndex = bdvStackSource.getBdvHandle()
-				.getViewerPanel().getVisibilityAndGrouping().getCurrentSource();
-		final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
-		converterSetups.add( bdvStackSource.getBdvHandle()
-				.getSetupAssignments().getConverterSetups().get( sourceIndex ) );
-		return converterSetups;
-	}
-
-
-//	public static void showBrightnessDialog( String name,
-//											 ConverterSetup converterSetup )
-//	{
-//		final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
-//		converterSetups.add( converterSetup );
-//
-//		showBrightnessDialog(
-//				name,
-//				converterSetups,
-//				0,
-//				3 * currentRangeMax );
-//	}
-
+	@Deprecated
 	public static void showBrightnessDialog(
 			String name,
-			ArrayList< ConverterSetup > converterSetups,
+			List< ConverterSetup > converterSetups,
 			double rangeMin,
 			double rangeMax )
 	{
@@ -475,6 +449,8 @@ public abstract class BdvDialogs
 		converterSetup.setDisplayRange( converterSetup.getDisplayRangeMin(), ( int ) gd.getNextNumber() );
 	}
 
+	@Deprecated
+	// Use standard BDV UI instead
 	public static JCheckBox createVisibilityCheckbox( int[] buttonDimensions,
 													  Bdv bdv,
 													  ArrayList< Integer > sourceIndices )
@@ -515,6 +491,8 @@ public abstract class BdvDialogs
 		return checkBox;
 	}
 
+	@Deprecated
+	// Use the standard BDV UI for this
 	public static void addDisplaySettingsUI( Bdv bdv, JPanel panel )
 	{
 		final java.util.List< ConverterSetup > converterSetups =
@@ -541,7 +519,6 @@ public abstract class BdvDialogs
 
 			addSourcesDisplaySettingsUI( panel, name, bdv, indices, color, 0.0, 65535.0 );
 		}
-
 	}
 
 	public static void showDisplaySettingsDialogForSourcesAtMousePosition(

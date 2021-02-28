@@ -87,49 +87,24 @@ public abstract class BdvUtils
 		return ( Source ) sources.get( sourceIndex ).getSpimSource();
 	}
 
-	public static ArrayList< ConverterSetup > getConverterSetups(
-			BdvStackSource bdvStackSource )
-	{
-		bdvStackSource.setCurrent();
-		final int sourceIndex = bdvStackSource.getBdvHandle()
-				.getViewerPanel().getVisibilityAndGrouping().getCurrentSource();
-		final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
-		converterSetups.add( bdvStackSource.getBdvHandle()
-				.getSetupAssignments().getConverterSetups().get( sourceIndex ) );
-		return converterSetups;
-	}
-
 	public static Interval getSourceGlobalBoundingInterval( Bdv bdv, Source< ? > source )
 	{
-		final AffineTransform3D sourceTransform = new AffineTransform3D();
-		source.getSourceTransform( 0, 0, sourceTransform );
+		final AffineTransform3D sourceTransform = getSourceTransform( source );
 		final RandomAccessibleInterval< ? > rai = source.getSource( 0,0  );
 		final Interval interval = Intervals.smallestContainingInterval( sourceTransform.estimateBounds( rai ) );
 		return interval;
 	}
 
-	public static void zoomToSource( Bdv bdv, String sourceName )
+	public static void zoomToSource( Bdv bdv, Source< ? > source )
 	{
-		zoomToSource( bdv, getSourceIndex( bdv, sourceName ) );
-	}
-
-	public static void zoomToSource( Bdv bdv, int sourceId )
-	{
-		setActive( bdv, sourceId, true );
-
-		final FinalInterval interval = getInterval( bdv, sourceId );
+		final FinalInterval interval = getInterval( source );
 		zoomToInterval( bdv, interval, 1.0 );
 	}
 
-	public static void setActive( Bdv bdv, int sourceId, boolean active )
+	public static FinalInterval getInterval( Source< ? > source )
 	{
-		bdv.getBdvHandle().getViewerPanel().getVisibilityAndGrouping().setSourceActive( sourceId, active );
-	}
-
-	public static FinalInterval getInterval( Bdv bdv, int sourceId )
-	{
-		final AffineTransform3D sourceTransform = getSourceTransform( bdv, sourceId );
-		final RandomAccessibleInterval< ? > rai = getRandomAccessibleInterval( bdv, sourceId );
+		final AffineTransform3D sourceTransform = getSourceTransform( source );
+		final RandomAccessibleInterval< ? > rai = source.getSource( 0, 0 );
 		return createBoundingIntervalAfterTransformation( rai, sourceTransform );
 	}
 
@@ -275,10 +250,10 @@ public abstract class BdvUtils
 	}
 
 
-	public static AffineTransform3D getSourceTransform( Bdv bdv, int sourceId )
+	public static AffineTransform3D getSourceTransform( Source< ? > spimSource )
 	{
 		final AffineTransform3D sourceTransform = new AffineTransform3D();
-		bdv.getBdvHandle().getViewerPanel().state().getSources().get( sourceId ).getSpimSource().getSourceTransform( 0, 0, sourceTransform );
+		spimSource.getSourceTransform( 0, 0, sourceTransform );
 		return sourceTransform;
 	}
 
@@ -305,7 +280,7 @@ public abstract class BdvUtils
 	{
 		final AffineTransform3D affineTransform3D = getImageZoomTransform( bdv, interval, zoomFactor );
 
-		bdv.getBdvHandle().getViewerPanel().setCurrentViewerTransform( affineTransform3D );
+		bdv.getBdvHandle().getViewerPanel().state().setViewerTransform( affineTransform3D );
 	}
 
 	public static AffineTransform3D getImageZoomTransform( Bdv bdv, FinalInterval interval, double zoomFactor )
@@ -755,6 +730,8 @@ public abstract class BdvUtils
 		return iterable;
 	}
 
+	@Deprecated
+	// Use bdv-playground instead
 	public static ArrayList< Integer > getSourceIndicesAtSelectedPoint( Bdv bdv, RealPoint selectedPoint, boolean evalSourcesAtPointIn2D )
 	{
 		final ArrayList< Integer > sourceIndicesAtSelectedPoint = new ArrayList<>();
@@ -823,7 +800,6 @@ public abstract class BdvUtils
 		{
 			return null;
 		}
-
 	}
 
 	public static RandomAccess< ? extends RealType< ? >  >
@@ -948,7 +924,7 @@ public abstract class BdvUtils
 	{
 		final AffineTransform3D affineTransform3D = getImageZoomTransform( bdv, interval );
 
-		bdv.getBdvHandle().getViewerPanel().setCurrentViewerTransform( affineTransform3D );
+		bdv.getBdvHandle().getViewerPanel().state().setViewerTransform( affineTransform3D );
 	}
 
 	public static AffineTransform3D getImageZoomTransform( Bdv bdv, FinalRealInterval interval  )
@@ -1011,7 +987,7 @@ public abstract class BdvUtils
 
 		if ( durationMillis <= 0 )
 		{
-			bdv.getBdvHandle().getViewerPanel().setCurrentViewerTransform( newViewerTransform );
+			bdv.getBdvHandle().getViewerPanel().state().setViewerTransform(  newViewerTransform );
 			return;
 		}
 		else
@@ -1109,6 +1085,7 @@ public abstract class BdvUtils
 		return viewerTransform;
 	}
 
+	@Deprecated
 	public static ARGBType getSourceColor( Bdv bdv, int sourceId )
 	{
 		return bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get( sourceId ).getColor();
@@ -1196,17 +1173,12 @@ public abstract class BdvUtils
 		return voxelSpacings;
 	}
 
+	@Deprecated
+	// Use: bdvStackSource.removeFromBdv();
 	public static < R extends RealType< R > & NativeType< R > >
 	void removeSource( BdvHandle bdv, BdvStackSource< R > bdvStackSource )
 	{
-		for ( SourceAndConverter< R > sourceAndConverter : bdvStackSource.getSources() )
-		{
-			final int sourceIndex = BdvUtils.getSourceIndex( bdv, sourceAndConverter.getSpimSource() );
-			final ConverterSetup converterSetup = bdv.getSetupAssignments().getConverterSetups().get( sourceIndex );
-			bdv.getSetupAssignments().removeSetup( converterSetup );
-
-			bdv.getViewerPanel().removeSource( sourceAndConverter.getSpimSource() );
-		}
+		bdvStackSource.removeFromBdv();
 	}
 
 	public static void centerBdvWindowLocation( BdvHandle bdv )
@@ -1278,7 +1250,7 @@ public abstract class BdvUtils
 		final double[] translation = viewerTransform.getTranslation();
 		translation[ 2 ] = 0;
 		viewerTransform.setTranslation( translation );
-		bdvHandle.getViewerPanel().setCurrentViewerTransform( viewerTransform );
+		bdvHandle.getViewerPanel().state().setViewerTransform( viewerTransform );
 	}
 
 	public static FinalInterval intersect2D( final Interval intervalA, final Interval intervalB )
@@ -1313,8 +1285,7 @@ public abstract class BdvUtils
 	public static FinalRealInterval getRealIntervalOfCurrentSource( BdvHandle bdvHandle )
 	{
 		final Source< ? > currentSource = bdvHandle.getViewerPanel().state().getCurrentSource().getSpimSource();
-		final AffineTransform3D affineTransform3D = new AffineTransform3D();
-		currentSource.getSourceTransform( 0, 0, affineTransform3D );
+		final AffineTransform3D affineTransform3D = getSourceTransform( currentSource );
 		return affineTransform3D.estimateBounds( currentSource.getSource( 0, 0 ) );
 	}
 
@@ -1326,8 +1297,7 @@ public abstract class BdvUtils
 
 		for ( SourceAndConverter< ? > visibleSource : visibleSources )
 		{
-			final AffineTransform3D affineTransform3D = new AffineTransform3D();
-			visibleSource.getSpimSource().getSourceTransform( 0, 0, affineTransform3D );
+			final AffineTransform3D affineTransform3D = getSourceTransform( visibleSource.getSpimSource() );
 			final FinalRealInterval bounds = affineTransform3D.estimateBounds( visibleSource.getSpimSource().getSource( 0, 0 ) );
 			union = Intervals.union( union, bounds );
 		}
