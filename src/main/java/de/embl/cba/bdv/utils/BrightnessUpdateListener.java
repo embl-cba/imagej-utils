@@ -32,11 +32,11 @@ import bdv.tools.brightness.ConverterSetup;
 import bdv.tools.brightness.SliderPanelDouble;
 import bdv.util.BoundedValueDouble;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class BrightnessUpdateListener implements BoundedValueDouble.UpdateListener
 {
-	final private ArrayList< ConverterSetup > converterSetups;
+	final private List< ConverterSetup > converterSetups;
  	final private BoundedValueDouble min;
 	final private BoundedValueDouble max;
 	private final SliderPanelDouble minSlider;
@@ -46,7 +46,7 @@ public class BrightnessUpdateListener implements BoundedValueDouble.UpdateListen
 									 BoundedValueDouble max,
 									 SliderPanelDouble minSlider,
 									 SliderPanelDouble maxSlider,
-									 ArrayList< ConverterSetup > converterSetups )
+									 List< ConverterSetup > converterSetups )
 	{
 		this.min = min;
 		this.max = max;
