@@ -46,6 +46,7 @@ public class Metadata
 	public String color = null;
 	public double[] contrastLimits;
 	public String imageId = null;
+	public String groupId = null;
 	public List< String > imageSetIDs = new ArrayList<>();
 	public Type type = Type.Image;
 	public Modality modality = Modality.FM;
@@ -89,6 +90,7 @@ public class Metadata
 
 	public Metadata copy() {
 		Metadata metadataCopy = new Metadata (this.imageId);
+		metadataCopy.groupId = groupId;
 		metadataCopy.displayName = this.displayName;
 		metadataCopy.color = this.color;
 		metadataCopy.contrastLimits = this.contrastLimits != null ? this.contrastLimits.clone() : null;
