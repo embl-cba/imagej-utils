@@ -66,6 +66,9 @@ public class Metadata
 	public SegmentsTableBdvAnd3dViews views = null;
 	public double[] addedTransform;
 
+	// currently needed by MoBIE
+	public Map< String, Object > misc = new HashMap<>(  );
+
 	public enum Modality
 	{
 		@Deprecated
