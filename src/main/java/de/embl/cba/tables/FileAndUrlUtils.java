@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -181,6 +182,23 @@ public class FileAndUrlUtils
 		} catch ( URISyntaxException e )
 		{
 			e.printStackTrace();
+		}
+	}
+
+	// TODO for s3 we need to go through the s3 api instead
+	public static boolean exists(String uri) {
+		if(uri.contains("http")) {
+			try {
+				HttpURLConnection con = (HttpURLConnection) new URL(uri).openConnection();
+				con.setRequestMethod("HEAD");
+				return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+		} else {
+			File f = new File(uri);
+			return f.exists();
 		}
 	}
 
