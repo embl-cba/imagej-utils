@@ -36,14 +36,15 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.AnonymousAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
@@ -56,15 +57,33 @@ public class FileAndUrlUtils
 		S3     // resource supports s3 API
  	}
 
+ 	// TODO to support buckets which have credentials, we would need something like this:
+	// https://github.com/mobie/mobie-viewer-fiji/blob/master/src/main/java/de/embl/cba/mobie/n5/S3CredentialsCreator.java
  	public static AmazonS3 getS3Client( String uri ) {
-		AmazonS3 s3 = AmazonS3ClientBuilder.standard().build();
+		final String endpoint = getEndpoint( uri );
+		final String region = "us-west-2";
+		final AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(endpoint, region);
+		final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(new AnonymousAWSCredentials());
+		AmazonS3 s3 = AmazonS3ClientBuilder
+				.standard()
+				.withPathStyleAccessEnabled(true)
+				.withEndpointConfiguration(endpointConfiguration)
+				.withCredentials(credentials)
+				.build();
 		return s3;
 	}
 
 	public static String[] getBucketAndObject( String uri ) {
-		String bucket = ""; // TODO
-		String object = ""; // TODO
+		final String[] split = uri.split("/");
+		String bucket = split[3];
+		String object = Arrays.stream( split ).skip( 4 ).collect( Collectors.joining( "/") );
 		return new String[] {bucket, object};
+	}
+
+	public static String getEndpoint( String uri ) {
+		final String[] split = uri.split("/");
+		String endpoint = Arrays.stream( split ).limit( 3 ).collect( Collectors.joining( "/" ) );
+		return endpoint;
 	}
 
  	public static ResourceType getType( String uri ) {
@@ -196,7 +215,9 @@ public class FileAndUrlUtils
 			case FILE:
 				return new File(uri).getParent();
 			case S3:
-				// TODO
+				// TODO I am not quite sure what to use as parent here
+				AmazonS3 s3 = getS3Client( uri );
+				String[] bucketAndObject = getBucketAndObject( uri );
 				return new String("todo");
 			default:
 				throw new RuntimeException( "Invalid ur: " + uri );
