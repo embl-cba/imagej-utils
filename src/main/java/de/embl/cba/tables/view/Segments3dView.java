@@ -29,6 +29,7 @@
 package de.embl.cba.tables.view;
 
 import bdv.viewer.Source;
+import bdv.viewer.TimePointListener;
 import customnode.CustomTriangleMesh;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.objects3d.FloodFill;
@@ -69,7 +70,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class Segments3dView < T extends ImageSegment >
+public class Segments3dView < T extends ImageSegment > implements TimePointListener
 {
 	private final List< T > segments;
 	private final SelectionModel< T > selectionModel;
@@ -92,10 +93,11 @@ public class Segments3dView < T extends ImageSegment >
 	private String objectsName;
 	private Component parentComponent;
 	private boolean showSelectedSegments = true;
-	private ConcurrentHashMap< T, CustomTriangleMesh > segmentToTriangleMesh;
+	private ConcurrentHashMap< T, CustomTriangleMesh > segmentToTriangleMesh = new ConcurrentHashMap<>( );
 	private ExecutorService executorService;
 	private boolean recomputeMeshes = false;
 	private double voxelSpacing = 0; // 0 = auto
+	private int currentTimePoint = 0;
 
 	public Segments3dView(
 			final List< T > segments,
@@ -284,11 +286,33 @@ public class Segments3dView < T extends ImageSegment >
 
 		for ( T segment : selected )
 		{
-			if ( ! segmentToContent.containsKey( segment ) || recomputeMeshes )
+			if ( segment.timePoint() == currentTimePoint )
 			{
-				if ( recomputeMeshes ) removeSegmentFrom3DView( segment );
-				final CustomTriangleMesh mesh = createSmoothCustomTriangleMesh( segment, voxelSpacing, recomputeMeshes );
-				addMeshToUniverse( segment, mesh );
+				if ( ! segmentToContent.containsKey( segment ) || recomputeMeshes )
+				{
+					if ( recomputeMeshes )
+					{
+						removeSegmentFrom3DView( segment );
+						segmentToTriangleMesh.remove( segment );
+					}
+					else
+					{
+						if ( segmentToTriangleMesh.containsKey( segment ) )
+						{
+							addMeshToUniverse( segment, segmentToTriangleMesh.get( segment ) );
+						}
+						else
+						{
+							final CustomTriangleMesh mesh = createSmoothCustomTriangleMesh( segment, voxelSpacing, recomputeMeshes );
+							segmentToTriangleMesh.put( segment, mesh );
+							addMeshToUniverse( segment, mesh );
+						}
+					}
+				}
+			}
+			else
+			{
+				removeSegmentFrom3DView( segment );
 			}
 		}
 	}
@@ -585,8 +609,7 @@ public class Segments3dView < T extends ImageSegment >
 			@Override
 			public void transformationUpdated( View view )
 			{
-
-				// TODO: maybe try to synch this with the Bdv View
+				// TODO: synchronize with the BDV View
 
 				//				final Transform3D transform3D = new Transform3D();
 //			view.getUserHeadToVworld( transform3D );
@@ -690,5 +713,14 @@ public class Segments3dView < T extends ImageSegment >
 	public void close()
 	{
 		// TODO
+	}
+
+	@Override
+	public void timePointChanged( int timePointIndex )
+	{
+		currentTimePoint = timePointIndex;
+
+		// TODO: Figure out whether the Universe internal time-point logic is useful.
+		//universe.showTimepoint( currentTimePoint );
 	}
 }

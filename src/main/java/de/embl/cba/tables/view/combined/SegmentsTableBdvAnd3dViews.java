@@ -124,6 +124,7 @@ public class SegmentsTableBdvAnd3dViews
 		);
 
 		segments3dView.setParentComponent( bdv.getViewerPanel() );
+		bdv.getViewerPanel().addTimePointListener( segments3dView );
 	}
 
 	private void tableView( BdvHandle bdv, SelectionColoringModel< TableRowImageSegment > selectionColoringModel )
