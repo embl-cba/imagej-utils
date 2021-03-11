@@ -430,7 +430,7 @@ public class SegmentsBdvView < T extends ImageSegment >
 		}
 	}
 
-	public int getNumTimePoints( Source< ? > source )
+	private int getNumTimePoints( Source< ? > source )
 	{
 		int numTimePoints = 0;
 		while ( source.isPresent( numTimePoints++ ) ){}

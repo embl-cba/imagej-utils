@@ -115,14 +115,18 @@ public class ColumnBasedTableRowImageSegment extends AbstractTableRow implements
 	public int timePoint()
 	{
 		if ( segmentPropertyToColumn.get( SegmentProperty.T ) == null )
+		{
 			return 0;
+		}
+		else
+		{
+			int timePoint = Utils.parseDouble( segmentPropertyToColumn.get( SegmentProperty.T )
+					.get( row ) ).intValue();
 
-		int timePoint = Utils.parseDouble( segmentPropertyToColumn.get( SegmentProperty.T )
-				.get( row ) ).intValue();
+			if ( isOneBasedTimePoint ) timePoint -= 1;
 
-		if ( isOneBasedTimePoint ) timePoint -= 1;
-
-		return timePoint;
+			return timePoint;
+		}
 	}
 
 	@Override

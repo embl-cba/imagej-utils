@@ -536,7 +536,7 @@ public class Segments3dView < T extends ImageSegment >
 
 		final RandomAccessibleInterval< ? extends RealType< ? > > rai =
 				BdvUtils.getRealTypeNonVolatileRandomAccessibleInterval(
-						labelsSource, 0, level );
+						labelsSource, segment.timePoint(), level );
 
 		return rai;
 	}
