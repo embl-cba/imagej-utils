@@ -109,8 +109,7 @@ public class LazySpimSource< T extends NumericType< T > > implements Source< T >
 	@Override
 	public boolean isPresent( int t )
 	{
-		if ( t == 0 ) return true;
-		return false;
+		return wrappedSource().isPresent( t );
 	}
 
 	@Override
