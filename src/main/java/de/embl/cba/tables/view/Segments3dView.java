@@ -64,7 +64,6 @@ import org.scijava.vecmath.Color3f;
 
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -332,20 +331,17 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 
 	private CustomTriangleMesh createCustomTriangleMesh( T segment, double voxelSpacing, boolean recomputeMesh )
 	{
-		createAndSetMesh( segment, voxelSpacing, recomputeMesh );
-		CustomTriangleMesh triangleMesh = MeshUtils.asCustomTriangleMesh( segment.getMesh() );
-		triangleMesh.setColor( getColor3f( segment ) );
-		return triangleMesh;
-	}
-
-	private void createAndSetMesh( T segment, double voxelSpacing, boolean recomputeMesh )
-	{
 		if ( segment.getMesh() == null || recomputeMesh )
 		{
 			final float[] mesh = createMesh( segment, voxelSpacing );
-			if ( mesh == null ) throw new RuntimeException( "Could not create mesh for segment of image " + segment.labelId() );
+			if ( mesh == null )
+				throw new RuntimeException( "Could not create mesh for segment of image " + segment.labelId() );
 			segment.setMesh( mesh );
 		}
+
+		CustomTriangleMesh triangleMesh = MeshUtils.asCustomTriangleMesh( segment.getMesh() );
+		triangleMesh.setColor( getColor3f( segment ) );
+		return triangleMesh;
 	}
 
 	private float[] createMesh( ImageSegment segment, double voxelSpacing )
