@@ -44,8 +44,41 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+
 public class FileAndUrlUtils
 {
+	enum ResourceType {
+		FILE,  // resource is a file on the file system
+		HTTP,  // resource supports http requests
+		S3     // resource supports s3 API
+ 	}
+
+ 	public static AmazonS3 getS3Client( String uri ) {
+		AmazonS3 s3 = AmazonS3ClientBuilder.standard().build();
+		return s3;
+	}
+
+	public static String[] getBucketAndObject( String uri ) {
+		String bucket = ""; // TODO
+		String object = ""; // TODO
+		return new String[] {bucket, object};
+	}
+
+ 	public static ResourceType getType( String uri ) {
+		if( uri.startsWith("https://s3") || uri.contains("s3.amazon.aws.com") ) {
+			return ResourceType.S3;
+		}
+		else if( uri.startsWith("http") ) {
+			return ResourceType.HTTP;
+		}
+		else {
+			return ResourceType.FILE;
+		}
+	}
+
 	public static List< File > getFileList( File directory, String fileNameRegExp )
 	{
 		final ArrayList< File > files = new ArrayList<>();
@@ -90,13 +123,21 @@ public class FileAndUrlUtils
 		return paths;
 	}
 
-	public static String getSeparator( String location )
+	public static String getSeparator( String uri )
 	{
+		ResourceType type = getType( uri );
 		String separator = null;
-		if ( location.startsWith( "http" ) )
-			separator = "/";
-		else
-			separator = File.separator;
+		switch (type) {
+			case FILE:
+				separator = File.separator;
+				break;
+			case HTTP:
+				separator = "/";
+				break;
+			case S3:
+				separator = "/";
+				break;
+		}
 		return separator;
 	}
 
@@ -122,38 +163,43 @@ public class FileAndUrlUtils
 		return path;
 	}
 
-	public static InputStream getInputStream( String filePath ) throws IOException
+	public static InputStream getInputStream( String uri ) throws IOException
 	{
-		InputStream is;
-		if ( filePath.startsWith( "http" ) )
-		{
-			URL url = new URL( filePath );
-			is = url.openStream();
+		ResourceType type = getType( uri );
+		switch (type) {
+			case HTTP:
+				URL url = new URL( uri );
+				return url.openStream();
+			case FILE:
+				return new FileInputStream( new File( uri ) );
+			case S3:
+				AmazonS3 s3 = getS3Client( uri );
+				String[] bucketAndObject = getBucketAndObject( uri );
+				return s3.getObject(bucketAndObject[0], bucketAndObject[1]).getObjectContent();
+			default:
+				throw new IOException( "Could not open uri: " + uri );
 		}
-		else
-		{
-			is = new FileInputStream( new File( filePath ) );
-		}
-		return is;
 	}
 
-	public static String getParentLocation( String path )
+	public static String getParentLocation( String uri )
 	{
-		if ( path.startsWith( "http" ) )
-		{
-			try
-			{
-				URI uri = new URI(path );
-				URI parent = uri.getPath().endsWith("/") ? uri.resolve("..") : uri.resolve(".");
-				return parent.toString();
-			} catch ( URISyntaxException e )
-			{
-				throw new RuntimeException( "Invalid URL Syntax: " + path );
-			}
-		}
-		else
-		{
-			return new File( path ).getParent();
+		ResourceType type = getType( uri );
+		switch (type) {
+			case HTTP:
+				try {
+					URI uri1 = new URI(uri);
+					URI parent = uri1.getPath().endsWith("/") ? uri1.resolve("..") : uri1.resolve(".");
+					return parent.toString();
+				} catch (URISyntaxException e) {
+					throw new RuntimeException( "Invalid URL Syntax: " + uri );
+				}
+			case FILE:
+				return new File(uri).getParent();
+			case S3:
+				// TODO
+				return new String("todo");
+			default:
+				throw new RuntimeException( "Invalid ur: " + uri );
 		}
 
 //		String tablesLocation = new File( path ).getParent();
@@ -185,20 +231,26 @@ public class FileAndUrlUtils
 		}
 	}
 
-	// TODO for s3 we need to go through the s3 api instead
 	public static boolean exists(String uri) {
-		if(uri.contains("http")) {
-			try {
-				HttpURLConnection con = (HttpURLConnection) new URL(uri).openConnection();
-				con.setRequestMethod("HEAD");
-				return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
-			} catch (Exception e) {
-				e.printStackTrace();
+		ResourceType type = getType( uri );
+		switch (type) {
+			case HTTP:
+				try {
+					HttpURLConnection con = (HttpURLConnection) new URL(uri).openConnection();
+					con.setRequestMethod("HEAD");
+					return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return false;
+				}
+			case FILE:
+				return new File( uri ).exists();
+			case S3:
+				AmazonS3 s3 = getS3Client( uri );
+				String[] bucketAndObject = getBucketAndObject( uri );
+				return s3.doesObjectExist(bucketAndObject[0], bucketAndObject[1]);
+			default:
 				return false;
-			}
-		} else {
-			File f = new File(uri);
-			return f.exists();
 		}
 	}
 
