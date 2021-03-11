@@ -72,7 +72,6 @@ import java.util.concurrent.Future;
 
 public class Segments3dView < T extends ImageSegment > implements TimePointListener
 {
-	private final List< T > segments;
 	private final SelectionModel< T > selectionModel;
 	private final SelectionColoringModel< T > selectionColoringModel;
 	private final ImageSourcesModel imageSourcesModel;
@@ -85,7 +84,6 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 	private boolean isListeningToUniverse;
 	private int meshSmoothingIterations;
 	private int segmentFocusAnimationDurationMillis;
-	private boolean contentModificationInProgress;
 	private double segmentFocusZoomLevel;
 	private double segmentFocusDxyMin;
 	private double segmentFocusDzMin;
@@ -93,33 +91,17 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 	private String objectsName;
 	private Component parentComponent;
 	private boolean showSelectedSegments = true;
-	private ConcurrentHashMap< T, CustomTriangleMesh > segmentToTriangleMesh = new ConcurrentHashMap<>( );
 	private ExecutorService executorService;
 	private boolean recomputeMeshes = false;
 	private double voxelSpacing = 0; // 0 = auto
 	private int currentTimePoint = 0;
 
 	public Segments3dView(
-			final List< T > segments,
-			final SelectionModel< T > selectionModel,
-			final SelectionColoringModel< T > selectionColoringModel,
-			ImageSourcesModel imageSourcesModel )
-	{
-		this( segments,
-				selectionModel,
-				selectionColoringModel,
-				imageSourcesModel,
-				null );
-	}
-
-	public Segments3dView(
-			final List< T > segments,
 			final SelectionModel< T > selectionModel,
 			final SelectionColoringModel< T > selectionColoringModel,
 			ImageSourcesModel imageSourcesModel,
 			Image3DUniverse universe )
 	{
-		this.segments = segments;
 		this.selectionModel = selectionModel;
 		this.selectionColoringModel = selectionColoringModel;
 		this.imageSourcesModel = imageSourcesModel;
@@ -258,10 +240,8 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 
 	private synchronized void updateView( boolean recomputeMeshes )
 	{
-		contentModificationInProgress = true;
 		updateSelectedSegments( recomputeMeshes );
 		removeUnselectedSegments();
-		contentModificationInProgress = false;
 	}
 
 	private void removeUnselectedSegments( )
@@ -290,24 +270,13 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 			{
 				if ( ! segmentToContent.containsKey( segment ) || recomputeMeshes )
 				{
-					if ( recomputeMeshes )
-					{
-						removeSegmentFrom3DView( segment );
-						segmentToTriangleMesh.remove( segment );
-					}
-					else
-					{
-						if ( segmentToTriangleMesh.containsKey( segment ) )
-						{
-							addMeshToUniverse( segment, segmentToTriangleMesh.get( segment ) );
-						}
-						else
-						{
-							final CustomTriangleMesh mesh = createSmoothCustomTriangleMesh( segment, voxelSpacing, recomputeMeshes );
-							segmentToTriangleMesh.put( segment, mesh );
-							addMeshToUniverse( segment, mesh );
-						}
-					}
+					if ( recomputeMeshes ) removeSegmentFrom3DView( segment );
+
+					// NOTE: if the segment has been shown once already this is cheap,
+					// because the mesh is cached at segment.getMesh()
+					// This is re-used within the createSmoothCustomTriangleMesh() code.
+					final CustomTriangleMesh mesh = createSmoothCustomTriangleMesh( segment, voxelSpacing, recomputeMeshes );
+					addMeshToUniverse( segment, mesh );
 				}
 			}
 			else
@@ -719,8 +688,6 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 	public void timePointChanged( int timePointIndex )
 	{
 		currentTimePoint = timePointIndex;
-
-		// TODO: Figure out whether the Universe internal time-point logic is useful.
 		//universe.showTimepoint( currentTimePoint );
 	}
 }

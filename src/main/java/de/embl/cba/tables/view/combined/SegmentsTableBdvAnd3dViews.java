@@ -116,7 +116,6 @@ public class SegmentsTableBdvAnd3dViews
 	private void threeDView( BdvHandle bdv, Image3DUniverse universe, SelectionColoringModel< TableRowImageSegment > selectionColoringModel )
 	{
 		segments3dView = new Segments3dView<>(
-				tableRowImageSegments,
 				selectionModel,
 				selectionColoringModel,
 				imageSourcesModel,
