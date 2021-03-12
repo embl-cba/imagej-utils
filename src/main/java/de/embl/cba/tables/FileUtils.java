@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static de.embl.cba.tables.S3Utils.selectS3PathFromDirectory;
 import static de.embl.cba.tables.github.GitHubUtils.selectGitHubPathFromDirectory;
 
 public class FileUtils
@@ -79,9 +80,18 @@ public class FileUtils
 		}
 
 		String filePath = null;
-		if ( directory != null && fileLocation.equals( FileLocation.Project ) && directory.contains( "raw.githubusercontent" ) )
+		final boolean isGithub = directory.contains( "raw.githubusercontent" );
+		final boolean isS3 = directory.contains( "s3.amazon.aws.com" ) || directory.startsWith("https://s3");
+		if ( directory != null && fileLocation.equals( FileLocation.Project ) && isGithub )
 		{
+			// we choose from project and have a github project
 			filePath = selectGitHubPathFromDirectory( directory, objectName );
+			if ( filePath == null ) return null;
+		}
+		else if ( directory != null && fileLocation.equals( FileLocation.Project ) && isS3 )
+		{
+			// we choose from project and have a s3 project
+			filePath = selectS3PathFromDirectory(directory, objectName);
 			if ( filePath == null ) return null;
 		}
 		else

@@ -205,6 +205,7 @@ public class FileAndUrlUtils
 		ResourceType type = getType( uri );
 		switch (type) {
 			case HTTP:
+			case S3:
 				try {
 					URI uri1 = new URI(uri);
 					URI parent = uri1.getPath().endsWith("/") ? uri1.resolve("..") : uri1.resolve(".");
@@ -214,11 +215,6 @@ public class FileAndUrlUtils
 				}
 			case FILE:
 				return new File(uri).getParent();
-			case S3:
-				// TODO I am not quite sure what to use as parent here
-				AmazonS3 s3 = getS3Client( uri );
-				String[] bucketAndObject = getBucketAndObject( uri );
-				return new String("todo");
 			default:
 				throw new RuntimeException( "Invalid ur: " + uri );
 		}
