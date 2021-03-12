@@ -90,9 +90,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 	{
 		None,
 		FocusOnly,
-		@Deprecated
-		SelectAndFocus,
-		SelectAndDeselectAndFocusSelected
+		ToggleSelectionAndFocusIfSelected
 	}
 
 	public TableRowsTableView(
@@ -306,9 +304,14 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 			return ColorUtils.getColor( argbType );
 	}
 
-	public void registerAsColoringListener( SelectionColoringModel< T > selectionColoringModel )
+	private void registerAsColoringListener( SelectionColoringModel< T > selectionColoringModel )
 	{
-		selectionColoringModel.listeners().add( () -> table.repaint( ) );
+		selectionColoringModel.listeners().add( () -> SwingUtilities.invokeLater( () -> repaintSynchronized() ) );
+	}
+
+	private synchronized void repaintSynchronized()
+	{
+		table.repaint();
 	}
 
 	private void configureJTable()
@@ -770,25 +773,23 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 				final T object = tableRows.get( row );
 
-				selectionMode = controlDown ? SelectionMode.SelectAndDeselectAndFocusSelected : SelectionMode.FocusOnly;
+				selectionMode = controlDown ? SelectionMode.ToggleSelectionAndFocusIfSelected : SelectionMode.FocusOnly;
 
 				if ( selectionMode.equals( SelectionMode.FocusOnly ) )
 				{
 					selectionModel.focus( object );
 				}
-				else if ( selectionMode.equals( SelectionMode.SelectAndFocus ) ) // TODO: currently this option cannot be reached
-				{
-					selectionModel.setSelected( object, true );
-					selectionModel.focus( object );
-				}
-				else if ( selectionMode.equals( SelectionMode.SelectAndDeselectAndFocusSelected ) )
+				else if ( selectionMode.equals( SelectionMode.ToggleSelectionAndFocusIfSelected ) )
 				{
 					selectionModel.toggle( object );
 					if ( selectionModel.isSelected( object ) )
 						selectionModel.focus( object );
 				}
 
-				table.repaint();
+				// Note: the table display repaint is triggered
+				// by the SelectionModel already.
+				// Maybe it is better to remove it here?
+				//SwingUtilities.invokeLater( () -> repaintSynchronized() );
 			})
 		);
 	}
@@ -805,7 +806,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 					recentlySelectedRowInView = -1;
 					table.getSelectionModel().clearSelection();
 				}
-				SwingUtilities.invokeLater( () -> table.repaint() );
+				SwingUtilities.invokeLater( () -> repaintSynchronized() );
 			}
 
 			@Override

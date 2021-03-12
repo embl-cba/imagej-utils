@@ -962,7 +962,11 @@ public abstract class BdvUtils
 
 	public static void moveToPosition( Bdv bdv, double[] xyz, int t, long durationMillis )
 	{
-		bdv.getBdvHandle().getViewerPanel().setTimepoint( t );
+		if ( t != bdv.getBdvHandle().getViewerPanel().state().getCurrentTimepoint() )
+		{
+			bdv.getBdvHandle().getViewerPanel().state().setCurrentTimepoint( t );
+			durationMillis = 0; // otherwise there can be hickups when changing both the viewer transform and the timepoint
+		}
 
 		final AffineTransform3D currentViewerTransform = new AffineTransform3D();
 		bdv.getBdvHandle().getViewerPanel().state().getViewerTransform( currentViewerTransform );
@@ -988,7 +992,6 @@ public abstract class BdvUtils
 		if ( durationMillis <= 0 )
 		{
 			bdv.getBdvHandle().getViewerPanel().state().setViewerTransform(  newViewerTransform );
-			return;
 		}
 		else
 		{

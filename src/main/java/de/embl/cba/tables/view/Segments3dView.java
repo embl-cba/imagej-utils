@@ -683,7 +683,11 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 	@Override
 	public void timePointChanged( int timePointIndex )
 	{
-		currentTimePoint = timePointIndex;
-		//universe.showTimepoint( currentTimePoint );
+		if ( timePointIndex != currentTimePoint )
+		{
+			currentTimePoint = timePointIndex;
+			if ( universe != null )
+				updateView( false );
+		}
 	}
 }
