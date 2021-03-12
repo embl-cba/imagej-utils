@@ -48,20 +48,19 @@ public class DefaultSelectionModel< T > implements SelectionModel< T >
 		selected = new HashSet();
 	}
 
-
 	@Override
-	public boolean isSelected( T object )
+	public synchronized boolean isSelected( T object )
 	{
 		return selected.contains( object );
 	}
 
 	@Override
-	public void setSelected( T object, boolean select )
+	public synchronized void setSelected( T object, boolean select )
 	{
 		setSelected( object, select, true );
 	}
 
-	public void setSelected( T object, boolean select, boolean notify )
+	private synchronized void setSelected( T object, boolean select, boolean notify )
 	{
 		if ( select )
 			add( object, notify );
@@ -69,7 +68,7 @@ public class DefaultSelectionModel< T > implements SelectionModel< T >
 			remove( object, notify );
 	}
 
-	private void remove( T object, boolean notify )
+	private synchronized void remove( T object, boolean notify )
 	{
 		if ( selected.contains( object ) )
 		{
@@ -80,7 +79,7 @@ public class DefaultSelectionModel< T > implements SelectionModel< T >
 		}
 	}
 
-	private void add( T object, boolean notify )
+	private synchronized void add( T object, boolean notify )
 	{
 		if ( ! selected.contains( object ) )
 		{
@@ -97,7 +96,7 @@ public class DefaultSelectionModel< T > implements SelectionModel< T >
 	}
 
 	@Override
-	public void toggle( T object )
+	public synchronized void toggle( T object )
 	{
 		if ( selected.contains( object ) )
 			remove( object, true );
@@ -106,7 +105,7 @@ public class DefaultSelectionModel< T > implements SelectionModel< T >
 	}
 
 	@Override
-	public void focus( T object )
+	public synchronized void focus( T object )
 	{
 		focusObject = object;
 
@@ -124,7 +123,7 @@ public class DefaultSelectionModel< T > implements SelectionModel< T >
 	}
 
 	@Override
-	public boolean setSelected( Collection< T > objects, boolean select )
+	public synchronized boolean setSelected( Collection< T > objects, boolean select )
 	{
 		for( T object : objects )
 			setSelected( object, select, false );
@@ -135,7 +134,7 @@ public class DefaultSelectionModel< T > implements SelectionModel< T >
 	}
 
 	@Override
-	public boolean clearSelection()
+	public synchronized boolean clearSelection()
 	{
 		if ( selected.size() == 0 )
 			return false;
@@ -148,7 +147,7 @@ public class DefaultSelectionModel< T > implements SelectionModel< T >
 	}
 
 	@Override
-	public Set< T > getSelected()
+	public synchronized Set< T > getSelected()
 	{
 		return new HashSet< T >( selected );
 	}

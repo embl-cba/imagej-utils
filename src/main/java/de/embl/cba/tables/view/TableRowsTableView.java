@@ -306,10 +306,10 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	private void registerAsColoringListener( SelectionColoringModel< T > selectionColoringModel )
 	{
-		selectionColoringModel.listeners().add( () -> SwingUtilities.invokeLater( () -> repaintSynchronized() ) );
+		selectionColoringModel.listeners().add( () -> SwingUtilities.invokeLater( () -> repaintTable() ) );
 	}
 
-	private synchronized void repaintSynchronized()
+	private synchronized void repaintTable()
 	{
 		table.repaint();
 	}
@@ -732,9 +732,9 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		return table;
 	}
 
-	public void moveToRowInView( int rowInView )
+	private synchronized void moveToRowInView( int rowInView )
 	{
-		recentlySelectedRowInView = rowInView;
+		setRecentlySelectedRowInView( rowInView );
 		//table.getSelectionModel().setSelectionInterval( rowInView, rowInView );
 		final Rectangle visibleRect = table.getVisibleRect();
 		final Rectangle cellRect = table.getCellRect( rowInView, 0, true );
@@ -767,7 +767,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 				if ( selectedRowInView == recentlySelectedRowInView ) return;
 
-				recentlySelectedRowInView = selectedRowInView;
+				setRecentlySelectedRowInView( selectedRowInView );
 
 				final int row = table.convertRowIndexToModel( recentlySelectedRowInView );
 
@@ -785,11 +785,6 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 					if ( selectionModel.isSelected( object ) )
 						selectionModel.focus( object );
 				}
-
-				// Note: the table display repaint is triggered
-				// by the SelectionModel already.
-				// Maybe it is better to remove it here?
-				//SwingUtilities.invokeLater( () -> repaintSynchronized() );
 			})
 		);
 	}
@@ -803,10 +798,10 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 			{
 				if ( selectionModel.isEmpty() )
 				{
-					recentlySelectedRowInView = -1;
+					setRecentlySelectedRowInView( -1 );
 					table.getSelectionModel().clearSelection();
 				}
-				SwingUtilities.invokeLater( () -> repaintSynchronized() );
+				SwingUtilities.invokeLater( () -> repaintTable() );
 			}
 
 			@Override
@@ -817,7 +812,12 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		} );
 	}
 
-	public void moveToSelectedTableRow( TableRow selection )
+	private synchronized void setRecentlySelectedRowInView( int r )
+	{
+		recentlySelectedRowInView = r;
+	}
+
+	private synchronized void moveToSelectedTableRow( TableRow selection )
 	{
 		final int rowInView = table.convertRowIndexToView( selection.rowIndex() );
 

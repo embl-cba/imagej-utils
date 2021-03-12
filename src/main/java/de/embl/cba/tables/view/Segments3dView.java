@@ -59,9 +59,11 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
+import oracle.jrockit.jfr.jdkevents.ThrowableTracer;
 import org.scijava.java3d.View;
 import org.scijava.vecmath.Color3f;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -206,7 +208,7 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 			{
 				if ( ! showSelectedSegments ) return;
 
-				updateView( false );
+				 updateView( false );
 			}
 
 			@Override
@@ -333,14 +335,23 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 	{
 		if ( segment.getMesh() == null || recomputeMesh )
 		{
-			final float[] mesh = createMesh( segment, voxelSpacing );
-			if ( mesh == null )
-				throw new RuntimeException( "Could not create mesh for segment of image " + segment.labelId() );
-			segment.setMesh( mesh );
+			try
+			{
+				final float[] mesh = createMesh( segment, voxelSpacing );
+				if ( mesh == null )
+					throw new RuntimeException( "Could not create mesh for segment " + segment.labelId() + " at time point " + segment.timePoint() );
+				segment.setMesh( mesh );
+			}
+			catch ( Exception e )
+			{
+				throw new RuntimeException( "Could not create mesh for segment " + segment.labelId() + " at time point " + segment.timePoint() );
+			}
+
 		}
 
 		CustomTriangleMesh triangleMesh = MeshUtils.asCustomTriangleMesh( segment.getMesh() );
 		triangleMesh.setColor( getColor3f( segment ) );
+
 		return triangleMesh;
 	}
 
@@ -683,11 +694,14 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 	@Override
 	public void timePointChanged( int timePointIndex )
 	{
-		if ( timePointIndex != currentTimePoint )
+		new Thread( () ->
 		{
-			currentTimePoint = timePointIndex;
-			if ( universe != null )
-				updateView( false );
-		}
+			if ( timePointIndex != currentTimePoint )
+			{
+				currentTimePoint = timePointIndex;
+				if ( universe != null )
+					updateView( false );
+			}
+		}).start();
 	}
 }
