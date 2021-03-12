@@ -10,7 +10,7 @@
 
 	<groupId>de.embl.cba</groupId>
 	<artifactId>imagej-utils</artifactId>
-    <version>0.6.2-SNAPSHOT</version>
+    <version>0.6.2</version>
 
 	<name>ImageJ Utilities</name>
 	<description>Various Java code for ImageJ</description>
@@ -63,7 +63,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/tischi/imagej-utils</connection>
 		<developerConnection>scm:git:git@github.com:tischi/imagej-utils</developerConnection>
-		<tag>imagej-utils</tag>
+		<tag>imagej-utils-0.6.2</tag>
 		<url>https://github.com/tischi/imagej-utils</url>
 	</scm>
 	<issueManagement>
