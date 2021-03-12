@@ -41,13 +41,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.AnonymousAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 public class FileAndUrlUtils
 {
@@ -57,18 +53,20 @@ public class FileAndUrlUtils
 		S3     // resource supports s3 API
  	}
 
- 	// TODO to support buckets which have credentials, we would need something like this:
-	// https://github.com/mobie/mobie-viewer-fiji/blob/master/src/main/java/de/embl/cba/mobie/n5/S3CredentialsCreator.java
  	public static AmazonS3 getS3Client( String uri ) {
 		final String endpoint = getEndpoint( uri );
 		final String region = "us-west-2";
 		final AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(endpoint, region);
-		final AWSCredentialsProvider credentials = new AWSStaticCredentialsProvider(new AnonymousAWSCredentials());
+		/*
+		 TODO in order to support buckets with credentials, we would either need to enable passing the authentication here,
+		 or implement a method to figure out if credentials are necessary dynamically
+		*/
+		final S3CredentialsCreator.S3Authentication authentication = S3CredentialsCreator.S3Authentication.Anonymous;
 		AmazonS3 s3 = AmazonS3ClientBuilder
 				.standard()
 				.withPathStyleAccessEnabled(true)
 				.withEndpointConfiguration(endpointConfiguration)
-				.withCredentials(credentials)
+				.withCredentials(S3CredentialsCreator.getCredentialsProvider(authentication))
 				.build();
 		return s3;
 	}
