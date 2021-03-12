@@ -36,6 +36,7 @@ import de.embl.cba.tables.tablerow.TableRow;
 import org.scijava.table.GenericTable;
 
 import javax.activation.UnsupportedDataTypeException;
+import javax.management.RuntimeMBeanException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -150,42 +151,17 @@ public class Tables
 
 	}
 
-	// TODO: put into some other class (e.g. Files)
 	public static BufferedReader getReader( String path )
 	{
-		if ( path.startsWith( "http" ) )
-		{
-			URL url = null;
-			try
-			{
-				url = new URL( path );
-			} catch ( Exception e )
-			{
-				throw new RuntimeException( "Could not open URL: " + path );
-			}
-
-			try
-			{
-				final InputStream in = url.openStream();
-				final InputStreamReader inReader = new InputStreamReader( in );
-				final BufferedReader bufferedReader = new BufferedReader( inReader );
-				return bufferedReader;
-			} catch ( Exception e )
-			{
-				throw new RuntimeException( "Could not open URL: " + path );
-			}
-		} else
-		{
-			FileInputStream fin = null;
-			try
-			{
-				fin = new FileInputStream( path );
-				return new BufferedReader( new InputStreamReader( fin ) );
-			} catch ( FileNotFoundException e )
-			{
-				throw new RuntimeException( "Could not open file: " + path );
-			}
+		InputStream stream;
+		try {
+			stream = FileAndUrlUtils.getInputStream(path);
+		} catch (IOException e) {
+			throw new RuntimeException("Could not get reader from" + path);
 		}
+		final InputStreamReader inReader = new InputStreamReader( stream );
+		final BufferedReader bufferedReader = new BufferedReader( inReader );
+		return bufferedReader;
 	}
 
 	public static List< String > readRows( File file, int numRows )

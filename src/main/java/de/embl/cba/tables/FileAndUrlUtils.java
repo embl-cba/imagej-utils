@@ -32,19 +32,70 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+
 public class FileAndUrlUtils
 {
+	enum ResourceType {
+		FILE,  // resource is a file on the file system
+		HTTP,  // resource supports http requests
+		S3     // resource supports s3 API
+ 	}
+
+ 	public static AmazonS3 getS3Client( String uri ) {
+		final String endpoint = getEndpoint( uri );
+		final String region = "us-west-2";
+		final AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(endpoint, region);
+		/*
+		 TODO in order to support buckets with credentials, we would either need to enable passing the authentication here,
+		 or implement a method to figure out if credentials are necessary dynamically
+		*/
+		final S3CredentialsCreator.S3Authentication authentication = S3CredentialsCreator.S3Authentication.Anonymous;
+		AmazonS3 s3 = AmazonS3ClientBuilder
+				.standard()
+				.withPathStyleAccessEnabled(true)
+				.withEndpointConfiguration(endpointConfiguration)
+				.withCredentials(S3CredentialsCreator.getCredentialsProvider(authentication))
+				.build();
+		return s3;
+	}
+
+	public static String[] getBucketAndObject( String uri ) {
+		final String[] split = uri.split("/");
+		String bucket = split[3];
+		String object = Arrays.stream( split ).skip( 4 ).collect( Collectors.joining( "/") );
+		return new String[] {bucket, object};
+	}
+
+	public static String getEndpoint( String uri ) {
+		final String[] split = uri.split("/");
+		String endpoint = Arrays.stream( split ).limit( 3 ).collect( Collectors.joining( "/" ) );
+		return endpoint;
+	}
+
+ 	public static ResourceType getType( String uri ) {
+		if( uri.startsWith("https://s3") || uri.contains("s3.amazon.aws.com") ) {
+			return ResourceType.S3;
+		}
+		else if( uri.startsWith("http") ) {
+			return ResourceType.HTTP;
+		}
+		else {
+			return ResourceType.FILE;
+		}
+	}
+
 	public static List< File > getFileList( File directory, String fileNameRegExp )
 	{
 		final ArrayList< File > files = new ArrayList<>();
@@ -89,13 +140,21 @@ public class FileAndUrlUtils
 		return paths;
 	}
 
-	public static String getSeparator( String location )
+	public static String getSeparator( String uri )
 	{
+		ResourceType type = getType( uri );
 		String separator = null;
-		if ( location.startsWith( "http" ) )
-			separator = "/";
-		else
-			separator = File.separator;
+		switch (type) {
+			case FILE:
+				separator = File.separator;
+				break;
+			case HTTP:
+				separator = "/";
+				break;
+			case S3:
+				separator = "/";
+				break;
+		}
 		return separator;
 	}
 
@@ -121,38 +180,41 @@ public class FileAndUrlUtils
 		return path;
 	}
 
-	public static InputStream getInputStream( String filePath ) throws IOException
+	public static InputStream getInputStream( String uri ) throws IOException
 	{
-		InputStream is;
-		if ( filePath.startsWith( "http" ) )
-		{
-			URL url = new URL( filePath );
-			is = url.openStream();
+		ResourceType type = getType( uri );
+		switch (type) {
+			case HTTP:
+				URL url = new URL( uri );
+				return url.openStream();
+			case FILE:
+				return new FileInputStream( new File( uri ) );
+			case S3:
+				AmazonS3 s3 = getS3Client( uri );
+				String[] bucketAndObject = getBucketAndObject( uri );
+				return s3.getObject(bucketAndObject[0], bucketAndObject[1]).getObjectContent();
+			default:
+				throw new IOException( "Could not open uri: " + uri );
 		}
-		else
-		{
-			is = new FileInputStream( new File( filePath ) );
-		}
-		return is;
 	}
 
-	public static String getParentLocation( String path )
+	public static String getParentLocation( String uri )
 	{
-		if ( path.startsWith( "http" ) )
-		{
-			try
-			{
-				URI uri = new URI(path );
-				URI parent = uri.getPath().endsWith("/") ? uri.resolve("..") : uri.resolve(".");
-				return parent.toString();
-			} catch ( URISyntaxException e )
-			{
-				throw new RuntimeException( "Invalid URL Syntax: " + path );
-			}
-		}
-		else
-		{
-			return new File( path ).getParent();
+		ResourceType type = getType( uri );
+		switch (type) {
+			case HTTP:
+			case S3:
+				try {
+					URI uri1 = new URI(uri);
+					URI parent = uri1.getPath().endsWith("/") ? uri1.resolve("..") : uri1.resolve(".");
+					return parent.toString();
+				} catch (URISyntaxException e) {
+					throw new RuntimeException( "Invalid URL Syntax: " + uri );
+				}
+			case FILE:
+				return new File(uri).getParent();
+			default:
+				throw new RuntimeException( "Invalid ur: " + uri );
 		}
 
 //		String tablesLocation = new File( path ).getParent();
@@ -181,6 +243,29 @@ public class FileAndUrlUtils
 		} catch ( URISyntaxException e )
 		{
 			e.printStackTrace();
+		}
+	}
+
+	public static boolean exists(String uri) {
+		ResourceType type = getType( uri );
+		switch (type) {
+			case HTTP:
+				try {
+					HttpURLConnection con = (HttpURLConnection) new URL(uri).openConnection();
+					con.setRequestMethod("HEAD");
+					return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return false;
+				}
+			case FILE:
+				return new File( uri ).exists();
+			case S3:
+				AmazonS3 s3 = getS3Client( uri );
+				String[] bucketAndObject = getBucketAndObject( uri );
+				return s3.doesObjectExist(bucketAndObject[0], bucketAndObject[1]);
+			default:
+				return false;
 		}
 	}
 
