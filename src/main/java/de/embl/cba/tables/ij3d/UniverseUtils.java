@@ -106,7 +106,7 @@ public class UniverseUtils
 			int max )
 	{
 		final Integer level = getLevel( source, voxelSpacing );
-		Logger.info( "3D View: Fetching source " + source.getName() + " at resolution " + voxelSpacing + " micrometer..." );
+		System.out.println( "3D View: Fetching source " + source.getName() + " at resolution " + voxelSpacing + " micrometer..." );
 		final ImagePlus wrap = getImagePlus( source, min, max, level );
 		final Content content = universe.addContent( wrap, displayType );
 		content.setTransparency( transparency );
@@ -202,8 +202,8 @@ public class UniverseUtils
 		return level;
 	}
 
-	public static void logVoxelSpacing( Source< ? > labelsSource, double[] voxelSpacings )
+	public static void logVoxelSpacing( Source< ? > source, double[] voxelSpacings )
 	{
-		Logger.info( "3D View: Fetching source " + labelsSource.getName() + " at resolution " + Arrays.stream( voxelSpacings ).mapToObj( x -> "" + x ).collect( Collectors.joining( " ," ) ) + " micrometer..." );
+		System.out.println( "3D View: Fetching source " + source.getName() + " at resolution " + Arrays.stream( voxelSpacings ).mapToObj( x -> "" + x ).collect( Collectors.joining( " ," ) ) + " micrometer..." );
 	}
 }

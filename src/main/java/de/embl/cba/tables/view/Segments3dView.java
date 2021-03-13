@@ -52,6 +52,7 @@ import ij3d.UniverseListener;
 import isosurface.MeshEditor;
 import net.imglib2.FinalInterval;
 import net.imglib2.FinalRealInterval;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.neighborhood.DiamondShape;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -59,17 +60,16 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
-import oracle.jrockit.jfr.jdkevents.ThrowableTracer;
 import org.scijava.java3d.View;
 import org.scijava.vecmath.Color3f;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class Segments3dView < T extends ImageSegment > implements TimePointListener
 {
@@ -241,8 +241,11 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 
 	private synchronized void updateView( boolean recomputeMeshes )
 	{
+		System.out.println( "Updating view...");
+		// TODO: It feels that below functions should be merged...
 		updateSelectedSegments( recomputeMeshes );
 		removeUnselectedSegments();
+		System.out.println( "Updating view: Done.");
 	}
 
 	private void removeUnselectedSegments( )
@@ -269,18 +272,21 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 		{
 			if ( segment.timePoint() == currentTimePoint )
 			{
-				if ( ! segmentToContent.containsKey( segment ) || recomputeMeshes )
-				{
-					if ( recomputeMeshes ) removeSegmentFrom3DView( segment );
+				if ( recomputeMeshes ) removeSegmentFrom3DView( segment );
 
-					// NOTE: if the segment has been shown once already this is cheap,
-					// because the mesh is cached at segment.getMesh()
-					// This is re-used within the createSmoothCustomTriangleMesh() code.
+				if ( segmentToContent.containsKey( segment )  )
+				{
+					// segment is shown already and should not be updated
+				}
+				else
+				{
+					// create segment mesh (cheap if it has been done before)
 					final CustomTriangleMesh mesh = createSmoothCustomTriangleMesh( segment, voxelSpacing, recomputeMeshes );
-					addMeshToUniverse( segment, mesh );
+
+					addSegmentMeshToUniverse( segment, mesh );
 				}
 			}
-			else
+			else // segment is of another time point
 			{
 				removeSegmentFrom3DView( segment );
 			}
@@ -304,7 +310,7 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 								{
 									final CustomTriangleMesh mesh = createSmoothCustomTriangleMesh( segment, voxelSpacing, recomputeMeshes );
 									if ( mesh != null )
-										addMeshToUniverse( segment, mesh  );
+										addSegmentMeshToUniverse( segment, mesh  );
 									else
 										Logger.info( "Error creating mesh of segment " + segment.labelId() );
 								}
@@ -321,9 +327,16 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 			universe.removeContent( content.getName() );
 			segmentToContent.remove( segment );
 			contentToSegment.remove( content );
+			System.out.println( "Removed " + getSegmentString( segment ) );
 		}
 	}
 
+	private String getSegmentString( T segment )
+	{
+		return segment.labelId() + "-" + segment.timePoint();
+	}
+
+	// TODO: why don't we just add the smoothed mesh to the segment?
 	private CustomTriangleMesh createSmoothCustomTriangleMesh( T segment, double voxelSpacing, boolean recomputeMesh )
 	{
 		CustomTriangleMesh triangleMesh = createCustomTriangleMesh( segment, voxelSpacing, recomputeMesh );
@@ -339,14 +352,16 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 			{
 				final float[] mesh = createMesh( segment, voxelSpacing );
 				if ( mesh == null )
+				{
 					throw new RuntimeException( "Could not create mesh for segment " + segment.labelId() + " at time point " + segment.timePoint() );
+				}
 				segment.setMesh( mesh );
 			}
 			catch ( Exception e )
 			{
+				e.printStackTrace();
 				throw new RuntimeException( "Could not create mesh for segment " + segment.labelId() + " at time point " + segment.timePoint() );
 			}
-
 		}
 
 		CustomTriangleMesh triangleMesh = MeshUtils.asCustomTriangleMesh( segment.getMesh() );
@@ -361,11 +376,11 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 
 		Integer level = getLevel( segment, labelsSource, voxelSpacing );
 		double[] voxelSpacings = Utils.getVoxelSpacings( labelsSource ).get( level );
-		UniverseUtils.logVoxelSpacing( labelsSource, voxelSpacings );
 
 		final RandomAccessibleInterval< ? extends RealType< ? > > labelsRAI = getLabelsRAI( segment, level );
 
-		if ( segment.boundingBox() == null ) setSegmentBoundingBox( segment, labelsRAI, voxelSpacings );
+		if ( segment.boundingBox() == null )
+			setSegmentBoundingBox( segment, labelsRAI, voxelSpacings );
 
 		FinalInterval boundingBox = intervalInVoxelUnits( segment.boundingBox(), voxelSpacings );
 		final long numElements = Intervals.numElements( boundingBox );
@@ -379,6 +394,12 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 						"The maximum recommended number is however only " + maxNumSegmentVoxels + ".\n" +
 						"It can take a bit of time to load...." );
 			}
+		}
+
+
+		if ( ! Intervals.contains( labelsRAI, boundingBox ) )
+		{
+			System.err.println( "The segment bounding box " + boundingBox + " is not fully contained in the image interval: " + Arrays.toString( Intervals.minAsLongArray( labelsRAI ) ) + "-" +  Arrays.toString( Intervals.maxAsDoubleArray( labelsRAI ) ));
 		}
 
 		final MeshExtractor meshExtractor = new MeshExtractor(
@@ -452,6 +473,7 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 		return showSelectedSegments;
 	}
 
+	@Deprecated // TODO: Is this used?
 	public synchronized void showSelectedSegments( boolean showSelectedSegments, boolean recomputeMeshes )
 	{
 		this.showSelectedSegments = showSelectedSegments;
@@ -534,6 +556,8 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 		final Source< ? > labelsSource
 				= imageSourcesModel.sources().get( segment.imageId() ).source();
 
+		System.out.println( "3D View: Fetching label image " + labelsSource.getName() + " at time point " + segment.timePoint() + " at a resolution level of " + Arrays.stream( Utils.getVoxelSpacings( labelsSource ).get( level ) ).mapToObj( x -> "" + x ).collect( Collectors.joining( " ," ) ) + " micrometer..." );
+
 		final RandomAccessibleInterval< ? extends RealType< ? > > rai =
 				BdvUtils.getRealTypeNonVolatileRandomAccessibleInterval(
 						labelsSource, segment.timePoint(), level );
@@ -541,7 +565,7 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 		return rai;
 	}
 
-	private void addMeshToUniverse( T segment, CustomTriangleMesh mesh )
+	private void addSegmentMeshToUniverse( T segment, CustomTriangleMesh mesh )
 	{
 		if ( mesh == null )
 			throw new RuntimeException( "Mesh of segment " + objectsName + "_" + segment.labelId() + " is null." );
@@ -556,6 +580,9 @@ public class Segments3dView < T extends ImageSegment > implements TimePointListe
 
 		segmentToContent.put( segment, content );
 		contentToSegment.put( content, segment );
+
+		System.out.println( "Added " + getSegmentString( segment ) );
+
 
 		universe.setAutoAdjustView( false );
 	}
