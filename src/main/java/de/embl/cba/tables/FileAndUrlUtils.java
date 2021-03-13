@@ -53,37 +53,6 @@ public class FileAndUrlUtils
 		S3     // resource supports s3 API
  	}
 
- 	public static AmazonS3 getS3Client( String uri ) {
-		final String endpoint = getEndpoint( uri );
-		final String region = "us-west-2";
-		final AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(endpoint, region);
-		/*
-		 TODO in order to support buckets with credentials, we would either need to enable passing the authentication here,
-		 or implement a method to figure out if credentials are necessary dynamically
-		*/
-		final S3CredentialsCreator.S3Authentication authentication = S3CredentialsCreator.S3Authentication.Anonymous;
-		AmazonS3 s3 = AmazonS3ClientBuilder
-				.standard()
-				.withPathStyleAccessEnabled(true)
-				.withEndpointConfiguration(endpointConfiguration)
-				.withCredentials(S3CredentialsCreator.getCredentialsProvider(authentication))
-				.build();
-		return s3;
-	}
-
-	public static String[] getBucketAndObject( String uri ) {
-		final String[] split = uri.split("/");
-		String bucket = split[3];
-		String object = Arrays.stream( split ).skip( 4 ).collect( Collectors.joining( "/") );
-		return new String[] {bucket, object};
-	}
-
-	public static String getEndpoint( String uri ) {
-		final String[] split = uri.split("/");
-		String endpoint = Arrays.stream( split ).limit( 3 ).collect( Collectors.joining( "/" ) );
-		return endpoint;
-	}
-
  	public static ResourceType getType( String uri ) {
 		if( uri.startsWith("https://s3") || uri.contains("s3.amazon.aws.com") ) {
 			return ResourceType.S3;
@@ -190,8 +159,8 @@ public class FileAndUrlUtils
 			case FILE:
 				return new FileInputStream( new File( uri ) );
 			case S3:
-				AmazonS3 s3 = getS3Client( uri );
-				String[] bucketAndObject = getBucketAndObject( uri );
+				AmazonS3 s3 = S3Utils.getS3Client( uri );
+				String[] bucketAndObject = S3Utils.getBucketAndObject( uri );
 				return s3.getObject(bucketAndObject[0], bucketAndObject[1]).getObjectContent();
 			default:
 				throw new IOException( "Could not open uri: " + uri );
@@ -261,8 +230,8 @@ public class FileAndUrlUtils
 			case FILE:
 				return new File( uri ).exists();
 			case S3:
-				AmazonS3 s3 = getS3Client( uri );
-				String[] bucketAndObject = getBucketAndObject( uri );
+				AmazonS3 s3 = S3Utils.getS3Client( uri );
+				String[] bucketAndObject = S3Utils.getBucketAndObject( uri );
 				return s3.doesObjectExist(bucketAndObject[0], bucketAndObject[1]);
 			default:
 				return false;
