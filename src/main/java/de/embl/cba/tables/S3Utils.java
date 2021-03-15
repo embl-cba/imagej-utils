@@ -1,17 +1,102 @@
 package de.embl.cba.tables;
 
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.AnonymousAWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.*;
+import com.google.api.client.http.HttpStatusCodes;
 import ij.gui.GenericDialog;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public abstract class S3Utils {
+
+    public static AmazonS3 getS3Client( String endpoint, String region, String bucket ) {
+        final AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(endpoint, region);
+
+        // first we create a client with anon credentials and see if we can access the bucket like this
+        AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider( new AnonymousAWSCredentials() );
+        AmazonS3 s3 = AmazonS3ClientBuilder
+                .standard()
+                .withPathStyleAccessEnabled(true)
+                .withEndpointConfiguration(endpointConfiguration)
+                .withCredentials(credentialsProvider)
+                .build();
+
+        // check if we can access the access
+        HeadBucketRequest headBucketRequest = new HeadBucketRequest(bucket);
+        try {
+            HeadBucketResult headBucketResult = s3.headBucket(headBucketRequest);
+            return s3;
+        }
+        catch (AmazonServiceException e) {
+            switch(e.getStatusCode()) {
+                // if we get a 403 response (access forbidden), we try again with credentials
+                case HttpStatusCodes.STATUS_CODE_FORBIDDEN:
+                    credentialsProvider = new DefaultAWSCredentialsProviderChain();
+                    checkCredentialsExistence(credentialsProvider);
+                    s3 = AmazonS3ClientBuilder
+                            .standard()
+                            .withPathStyleAccessEnabled(true)
+                            .withEndpointConfiguration(endpointConfiguration)
+                            .withCredentials(credentialsProvider)
+                            .build();
+                    // check if we have access permissions now
+                    try {
+                        HeadBucketResult headBucketResult = s3.headBucket(headBucketRequest);
+                    } catch(AmazonServiceException e2) {
+                        throw e2;
+                    }
+                    return s3;
+                // otherwise the bucket does not exist or has been permanently moved; throw the exception
+                default:
+                    throw e;
+            }
+        }
+    }
+
+    public static AmazonS3 getS3Client( String uri ) {
+        final String endpoint = getEndpoint( uri );
+        final String region = "us-west-2";  // TODO get region from uri
+        final String[] bucketAndObject = getBucketAndObject(uri);
+        return getS3Client(endpoint, region, bucketAndObject[0]);
+    }
+
+    public static void checkCredentialsExistence( AWSCredentialsProvider credentialsProvider )
+    {
+        try
+        {
+            credentialsProvider.getCredentials();
+        }
+        catch ( Exception e )
+        {
+            throw  new RuntimeException( e ); // No credentials could be found
+        }
+    }
+
+    public static String[] getBucketAndObject( String uri ) {
+        final String[] split = uri.split("/");
+        String bucket = split[3];
+        String object = Arrays.stream( split ).skip( 4 ).collect( Collectors.joining( "/") );
+        return new String[] {bucket, object};
+    }
+
+    public static String getEndpoint( String uri ) {
+        final String[] split = uri.split("/");
+        String endpoint = Arrays.stream( split ).limit( 3 ).collect( Collectors.joining( "/" ) );
+        return endpoint;
+    }
+
     public static String selectS3PathFromDirectory( String directory, String objectName ) throws IOException
     {
         final ArrayList< String > filePaths = getS3FilePaths( directory );
@@ -29,8 +114,8 @@ public abstract class S3Utils {
 
     public static ArrayList< String > getS3FilePaths( String directory )
     {
-        final AmazonS3 s3 = FileAndUrlUtils.getS3Client( directory );
-        final String[] bucketAndObject = FileAndUrlUtils.getBucketAndObject( directory );
+        final AmazonS3 s3 = getS3Client( directory );
+        final String[] bucketAndObject = getBucketAndObject( directory );
 
         final String bucket = bucketAndObject[0];
         final String prefix = (bucketAndObject[1] == "") ? "" : (bucketAndObject[1] + "/");
