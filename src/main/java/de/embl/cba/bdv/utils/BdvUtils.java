@@ -42,10 +42,10 @@ import bdv.viewer.*;
 import bdv.viewer.animate.AbstractTransformAnimator;
 import bdv.viewer.animate.SimilarityTransformAnimator;
 
+import de.embl.cba.tables.FileAndUrlUtils;
 import de.embl.cba.transforms.utils.Transforms;
 import mpicbg.spim.data.SpimData;
 import mpicbg.spim.data.SpimDataException;
-import mpicbg.spim.data.XmlIoSpimData;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.*;
 import net.imglib2.Point;
@@ -67,6 +67,8 @@ import org.apache.commons.lang.WordUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.List;
 import java.util.stream.DoubleStream;
@@ -1271,10 +1273,11 @@ public abstract class BdvUtils
 	{
 		try
 		{
-			SpimData spimData = new XmlIoSpimData().load( path);
+			InputStream stream = FileAndUrlUtils.getInputStream( path );
+			SpimData spimData = new CustomXmlIoSpimData().loadFromStream( stream, path );
 			return spimData;
 		}
-		catch ( SpimDataException e )
+		catch (SpimDataException | IOException e )
 		{
 			System.out.println( path );
 			e.printStackTrace();
