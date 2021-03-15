@@ -21,14 +21,8 @@ import java.util.stream.Collectors;
 
 public abstract class S3Utils {
 
-    // TODO if we decide to use this, we should get rid of S3CredentialsCreator and use this method in mobie
-    // then we can also get rid of the authentication field in the bdv.xml
-    public static AmazonS3 getS3Client( String uri ) {
-        final String endpoint = getEndpoint( uri );
-        final String region = "us-west-2";
+    public static AmazonS3 getS3Client( String endpoint, String region, String bucket ) {
         final AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(endpoint, region);
-
-        final String[] bucketAndObject = getBucketAndObject(uri);
 
         // first we create a client with anon credentials and see if we can access the bucket like this
         AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider( new AnonymousAWSCredentials() );
@@ -40,7 +34,7 @@ public abstract class S3Utils {
                 .build();
 
         // check if we can access the access
-        HeadBucketRequest headBucketRequest = new HeadBucketRequest(bucketAndObject[0]);
+        HeadBucketRequest headBucketRequest = new HeadBucketRequest(bucket);
         try {
             HeadBucketResult headBucketResult = s3.headBucket(headBucketRequest);
             return s3;
@@ -64,11 +58,18 @@ public abstract class S3Utils {
                         throw e2;
                     }
                     return s3;
-                    // otherwise the bucket does not exist or has been permanently moved; throw the exception
+                // otherwise the bucket does not exist or has been permanently moved; throw the exception
                 default:
                     throw e;
             }
         }
+    }
+
+    public static AmazonS3 getS3Client( String uri ) {
+        final String endpoint = getEndpoint( uri );
+        final String region = "us-west-2";  // TODO get region from uri
+        final String[] bucketAndObject = getBucketAndObject(uri);
+        return getS3Client(endpoint, region, bucketAndObject[0]);
     }
 
     public static void checkCredentialsExistence( AWSCredentialsProvider credentialsProvider )
