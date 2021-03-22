@@ -106,11 +106,11 @@ public class TableColumns
 
 	public static Map< String, List< String > > stringColumnsFromTableFile( final String path, String delim )
 	{
-		final List< String > rowsInTableIncludingHeader = Tables.readRows( path );
+		final List< String > tableRowsIncludingHeader = Tables.readRows( path );
 
-		delim = Tables.autoDelim( delim, rowsInTableIncludingHeader );
+		delim = Tables.autoDelim( delim, tableRowsIncludingHeader );
 
-		List< String > columnNames = Tables.getColumnNames( rowsInTableIncludingHeader, delim );
+		List< String > columnNames = Tables.getColumnNames( tableRowsIncludingHeader, delim );
 
 		final Map< String, List< String > > columnNameToStrings = new LinkedHashMap<>();
 
@@ -122,13 +122,13 @@ public class TableColumns
 			columnNameToStrings.put( columnName, new ArrayList<>( ) );
 		}
 
-		final int numRows = rowsInTableIncludingHeader.size() - 1;
+		final int numRows = tableRowsIncludingHeader.size() - 1;
 
 		final long start = System.currentTimeMillis();
 
 		for ( int row = 1; row <= numRows; ++row )
 		{
-			final String[] split = rowsInTableIncludingHeader.get( row ).split( delim );
+			final String[] split = tableRowsIncludingHeader.get( row ).split( delim );
 			for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
 			{
 				columnNameToStrings.get( columnNames.get( columnIndex ) ).add( split[ columnIndex ].replace( "\"", "" ) );

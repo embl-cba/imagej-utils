@@ -36,6 +36,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import org.apache.commons.io.IOUtils;
 
 public class FileAndUrlUtils
 {
@@ -165,6 +167,13 @@ public class FileAndUrlUtils
 			default:
 				throw new IOException( "Could not open uri: " + uri );
 		}
+	}
+
+	public static String read( String uri ) throws IOException
+	{
+		final InputStream inputStream = FileAndUrlUtils.getInputStream( uri );
+		final String s = IOUtils.toString( inputStream, StandardCharsets.UTF_8.name() );
+		return s;
 	}
 
 	public static String getParentLocation( String uri )
