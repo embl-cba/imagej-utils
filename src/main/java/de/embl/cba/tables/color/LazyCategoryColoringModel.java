@@ -29,9 +29,6 @@
 package de.embl.cba.tables.color;
 
 import de.embl.cba.bdv.utils.lut.ARGBLut;
-import de.embl.cba.bdv.utils.lut.IndexARGBLut;
-import de.embl.cba.tables.color.AbstractColoringModel;
-import de.embl.cba.tables.color.CategoryColoringModel;
 import net.imglib2.type.numeric.ARGBType;
 
 import java.util.HashMap;
@@ -42,7 +39,7 @@ import static de.embl.cba.bdv.utils.converters.RandomARGBConverter.goldenRatio;
 public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > implements CategoryColoringModel< T >
 {
 	private Map< T, ARGBType > inputToColorMap;
-	private IndexARGBLut argbLut;
+	private ARGBLut argbLut;
 	private int randomSeed;
 
 	/**
@@ -53,7 +50,7 @@ public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > i
 	 *
 	 * @param argbLut
 	 */
-	public LazyCategoryColoringModel( IndexARGBLut argbLut )
+	public LazyCategoryColoringModel( ARGBLut argbLut )
 	{
 		super();
 		this.argbLut = argbLut;

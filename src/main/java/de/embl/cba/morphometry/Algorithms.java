@@ -303,7 +303,6 @@ public class Algorithms
 			RandomAccessibleInterval< T > rai,
 			double threshold )
 	{
-		Logger.log( "Computing mask..." );
 		RandomAccessibleInterval< BitType > mask =
 				Converters.convert( rai, ( i, o )
 						-> o.set( i.getRealDouble() > threshold ? true : false ), new BitType() );
@@ -334,7 +333,6 @@ public class Algorithms
 		stack = Transforms.getWithAdjustedOrigin( mask, stack );
 
 		return stack;
-
 	}
 
 	public static < T extends RealType< T > & NativeType< T > >
@@ -344,7 +342,6 @@ public class Algorithms
 			double globalThreshold,
 			double localThreshold )
 	{
-
 		RandomAccessibleInterval< BitType > seeds = ArrayImgs.bits( Intervals.dimensionsAsLongArray( distance ) );
 		seeds = Transforms.getWithAdjustedOrigin( distance, seeds );
 
@@ -394,7 +391,6 @@ public class Algorithms
 			Shape shape,
 			double minimumValue )
 	{
-
 		RandomAccessibleInterval< BitType > localMaxima = ArrayImgs.bits( Intervals.dimensionsAsLongArray( input ) );
 		localMaxima = Transforms.getWithAdjustedOrigin( input, localMaxima );
 
@@ -435,7 +431,6 @@ public class Algorithms
 			RandomAccessibleInterval< R > input,
 			Shape shape )
 	{
-
 		RandomAccessible< Neighborhood< R > > neighborhoods = shape.neighborhoodsRandomAccessible( Views.extendBorder( input ) );
 		RandomAccessibleInterval< Neighborhood< R > > neighborhoodsInterval = Views.interval( neighborhoods, input );
 
@@ -466,7 +461,6 @@ public class Algorithms
 	public static < T extends RealType< T > & NativeType< T > >
 	RandomAccessibleInterval< BitType > createCenterAndBoundarySeeds( RandomAccessibleInterval< T > distance, Shape shape, double globalThreshold, double localThreshold )
 	{
-
 		RandomAccessibleInterval< BitType > seeds = ArrayImgs.bits( Intervals.dimensionsAsLongArray( distance ) );
 		seeds = Transforms.getWithAdjustedOrigin( distance, seeds );
 
