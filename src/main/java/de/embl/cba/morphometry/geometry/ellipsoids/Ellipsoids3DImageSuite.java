@@ -29,6 +29,7 @@
 package de.embl.cba.morphometry.geometry.ellipsoids;
 
 import de.embl.cba.transforms.utils.Transforms;
+import ij.IJ;
 import ij.ImagePlus;
 import mcib3d.geom.Object3D;
 import mcib3d.geom.Objects3DPopulation;
@@ -44,10 +45,13 @@ public abstract class Ellipsoids3DImageSuite
 		final Object3D object = objects3DPopulation.getObject( 0 );
 
 		final EllipsoidVectors ellipsoidVectors = new EllipsoidVectors();
+		ellipsoidVectors.center = object.getCenterAsArray();
 		ellipsoidVectors.shortestAxis = object.getVectorAxis( 0 );
 		ellipsoidVectors.middleAxis = object.getVectorAxis( 1 );
 		ellipsoidVectors.longestAxis = object.getVectorAxis( 2 );
-		ellipsoidVectors.center = object.getCenterAsArray();
+		ellipsoidVectors.shortestAxisLength = 2 * object.getRadiusMoments( 0 );
+		ellipsoidVectors.middleAxisLength = 2 * object.getRadiusMoments( 1 );
+		ellipsoidVectors.longestAxisLength = 2 * object.getRadiusMoments( 2 );
 
 		return ellipsoidVectors;
 	}

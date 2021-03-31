@@ -36,4 +36,7 @@ public class EllipsoidVectors
 	public Vector3D middleAxis;
 	public Vector3D longestAxis;
 	public double[] center;
+	public double shortestAxisLength;
+	public double middleAxisLength;
+	public double longestAxisLength;
 }
