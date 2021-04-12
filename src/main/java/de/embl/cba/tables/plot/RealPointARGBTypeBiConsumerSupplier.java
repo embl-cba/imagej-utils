@@ -28,38 +28,34 @@
  */
 package de.embl.cba.tables.plot;
 
-import de.embl.cba.DebugHelper;
 import de.embl.cba.tables.color.ColoringModel;
-import de.embl.cba.tables.tablerow.TableRow;
 import net.imglib2.KDTree;
 import net.imglib2.RealPoint;
 import net.imglib2.Sampler;
 import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
 import net.imglib2.type.numeric.ARGBType;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-public class RealPointARGBTypeBiConsumerSupplier< T extends TableRow > implements Supplier< BiConsumer< RealPoint, ARGBType > >
+public class RealPointARGBTypeBiConsumerSupplier< T > implements Supplier< BiConsumer< RealPoint, ARGBType > >
 {
 	private final KDTree< T > kdTree;
 	private final ColoringModel< T > coloringModel;
 	private final double radius;
-	private AtomicInteger i = new AtomicInteger( 0 );
+	private final int background;
 
-	public RealPointARGBTypeBiConsumerSupplier( KDTree< T > kdTree, ColoringModel< T > coloringModel, final double radius )
+	public RealPointARGBTypeBiConsumerSupplier( KDTree< T > kdTree, ColoringModel< T > coloringModel, final double radius, int background )
 	{
 		this.kdTree = kdTree;
 		this.coloringModel = coloringModel;
 		this.radius = radius;
+		this.background = background;
 	}
 
 	@Override
 	public BiConsumer< RealPoint, ARGBType > get()
 	{
-		//System.out.println( i.incrementAndGet() );
-		//DebugHelper.printStackTrace( 10 );
 		return new RealPointARGBTypeBiConsumer( kdTree, coloringModel, radius );
 	}
 
@@ -95,7 +91,7 @@ public class RealPointARGBTypeBiConsumerSupplier< T extends TableRow > implement
 			}
 			else
 			{
-				argbType.setZero();
+				argbType.set( background );
 			}
 		}
 	}

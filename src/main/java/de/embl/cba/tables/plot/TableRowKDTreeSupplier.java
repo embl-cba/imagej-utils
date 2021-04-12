@@ -49,7 +49,7 @@ import java.util.stream.IntStream;
  *
  * @param <T>
  */
-public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< KDTree< T  > >
+public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< KDTree< T > >
 {
 	final private int n = 2;
 
@@ -73,7 +73,7 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 	/**
 	 * Create a KDTree, using copies of the tableRows and dataPoints,
 	 * because the KDTree modifies those lists internally,
-	 * which would lead to confusing and concurrency issues.
+	 * which would lead to confusion and concurrency issues.
 	 *
 	 * @return
 	 */
