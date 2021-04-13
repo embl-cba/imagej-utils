@@ -126,7 +126,7 @@ public class TableRowsScatterPlot< T extends TableRow >
 					"\nand selecting \"Reconfigure...\"");
 		}
 
-		Supplier< BiConsumer< RealPoint, ARGBType > > biConsumerSupplier = new RealPointARGBTypeBiConsumerSupplier<>( kdTree, selectionColoringModel,  dotSizeScaleFactor *( min[ 0 ] - max[ 0 ] ) / 100.0, ARGBType.rgba( 0,0,0,0 ) );
+		Supplier< BiConsumer< RealPoint, ARGBType > > biConsumerSupplier = new RealPointARGBTypeBiConsumerSupplier<>( kdTree, selectionColoringModel,  dotSizeScaleFactor *( min[ 0 ] - max[ 0 ] ) / 100.0, ARGBType.rgba( 100,100,100,255 ) );
 
 		FunctionRealRandomAccessible< ARGBType > randomAccessible = new FunctionRealRandomAccessible( 2, biConsumerSupplier, ARGBType::new );
 

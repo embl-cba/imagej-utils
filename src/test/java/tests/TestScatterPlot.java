@@ -38,7 +38,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class TestScatterPlot
 {
 	//@Test // TODO: why does this not run as a test but throws an assertion error?

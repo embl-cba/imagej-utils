@@ -39,6 +39,23 @@ import java.util.ArrayList;
 
 public abstract class GitHubUtils
 {
+	public static String createRawUrl( String url )
+	{
+		return createRawUrl( url, null );
+	}
+
+	public static String createRawUrl( String url, String branch )
+	{
+		if ( ! url.contains( "github.com" ) )
+		{
+			throw new UnsupportedOperationException( "URL must contain github.com." );
+		}
+
+		String rawUrl = url.replace( "github.com", "raw.githubusercontent.com" );
+		if ( branch != null ) rawUrl += "/" + branch;
+		return rawUrl;
+	}
+
 	public static GitLocation rawUrlToGitLocation( String rawUrl )
 	{
 		final GitLocation gitLocation = new GitLocation();
