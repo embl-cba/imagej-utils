@@ -99,7 +99,7 @@ public class ExploreObjectsTableCommand implements Command
 	{
 		if ( ! isRelativeImagePath ) imageRootFolder = new File("" );
 
-		Logger.info("Opening table: " + tableFile );
+		Logger.info("Opening table:\n" + tableFile );
 		final List< TableRowImageSegment > tableRowImageSegments
 				= createSegments( tableFile.getAbsolutePath() );
 

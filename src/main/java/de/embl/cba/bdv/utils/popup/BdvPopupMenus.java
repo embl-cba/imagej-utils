@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 
 public abstract class BdvPopupMenus
 {
-	private static ConcurrentHashMap< BdvHandle, PopupMenu > bdvToPopup = new ConcurrentHashMap<>( );
+	private static ConcurrentHashMap< BdvHandle, PopupMenu > bdvToPopup = new ConcurrentHashMap<>();
 
 	public static synchronized void addAction( BdvHandle bdvHandle, List< String > menuNames, String actionName, ClickBehaviour clickBehaviour )
 	{
@@ -60,6 +60,15 @@ public abstract class BdvPopupMenus
 		bdvToPopup.get( bdvHandle ).removePopupAction( actionName );
 	}
 
+	public static synchronized void removeAllActions( BdvHandle bdvHandle )
+	{
+		final PopupMenu popupMenu = bdvToPopup.get( bdvHandle );
+		for ( String actionName : popupMenu.getActionNames() )
+		{
+			removeAction( bdvHandle, actionName );
+		}
+	}
+
 	public static synchronized void addAction( BdvHandle bdvHandle, String actionName, Runnable runnable )
 	{
 		ensurePopupMenuExist( bdvHandle );
@@ -70,6 +79,11 @@ public abstract class BdvPopupMenus
 	{
 		ensurePopupMenuExist( bdvHandle );
 		bdvToPopup.get( bdvHandle ).addPopupAction( "Make Screenshot...", new ViewCaptureDialog( bdvHandle ) );
+	}
+
+	public static synchronized void removePopupMenu( BdvHandle bdvHandle )
+	{
+		bdvToPopup.remove( bdvHandle );
 	}
 
 	private static void ensurePopupMenuExist( BdvHandle bdvHandle )

@@ -157,7 +157,7 @@ public class Tables
 		try {
 			stream = FileAndUrlUtils.getInputStream(path);
 		} catch (IOException e) {
-			throw new RuntimeException("Could not get reader from" + path);
+			throw new RuntimeException("Could not open " + path);
 		}
 		final InputStreamReader inReader = new InputStreamReader( stream );
 		final BufferedReader bufferedReader = new BufferedReader( inReader );

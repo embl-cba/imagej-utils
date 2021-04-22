@@ -129,6 +129,11 @@ public class PopupMenu
 		actionNameToMenuItem.remove( actionName );
 	}
 
+	public Set< String > getActionNames()
+	{
+		return actionNameToMenuItem.keySet();
+	}
+
 	private void removeEmptyMenus()
 	{
 		final ArrayList< JMenu > removed = new ArrayList<>();
