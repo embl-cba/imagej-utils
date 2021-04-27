@@ -40,13 +40,15 @@ import net.imglib2.type.numeric.ARGBType;
 
 import javax.swing.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.TRANSPARENT;
 
 public class ColumnColoringModelCreator< T extends TableRow >
 {
-	private final JTable table;
+	private JTable table;
+	private List< T > tableRows;
 
 	private String selectedColumnName;
 	private String selectedColoringMode;
@@ -67,6 +69,18 @@ public class ColumnColoringModelCreator< T extends TableRow >
 	{
 		this.table = table;
 
+		init();
+	}
+
+	public ColumnColoringModelCreator( List< T > tableRows )
+	{
+		this.tableRows = tableRows;
+
+		init();
+	}
+
+	private void init()
+	{
 		this.columnNameToMinMax = new HashMap<>();
 		this.columnNameToRangeSettings = new HashMap<>();
 	}
@@ -164,10 +178,22 @@ public class ColumnColoringModelCreator< T extends TableRow >
 	}
 
 	private void populateColoringModelFromArgbColumn (String selectedColumnName, CategoryTableRowColumnColoringModel<T> coloringModel) {
-		int selectedColumnIndex = table.getColumnModel().getColumnIndex(selectedColumnName);
-		for (int i = 0; i < table.getRowCount(); i++) {
-			String argbString = (String) table.getValueAt(i, selectedColumnIndex);
-			if ( !argbString.equals("NaN") & !argbString.equals("None") ) {
+
+		int selectedColumnIndex = -1;
+		if ( table != null )
+		{
+			selectedColumnIndex = table.getColumnModel().getColumnIndex( selectedColumnName );
+		}
+
+		for (int i = 0; i < table.getRowCount(); i++)
+		{
+			String argbString;
+			if ( table != null )
+				argbString = (String) table.getValueAt(i, selectedColumnIndex);
+			else
+				argbString = tableRows.get( i ).getCell( selectedColumnName );
+
+			if ( ! argbString.equals("NaN") & !argbString.equals("None") ) {
 				String[] splitArgbString = argbString.split("-");
 
 				int[] argbValues = new int[4];
