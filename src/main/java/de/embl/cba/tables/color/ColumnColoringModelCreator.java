@@ -32,7 +32,7 @@ import de.embl.cba.bdv.utils.lut.ARGBLut;
 import de.embl.cba.bdv.utils.lut.BlueWhiteRedARGBLut;
 import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.bdv.utils.lut.ViridisARGBLut;
-import de.embl.cba.tables.Logger;
+import de.embl.cba.tables.TableRows;
 import de.embl.cba.tables.Tables;
 import de.embl.cba.tables.tablerow.TableRow;
 import ij.gui.GenericDialog;
@@ -180,12 +180,18 @@ public class ColumnColoringModelCreator< T extends TableRow >
 	private void populateColoringModelFromArgbColumn (String selectedColumnName, CategoryTableRowColumnColoringModel<T> coloringModel) {
 
 		int selectedColumnIndex = -1;
+		int rowCount;
 		if ( table != null )
 		{
 			selectedColumnIndex = table.getColumnModel().getColumnIndex( selectedColumnName );
+			rowCount = table.getRowCount();
+		}
+		else
+		{
+			rowCount = tableRows.size();
 		}
 
-		for (int i = 0; i < table.getRowCount(); i++)
+		for ( int i = 0; i < rowCount; i++)
 		{
 			String argbString;
 			if ( table != null )
@@ -201,8 +207,7 @@ public class ColumnColoringModelCreator< T extends TableRow >
 					argbValues[j] = Integer.parseInt(splitArgbString[j]);
 				}
 
-				coloringModel.putInputToFixedColor(argbString,
-						new ARGBType(ARGBType.rgba(argbValues[1], argbValues[2], argbValues[3], argbValues[0])));
+				coloringModel.putInputToFixedColor(argbString, new ARGBType(ARGBType.rgba(argbValues[1], argbValues[2], argbValues[3], argbValues[0])));
 			}
 		}
 	}
@@ -246,14 +251,13 @@ public class ColumnColoringModelCreator< T extends TableRow >
 			Double max,
 			ARGBLut argbLut )
 	{
-		if ( ! Tables.isNumeric( table, selectedColumnName ) )
-		{
-			Logger.error( "This coloring mode is only available for numeric columns.\n" +
-					"The selected " + selectedColumnName + " column however appears to contain non-numeric values.");
-			return null; // TODO: Make this work without null pointer exception
-		}
+		double[] valueRange;
 
-		final double[] valueRange = getValueRange( table, selectedColumnName );
+		if ( table != null )
+			valueRange = getValueRange( table, selectedColumnName );
+		else
+			valueRange = getValueRange( tableRows, selectedColumnName );
+
 		double[] valueSettings = getValueSettings( selectedColumnName, valueRange );
 
 		final NumericTableRowColumnColoringModel< T > coloringModel
@@ -299,6 +303,17 @@ public class ColumnColoringModelCreator< T extends TableRow >
 		if ( ! columnNameToMinMax.containsKey( column ) )
 		{
 			final double[] minMaxValues = Tables.minMax( column, table );
+			columnNameToMinMax.put( column, minMaxValues );
+		}
+
+		return columnNameToMinMax.get( column );
+	}
+
+	private double[] getValueRange( List< ? extends TableRow > tableRows, String column )
+	{
+		if ( ! columnNameToMinMax.containsKey( column ) )
+		{
+			final double[] minMaxValues = TableRows.minMax( tableRows, column );
 			columnNameToMinMax.put( column, minMaxValues );
 		}
 

@@ -30,10 +30,6 @@ package de.embl.cba.tables;
 
 import de.embl.cba.bdv.utils.sources.Metadata;
 import de.embl.cba.bdv.utils.wrap.Wraps;
-import de.embl.cba.tables.Calibrations;
-import de.embl.cba.tables.Logger;
-import de.embl.cba.tables.TableColumns;
-import de.embl.cba.tables.Utils;
 import de.embl.cba.tables.image.DefaultImageSourcesModel;
 import de.embl.cba.tables.imagesegment.SegmentProperty;
 import de.embl.cba.tables.imagesegment.SegmentPropertyColumnsSelectionDialog;

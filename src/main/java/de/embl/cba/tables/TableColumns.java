@@ -30,6 +30,7 @@ package de.embl.cba.tables;
 
 import de.embl.cba.tables.Tables;
 import de.embl.cba.tables.Utils;
+import de.embl.cba.tables.tablerow.TableRow;
 import ij.measure.ResultsTable;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -334,11 +335,37 @@ public class TableColumns
 		return orderColumn;
 	}
 
+	public static ArrayList< Double > getNumericColumnAsDoubleList( List< ? extends TableRow > tableRows, String columnName )
+	{
+		final int numRows = tableRows.size();
+		final ArrayList< Double > orderColumn = new ArrayList<>();
+		for ( int rowIndex = 0; rowIndex < numRows; ++rowIndex )
+			orderColumn.add( Utils.parseDouble( tableRows.get( rowIndex ).getCell( columnName ) ) );
+		return orderColumn;
+	}
+
 	public static Map< String, List< String > > openAndOrderNewColumns( JTable table, String mergeByColumnName, String newTablePath )
 	{
 		// TODO: this assumes that the ordering column is numeric; is this needed?
 		final ArrayList< Double > orderColumn = getNumericColumnAsDoubleList(
 				table,
+				mergeByColumnName );
+
+		final Map< String, List< String > > columNameToValues =
+				orderedStringColumnsFromTableFile(
+						newTablePath,
+						null,
+						mergeByColumnName,
+						orderColumn );
+
+		return columNameToValues;
+	}
+
+	public static Map< String, List< String > > openAndOrderNewColumns( List< ? extends TableRow > tableRows, String mergeByColumnName, String newTablePath )
+	{
+		// TODO: this assumes that the ordering column is numeric; is this needed?
+		final ArrayList< Double > orderColumn = getNumericColumnAsDoubleList(
+				tableRows,
 				mergeByColumnName );
 
 		final Map< String, List< String > > columNameToValues =

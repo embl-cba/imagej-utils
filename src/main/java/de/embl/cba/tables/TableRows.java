@@ -185,4 +185,20 @@ public abstract class TableRows
 					columnIndex );
 		}
 	}
+
+	public static double[] minMax( List< ? extends TableRow > tableRows, String column  )
+	{
+		double min = Double.MAX_VALUE;
+		double max = -Double.MAX_VALUE;
+
+		final int rowCount = tableRows.size();
+		for ( int row = 0; row < rowCount; row++ )
+		{
+			final double value = Double.parseDouble(  tableRows.get( row ).getCell( column ) );
+			if ( value < min ) min = value;
+			if ( value > max ) max = value;
+		}
+
+		return new double[]{ min, max };
+	}
 }
