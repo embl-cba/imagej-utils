@@ -107,9 +107,17 @@ public class CategoryTableRowColumnColoringModel< T extends TableRow >
 	public void incRandomSeed( )
 	{
 		if ( fixedColorMode ) return;
-
 		inputToRandomColor.clear();
 		this.randomSeed++;
+		notifyColoringListeners();
+	}
+
+	@Override
+	public void setRandomSeed( int seed )
+	{
+		if ( fixedColorMode ) return;
+		inputToRandomColor.clear();
+		this.randomSeed = seed;
 		notifyColoringListeners();
 	}
 

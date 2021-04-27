@@ -82,7 +82,14 @@ public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > i
 	{
 		inputToColorMap.clear();
 		this.randomSeed++;
+		notifyColoringListeners();
+	}
 
+	@Override
+	public void setRandomSeed( int seed )
+	{
+		inputToColorMap.clear();
+		this.randomSeed = seed;
 		notifyColoringListeners();
 	}
 }

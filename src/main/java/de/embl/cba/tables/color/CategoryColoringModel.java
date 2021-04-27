@@ -46,4 +46,6 @@ public interface CategoryColoringModel< T > extends Converter< T, ARGBType >
 
 	void incRandomSeed();
 
+	void setRandomSeed( int seed );
+
 }
