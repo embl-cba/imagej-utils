@@ -30,6 +30,7 @@ package de.embl.cba.tables.color;
 
 import de.embl.cba.bdv.utils.lut.ARGBLut;
 import de.embl.cba.bdv.utils.lut.BlueWhiteRedARGBLut;
+import de.embl.cba.bdv.utils.lut.ColumnARGBLut;
 import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.bdv.utils.lut.ViridisARGBLut;
 import de.embl.cba.tables.TableRows;
@@ -160,7 +161,7 @@ public class ColumnColoringModelCreator< T extends TableRow >
 				return createCategoricalColoringModel(
 						selectedColumnName,
 						false,
-						null, TRANSPARENT );
+						new ColumnARGBLut(), TRANSPARENT );
 		}
 
 		return null;
@@ -237,7 +238,8 @@ public class ColumnColoringModelCreator< T extends TableRow >
 			}
 		}
 
-		if ( argbLut == null) {
+		if ( argbLut instanceof ColumnARGBLut )
+		{
 			populateColoringModelFromArgbColumn( selectedColumnName, coloringModel );
 		}
 
