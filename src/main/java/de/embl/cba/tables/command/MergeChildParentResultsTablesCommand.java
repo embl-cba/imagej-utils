@@ -29,31 +29,29 @@
 package de.embl.cba.tables.command;
 
 import de.embl.cba.tables.morpholibj.ExploreMorphoLibJLabelImage;
+import de.embl.cba.tables.results.ResultsTableFetcher;
 import ij.ImagePlus;
+import ij.measure.ResultsTable;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+import java.util.HashMap;
+
 @Deprecated
-// @Plugin(type = Command.class, menuPath = "Plugins>Segmentation>Explore>Explore MorphoLibJ Segmentation" )
-public class ExploreMorphoLibJLabelImageCommand implements Command
+@Plugin(type = Command.class, menuPath = "Plugins>Tables>Merge>Merge Child and Parent Results Tables" )
+public class MergeChildParentResultsTablesCommand implements Command
 {
-	@Parameter ( label = "Intensity image", required = false )
-	public ImagePlus intensityImage;
+	@Parameter ( label = "Parent results table name" )
+	public String parentTable;
 
-	@Parameter ( label = "Label mask image" )
-	public ImagePlus labelImage;
-
-	@Parameter ( label = "Results table title" )
-	public String resultsTableTitle;
+	@Parameter ( label = "Child results table name" )
+	public String childTable;
 
 	@Override
 	public void run()
 	{
-		new ExploreMorphoLibJLabelImage(
-						intensityImage,
-						labelImage,
-						resultsTableTitle );
+		final HashMap< String, ResultsTable > titleToTable = ResultsTableFetcher.fetchResultsTables();
 	}
 
 }

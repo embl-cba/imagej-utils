@@ -28,7 +28,6 @@
  */
 package demo;
 
-import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.tables.morpholibj.ExploreMorphoLibJLabelImage;
 import de.embl.cba.tables.view.combined.SegmentsTableBdvAnd3dViews;
 import ij.IJ;
