@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static de.embl.cba.bdv.utils.converters.RandomARGBConverter.goldenRatio;
 
 public class CategoryTableRowColumnColoringModel< T extends TableRow >
-		extends AbstractColoringModel< T > implements CategoryColoringModel< T >, ColumnColoringModel
+		extends AbstractColoringModel< T > implements CategoryColoringModel< T >, ColumnColoringModel, ARBGLutSupplier
 {
 	public static final ARGBType TRANSPARENT = new ARGBType( ARGBType.rgba( 0, 0, 0, 0 ) );
 	public static final ARGBType DARK_GREY = new ARGBType( ARGBType.rgba( 100, 100, 100, 255 ) );
@@ -143,7 +143,6 @@ public class CategoryTableRowColumnColoringModel< T extends TableRow >
 		return columnName;
 	}
 
-	@Override
 	public ARGBLut getARGBLut() {
 		return this.argbLut;
 	}

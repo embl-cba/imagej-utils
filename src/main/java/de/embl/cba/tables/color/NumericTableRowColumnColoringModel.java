@@ -36,10 +36,9 @@ import de.embl.cba.tables.color.NumericColoringModel;
 import de.embl.cba.tables.tablerow.TableRow;
 import net.imglib2.type.numeric.ARGBType;
 
-
 // TODO: extract abstract class NumericFeatureColoringModel
 public class NumericTableRowColumnColoringModel< T extends TableRow >
-		extends AbstractColoringModel< T > implements NumericColoringModel< T >, ColumnColoringModel
+		extends AbstractColoringModel< T > implements NumericColoringModel< T >, ColumnColoringModel, ARBGLutSupplier
 {
 	private final String columnName;
 	private final ARGBLut lut;

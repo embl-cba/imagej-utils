@@ -36,7 +36,7 @@ import java.util.Map;
 
 import static de.embl.cba.bdv.utils.converters.RandomARGBConverter.goldenRatio;
 
-public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > implements CategoryColoringModel< T >
+public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > implements CategoryColoringModel< T >, ARBGLutSupplier
 {
 	private Map< T, ARGBType > inputToColorMap;
 	private ARGBLut argbLut;
@@ -91,5 +91,11 @@ public class LazyCategoryColoringModel< T > extends AbstractColoringModel< T > i
 		inputToColorMap.clear();
 		this.randomSeed = seed;
 		notifyColoringListeners();
+	}
+
+	@Override
+	public ARGBLut getARGBLut()
+	{
+		return argbLut;
 	}
 }

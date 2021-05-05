@@ -39,5 +39,6 @@ public interface ARGBLut
 	int getARGB( double x );
 
 	String getName();
+
 	void setName( String name );
 }
