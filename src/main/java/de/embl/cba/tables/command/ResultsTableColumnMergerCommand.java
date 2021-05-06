@@ -30,14 +30,10 @@ package de.embl.cba.tables.command;
 
 import de.embl.cba.tables.results.ResultsBuilder;
 import de.embl.cba.tables.results.ResultsTableFetcher;
-import ij.IJ;
 import ij.measure.ResultsTable;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-
-import java.util.HashMap;
-import java.util.stream.Collectors;
 
 
 /**
@@ -48,7 +44,7 @@ import java.util.stream.Collectors;
  * The aggregated child measurements will be appended as new columns to the parent results table.
  *
  */
-@Plugin(type = Command.class, menuPath = "Plugins>Tables>Merge>Merge Result Tables Columns" )
+@Plugin(type = Command.class, menuPath = "Plugins>Tables>Merge>Merge Results Tables Columns" )
 public class ResultsTableColumnMergerCommand implements Command
 {
 	@Parameter ( label = "Results table name" )
@@ -66,38 +62,18 @@ public class ResultsTableColumnMergerCommand implements Command
 	@Override
 	public void run()
 	{
-		if ( ! fetchTables() ) return;
+		fetchTables();
 
 		final ResultsTable resultsTable = new ResultsBuilder( tableA ).addResult( tableB ).getResultsTable();
 
 		resultsTable.show( outputTableName );
 	}
 
-	private boolean fetchTables()
+	private void fetchTables()
 	{
-		final HashMap< String, ResultsTable > titleToTable = ResultsTableFetcher.fetchCurrentlyOpenResultsTables();
+		final ResultsTableFetcher resultsTableFetcher = new ResultsTableFetcher();
 
-		if ( ! titleToTable.containsKey( tableNameA ) )
-		{
-			showResultsTableNotFoundMessage( titleToTable, tableNameA );
-			return false;
-		}
-
-		if ( ! titleToTable.containsKey( tableNameB ) )
-		{
-			showResultsTableNotFoundMessage( titleToTable, tableNameB );
-			return false;
-		}
-
-		tableA = titleToTable.get( tableNameA );
-		tableB = titleToTable.get( tableNameB );
-		return true;
+		tableA = resultsTableFetcher.fetch( tableNameA );
+		tableB = resultsTableFetcher.fetch( tableNameB );
 	}
-
-	private void showResultsTableNotFoundMessage( HashMap< String, ResultsTable > titleToTable, String parentTable )
-	{
-		IJ.showMessage( parentTable + "  does not exist.\n" +
-				"Please choose one of the following: " + titleToTable.keySet().stream().collect( Collectors.joining("\n") ) );
-	}
-
 }

@@ -30,14 +30,12 @@ package de.embl.cba.tables.command;
 
 import de.embl.cba.tables.results.ResultsChildAndParentMerger;
 import de.embl.cba.tables.results.ResultsTableFetcher;
-import ij.IJ;
 import ij.measure.ResultsTable;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import java.util.HashMap;
-import java.util.stream.Collectors;
 
 
 /**
@@ -76,7 +74,7 @@ public class ChildParentResultsTablesMergerCommand implements Command
 	@Override
 	public void run()
 	{
-		if ( ! fetchTables() ) return;
+		fetchTables();
 
 		final ResultsChildAndParentMerger merger = new ResultsChildAndParentMerger( childTable, parentTable, childName, parentLabelColumn );
 
@@ -85,31 +83,12 @@ public class ChildParentResultsTablesMergerCommand implements Command
 		parentTable.show( outputTableName );
 	}
 
-	private boolean fetchTables()
+	private void fetchTables()
 	{
-		final HashMap< String, ResultsTable > titleToTable = ResultsTableFetcher.fetchCurrentlyOpenResultsTables();
+		final ResultsTableFetcher resultsTableFetcher = new ResultsTableFetcher();
 
-		if ( ! titleToTable.containsKey( parentTableName ) )
-		{
-			showResultsTableNotFoundMessage( titleToTable, parentTableName );
-			return false;
-		}
-
-		if ( ! titleToTable.containsKey( childTableName ) )
-		{
-			showResultsTableNotFoundMessage( titleToTable, childTableName );
-			return false;
-		}
-
-		parentTable = titleToTable.get( parentTableName );
-		childTable = titleToTable.get( childTableName );
-		return true;
-	}
-
-	private void showResultsTableNotFoundMessage( HashMap< String, ResultsTable > titleToTable, String parentTable )
-	{
-		IJ.showMessage( parentTable + "  does not exist.\n" +
-				"Please choose one of the following: " + titleToTable.keySet().stream().collect( Collectors.joining("\n") ) );
+		parentTable = resultsTableFetcher.fetch( parentTableName );
+		childTable = resultsTableFetcher.fetch( childTableName );
 	}
 
 }
