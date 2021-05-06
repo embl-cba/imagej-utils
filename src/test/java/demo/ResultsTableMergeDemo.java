@@ -28,9 +28,9 @@
  */
 package demo;
 
+import de.embl.cba.tables.command.ResultsTableColumnMergerCommand;
 import ij.IJ;
 import net.imagej.ImageJ;
-import tests.Test3DView;
 
 public class ResultsTableMergeDemo
 {
@@ -39,8 +39,16 @@ public class ResultsTableMergeDemo
 		final ImageJ ij = new ImageJ();
 		ij.ui().showUI();
 
-		IJ.open( Test3DView.class.getResource( "../test-data/merge-tables/parent.csv" ).getFile() );
+		IJ.open( ResultsTableMergeDemo.class.getResource( "../test-data/merge-tables/golgi-shapes.csv" ).getFile() );
 
-		IJ.open( Test3DView.class.getResource( "../test-data/merge-tables/child.csv" ).getFile() );
+		IJ.open( ResultsTableMergeDemo.class.getResource( "../test-data/merge-tables/golgi-parent-labels.csv" ).getFile() );
+
+		final ResultsTableColumnMergerCommand command = new ResultsTableColumnMergerCommand();
+		command.tableNameA = "golgi-shapes.csv";
+		command.tableNameB = "golgi-parent-labels.csv";
+		command.outputTableName = "golgi.csv";
+
+		command.run();
+
 	}
 }

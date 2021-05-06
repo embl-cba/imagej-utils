@@ -11,6 +11,7 @@ public class ResultsChildAndParentMerger
 	private final ResultsTable parentTable;
 	private final String childName;
 	private final String childTableParentLabelColumn;
+
 	private final HashMap< Integer, Map< String, List< Double > > > parentToFeatureToMeasurements;
 	private final HashMap< Integer, Integer > parentToRowIndex;
 
@@ -76,7 +77,7 @@ public class ResultsChildAndParentMerger
 		IntStream.range( 0, parentTable.size() ).forEach( row ->
 		{
 			final HashMap< String, List< Double > > featureToMeasurements = new HashMap<>();
-			parentToFeatureToMeasurements.put( Integer.parseInt( parentTable.getLabel( row ) ), featureToMeasurements );
+			parentToFeatureToMeasurements.put( getParentLabel( row ), featureToMeasurements );
 			Arrays.stream( childTable.getHeadings() ).forEach( column -> featureToMeasurements.put( column, new ArrayList<>() ) );
 		} );
 
@@ -115,9 +116,23 @@ public class ResultsChildAndParentMerger
 		HashMap< Integer, Integer > parentLabelToRowIndex = new HashMap<>();
 		IntStream.range( 0, parentTable.size() ).forEach( row ->
 		{
-			parentLabelToRowIndex.put( Integer.parseInt( parentTable.getLabel( row ) ), row );
+			parentLabelToRowIndex.put( getParentLabel( row ), row );
 		});
 
 		return parentLabelToRowIndex;
+	}
+
+	private int getParentLabel( int row )
+	{
+		try
+		{
+			// when opened from csv file
+			return ( int ) parentTable.getValue( "Label", row );
+		}
+		catch ( Exception e )
+		{
+			// when obtained from MorpholibJ
+			return Integer.parseInt( parentTable.getLabel( row ) );
+		}
 	}
 }

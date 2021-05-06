@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 public class ResultsTableFetcher
 {
-	public static HashMap< String, ij.measure.ResultsTable > fetchResultsTables()
+	public static HashMap< String, ij.measure.ResultsTable > fetchCurrentlyOpenResultsTables()
 	{
 		HashMap< String, ij.measure.ResultsTable > titleToResultsTable = new HashMap<>();
 

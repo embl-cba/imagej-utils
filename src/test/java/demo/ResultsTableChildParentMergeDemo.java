@@ -26,32 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.embl.cba.tables.command;
+package demo;
 
-import de.embl.cba.tables.morpholibj.ExploreMorphoLibJLabelImage;
-import de.embl.cba.tables.results.ResultsTableFetcher;
-import ij.ImagePlus;
-import ij.measure.ResultsTable;
-import org.scijava.command.Command;
-import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
+import de.embl.cba.tables.command.ChildParentResultsTablesMergerCommand;
+import ij.IJ;
+import net.imagej.ImageJ;
+import tests.Test3DView;
 
-import java.util.HashMap;
-
-@Deprecated
-@Plugin(type = Command.class, menuPath = "Plugins>Tables>Merge>Merge Child and Parent Results Tables" )
-public class MergeChildParentResultsTablesCommand implements Command
+public class ResultsTableChildParentMergeDemo
 {
-	@Parameter ( label = "Parent results table name" )
-	public String parentTable;
-
-	@Parameter ( label = "Child results table name" )
-	public String childTable;
-
-	@Override
-	public void run()
+	public static void main( String[] args )
 	{
-		final HashMap< String, ResultsTable > titleToTable = ResultsTableFetcher.fetchResultsTables();
-	}
+		final ImageJ ij = new ImageJ();
+		ij.ui().showUI();
 
+		IJ.open( Test3DView.class.getResource( "../test-data/merge-tables/parent-cells.csv" ).getFile() );
+
+		IJ.open( Test3DView.class.getResource( "../test-data/merge-tables/golgi-children.csv" ).getFile() );
+
+		final ChildParentResultsTablesMergerCommand command = new ChildParentResultsTablesMergerCommand();
+		command.parentTableName = "parent-cells.csv";
+		command.childTableName = "golgi-children.csv";
+		command.aggregationMode = "Mean";
+		command.childName = "Golgi";
+		command.parentLabelColumn = "Max";
+		command.run();
+
+	}
 }
