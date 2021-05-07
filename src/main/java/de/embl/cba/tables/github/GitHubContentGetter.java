@@ -70,8 +70,12 @@ public class GitHubContentGetter
 		if ( ! url.endsWith( "/" ) ) url += "/";
 		if ( ! path.startsWith( "/" ) ) path = "/" + path;
 		url += "contents" + path;
-		if ( branch != null )
+		if ( branch != null ) {
+			if ( url.endsWith("/") ) {
+				url = url.substring( 0, url.length() - 1 );
+			}
 			url += "?ref=" + branch;
+		}
 		return url;
 	}
 
