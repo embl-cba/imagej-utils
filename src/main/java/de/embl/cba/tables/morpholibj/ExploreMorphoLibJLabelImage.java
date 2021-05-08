@@ -220,7 +220,7 @@ public class ExploreMorphoLibJLabelImage
 	private List< TableRowImageSegment > createMLJTableRowImageSegments(
 			ij.measure.ResultsTable resultsTable )
 	{
-		columns = TableColumns.columnsFromImageJ1ResultsTable( resultsTable );
+		columns = TableColumns.convertResultsTableToColumns( resultsTable );
 
 		columns = TableColumns.addLabelImageIdColumn(
 				columns,

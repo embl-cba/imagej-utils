@@ -30,6 +30,7 @@ package de.embl.cba.tables;
 
 import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
 import de.embl.cba.tables.tablerow.TableRow;
+import ij.measure.ResultsTable;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -37,6 +38,7 @@ import java.util.*;
 
 public abstract class TableRows
 {
+
 	public static < T extends TableRow >
 	void addColumn( List< T > tableRows, String columnName, Object[] values )
 	{
