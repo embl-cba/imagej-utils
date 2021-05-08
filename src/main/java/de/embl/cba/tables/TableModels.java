@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class TableModels
 {
-	public static ResultsTable resultsTableFromTableModel( AbstractTableModel< ? > tableModel )
+	public static ResultsTable resultsTableFromTableModel( TableModel< ? extends TableRow > tableModel )
 	{
 		final ResultsTable resultsTable = new ResultsTable();
 		final Set< String > columnNames = tableModel.getColumnNames();

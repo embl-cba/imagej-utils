@@ -1,5 +1,6 @@
 package de.embl.cba.tables;
 
+import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
 import de.embl.cba.tables.tablerow.ColumnBasedTableRow;
 import de.embl.cba.tables.tablerow.TableRow;
 import org.apache.commons.math3.random.StableRandomGenerator;
@@ -7,9 +8,10 @@ import org.apache.commons.math3.random.StableRandomGenerator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public class DefaultTableModel< T extends TableRow > extends AbstractTableModel< T >
+public class DefaultTableModel< T extends TableRow > implements TableModel< T >
 {
 	private final List< T > tableRows;
 
@@ -56,6 +58,29 @@ public class DefaultTableModel< T extends TableRow > extends AbstractTableModel<
 				cells.add( tableRow.getCell( columnName ) );
 			}
 			return cells;
+		}
+	}
+
+	@Override
+	public void addColumn( String columnName )
+	{
+		if ( getColumnNames().contains( columnName ) )
+			return;
+
+		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRow )
+		{
+			final Map< String, List< String > > columns = ( ( ColumnBasedTableRowImageSegment ) tableRows.get( 0 ) ).getColumns();
+
+			final ArrayList< String > strings = new ArrayList<>();
+			final int size = tableRows.size();
+			for ( int i = 0; i < size; i++ )
+				strings.add( "None" );
+
+			columns.put( columnName, strings );
+		}
+		else
+		{
+			throw new UnsupportedOperationException( "Cannot add column to table rows of class: " + tableRows.get( 0 ).getClass());
 		}
 	}
 
