@@ -12,5 +12,7 @@ public interface TableRowsModel< T extends TableRow > extends Iterable< T >
 	T getRow( int rowIndex );
 	int indexOf( T tableRow );
 	List< String > getColumn( String columnName );
-	void addColumn( String columnName );
+	void addColumn( String columnName, String defaultEntry );
+	void addColumn( String columnName, List< String > entries );
+
 }

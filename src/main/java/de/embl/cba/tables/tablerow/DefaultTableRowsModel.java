@@ -1,6 +1,7 @@
 package de.embl.cba.tables.tablerow;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -78,21 +79,23 @@ public class DefaultTableRowsModel< T extends TableRow > implements TableRowsMod
 	}
 
 	@Override
-	public void addColumn( String columnName )
+	public void addColumn( String columnName, String defaultEntry )
 	{
-		if ( getColumnNames().contains( columnName ) )
-			return;
+		final ArrayList< String > entries = new ArrayList<>();
+		final int size = tableRows.size();
+		for ( int i = 0; i < size; i++ )
+			entries.add( defaultEntry );
 
+		addColumn( columnName, entries );
+	}
+
+	@Override
+	public void addColumn( String columnName, List< String > entries )
+	{
 		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRow )
 		{
 			final Map< String, List< String > > columns = ( ( ColumnBasedTableRow ) tableRows.get( 0 ) ).getColumns();
-
-			final ArrayList< String > strings = new ArrayList<>();
-			final int size = tableRows.size();
-			for ( int i = 0; i < size; i++ )
-				strings.add( "None" );
-
-			columns.put( columnName, strings );
+			columns.put( columnName, entries );
 		}
 		else
 		{
