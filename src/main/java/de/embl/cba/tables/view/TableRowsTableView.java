@@ -39,8 +39,10 @@ import de.embl.cba.tables.plot.ScatterPlotDialog;
 import de.embl.cba.tables.plot.TableRowsScatterPlot;
 import de.embl.cba.tables.select.SelectionListener;
 import de.embl.cba.tables.select.SelectionModel;
+import de.embl.cba.tables.tablerow.JTableFromTableRowsModelCreator;
 import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.tablerow.TableRowListener;
+import de.embl.cba.tables.tablerow.TableRows;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import net.imglib2.type.numeric.ARGBType;
@@ -58,7 +60,7 @@ import java.util.*;
 import java.util.List;
 
 import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
-import static de.embl.cba.tables.TableRows.setTableCell;
+import static de.embl.cba.tables.tablerow.TableRows.setTableCell;
 import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK_GREY;
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
@@ -316,7 +318,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 
 	private void configureJTable()
 	{
-		table = Tables.jTableFromTableRows( tableRows );
+		table = new JTableFromTableRowsModelCreator( tableRows ).createJTable();
 		table.setPreferredScrollableViewportSize( new Dimension(500, 200) );
 		table.setFillsViewportHeight( true );
 		table.setAutoCreateRowSorter( true );

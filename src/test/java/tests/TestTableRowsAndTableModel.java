@@ -28,9 +28,9 @@
  */
 package tests;
 
-import de.embl.cba.tables.DefaultTableModel;
+import de.embl.cba.tables.tablerow.DefaultTableRowsModel;
 import de.embl.cba.tables.TableColumns;
-import de.embl.cba.tables.TableModels;
+import de.embl.cba.tables.tablerow.ResultsTableFromTableRowsModelCreator;
 import de.embl.cba.tables.morpholibj.ExploreMorphoLibJLabelImage;
 import de.embl.cba.tables.tablerow.TableRowImageSegment;
 import de.embl.cba.tables.view.combined.SegmentsTableBdvAnd3dViews;
@@ -81,9 +81,9 @@ public class TestTableRowsAndTableModel
 		// Test conversion of
 		final List< TableRowImageSegment > tableRows = views.getTableRowsTableView().getTableRows();
 
-		final DefaultTableModel< TableRowImageSegment > tableModel = new DefaultTableModel<>( tableRows );
+		final DefaultTableRowsModel< TableRowImageSegment > tableModel = new DefaultTableRowsModel<>( tableRows );
 
-		final ResultsTable resultsTable = TableModels.resultsTableFromTableModel( tableModel );
+		final ResultsTable resultsTable = new ResultsTableFromTableRowsModelCreator( tableModel ).createResultsTable();
 
 		resultsTable.show( "Results from TableRows" );
 

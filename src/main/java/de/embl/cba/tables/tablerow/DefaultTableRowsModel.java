@@ -1,23 +1,32 @@
-package de.embl.cba.tables;
-
-import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
-import de.embl.cba.tables.tablerow.ColumnBasedTableRow;
-import de.embl.cba.tables.tablerow.TableRow;
-import org.apache.commons.math3.random.StableRandomGenerator;
+package de.embl.cba.tables.tablerow;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DefaultTableModel< T extends TableRow > implements TableModel< T >
+public class DefaultTableRowsModel< T extends TableRow > implements TableRowsModel< T >
 {
 	private final List< T > tableRows;
+	private HashMap< T, Integer > tableRowToIndex;
 
-	public DefaultTableModel( List< T > tableRows )
+	public DefaultTableRowsModel( List< T > tableRows )
 	{
 		this.tableRows = tableRows;
+		initRowIndices( tableRows );
+	}
+
+	private void initRowIndices( List< T > tableRows )
+	{
+		tableRowToIndex = new HashMap<>();
+		final int numTableRows = tableRows.size();
+		for ( int rowIndex = 0; rowIndex < numTableRows; rowIndex++ )
+		{
+			tableRowToIndex.put( tableRows.get( rowIndex ), rowIndex++ );
+		}
 	}
 
 	@Override
@@ -44,7 +53,14 @@ public class DefaultTableModel< T extends TableRow > implements TableModel< T >
 		return tableRows.get( rowIndex );
 	}
 
-	public List< String > getColumn( String columnName ){
+	@Override
+	public int indexOf( T tableRow )
+	{
+		return tableRowToIndex.get( tableRow );
+	}
+
+	public List< String > getColumn( String columnName )
+	{
 		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRow )
 		{
 			final List< String > cells = ( ( ColumnBasedTableRow ) tableRows.get( 0 ) ).getColumns().get( columnName );
@@ -69,7 +85,7 @@ public class DefaultTableModel< T extends TableRow > implements TableModel< T >
 
 		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRow )
 		{
-			final Map< String, List< String > > columns = ( ( ColumnBasedTableRowImageSegment ) tableRows.get( 0 ) ).getColumns();
+			final Map< String, List< String > > columns = ( ( ColumnBasedTableRow ) tableRows.get( 0 ) ).getColumns();
 
 			final ArrayList< String > strings = new ArrayList<>();
 			final int size = tableRows.size();

@@ -26,8 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.embl.cba.tables;
+package de.embl.cba.tables.tablerow;
 
+import de.embl.cba.tables.Logger;
+import de.embl.cba.tables.Utils;
 import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
 import de.embl.cba.tables.tablerow.TableRow;
 import ij.measure.ResultsTable;
@@ -38,7 +40,6 @@ import java.util.*;
 
 public abstract class TableRows
 {
-
 	public static < T extends TableRow >
 	void addColumn( List< T > tableRows, String columnName, Object[] values )
 	{
