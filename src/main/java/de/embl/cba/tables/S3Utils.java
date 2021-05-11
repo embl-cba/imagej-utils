@@ -127,8 +127,7 @@ public abstract class S3Utils {
 
     public static String selectS3PathFromDirectory( String directory, String objectName ) throws IOException
     {
-        final ArrayList< String > filePaths = getS3FilePaths( directory );
-        final String[] fileNames = filePaths.stream().map( File::new ).map( File::getName ).toArray( String[]::new );
+        final String[] fileNames = getS3FileNames( directory );
 
         final GenericDialog gd = new GenericDialog( "Select " + objectName );
         gd.addChoice( objectName, fileNames, fileNames[ 0 ] );
@@ -138,6 +137,12 @@ public abstract class S3Utils {
         String newFilePath = FileAndUrlUtils.combinePath( directory, fileName );
 
         return newFilePath;
+    }
+
+    public static String[] getS3FileNames( String directory )
+    {
+        final ArrayList< String > filePaths = getS3FilePaths( directory );
+        return filePaths.stream().map( File::new ).map( File::getName ).toArray( String[]::new );
     }
 
     public static ArrayList< String > getS3FilePaths( String directory )
