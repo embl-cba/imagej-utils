@@ -28,9 +28,8 @@
  */
 package de.embl.cba.tables.measure;
 
-import de.embl.cba.tables.TableRows;
+import de.embl.cba.tables.tablerow.TableRows;
 import de.embl.cba.tables.Tables;
-import de.embl.cba.tables.measure.SummaryStatistics;
 import de.embl.cba.tables.tablerow.TableRow;
 import ij.IJ;
 import ij.gui.GenericDialog;

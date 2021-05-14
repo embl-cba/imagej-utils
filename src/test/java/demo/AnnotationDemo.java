@@ -29,11 +29,14 @@
 package demo;
 
 import de.embl.cba.tables.morpholibj.ExploreMorphoLibJLabelImage;
+import de.embl.cba.tables.tablerow.TableRowImageSegment;
 import de.embl.cba.tables.view.combined.SegmentsTableBdvAnd3dViews;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imagej.ImageJ;
 import tests.Test3DView;
+
+import java.util.List;
 
 public class AnnotationDemo
 {

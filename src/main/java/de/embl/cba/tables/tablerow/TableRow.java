@@ -42,11 +42,6 @@ public interface TableRow
 
 	Set< String > getColumnNames();
 
-	/**
-	 * The index of the row in the underlying table.
-	 * TODO: Maybe this is not needed...
-	 *
-	 * @return row index
-	 */
+	@Deprecated
 	int rowIndex();
 }

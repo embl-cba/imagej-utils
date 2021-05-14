@@ -26,10 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.embl.cba.tables;
+package de.embl.cba.tables.tablerow;
 
+import de.embl.cba.tables.Logger;
+import de.embl.cba.tables.Utils;
 import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
 import de.embl.cba.tables.tablerow.TableRow;
+import ij.measure.ResultsTable;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;

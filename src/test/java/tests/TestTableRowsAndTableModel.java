@@ -28,17 +28,22 @@
  */
 package tests;
 
+import de.embl.cba.tables.tablerow.DefaultTableRowsModel;
 import de.embl.cba.tables.TableColumns;
+import de.embl.cba.tables.tablerow.ResultsTableFromTableRowsModelCreator;
 import de.embl.cba.tables.morpholibj.ExploreMorphoLibJLabelImage;
+import de.embl.cba.tables.tablerow.TableRowImageSegment;
 import de.embl.cba.tables.view.combined.SegmentsTableBdvAnd3dViews;
 import ij.IJ;
+import ij.measure.ResultsTable;
 import net.imagej.ImageJ;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class TestAppendTables
+public class TestTableRowsAndTableModel
 {
 	// TODO: write a proper test without any UI popping up
 	public static void main( String[] args )
@@ -46,13 +51,13 @@ public class TestAppendTables
 		final ImageJ ij = new ImageJ();
 		ij.ui().showUI();
 
-		IJ.open( TestAppendTables.class.getResource(
+		IJ.open( TestTableRowsAndTableModel.class.getResource(
 				"../test-data/3d-image-lbl-morpho.csv" ).getFile() );
 
 		final ExploreMorphoLibJLabelImage explore = new ExploreMorphoLibJLabelImage(
-				IJ.openImage( TestAppendTables.class.getResource(
+				IJ.openImage( TestTableRowsAndTableModel.class.getResource(
 						"../test-data/3d-image.zip" ).getFile() ),
-				IJ.openImage( TestAppendTables.class.getResource(
+				IJ.openImage( TestTableRowsAndTableModel.class.getResource(
 						"../test-data/3d-image-lbl.zip" ).getFile() ),
 				"3d-image-lbl-morpho" );
 
@@ -62,7 +67,7 @@ public class TestAppendTables
 				views.getTableRowsTableView().getTable(),
 				ExploreMorphoLibJLabelImage.LABEL );
 
-		final String tableFile = TestAppendTables.class.getResource( "../test-data/3d-image-lbl-morpho-colorMap.csv" ).getFile();
+		final String tableFile = TestTableRowsAndTableModel.class.getResource( "../test-data/3d-image-lbl-morpho-colorMap.csv" ).getFile();
 
 		Map< String, List< String > > columns2 =
 			TableColumns.orderedStringColumnsFromTableFile(
@@ -72,6 +77,22 @@ public class TestAppendTables
 					orderColumn );
 
 		views.getTableRowsTableView().addColumns( columns2 );
+
+		// Test conversion of
+		final List< TableRowImageSegment > tableRows = views.getTableRowsTableView().getTableRows();
+
+		final DefaultTableRowsModel< TableRowImageSegment > tableModel = new DefaultTableRowsModel<>( tableRows );
+
+		final ResultsTable resultsTable = new ResultsTableFromTableRowsModelCreator( tableModel ).createResultsTable();
+
+		resultsTable.show( "Results from TableRows" );
+
+		final Set< String > columnNames = tableModel.getColumnNames();
+		final List< String > column = tableModel.getColumn( columnNames.iterator().next() );
+		for ( String s : column )
+		{
+			System.out.println( s );
+		}
 	}
 }
 

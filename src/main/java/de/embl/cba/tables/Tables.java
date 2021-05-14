@@ -490,37 +490,10 @@ public class Tables
 //		return Utils.parseDouble( rowEntries[ columnIndex ] );
 //	}
 
-	public static JTable jTableFromTableRows( List< ? extends TableRow > tableRows )
-	{
-		ColumnClassAwareTableModel model = new ColumnClassAwareTableModel();
-
-		final Set< String > columnNames = tableRows.get( 0 ).getColumnNames();
-
-		for ( String columnName : columnNames )
-		{
-			List< String > strings = getStrings( tableRows, columnName );
-
-			Object[] objects = null;
-			try
-			{
-				objects = TableColumns.asTypedArray( strings );
-			} catch ( UnsupportedDataTypeException e )
-			{
-				e.printStackTrace();
-			}
-			model.addColumn( columnName, objects  );
-		}
-
-		model.refreshColumnClassesFromObjectColumns();
-
-		return new JTable( model );
-	}
-
 	public static List< String >
-	getStrings( List< ? extends TableRow > tableRows,
-				String columnName )
+	getColumnEntries( List< ? extends TableRow > tableRows,
+					  String columnName )
 	{
-
 		if ( tableRows instanceof ColumnBasedTableRowImageSegment )
 		{
 			final Map< String, List< String > > columns

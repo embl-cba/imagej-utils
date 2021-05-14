@@ -28,27 +28,28 @@
  */
 package de.embl.cba.tables;
 
-import de.embl.cba.tables.Tables;
-import de.embl.cba.tables.Utils;
 import de.embl.cba.tables.tablerow.TableRow;
 import ij.measure.ResultsTable;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.swing.*;
 import javax.swing.table.TableModel;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class TableColumns
 {
-	public static Map< String, List< String > >
-			columnsFromImageJ1ResultsTable(
-			ResultsTable resultsTable )
+	public static Map< String, List< String > > convertResultsTableToColumns( ResultsTable resultsTable )
 	{
 		List< String > columnNames = Arrays.asList( resultsTable.getHeadings() );
 		final int numRows = resultsTable.size();
 
-		final Map< String, List< String > > columnNamesToValues
-				= new LinkedHashMap<>();
+		final Map< String, List< String > > columnNamesToValues = new LinkedHashMap<>();
 
 		for ( String columnName : columnNames )
 		{
