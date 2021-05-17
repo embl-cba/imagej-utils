@@ -64,14 +64,27 @@ public class GitHubContentGetter
 		return restCaller.get( url, requestMethod, accessToken );
 	}
 
+	public Integer getContentResponseCode() {
+		// GET /repos/:owner/:repo/contents/:path?ref=:branch
+
+		String url = createGetContentApiUrl( path );
+		final String requestMethod = "GET";
+		final RESTCaller restCaller = new RESTCaller();
+		return restCaller.getResponseCode( url, requestMethod, accessToken );
+	}
+
 	private String createGetContentApiUrl( String path )
 	{
 		String url = repository.replace( "github.com", "api.github.com/repos" );
 		if ( ! url.endsWith( "/" ) ) url += "/";
 		if ( ! path.startsWith( "/" ) ) path = "/" + path;
 		url += "contents" + path;
-		if ( branch != null )
+		if ( branch != null ) {
+			if ( url.endsWith("/") ) {
+				url = url.substring( 0, url.length() - 1 );
+			}
 			url += "?ref=" + branch;
+		}
 		return url;
 	}
 

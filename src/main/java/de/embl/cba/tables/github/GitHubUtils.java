@@ -75,10 +75,7 @@ public abstract class GitHubUtils
 	// objectName is used for the dialog labels e.g. 'table', 'bookmark' etc...
 	public static String selectGitHubPathFromDirectory( String directory, String objectName ) throws IOException
 	{
-		final GitLocation gitLocation = GitHubUtils.rawUrlToGitLocation( directory );
-		final ArrayList< String > filePaths = GitHubUtils.getFilePaths( gitLocation );
-		final String[] fileNames = filePaths.stream().map( File::new ).map( File::getName ).toArray( String[]::new );
-
+		final String[] fileNames = getFileNames( directory );
 
 		final GenericDialog gd = new GenericDialog( "Select " + objectName );
 		gd.addChoice( objectName, fileNames, fileNames[ 0 ] );
@@ -88,6 +85,13 @@ public abstract class GitHubUtils
 		String newFilePath = FileAndUrlUtils.combinePath( directory, fileName );
 
 		return newFilePath;
+	}
+
+	public static String[] getFileNames( String directory )
+	{
+		final GitLocation gitLocation = GitHubUtils.rawUrlToGitLocation( directory );
+		final ArrayList< String > filePaths = GitHubUtils.getFilePaths( gitLocation );
+		return filePaths.stream().map( File::new ).map( File::getName ).toArray( String[]::new );
 	}
 
 	public static ArrayList< String > getFilePaths( GitLocation gitLocation )

@@ -75,6 +75,28 @@ public class RESTCaller
 		}
 	}
 
+	private HttpURLConnection createUrlConnection( String url, String requestMethod, String accessToken ) throws IOException {
+		URL obj = new URL( url );
+		HttpURLConnection httpURLConnection = ( HttpURLConnection ) obj.openConnection();
+
+		httpURLConnection.setRequestMethod( requestMethod );
+		httpURLConnection.setRequestProperty( "Content-Type", "application/json" );
+		if ( accessToken != null )
+			httpURLConnection.setRequestProperty( "Authorization", "Token " + accessToken );
+
+		return httpURLConnection;
+	}
+
+	public Integer getResponseCode(String url, String requestMethod, String accessToken ) {
+		try {
+			HttpURLConnection httpURLConnection = createUrlConnection( url, requestMethod, accessToken );
+			return httpURLConnection.getResponseCode();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 
 	public String get(
 			String url,
@@ -84,14 +106,7 @@ public class RESTCaller
 	{
 		try
 		{
-			URL obj = new URL( url );
-			HttpURLConnection httpURLConnection = ( HttpURLConnection ) obj.openConnection();
-
-			httpURLConnection.setRequestMethod( requestMethod );
-			httpURLConnection.setRequestProperty( "Content-Type", "application/json" );
-			if ( accessToken != null )
-				httpURLConnection.setRequestProperty( "Authorization", "Token " + accessToken );
-
+			HttpURLConnection httpURLConnection = createUrlConnection( url, requestMethod, accessToken );
 			return parseResponse( httpURLConnection );
 		}
 		catch( Exception e )
