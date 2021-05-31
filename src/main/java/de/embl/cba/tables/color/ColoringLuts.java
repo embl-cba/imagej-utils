@@ -31,8 +31,8 @@ package de.embl.cba.tables.color;
 public class ColoringLuts
 {
 	public static final String ZERO_TRANSPARENT = "ZeroTransparent";
-	public static final String BLUE_WHITE_RED = "BlueWhiteRed";
-	public static final String VIRIDIS = "Viridis";
-	public static final String GLASBEY = "Glasbey";
-	public static final String ARGB_COLUMN = "A-R-G-B Column";
+	public static final String BLUE_WHITE_RED = "blueWhiteRed";
+	public static final String VIRIDIS = "viridis";
+	public static final String GLASBEY = "glasbey";
+	public static final String ARGB_COLUMN = "argbColumn";
 }
