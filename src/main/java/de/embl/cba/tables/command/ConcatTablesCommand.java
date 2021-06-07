@@ -28,7 +28,7 @@
  */
 package de.embl.cba.tables.command;
 
-import de.embl.cba.tables.FileUtils;
+import de.embl.cba.tables.FileAndUrlUtils;
 import de.embl.cba.tables.Logger;
 import de.embl.cba.tables.Tables;
 import de.embl.cba.tables.table.ConcatenatedTableModel;
@@ -59,7 +59,7 @@ public class ConcatTablesCommand< R extends RealType< R > > implements Command
 	@Override
 	public void run()
 	{
-		final List< File > files = FileUtils.getFileList( directory, regExp, true );
+		final List< File > files = FileAndUrlUtils.getFileList( directory, regExp, true );
 
 		final ArrayList< TableModel > models = new ArrayList<>();
 		for ( File file : files )

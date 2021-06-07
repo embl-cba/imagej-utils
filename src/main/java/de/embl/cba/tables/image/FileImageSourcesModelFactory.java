@@ -29,7 +29,7 @@
 package de.embl.cba.tables.image;
 
 import de.embl.cba.bdv.utils.sources.Metadata;
-import de.embl.cba.tables.FileUtils;
+import de.embl.cba.tables.FileAndUrlUtils;
 import de.embl.cba.tables.Logger;
 import de.embl.cba.tables.Tables;
 import de.embl.cba.tables.image.FileImageSourcesModel;
@@ -157,7 +157,7 @@ public class FileImageSourcesModelFactory< T extends TableRowImageSegment >
 	{
 		final Metadata.Modality modality;
 
-		if ( FileUtils.stringContainsItemFromList( imageName, labelMaskColumnIds ) )
+		if ( FileAndUrlUtils.stringContainsItemFromList( imageName, labelMaskColumnIds ) )
 			modality = Metadata.Modality.Segmentation;
 		else
 			modality = Metadata.Modality.FM;
