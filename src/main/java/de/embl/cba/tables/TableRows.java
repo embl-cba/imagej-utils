@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.embl.cba.tables.tablerow;
+package de.embl.cba.tables;
 
 import de.embl.cba.tables.Logger;
 import de.embl.cba.tables.Utils;

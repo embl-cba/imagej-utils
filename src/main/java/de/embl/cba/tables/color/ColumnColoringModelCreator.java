@@ -33,7 +33,7 @@ import de.embl.cba.bdv.utils.lut.BlueWhiteRedARGBLut;
 import de.embl.cba.bdv.utils.lut.ColumnARGBLut;
 import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.bdv.utils.lut.ViridisARGBLut;
-import de.embl.cba.tables.tablerow.TableRows;
+import de.embl.cba.tables.TableRows;
 import de.embl.cba.tables.Tables;
 import de.embl.cba.tables.tablerow.TableRow;
 import ij.gui.GenericDialog;

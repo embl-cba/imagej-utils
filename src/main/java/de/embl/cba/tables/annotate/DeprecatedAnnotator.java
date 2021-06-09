@@ -46,7 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-public class Annotator < T extends TableRow > extends JFrame
+public class DeprecatedAnnotator< T extends TableRow > extends JFrame
 {
 	public static final String LAST = "You are already at the last object in table.";
 	public static final String NO_MORE_SEGMENTS = "No more segments.";
@@ -65,7 +65,7 @@ public class Annotator < T extends TableRow > extends JFrame
 	private JScrollPane annotationButtonsScrollPane;
 	private T currentlySelectedRow;
 
-	public Annotator(
+	public DeprecatedAnnotator(
 			String annotationColumnName,
 			List< T > tableRows,
 			SelectionColoringModel< T > selectionColoringModel,

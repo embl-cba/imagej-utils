@@ -8,11 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultTableRowsModel< T extends TableRow > implements TableRowsModel< T >
 {
 	private final List< T > tableRows;
-	private HashMap< T, Integer > tableRowToIndex;
+	private Map< T, Integer > tableRowToIndex;
 
 	public DefaultTableRowsModel( List< T > tableRows )
 	{
@@ -22,11 +23,11 @@ public class DefaultTableRowsModel< T extends TableRow > implements TableRowsMod
 
 	private void initRowIndices( List< T > tableRows )
 	{
-		tableRowToIndex = new HashMap<>();
+		tableRowToIndex = new ConcurrentHashMap<>();
 		final int numTableRows = tableRows.size();
 		for ( int rowIndex = 0; rowIndex < numTableRows; rowIndex++ )
 		{
-			tableRowToIndex.put( tableRows.get( rowIndex ), rowIndex++ );
+			tableRowToIndex.put( tableRows.get( rowIndex ), rowIndex );
 		}
 	}
 
@@ -57,25 +58,34 @@ public class DefaultTableRowsModel< T extends TableRow > implements TableRowsMod
 	@Override
 	public int indexOf( T tableRow )
 	{
-		return tableRowToIndex.get( tableRow );
+		try
+		{
+			return tableRowToIndex.get( tableRow );
+		}
+		catch ( Exception e )
+		{
+			throw new RuntimeException( "Table row not found in table model." );
+		}
 	}
 
 	public List< String > getColumn( String columnName )
 	{
-		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRow )
-		{
-			final List< String > cells = ( ( ColumnBasedTableRow ) tableRows.get( 0 ) ).getColumns().get( columnName );
-			return cells;
-		}
-		else
-		{
+
+//		Below is not working for concatenate tables.
+//		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRow )
+//		{
+//			final List< String > cells = ( ( ColumnBasedTableRow ) tableRows.get( 0 ) ).getColumns().get( columnName );
+//			return cells;
+//		}
+//		else
+//		{
 			final ArrayList< String > cells = new ArrayList<>();
 			for ( T tableRow : tableRows )
 			{
 				cells.add( tableRow.getCell( columnName ) );
 			}
 			return cells;
-		}
+//		}
 	}
 
 	@Override

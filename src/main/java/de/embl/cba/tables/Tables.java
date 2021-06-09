@@ -32,6 +32,7 @@ import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
 import de.embl.cba.tables.table.ColumnClassAwareTableModel;
 import de.embl.cba.tables.tablerow.ColumnBasedTableRow;
 import de.embl.cba.tables.tablerow.DefaultColumnBasedTableRow;
+import de.embl.cba.tables.tablerow.JTableFromTableRowsModelCreator;
 import de.embl.cba.tables.tablerow.TableRow;
 import org.scijava.table.GenericTable;
 
@@ -48,6 +49,12 @@ import java.util.*;
 
 public class Tables
 {
+	@Deprecated // Use JTableFromTableRowsModelCreator instead
+	public static JTable jTableFromTableRows( List< ? extends TableRow > tableRows )
+	{
+		return new JTableFromTableRowsModelCreator( tableRows ).createJTable();
+	}
+
 	public static JTable asJTable( GenericTable genericTable )
 	{
 		final int numCols = genericTable.getColumnCount();
