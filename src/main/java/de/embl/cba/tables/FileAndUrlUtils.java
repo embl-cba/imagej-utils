@@ -263,7 +263,7 @@ public class FileAndUrlUtils
 					return null;
 				}
 			case FILE:
-				List<File> files = getFileList( new File(uri), "*", false );
+				List<File> files = getFileList( new File(uri), ".*", false );
 				if ( files.size() > 0 ) {
 					String[] fileNames = new String[files.size()];
 					for ( int i = 0; i< files.size(); i++) {
@@ -300,6 +300,7 @@ public class FileAndUrlUtils
 				break;
 			case FILE:
 				final JFileChooser jFileChooser = new JFileChooser(uri);
+				jFileChooser.setDialogTitle( "Select " + objectName );
 				if (jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
 					filePath = jFileChooser.getSelectedFile().getAbsolutePath();
 				break;
