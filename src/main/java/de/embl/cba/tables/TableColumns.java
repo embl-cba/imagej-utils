@@ -37,6 +37,7 @@ import javax.swing.table.TableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,8 +146,7 @@ public class TableColumns
 	public static Map< String, List< String > >
 	orderedStringColumnsForMerging(
 			String delim, // can be null
-			String mergeByColumnName,
-			ArrayList< String > referenceColumnInTargetTable, // length of list corresponds to target table
+			Map< String, List< String > > referenceColumns, // length of list corresponds to target table
 			List< String > tableRowsIncludingHeader )
 	{
 		delim = Tables.autoDelim( delim, tableRowsIncludingHeader );
@@ -157,7 +157,7 @@ public class TableColumns
 
 		int mergeByColumnIndex = -1;
 
-		final int numRowsTargetTable = referenceColumnInTargetTable.size();
+		final int numRowsTargetTable = referenceColumns.values().iterator().next().size();
 		final int numColumns = columnNames.size();
 
 		for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
@@ -341,34 +341,37 @@ public class TableColumns
 		return column;
 	}
 
-	public static Map< String, List< String > > openAndOrderNewColumns( JTable table, String mergeByColumnName, String newTablePath )
+	public static Map< String, List< String > > openAndOrderNewColumns( JTable table, String referenceColumnName, String newTablePath )
 	{
-		// TODO: this assumes that the ordering column is numeric; is this needed?
-		final ArrayList< String > orderColumn = getColumn(
+		final ArrayList< String > referenceColumn = getColumn(
 				table,
-				mergeByColumnName );
+				referenceColumnName );
+
+		final HashMap< String, List< String > > referenceColumns = new HashMap<>();
+		referenceColumns.put( referenceColumnName, referenceColumn );
 
 		final Map< String, List< String > > columNameToValues =
 				orderedStringColumnsForMerging(
 						null,
-						mergeByColumnName,
-						orderColumn,
+						referenceColumns,
 						Tables.readRows( newTablePath ) );
 
 		return columNameToValues;
 	}
 
-	public static Map< String, List< String > > openAndOrderNewColumns( List< ? extends TableRow > tableRows, String mergeByColumnName, String newTablePath )
+	public static Map< String, List< String > > openAndOrderNewColumns( List< ? extends TableRow > tableRows, String referenceColumnName, String newTablePath )
 	{
-		final ArrayList< String > orderColumn = getColumn(
+		final ArrayList< String > referenceColumn = getColumn(
 				tableRows,
-				mergeByColumnName );
+				referenceColumnName );
+
+		final HashMap< String, List< String > > referenceColumns = new HashMap<>();
+		referenceColumns.put( referenceColumnName, referenceColumn );
 
 		final Map< String, List< String > > columNameToValues =
 				orderedStringColumnsForMerging(
 						null,
-						mergeByColumnName,
-						orderColumn,
+						referenceColumns,
 						Tables.readRows( newTablePath ) );
 
 		return columNameToValues;

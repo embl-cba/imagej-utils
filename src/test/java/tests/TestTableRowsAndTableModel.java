@@ -40,6 +40,7 @@ import ij.measure.ResultsTable;
 import net.imagej.ImageJ;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,11 +71,13 @@ public class TestTableRowsAndTableModel
 
 		final String tableFile = TestTableRowsAndTableModel.class.getResource( "../test-data/3d-image-lbl-morpho-colorMap.csv" ).getFile();
 
+		final HashMap< String, List< String > > referenceColumns = new HashMap<>();
+		referenceColumns.put( "Label", orderColumn );
+
 		Map< String, List< String > > columns2 =
 			TableColumns.orderedStringColumnsForMerging(
 					null,
-					"Label",
-					orderColumn,
+					referenceColumns,
 					Tables.readRows( tableFile ) );
 
 		views.getTableRowsTableView().addColumns( columns2 );
