@@ -29,7 +29,7 @@
 package de.embl.cba.tables.select;
 
 import de.embl.cba.tables.SwingUtils;
-import de.embl.cba.tables.tablerow.TableRows;
+import de.embl.cba.tables.TableRows;
 import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.view.TableRowsTableView;
 

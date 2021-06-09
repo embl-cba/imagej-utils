@@ -1,7 +1,5 @@
 package de.embl.cba.tables.tablerow;
 
-import de.embl.cba.tables.tablerow.TableRow;
-
 import java.util.List;
 import java.util.Set;
 
@@ -14,5 +12,4 @@ public interface TableRowsModel< T extends TableRow > extends Iterable< T >
 	List< String > getColumn( String columnName );
 	void addColumn( String columnName, String defaultEntry );
 	void addColumn( String columnName, List< String > entries );
-
 }

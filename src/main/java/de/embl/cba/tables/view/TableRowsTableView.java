@@ -32,7 +32,7 @@ import bdv.tools.HelpDialog;
 import de.embl.cba.bdv.utils.lut.ARGBLut;
 import de.embl.cba.bdv.utils.lut.GlasbeyARGBLut;
 import de.embl.cba.tables.*;
-import de.embl.cba.tables.annotate.Annotator;
+import de.embl.cba.tables.annotate.DeprecatedAnnotator;
 import de.embl.cba.tables.color.*;
 import de.embl.cba.tables.measure.MeasureDistance;
 import de.embl.cba.tables.plot.ScatterPlotDialog;
@@ -42,7 +42,7 @@ import de.embl.cba.tables.select.SelectionModel;
 import de.embl.cba.tables.tablerow.JTableFromTableRowsModelCreator;
 import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.tablerow.TableRowListener;
-import de.embl.cba.tables.tablerow.TableRows;
+import de.embl.cba.tables.TableRows;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import net.imglib2.type.numeric.ARGBType;
@@ -60,7 +60,7 @@ import java.util.*;
 import java.util.List;
 
 import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
-import static de.embl.cba.tables.tablerow.TableRows.setTableCell;
+import static de.embl.cba.tables.TableRows.setTableCell;
 import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK_GREY;
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
@@ -655,7 +655,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 		selectionColoringModel.setColoringModel( columnNameToColoringModel.get( columnName ) );
 		final RowSorter< ? extends TableModel > rowSorter = table.getRowSorter();
 
-		final Annotator annotator = new Annotator(
+		final DeprecatedAnnotator annotator = new DeprecatedAnnotator(
 				columnName,
 				tableRows,
 				selectionColoringModel,
