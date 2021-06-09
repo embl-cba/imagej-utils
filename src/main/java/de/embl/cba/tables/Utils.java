@@ -120,4 +120,12 @@ public class Utils
 		else
 			return Double.parseDouble( cell );
 	}
+
+	public static String toStringWithoutSuperfluousDecimals(double d)
+	{
+		if(d == (long) d)
+			return String.format("%d",(long)d);
+		else
+			return String.format("%s",d);
+	}
 }

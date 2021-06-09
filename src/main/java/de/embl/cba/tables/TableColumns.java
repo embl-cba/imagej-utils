@@ -59,7 +59,7 @@ public class TableColumns
 
 			final List< String > list = new ArrayList<>( );
 			for ( int row = 0; row < numRows; ++row )
-				list.add( "" + columnValues[ row ] );
+				list.add( Utils.toStringWithoutSuperfluousDecimals( columnValues[ row ] ) );
 
 			columnNamesToValues.put( columnName, list );
 		}
@@ -143,28 +143,26 @@ public class TableColumns
 	}
 
 	public static Map< String, List< String > >
-	orderedStringColumnsFromTableFile(
-			final String path,
-			String delim,
+	orderedStringColumnsForMerging(
+			String delim, // can be null
 			String mergeByColumnName,
-			ArrayList< Double > mergeByColumnValues )
+			ArrayList< String > referenceColumnInTargetTable, // length of list corresponds to target table
+			List< String > tableRowsIncludingHeader )
 	{
-		final List< String > rowsInTableIncludingHeader = Tables.readRows( path );
+		delim = Tables.autoDelim( delim, tableRowsIncludingHeader );
 
-		delim = Tables.autoDelim( delim, rowsInTableIncludingHeader );
-
-		List< String > columnNames = Tables.getColumnNames( rowsInTableIncludingHeader, delim );
+		List< String > columnNames = Tables.getColumnNames( tableRowsIncludingHeader, delim );
 
 		final Map< String, List< String > > columnNameToStrings = new LinkedHashMap<>();
 
 		int mergeByColumnIndex = -1;
 
-		final int numRowsTargetTable = mergeByColumnValues.size();
+		final int numRowsTargetTable = referenceColumnInTargetTable.size();
 		final int numColumns = columnNames.size();
 
 		for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
 		{
-			final String[] split = rowsInTableIncludingHeader.get( 1 ).split( delim );
+			final String[] split = tableRowsIncludingHeader.get( 1 ).split( delim );
 			final String firstCell = split[ columnIndex ];
 
 			String defaultValue = "None"; // for text
@@ -183,16 +181,14 @@ public class TableColumns
 			throw new UnsupportedOperationException( "Column by which to merge not found: " + mergeByColumnName );
 
 //		final long start = System.currentTimeMillis();
-		final int numRowsSourceTable = rowsInTableIncludingHeader.size() - 1;
+		final int numRowsSourceTable = tableRowsIncludingHeader.size() - 1;
 
 		// TODO: code looks inefficient...
 		for ( int rowIndex = 0; rowIndex < numRowsSourceTable; ++rowIndex )
 		{
-			final String[] split = rowsInTableIncludingHeader.get( rowIndex + 1 ).split( delim );
-			final String cell = split[ mergeByColumnIndex ];
-
-			final Double orderValue = Utils.parseDouble( cell );
-			final int targetRowIndex = mergeByColumnValues.indexOf( orderValue );
+			final String[] split = tableRowsIncludingHeader.get( rowIndex + 1 ).split( delim );
+			final String referenceValue = split[ mergeByColumnIndex ];
+			final int targetRowIndex = referenceColumnInTargetTable.indexOf( referenceValue );
 
 			for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
 			{
@@ -324,57 +320,56 @@ public class TableColumns
 		return columns;
 	}
 
-	public static ArrayList< Double > getNumericColumnAsDoubleList( JTable table, String columnName )
+	public static ArrayList< String > getColumn( JTable table, String columnName )
 	{
-		final int objectLabelColumnIndex = table.getColumnModel().getColumnIndex( columnName );
+		final int columnIndex = table.getColumnModel().getColumnIndex( columnName );
 
 		final TableModel model = table.getModel();
 		final int numRows = model.getRowCount();
-		final ArrayList< Double > orderColumn = new ArrayList<>();
+		final ArrayList< String > column = new ArrayList<>();
 		for ( int rowIndex = 0; rowIndex < numRows; ++rowIndex )
-			orderColumn.add( Utils.parseDouble( model.getValueAt( rowIndex, objectLabelColumnIndex ).toString() ) );
-		return orderColumn;
+			column.add( model.getValueAt( rowIndex, columnIndex ).toString() );
+		return column;
 	}
 
-	public static ArrayList< Double > getNumericColumnAsDoubleList( List< ? extends TableRow > tableRows, String columnName )
+	public static ArrayList< String > getColumn( List< ? extends TableRow > tableRows, String columnName )
 	{
 		final int numRows = tableRows.size();
-		final ArrayList< Double > orderColumn = new ArrayList<>();
+		final ArrayList< String > column = new ArrayList<>();
 		for ( int rowIndex = 0; rowIndex < numRows; ++rowIndex )
-			orderColumn.add( Utils.parseDouble( tableRows.get( rowIndex ).getCell( columnName ) ) );
-		return orderColumn;
+			column.add( tableRows.get( rowIndex ).getCell( columnName ) );
+		return column;
 	}
 
 	public static Map< String, List< String > > openAndOrderNewColumns( JTable table, String mergeByColumnName, String newTablePath )
 	{
 		// TODO: this assumes that the ordering column is numeric; is this needed?
-		final ArrayList< Double > orderColumn = getNumericColumnAsDoubleList(
+		final ArrayList< String > orderColumn = getColumn(
 				table,
 				mergeByColumnName );
 
 		final Map< String, List< String > > columNameToValues =
-				orderedStringColumnsFromTableFile(
-						newTablePath,
+				orderedStringColumnsForMerging(
 						null,
 						mergeByColumnName,
-						orderColumn );
+						orderColumn,
+						Tables.readRows( newTablePath ) );
 
 		return columNameToValues;
 	}
 
 	public static Map< String, List< String > > openAndOrderNewColumns( List< ? extends TableRow > tableRows, String mergeByColumnName, String newTablePath )
 	{
-		// TODO: this assumes that the ordering column is numeric; is this needed?
-		final ArrayList< Double > orderColumn = getNumericColumnAsDoubleList(
+		final ArrayList< String > orderColumn = getColumn(
 				tableRows,
 				mergeByColumnName );
 
 		final Map< String, List< String > > columNameToValues =
-				orderedStringColumnsFromTableFile(
-						newTablePath,
+				orderedStringColumnsForMerging(
 						null,
 						mergeByColumnName,
-						orderColumn );
+						orderColumn,
+						Tables.readRows( newTablePath ) );
 
 		return columNameToValues;
 	}

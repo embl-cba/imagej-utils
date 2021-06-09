@@ -28,6 +28,7 @@
  */
 package tests;
 
+import de.embl.cba.tables.Tables;
 import de.embl.cba.tables.tablerow.DefaultTableRowsModel;
 import de.embl.cba.tables.TableColumns;
 import de.embl.cba.tables.tablerow.ResultsTableFromTableRowsModelCreator;
@@ -63,18 +64,18 @@ public class TestTableRowsAndTableModel
 
 		final SegmentsTableBdvAnd3dViews views = explore.getTableBdvAnd3dViews();
 
-		final ArrayList< Double > orderColumn = TableColumns.getNumericColumnAsDoubleList(
-				views.getTableRowsTableView().getTable(),
+		final ArrayList< String > orderColumn = TableColumns.getColumn(
+				views.getTableRowsTableView().getTableRows(),
 				ExploreMorphoLibJLabelImage.LABEL );
 
 		final String tableFile = TestTableRowsAndTableModel.class.getResource( "../test-data/3d-image-lbl-morpho-colorMap.csv" ).getFile();
 
 		Map< String, List< String > > columns2 =
-			TableColumns.orderedStringColumnsFromTableFile(
-					tableFile,
+			TableColumns.orderedStringColumnsForMerging(
 					null,
 					"Label",
-					orderColumn );
+					orderColumn,
+					Tables.readRows( tableFile ) );
 
 		views.getTableRowsTableView().addColumns( columns2 );
 
