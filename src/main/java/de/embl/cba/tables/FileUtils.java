@@ -28,6 +28,8 @@
  */
 package de.embl.cba.tables;
 
+import de.embl.cba.tables.github.GitHubUtils;
+import de.embl.cba.tables.github.GitLocation;
 import ij.gui.GenericDialog;
 
 import javax.swing.*;
@@ -40,7 +42,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static de.embl.cba.tables.S3Utils.selectS3PathFromDirectory;
+import static de.embl.cba.tables.S3Utils.*;
+import static de.embl.cba.tables.github.GitHubUtils.getFileNames;
 import static de.embl.cba.tables.github.GitHubUtils.selectGitHubPathFromDirectory;
 
 public class FileUtils
@@ -66,6 +69,37 @@ public class FileUtils
 		return files;
 	}
 
+	public static boolean isGithub( String directory ) {
+		return directory.contains( "raw.githubusercontent" );
+	}
+
+	public static boolean isS3( String directory ) {
+		return directory.contains( "s3.amazon.aws.com" ) || directory.startsWith("https://s3");
+	}
+
+	public static String[] getFileNamesFromProject( String directory ) {
+		if ( directory != null ) {
+			if ( isGithub(directory) ) {
+				return getFileNames( directory );
+			} else if ( isS3(directory)) {
+				return getS3FileNames( directory );
+			} else {
+				File[] files = new File(directory).listFiles();
+				if ( files != null ) {
+					String[] fileNames = new String[files.length];
+					for ( int i = 0; i< files.length; i++) {
+						fileNames[i] = files[i].getName();
+					}
+					return fileNames;
+				} else {
+					return null;
+				}
+			}
+		} else {
+			return null;
+		}
+	}
+
 	// objectName is used for the dialog labels e.g. 'table', 'bookmark' etc...
 	public static String selectPathFromProjectOrFileSystem (String directory, String objectName) throws IOException {
 		FileLocation fileLocation = null;
@@ -80,15 +114,13 @@ public class FileUtils
 		}
 
 		String filePath = null;
-		final boolean isGithub = directory.contains( "raw.githubusercontent" );
-		final boolean isS3 = directory.contains( "s3.amazon.aws.com" ) || directory.startsWith("https://s3");
-		if ( directory != null && fileLocation.equals( FileLocation.Project ) && isGithub )
+		if ( directory != null && fileLocation.equals( FileLocation.Project ) && isGithub( directory ) )
 		{
 			// we choose from project and have a github project
 			filePath = selectGitHubPathFromDirectory( directory, objectName );
 			if ( filePath == null ) return null;
 		}
-		else if ( directory != null && fileLocation.equals( FileLocation.Project ) && isS3 )
+		else if ( directory != null && fileLocation.equals( FileLocation.Project ) && isS3( directory ) )
 		{
 			// we choose from project and have a s3 project
 			filePath = selectS3PathFromDirectory(directory, objectName);
