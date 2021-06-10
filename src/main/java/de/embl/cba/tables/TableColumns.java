@@ -226,6 +226,82 @@ public class TableColumns
 		return columnNameToStrings;
 	}
 
+	public static Map< String, List< String > >
+	createColumnsForMergingExcludingReferenceColumns(
+			Map< String, List< String > > referenceColumns,
+			Map< String, List< String > > newColumns )
+	{
+		final int numRowsReferenceTable = referenceColumns.values().iterator().next().size();
+		final List< String > referenceColumnNames = new ArrayList<>( referenceColumns.keySet() );
+
+		// create lookup map for finding the correct row,
+		// given reference cell entries
+		final HashMap< String, Integer > keyToRowIndex = new HashMap<>();
+		final StringBuilder referenceKeyBuilder = new StringBuilder();
+		for ( int rowIndex = 0; rowIndex < numRowsReferenceTable; rowIndex++ )
+		{
+			for ( String referenceColumnName : referenceColumnNames )
+			{
+				referenceKeyBuilder.append( referenceColumns.get( referenceColumnName ).get( rowIndex ) );
+			}
+			keyToRowIndex.put( referenceKeyBuilder.toString(), rowIndex );
+			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear for reuse
+		}
+
+		// prepare the new columns with a default value
+		// - the entries may have a different order
+		// - some entries may get default values, because it is
+		//   not required that all rows exist in the new columns
+		final Map< String, List< String > > newColumnsForMerging = new LinkedHashMap<>();
+		for ( Map.Entry< String, List< String > > columns : newColumns.entrySet() )
+		{
+			if ( referenceColumnNames.contains( columns.getKey() ) )
+			{
+				// we don't need the reference columns a second time
+				continue;
+			}
+
+			final String firstCell = columns.getValue().get( 0 );
+
+			String defaultValue;
+			if ( Tables.isNumeric( firstCell ) )
+				defaultValue = "NaN"; // for numbers
+			else
+				defaultValue = "None"; // for text
+
+			final ArrayList< String > defaultValues = new ArrayList< >( Collections.nCopies( numRowsReferenceTable, defaultValue ));
+
+			newColumnsForMerging.put( columns.getKey(), defaultValues );
+		}
+
+		// new column names excluding the reference columns
+		final List< String > newColumnsForMergingNames = new ArrayList<>( newColumnsForMerging.keySet() );
+
+		// final long start = System.currentTimeMillis();
+		// go through the new columns and put their values
+		// into the correct row (i.e. targetRowIndex) of the columns to be merged
+		final int numRows = newColumns.values().iterator().next().size();
+		for ( int rowIndex = 0; rowIndex < numRows; ++rowIndex )
+		{
+			for ( String referenceColumnName : referenceColumnNames )
+			{
+				referenceKeyBuilder.append( newColumns.get( referenceColumnName ).get( rowIndex ) );
+			}
+			final int targetRowIndex = keyToRowIndex.get( referenceKeyBuilder.toString() );
+			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear for reuse
+
+			for ( String columnName : newColumnsForMergingNames )
+			{
+				newColumnsForMerging.get( columnName ).set( targetRowIndex, newColumns.get( columnName ).get( rowIndex ) );
+			}
+		}
+
+//		System.out.println( ( System.currentTimeMillis() - start ) / 1000.0 ) ;
+
+		return newColumnsForMerging;
+	}
+
+
 	public static Map< String, List< ? > >
 	asTypedColumns( Map< String, List< String > > columnToStringValues )
 			throws UnsupportedDataTypeException

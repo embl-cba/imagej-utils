@@ -78,13 +78,12 @@ public class TestTableRowsAndTableModel
 		referenceColumns.put( "Label", labelColumn );
 		referenceColumns.put( "ImageName", imageColumn );
 
+		final Map< String, List< String > > newColumns = TableColumns.stringColumnsFromTableFile( tableFile );
+
 		Map< String, List< String > > columns2 =
 			TableColumns.createColumnsForMergingExcludingReferenceColumns(
-					null,
 					referenceColumns,
-					Tables.readRows( tableFile ) );
-
-
+					newColumns );
 
 		views.getTableRowsTableView().addColumns( columns2 );
 
