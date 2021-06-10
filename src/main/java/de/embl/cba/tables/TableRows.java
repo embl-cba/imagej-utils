@@ -44,7 +44,6 @@ public abstract class TableRows
 	public static < T extends TableRow >
 	void addColumn( List< T > tableRows, String columnName, Object[] values )
 	{
-		// TODO: this may fail if the the table rows are concatenated from several tables.
 		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRowImageSegment )
 		{
 			final Map< String, List< String > > columns
@@ -58,8 +57,38 @@ public abstract class TableRows
 		}
 		else
 		{
-			throw new UnsupportedOperationException(
-					"TableRow class not supported yet: " + tableRows.get( 0 ).getClass());
+			assert tableRows.size() == values.length;
+
+			for ( int i = 0; i < values.length; i++ )
+			{
+				tableRows.get( i ).setCell( columnName, values[ i ].toString() );
+			}
+		}
+	}
+
+	public static < T extends TableRow >
+	void addColumn( List< T > tableRows, String columnName, List< String > values )
+	{
+		final int size = values.size();
+		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRowImageSegment )
+		{
+			final Map< String, List< String > > columns
+					= ( ( ColumnBasedTableRowImageSegment ) tableRows.get( 0 ) ).getColumns();
+
+			final ArrayList< String > strings = new ArrayList<>();
+			for ( int i = 0; i < size; i++ )
+				strings.add( values.get( i ) );
+
+			columns.put( columnName, strings );
+		}
+		else
+		{
+			assert tableRows.size() == size;
+
+			for ( int i = 0; i < size; i++ )
+			{
+				tableRows.get( i ).setCell( columnName, values.get( i ) );
+			}
 		}
 	}
 
