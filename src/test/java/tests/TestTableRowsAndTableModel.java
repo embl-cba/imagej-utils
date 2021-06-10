@@ -65,20 +65,26 @@ public class TestTableRowsAndTableModel
 
 		final SegmentsTableBdvAnd3dViews views = explore.getTableBdvAnd3dViews();
 
-		final ArrayList< String > orderColumn = TableColumns.getColumn(
-				views.getTableRowsTableView().getTableRows(),
-				ExploreMorphoLibJLabelImage.LABEL );
-
 		final String tableFile = TestTableRowsAndTableModel.class.getResource( "../test-data/3d-image-lbl-morpho-colorMap.csv" ).getFile();
 
+		final ArrayList< String > labelColumn = TableColumns.getColumn(
+				views.getTableRowsTableView().getTableRows(),
+				ExploreMorphoLibJLabelImage.LABEL );
+		final ArrayList< String > imageColumn = TableColumns.getColumn(
+				views.getTableRowsTableView().getTableRows(),
+				"ImageName");
+
 		final HashMap< String, List< String > > referenceColumns = new HashMap<>();
-		referenceColumns.put( "Label", orderColumn );
+		referenceColumns.put( "Label", labelColumn );
+		referenceColumns.put( "ImageName", imageColumn );
 
 		Map< String, List< String > > columns2 =
-			TableColumns.orderedStringColumnsForMerging(
+			TableColumns.createColumnsForMergingExcludingReferenceColumns(
 					null,
 					referenceColumns,
 					Tables.readRows( tableFile ) );
+
+
 
 		views.getTableRowsTableView().addColumns( columns2 );
 

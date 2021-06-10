@@ -144,20 +144,33 @@ public class TableColumns
 	}
 
 	public static Map< String, List< String > >
-	orderedStringColumnsForMerging(
+	createColumnsForMergingExcludingReferenceColumns(
 			String delim, // can be null
-			Map< String, List< String > > referenceColumns, // length of list corresponds to target table
+			Map< String, List< String > > referenceColumns,
 			List< String > tableRowsIncludingHeader )
 	{
-		delim = Tables.autoDelim( delim, tableRowsIncludingHeader );
+		final int numRowsTargetTable = referenceColumns.values().iterator().next().size();
+		final Set< String > referenceColumnNames = referenceColumns.keySet();
 
+		// create lookup map for finding the correct row,
+		// given reference cell entries
+		final HashMap< String, Integer > keyToRowIndex = new HashMap<>();
+		final StringBuilder referenceKeyBuilder = new StringBuilder();
+		for ( int rowIndex = 0; rowIndex < numRowsTargetTable; rowIndex++ )
+		{
+			for ( String referenceColumnName : referenceColumnNames )
+			{
+				referenceKeyBuilder.append( referenceColumns.get( referenceColumnName ).get( rowIndex ) );
+			}
+			keyToRowIndex.put( referenceKeyBuilder.toString(), rowIndex );
+			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear for reuse
+		}
+
+		delim = Tables.autoDelim( delim, tableRowsIncludingHeader );
 		List< String > columnNames = Tables.getColumnNames( tableRowsIncludingHeader, delim );
 
 		final Map< String, List< String > > columnNameToStrings = new LinkedHashMap<>();
 
-		int mergeByColumnIndex = -1;
-
-		final int numRowsTargetTable = referenceColumns.values().iterator().next().size();
 		final int numColumns = columnNames.size();
 
 		for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
@@ -173,28 +186,39 @@ public class TableColumns
 
 			final String columnName = columnNames.get( columnIndex );
 			columnNameToStrings.put( columnName, values );
-			if ( columnName.equals( mergeByColumnName ) )
-				mergeByColumnIndex = columnIndex;
 		}
 
-		if ( mergeByColumnIndex == -1 )
-			throw new UnsupportedOperationException( "Column by which to merge not found: " + mergeByColumnName );
+		final ArrayList< Integer > referenceColumnIndices = new ArrayList<>();
+		for ( String referenceColumnName : referenceColumnNames )
+		{
+			referenceColumnIndices.add( columnNames.indexOf( referenceColumnName ) );
+		}
 
 //		final long start = System.currentTimeMillis();
 		final int numRowsSourceTable = tableRowsIncludingHeader.size() - 1;
 
-		// TODO: code looks inefficient...
 		for ( int rowIndex = 0; rowIndex < numRowsSourceTable; ++rowIndex )
 		{
 			final String[] split = tableRowsIncludingHeader.get( rowIndex + 1 ).split( delim );
-			final String referenceValue = split[ mergeByColumnIndex ];
-			final int targetRowIndex = referenceColumnInTargetTable.indexOf( referenceValue );
+
+			for ( Integer referenceColumnIndex : referenceColumnIndices )
+			{
+				referenceKeyBuilder.append( split[ referenceColumnIndex ] );
+			}
+
+			final int targetRowIndex = keyToRowIndex.get( referenceKeyBuilder.toString() );
+			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear
 
 			for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
 			{
 				final String columName = columnNames.get( columnIndex );
 				columnNameToStrings.get( columName ).set( targetRowIndex, split[ columnIndex ].replace( "\"", "" ) );
 			}
+		}
+
+		for ( String referenceColumnName : referenceColumnNames )
+		{
+			columnNameToStrings.remove( referenceColumnName );
 		}
 
 //		System.out.println( ( System.currentTimeMillis() - start ) / 1000.0 ) ;
@@ -351,7 +375,7 @@ public class TableColumns
 		referenceColumns.put( referenceColumnName, referenceColumn );
 
 		final Map< String, List< String > > columNameToValues =
-				orderedStringColumnsForMerging(
+				createColumnsForMergingExcludingReferenceColumns(
 						null,
 						referenceColumns,
 						Tables.readRows( newTablePath ) );
@@ -369,7 +393,7 @@ public class TableColumns
 		referenceColumns.put( referenceColumnName, referenceColumn );
 
 		final Map< String, List< String > > columNameToValues =
-				orderedStringColumnsForMerging(
+				createColumnsForMergingExcludingReferenceColumns(
 						null,
 						referenceColumns,
 						Tables.readRows( newTablePath ) );
