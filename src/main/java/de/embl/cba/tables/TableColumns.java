@@ -45,6 +45,24 @@ import java.util.Set;
 
 public class TableColumns
 {
+	public static Map< String, List< String > > concatenate( ArrayList< Map< String, List< String > > > tables )
+	{
+		// init with the first
+		Map< String, List< String > > concatenatedTable = tables.get( 0 );
+		final Set< String > columnNames = concatenatedTable.keySet();
+
+		// append the others
+		for ( int tableIndex = 1; tableIndex < tables.size(); tableIndex++ )
+		{
+			final Map< String, List< String > > additionalTable = tables.get( tableIndex );
+			for ( String columnName : columnNames )
+			{
+				concatenatedTable.get( columnName ).addAll( additionalTable.get( columnName ) );
+			}
+		}
+		return concatenatedTable;
+	}
+
 	public static Map< String, List< String > > convertResultsTableToColumns( ResultsTable resultsTable )
 	{
 		List< String > columnNames = Arrays.asList( resultsTable.getHeadings() );
