@@ -288,6 +288,13 @@ public class TableColumns
 				referenceKeyBuilder.append( newColumns.get( referenceColumnName ).get( rowIndex ) );
 			}
 			final int targetRowIndex = keyToRowIndex.get( referenceKeyBuilder.toString() );
+
+			if ( targetRowIndex == -1 )
+			{
+				System.err.println( "Table row key could not be found in reference table: " + referenceKeyBuilder.toString()  );
+				continue;
+			}
+
 			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear for reuse
 
 			for ( String columnName : newColumnsForMergingNames )

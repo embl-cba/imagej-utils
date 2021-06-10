@@ -28,7 +28,6 @@
  */
 package tests;
 
-import de.embl.cba.tables.Tables;
 import de.embl.cba.tables.tablerow.DefaultTableRowsModel;
 import de.embl.cba.tables.TableColumns;
 import de.embl.cba.tables.tablerow.ResultsTableFromTableRowsModelCreator;

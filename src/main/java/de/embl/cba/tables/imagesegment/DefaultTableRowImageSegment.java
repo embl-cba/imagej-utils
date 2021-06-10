@@ -29,41 +29,58 @@
 package de.embl.cba.tables.imagesegment;
 
 import de.embl.cba.tables.Utils;
-import de.embl.cba.tables.imagesegment.SegmentProperty;
 import de.embl.cba.tables.tablerow.AbstractTableRow;
-import de.embl.cba.tables.tablerow.ColumnBasedTableRow;
+import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.tablerow.TableRowImageSegment;
 import net.imglib2.FinalRealInterval;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * All values are dynamically fetched from the columns.
- * This might be slow, but allows changes in columns to be reflected.
- * // TODO: make interface for ColumnBasedTableRow
+ * All values are set immediately
+ * (unlike in the ColumnBasedTableRowImageSegment)
  */
-public class ColumnBasedTableRowImageSegment extends AbstractTableRow implements TableRowImageSegment, ColumnBasedTableRow
+public class DefaultTableRowImageSegment extends AbstractTableRow implements TableRowImageSegment, TableRow
 {
-	private final int row;
 	private final Map< String, List< String > > columns;
+	private final Map< String, String > cells;
 	private final Map< SegmentProperty, List< String > > segmentPropertyToColumn;
 	private double[] position;
 	FinalRealInterval boundingBox;
 	private boolean isOneBasedTimePoint;
 	private float[] mesh;
+	private int timePoint;
+	private Double labelId;
+	private String imageId;
 
-	public ColumnBasedTableRowImageSegment(
-			int row,
+	public DefaultTableRowImageSegment(
+			int rowIndex,
 			Map< String, List< String > > columns,
 			Map< SegmentProperty, List< String > > segmentPropertyToColumn,
 			boolean isOneBasedTimePoint )
 	{
-		this.row = row;
 		this.columns = columns;
 		this.segmentPropertyToColumn = segmentPropertyToColumn;
 		this.isOneBasedTimePoint = isOneBasedTimePoint;
+
+		this.cells = new HashMap<>();
+
+		// set cells
+		for ( String column : columns.keySet() )
+		{
+			cells.put( column, columns.get( column ).get( rowIndex ) );
+		}
+
+		// set segment properties
+		setPosition( rowIndex );
+		setTimePoint( rowIndex );
+		setImageId( rowIndex );
+		setLabelId( rowIndex );
+		initBoundingBox( rowIndex );
+
 	}
 
 	public Map< String, List< String > > getColumns()
@@ -71,7 +88,7 @@ public class ColumnBasedTableRowImageSegment extends AbstractTableRow implements
 		return columns;
 	}
 
-	private synchronized void setPosition()
+	private void setPosition( int row )
 	{
 		if ( position != null ) return;
 
@@ -96,46 +113,56 @@ public class ColumnBasedTableRowImageSegment extends AbstractTableRow implements
 								.get( row ) );
 	}
 
-	@Override
-	public String imageId()
+	public void setImageId( int row )
 	{
-		return segmentPropertyToColumn
+		imageId = segmentPropertyToColumn
 				.get( SegmentProperty.LabelImage )
 				.get( row );
 	}
 
 	@Override
-	public double labelId()
+	public String imageId()
 	{
-		return Utils.parseDouble( segmentPropertyToColumn
+		return imageId;
+	}
+
+	private void setLabelId( int row )
+	{
+		labelId = Utils.parseDouble( segmentPropertyToColumn
 				.get( SegmentProperty.ObjectLabel )
 				.get( row ) );
 	}
 
 	@Override
-	public int timePoint()
+	public double labelId()
+	{
+		return labelId;
+	}
+
+	private void setTimePoint( int row )
 	{
 		if ( segmentPropertyToColumn.get( SegmentProperty.T ) == null )
 		{
-			return 0;
+			timePoint = 0;
 		}
 		else
 		{
-			int timePoint = Utils.parseDouble( segmentPropertyToColumn.get( SegmentProperty.T )
+			timePoint = Utils.parseDouble( segmentPropertyToColumn.get( SegmentProperty.T )
 					.get( row ) ).intValue();
 
 			if ( isOneBasedTimePoint ) timePoint -= 1;
-
-			return timePoint;
 		}
+	}
+
+	@Override
+	public int timePoint()
+	{
+		return timePoint;
 	}
 
 	@Override
 	public FinalRealInterval boundingBox()
 	{
-		if ( boundingBox == null )
-			setBoundingBoxFromTableRow();
-
 		return boundingBox;
 	}
 
@@ -157,7 +184,7 @@ public class ColumnBasedTableRowImageSegment extends AbstractTableRow implements
 		this.mesh = mesh;
 	}
 
-	private void setBoundingBoxFromTableRow()
+	private void initBoundingBox( int row )
 	{
 		// TODO: this checking needs improvement...
 		if ( ! segmentPropertyToColumn.containsKey( SegmentProperty.BoundingBoxXMin ) )
@@ -166,13 +193,13 @@ public class ColumnBasedTableRowImageSegment extends AbstractTableRow implements
 			return;
 		}
 
-		final double[] min = getBoundingBoxMin();
-		final double[] max = getBoundingBoxMax();
+		final double[] min = getBoundingBoxMin( row );
+		final double[] max = getBoundingBoxMax( row );
 
 		boundingBox = new FinalRealInterval( min, max );
 	}
 
-	private double[] getBoundingBoxMax()
+	private double[] getBoundingBoxMax( int row )
 	{
 		final double[] max = new double[ numDimensions() ];
 
@@ -196,7 +223,7 @@ public class ColumnBasedTableRowImageSegment extends AbstractTableRow implements
 		return max;
 	}
 
-	private double[] getBoundingBoxMin()
+	private double[] getBoundingBoxMin( int row )
 	{
 		final double[] min = new double[ numDimensions() ];
 
@@ -223,65 +250,58 @@ public class ColumnBasedTableRowImageSegment extends AbstractTableRow implements
 	@Override
 	public String getCell( String columnName )
 	{
-		return columns.get( columnName ).get( row );
+		return cells.get( columnName );
 	}
 
 	@Override
 	public void setCell( String columnName, String value )
 	{
-		columns.get( columnName ).set( row, value );
+		cells.put( columnName, value );
 		this.notifyCellChangedListeners( columnName, value );
 	}
 
 	@Override
 	public Set< String > getColumnNames()
 	{
-		return columns.keySet();
+		return cells.keySet();
 	}
 
 	@Override
 	@Deprecated
 	public int rowIndex()
 	{
-		return row;
+		return -1;
 	}
 
 	@Override
-	public synchronized void localize( float[] position )
+	public void localize( float[] position )
 	{
-		setPosition();
-
 		for ( int d = 0; d < 3; d++ )
 			position[ d ] = (float) this.position[ d ];
 	}
 
 	@Override
-	public synchronized void localize( double[] position )
+	public void localize( double[] position )
 	{
-		setPosition();
-
 		for ( int d = 0; d < 3; d++ )
 			position[ d ] = this.position[ d ];
 	}
 
 	@Override
-	public synchronized float getFloatPosition( int d )
+	public float getFloatPosition( int d )
 	{
-		setPosition();
 		return (float) position[ d ];
 	}
 
 	@Override
-	public synchronized double getDoublePosition( int d )
+	public double getDoublePosition( int d )
 	{
-		setPosition();
 		return position[ d ];
 	}
 
 	@Override
 	public int numDimensions()
 	{
-		setPosition();
 		return position.length;
 	}
 }

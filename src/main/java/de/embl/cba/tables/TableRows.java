@@ -31,6 +31,7 @@ package de.embl.cba.tables;
 import de.embl.cba.tables.Logger;
 import de.embl.cba.tables.Utils;
 import de.embl.cba.tables.imagesegment.ColumnBasedTableRowImageSegment;
+import de.embl.cba.tables.tablerow.ColumnBasedTableRow;
 import de.embl.cba.tables.tablerow.TableRow;
 import ij.measure.ResultsTable;
 
@@ -43,6 +44,7 @@ public abstract class TableRows
 	public static < T extends TableRow >
 	void addColumn( List< T > tableRows, String columnName, Object[] values )
 	{
+		// TODO: this may fail if the the table rows are concatenated from several tables.
 		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRowImageSegment )
 		{
 			final Map< String, List< String > > columns
