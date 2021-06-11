@@ -39,6 +39,7 @@ import ij.measure.ResultsTable;
 import net.imagej.ImageJ;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,18 +64,25 @@ public class TestTableRowsAndTableModel
 
 		final SegmentsTableBdvAnd3dViews views = explore.getTableBdvAnd3dViews();
 
-		final ArrayList< Double > orderColumn = TableColumns.getNumericColumnAsDoubleList(
-				views.getTableRowsTableView().getTable(),
-				ExploreMorphoLibJLabelImage.LABEL );
-
 		final String tableFile = TestTableRowsAndTableModel.class.getResource( "../test-data/3d-image-lbl-morpho-colorMap.csv" ).getFile();
 
+		final ArrayList< String > labelColumn = TableColumns.getColumn(
+				views.getTableRowsTableView().getTableRows(),
+				ExploreMorphoLibJLabelImage.LABEL );
+		final ArrayList< String > imageColumn = TableColumns.getColumn(
+				views.getTableRowsTableView().getTableRows(),
+				"ImageName");
+
+		final HashMap< String, List< String > > referenceColumns = new HashMap<>();
+		referenceColumns.put( "Label", labelColumn );
+		referenceColumns.put( "ImageName", imageColumn );
+
+		final Map< String, List< String > > newColumns = TableColumns.stringColumnsFromTableFile( tableFile );
+
 		Map< String, List< String > > columns2 =
-			TableColumns.orderedStringColumnsFromTableFile(
-					tableFile,
-					null,
-					"Label",
-					orderColumn );
+			TableColumns.createColumnsForMergingExcludingReferenceColumns(
+					referenceColumns,
+					newColumns );
 
 		views.getTableRowsTableView().addColumns( columns2 );
 

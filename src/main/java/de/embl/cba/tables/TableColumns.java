@@ -37,6 +37,7 @@ import javax.swing.table.TableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,24 @@ import java.util.Set;
 
 public class TableColumns
 {
+	public static Map< String, List< String > > concatenate( List< Map< String, List< String > > > tables )
+	{
+		// init with the first
+		Map< String, List< String > > concatenatedTable = tables.get( 0 );
+		final Set< String > columnNames = concatenatedTable.keySet();
+
+		// append the others
+		for ( int tableIndex = 1; tableIndex < tables.size(); tableIndex++ )
+		{
+			final Map< String, List< String > > additionalTable = tables.get( tableIndex );
+			for ( String columnName : columnNames )
+			{
+				concatenatedTable.get( columnName ).addAll( additionalTable.get( columnName ) );
+			}
+		}
+		return concatenatedTable;
+	}
+
 	public static Map< String, List< String > > convertResultsTableToColumns( ResultsTable resultsTable )
 	{
 		List< String > columnNames = Arrays.asList( resultsTable.getHeadings() );
@@ -59,7 +78,7 @@ public class TableColumns
 
 			final List< String > list = new ArrayList<>( );
 			for ( int row = 0; row < numRows; ++row )
-				list.add( "" + columnValues[ row ] );
+				list.add( Utils.toStringWithoutSuperfluousDecimals( columnValues[ row ] ) );
 
 			columnNamesToValues.put( columnName, list );
 		}
@@ -143,28 +162,38 @@ public class TableColumns
 	}
 
 	public static Map< String, List< String > >
-	orderedStringColumnsFromTableFile(
-			final String path,
-			String delim,
-			String mergeByColumnName,
-			ArrayList< Double > mergeByColumnValues )
+	createColumnsForMergingExcludingReferenceColumns(
+			String delim, // can be null
+			Map< String, List< String > > referenceColumns,
+			List< String > tableRowsIncludingHeader )
 	{
-		final List< String > rowsInTableIncludingHeader = Tables.readRows( path );
+		final int numRowsTargetTable = referenceColumns.values().iterator().next().size();
+		final Set< String > referenceColumnNames = referenceColumns.keySet();
 
-		delim = Tables.autoDelim( delim, rowsInTableIncludingHeader );
+		// create lookup map for finding the correct row,
+		// given reference cell entries
+		final HashMap< String, Integer > keyToRowIndex = new HashMap<>();
+		final StringBuilder referenceKeyBuilder = new StringBuilder();
+		for ( int rowIndex = 0; rowIndex < numRowsTargetTable; rowIndex++ )
+		{
+			for ( String referenceColumnName : referenceColumnNames )
+			{
+				referenceKeyBuilder.append( referenceColumns.get( referenceColumnName ).get( rowIndex ) );
+			}
+			keyToRowIndex.put( referenceKeyBuilder.toString(), rowIndex );
+			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear for reuse
+		}
 
-		List< String > columnNames = Tables.getColumnNames( rowsInTableIncludingHeader, delim );
+		delim = Tables.autoDelim( delim, tableRowsIncludingHeader );
+		List< String > columnNames = Tables.getColumnNames( tableRowsIncludingHeader, delim );
 
 		final Map< String, List< String > > columnNameToStrings = new LinkedHashMap<>();
 
-		int mergeByColumnIndex = -1;
-
-		final int numRowsTargetTable = mergeByColumnValues.size();
 		final int numColumns = columnNames.size();
 
 		for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
 		{
-			final String[] split = rowsInTableIncludingHeader.get( 1 ).split( delim );
+			final String[] split = tableRowsIncludingHeader.get( 1 ).split( delim );
 			final String firstCell = split[ columnIndex ];
 
 			String defaultValue = "None"; // for text
@@ -175,24 +204,28 @@ public class TableColumns
 
 			final String columnName = columnNames.get( columnIndex );
 			columnNameToStrings.put( columnName, values );
-			if ( columnName.equals( mergeByColumnName ) )
-				mergeByColumnIndex = columnIndex;
 		}
 
-		if ( mergeByColumnIndex == -1 )
-			throw new UnsupportedOperationException( "Column by which to merge not found: " + mergeByColumnName );
+		final ArrayList< Integer > referenceColumnIndices = new ArrayList<>();
+		for ( String referenceColumnName : referenceColumnNames )
+		{
+			referenceColumnIndices.add( columnNames.indexOf( referenceColumnName ) );
+		}
 
 //		final long start = System.currentTimeMillis();
-		final int numRowsSourceTable = rowsInTableIncludingHeader.size() - 1;
+		final int numRowsSourceTable = tableRowsIncludingHeader.size() - 1;
 
-		// TODO: code looks inefficient...
 		for ( int rowIndex = 0; rowIndex < numRowsSourceTable; ++rowIndex )
 		{
-			final String[] split = rowsInTableIncludingHeader.get( rowIndex + 1 ).split( delim );
-			final String cell = split[ mergeByColumnIndex ];
+			final String[] split = tableRowsIncludingHeader.get( rowIndex + 1 ).split( delim );
 
-			final Double orderValue = Utils.parseDouble( cell );
-			final int targetRowIndex = mergeByColumnValues.indexOf( orderValue );
+			for ( Integer referenceColumnIndex : referenceColumnIndices )
+			{
+				referenceKeyBuilder.append( split[ referenceColumnIndex ] );
+			}
+
+			final int targetRowIndex = keyToRowIndex.get( referenceKeyBuilder.toString() );
+			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear
 
 			for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
 			{
@@ -201,10 +234,103 @@ public class TableColumns
 			}
 		}
 
+		for ( String referenceColumnName : referenceColumnNames )
+		{
+			columnNameToStrings.remove( referenceColumnName );
+		}
+
 //		System.out.println( ( System.currentTimeMillis() - start ) / 1000.0 ) ;
 
 		return columnNameToStrings;
 	}
+
+	public static Map< String, List< String > >
+	createColumnsForMergingExcludingReferenceColumns(
+			Map< String, List< String > > referenceColumns,
+			Map< String, List< String > > newColumns )
+	{
+		final int numRowsReferenceTable = referenceColumns.values().iterator().next().size();
+		final List< String > referenceColumnNames = new ArrayList<>( referenceColumns.keySet() );
+
+		// create lookup map for finding the correct row,
+		// given reference cell entries
+		final HashMap< String, Integer > keyToRowIndex = new HashMap<>();
+		final StringBuilder referenceKeyBuilder = new StringBuilder();
+		for ( int rowIndex = 0; rowIndex < numRowsReferenceTable; rowIndex++ )
+		{
+			for ( String referenceColumnName : referenceColumnNames )
+			{
+				referenceKeyBuilder.append( referenceColumns.get( referenceColumnName ).get( rowIndex ) + "--" );
+			}
+			keyToRowIndex.put( referenceKeyBuilder.toString(), rowIndex );
+			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear for reuse
+		}
+
+		// prepare the new columns with a default value
+		// - the entries may have a different order
+		// - some entries may get default values, because it is
+		//   not required that all rows exist in the new columns
+		final Map< String, List< String > > newColumnsForMerging = new LinkedHashMap<>();
+		for ( Map.Entry< String, List< String > > columns : newColumns.entrySet() )
+		{
+			if ( referenceColumnNames.contains( columns.getKey() ) )
+			{
+				// we don't need the reference columns a second time
+				continue;
+			}
+
+			final String firstCell = columns.getValue().get( 0 );
+
+			String defaultValue;
+			if ( Tables.isNumeric( firstCell ) )
+				defaultValue = "NaN"; // for numbers
+			else
+				defaultValue = "None"; // for text
+
+			final ArrayList< String > defaultValues = new ArrayList< >( Collections.nCopies( numRowsReferenceTable, defaultValue ));
+
+			newColumnsForMerging.put( columns.getKey(), defaultValues );
+		}
+
+		// new column names excluding the reference columns
+		final List< String > newColumnsForMergingNames = new ArrayList<>( newColumnsForMerging.keySet() );
+
+		// final long start = System.currentTimeMillis();
+		// go through the new columns and put their values
+		// into the correct row (i.e. targetRowIndex) of the columns to be merged
+		final int numRows = newColumns.values().iterator().next().size();
+		for ( int rowIndex = 0; rowIndex < numRows; ++rowIndex )
+		{
+			for ( String referenceColumnName : referenceColumnNames )
+			{
+				final String partialKey = newColumns.get( referenceColumnName ).get( rowIndex );
+				referenceKeyBuilder.append( partialKey + "--");
+			}
+
+			final String fullKey = referenceKeyBuilder.toString();
+
+			final Integer targetRowIndex = keyToRowIndex.get( fullKey );
+
+			if ( targetRowIndex == null )
+			{
+				System.err.println( "Table row key could not be found in reference table: " + fullKey );
+				referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() );
+				continue;
+			}
+
+			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear for reuse
+
+			for ( String columnName : newColumnsForMergingNames )
+			{
+				newColumnsForMerging.get( columnName ).set( targetRowIndex, newColumns.get( columnName ).get( rowIndex ) );
+			}
+		}
+
+//		System.out.println( ( System.currentTimeMillis() - start ) / 1000.0 ) ;
+
+		return newColumnsForMerging;
+	}
+
 
 	public static Map< String, List< ? > >
 	asTypedColumns( Map< String, List< String > > columnToStringValues )
@@ -324,57 +450,59 @@ public class TableColumns
 		return columns;
 	}
 
-	public static ArrayList< Double > getNumericColumnAsDoubleList( JTable table, String columnName )
+	public static ArrayList< String > getColumn( JTable table, String columnName )
 	{
-		final int objectLabelColumnIndex = table.getColumnModel().getColumnIndex( columnName );
+		final int columnIndex = table.getColumnModel().getColumnIndex( columnName );
 
 		final TableModel model = table.getModel();
 		final int numRows = model.getRowCount();
-		final ArrayList< Double > orderColumn = new ArrayList<>();
+		final ArrayList< String > column = new ArrayList<>();
 		for ( int rowIndex = 0; rowIndex < numRows; ++rowIndex )
-			orderColumn.add( Utils.parseDouble( model.getValueAt( rowIndex, objectLabelColumnIndex ).toString() ) );
-		return orderColumn;
+			column.add( model.getValueAt( rowIndex, columnIndex ).toString() );
+		return column;
 	}
 
-	public static ArrayList< Double > getNumericColumnAsDoubleList( List< ? extends TableRow > tableRows, String columnName )
+	public static ArrayList< String > getColumn( List< ? extends TableRow > tableRows, String columnName )
 	{
 		final int numRows = tableRows.size();
-		final ArrayList< Double > orderColumn = new ArrayList<>();
+		final ArrayList< String > column = new ArrayList<>();
 		for ( int rowIndex = 0; rowIndex < numRows; ++rowIndex )
-			orderColumn.add( Utils.parseDouble( tableRows.get( rowIndex ).getCell( columnName ) ) );
-		return orderColumn;
+			column.add( tableRows.get( rowIndex ).getCell( columnName ) );
+		return column;
 	}
 
-	public static Map< String, List< String > > openAndOrderNewColumns( JTable table, String mergeByColumnName, String newTablePath )
+	public static Map< String, List< String > > openAndOrderNewColumns( JTable table, String referenceColumnName, String newTablePath )
 	{
-		// TODO: this assumes that the ordering column is numeric; is this needed?
-		final ArrayList< Double > orderColumn = getNumericColumnAsDoubleList(
+		final ArrayList< String > referenceColumn = getColumn(
 				table,
-				mergeByColumnName );
+				referenceColumnName );
+
+		final HashMap< String, List< String > > referenceColumns = new HashMap<>();
+		referenceColumns.put( referenceColumnName, referenceColumn );
 
 		final Map< String, List< String > > columNameToValues =
-				orderedStringColumnsFromTableFile(
-						newTablePath,
+				createColumnsForMergingExcludingReferenceColumns(
 						null,
-						mergeByColumnName,
-						orderColumn );
+						referenceColumns,
+						Tables.readRows( newTablePath ) );
 
 		return columNameToValues;
 	}
 
-	public static Map< String, List< String > > openAndOrderNewColumns( List< ? extends TableRow > tableRows, String mergeByColumnName, String newTablePath )
+	public static Map< String, List< String > > openAndOrderNewColumns( List< ? extends TableRow > tableRows, String referenceColumnName, String newTablePath )
 	{
-		// TODO: this assumes that the ordering column is numeric; is this needed?
-		final ArrayList< Double > orderColumn = getNumericColumnAsDoubleList(
+		final ArrayList< String > referenceColumn = getColumn(
 				tableRows,
-				mergeByColumnName );
+				referenceColumnName );
+
+		final HashMap< String, List< String > > referenceColumns = new HashMap<>();
+		referenceColumns.put( referenceColumnName, referenceColumn );
 
 		final Map< String, List< String > > columNameToValues =
-				orderedStringColumnsFromTableFile(
-						newTablePath,
+				createColumnsForMergingExcludingReferenceColumns(
 						null,
-						mergeByColumnName,
-						orderColumn );
+						referenceColumns,
+						Tables.readRows( newTablePath ) );
 
 		return columNameToValues;
 	}

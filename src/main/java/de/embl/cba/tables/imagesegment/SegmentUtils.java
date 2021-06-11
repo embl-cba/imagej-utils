@@ -193,24 +193,31 @@ public class SegmentUtils
 			final Map< SegmentProperty, List< String > > segmentPropertiesToColumn,
 			boolean isOneBasedTimePoint )
 	{
-		final List< TableRowImageSegment > columnBasedTableRowImageSegments
+		final List< TableRowImageSegment > tableRowImageSegments
 				= new ArrayList<>();
 
 		final int numRows = columns.values().iterator().next().size();
 
 		for ( int row = 0; row < numRows; row++ )
 		{
-			final ColumnBasedTableRowImageSegment segment
-					= new ColumnBasedTableRowImageSegment(
-							row,
-							columns,
-							segmentPropertiesToColumn,
-							isOneBasedTimePoint );
+//			final ColumnBasedTableRowImageSegment segment
+//					= new ColumnBasedTableRowImageSegment(
+//							row,
+//							columns,
+//							segmentPropertiesToColumn,
+//							isOneBasedTimePoint );
 
-			columnBasedTableRowImageSegments.add( segment );
+			final DefaultTableRowImageSegment segment
+					= new DefaultTableRowImageSegment(
+					row,
+					columns,
+					segmentPropertiesToColumn,
+					isOneBasedTimePoint );
+
+			tableRowImageSegments.add( segment );
 		}
 
-		return columnBasedTableRowImageSegments;
+		return tableRowImageSegments;
 	}
 
 	public static < T extends ImageSegment >
