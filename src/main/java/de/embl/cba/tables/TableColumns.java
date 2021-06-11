@@ -45,7 +45,7 @@ import java.util.Set;
 
 public class TableColumns
 {
-	public static Map< String, List< String > > concatenate( ArrayList< Map< String, List< String > > > tables )
+	public static Map< String, List< String > > concatenate( List< Map< String, List< String > > > tables )
 	{
 		// init with the first
 		Map< String, List< String > > concatenatedTable = tables.get( 0 );
@@ -260,7 +260,7 @@ public class TableColumns
 		{
 			for ( String referenceColumnName : referenceColumnNames )
 			{
-				referenceKeyBuilder.append( referenceColumns.get( referenceColumnName ).get( rowIndex ) );
+				referenceKeyBuilder.append( referenceColumns.get( referenceColumnName ).get( rowIndex ) + "--" );
 			}
 			keyToRowIndex.put( referenceKeyBuilder.toString(), rowIndex );
 			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear for reuse
@@ -303,13 +303,18 @@ public class TableColumns
 		{
 			for ( String referenceColumnName : referenceColumnNames )
 			{
-				referenceKeyBuilder.append( newColumns.get( referenceColumnName ).get( rowIndex ) );
+				final String partialKey = newColumns.get( referenceColumnName ).get( rowIndex );
+				referenceKeyBuilder.append( partialKey + "--");
 			}
-			final int targetRowIndex = keyToRowIndex.get( referenceKeyBuilder.toString() );
 
-			if ( targetRowIndex == -1 )
+			final String fullKey = referenceKeyBuilder.toString();
+
+			final Integer targetRowIndex = keyToRowIndex.get( fullKey );
+
+			if ( targetRowIndex == null )
 			{
-				System.err.println( "Table row key could not be found in reference table: " + referenceKeyBuilder.toString()  );
+				System.err.println( "Table row key could not be found in reference table: " + fullKey );
+				referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() );
 				continue;
 			}
 

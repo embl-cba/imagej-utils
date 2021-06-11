@@ -34,7 +34,10 @@ import de.embl.cba.tables.tablerow.TableRow;
 import de.embl.cba.tables.tablerow.TableRowImageSegment;
 import net.imglib2.FinalRealInterval;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +48,6 @@ import java.util.Set;
  */
 public class DefaultTableRowImageSegment extends AbstractTableRow implements TableRowImageSegment, TableRow
 {
-	private final Map< String, List< String > > columns;
 	private final Map< String, String > cells;
 	private final Map< SegmentProperty, List< String > > segmentPropertyToColumn;
 	private double[] position;
@@ -62,30 +64,25 @@ public class DefaultTableRowImageSegment extends AbstractTableRow implements Tab
 			Map< SegmentProperty, List< String > > segmentPropertyToColumn,
 			boolean isOneBasedTimePoint )
 	{
-		this.columns = columns;
 		this.segmentPropertyToColumn = segmentPropertyToColumn;
 		this.isOneBasedTimePoint = isOneBasedTimePoint;
 
-		this.cells = new HashMap<>();
+		this.cells = new LinkedHashMap<>();
+
+		// set segment properties
+		setLabelId( rowIndex );
+		setImageId( rowIndex );
+		setTimePoint( rowIndex );
+		setPosition( rowIndex );
+		initBoundingBox( rowIndex );
 
 		// set cells
-		for ( String column : columns.keySet() )
+		final List< String > columnNames = new ArrayList<>( columns.keySet() );
+		Collections.sort( columnNames );
+		for ( String column : columnNames )
 		{
 			cells.put( column, columns.get( column ).get( rowIndex ) );
 		}
-
-		// set segment properties
-		setPosition( rowIndex );
-		setTimePoint( rowIndex );
-		setImageId( rowIndex );
-		setLabelId( rowIndex );
-		initBoundingBox( rowIndex );
-
-	}
-
-	public Map< String, List< String > > getColumns()
-	{
-		return columns;
 	}
 
 	private void setPosition( int row )
