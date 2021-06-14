@@ -171,55 +171,6 @@ public abstract class TableRows
 		}
 	}
 
-	/**
-	 * Write the values both in the TableRows and JTable
-	 *
-	 * TODO: this should not have to do it also in the table model.
-	 * somehow there should be a notification that the values in the table row have changed.
-	 * and then the TableView should take care of this!!
-	 *
-	 * @param rowIndex
-	 * @param column
-	 * @param value
-	 * @param table
-	 */
-	public static < T extends TableRow >
-	void setTableCell(
-			int rowIndex,
-			String column,
-			String value,
-			JTable table )
-	{
-		final TableModel model = table.getModel();
-		final int columnIndex = table.getColumnModel().getColumnIndex( column );
-
-		final Object valueToBeReplaced = model.getValueAt( rowIndex, columnIndex );
-
-		if ( valueToBeReplaced.getClass().equals( Double.class ) )
-		{
-			try
-			{
-				final double number = Utils.parseDouble( value );
-
-				model.setValueAt(
-						number,
-						rowIndex,
-						columnIndex );
-			}
-			catch ( Exception e )
-			{
-				Logger.error( "Entered value must be numeric for column: " + column );
-			}
-		}
-		else
-		{
-			model.setValueAt(
-					value,
-					rowIndex,
-					columnIndex );
-		}
-	}
-
 	public static double[] minMax( List< ? extends TableRow > tableRows, String column  )
 	{
 		double min = Double.MAX_VALUE;

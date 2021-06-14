@@ -59,8 +59,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
-import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
-import static de.embl.cba.tables.TableRows.setTableCell;
+import static de.embl.cba.tables.Tables.setJTableCell;
 import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK_GREY;
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
@@ -152,7 +151,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 				@Override
 				public void cellChanged( String columnName, String value )
 				{
-					setTableCell( finalRowIndex, columnName, value, getTable() );
+					setJTableCell( finalRowIndex, columnName, value, getTable() );
 				}
 			} );
 		}
@@ -500,7 +499,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 					try
 					{
 						String mergeByColumnName = getMergeByColumnName();
-						String tablePath = selectPathFromProjectOrFileSystem( tablesDirectory, "Table");
+						String tablePath = selectRemoteOrFileSystem( tablesDirectory );
 						addAdditionalTable(tablePath);
 						Map< String, List< String > > newColumnsOrdered = TableUIs.loadColumns( table, tablePath, mergeByColumnName );
 						if ( newColumnsOrdered == null ) return;
@@ -513,6 +512,32 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 				} ) );
 
 		return menuItem;
+	}
+
+	public static String selectRemoteOrFileSystem (String directory) throws IOException {
+
+		if ( directory == null ) {
+			return null;
+		}
+
+		FileAndUrlUtils.ResourceType type = FileAndUrlUtils.getType( directory );
+		switch (type) {
+			case FILE:
+				return FileAndUrlUtils.selectPath( directory, "Table" );
+			default:
+				final GenericDialog gd = new GenericDialog( "Choose source" );
+				String[] choices = new String[]{ "Remote", "File System" };
+				gd.addChoice( "Load from", choices, choices[0] );
+				gd.showDialog();
+				if ( gd.wasCanceled() ) return null;
+
+				String choice = gd.getNextChoice();
+				if ( choice.equals("Remote") ) {
+					return FileAndUrlUtils.selectPath( directory, "Table" );
+				} else {
+					return FileAndUrlUtils.selectPath( System.getProperty("user.home"), "Table" );
+				}
+		}
 	}
 
 	private String getMergeByColumnName()

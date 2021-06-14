@@ -40,11 +40,17 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.amazonaws.services.s3.AmazonS3;
+import de.embl.cba.tables.github.GitHubUtils;
 import org.apache.commons.io.IOUtils;
+
+import javax.swing.*;
+
+import static de.embl.cba.tables.S3Utils.*;
+import static de.embl.cba.tables.github.GitHubUtils.*;
 
 public class FileAndUrlUtils
 {
-	enum ResourceType {
+	public enum ResourceType {
 		FILE,  // resource is a file on the file system
 		HTTP,  // resource supports http requests
 		S3     // resource supports s3 API
@@ -62,14 +68,27 @@ public class FileAndUrlUtils
 		}
 	}
 
-	public static List< File > getFileList( File directory, String fileNameRegExp )
+	public static BufferedReader getReader( String path )
+	{
+		InputStream stream;
+		try {
+			stream = getInputStream(path);
+		} catch (IOException e) {
+			throw new RuntimeException("Could not open " + path);
+		}
+		final InputStreamReader inReader = new InputStreamReader( stream );
+		final BufferedReader bufferedReader = new BufferedReader( inReader );
+		return bufferedReader;
+	}
+
+	public static List< File > getFileList( File directory, String fileNameRegExp, boolean recursive )
 	{
 		final ArrayList< File > files = new ArrayList<>();
-		populateFileList( directory, fileNameRegExp,files );
+		populateFileList( directory, fileNameRegExp, files, recursive );
 		return files;
 	}
 
-	public static void populateFileList( File directory, String fileNameRegExp, List< File > files ) {
+	public static void populateFileList( File directory, String fileNameRegExp, List< File > files, boolean recursive ) {
 
 		// Get all the files from a directory.
 		File[] fList = directory.listFiles();
@@ -85,9 +104,9 @@ public class FileAndUrlUtils
 					if ( matcher.matches() )
 						files.add( file );
 				}
-				else if ( file.isDirectory() )
+				else if ( file.isDirectory() && recursive )
 				{
-					populateFileList( file, fileNameRegExp, files );
+					populateFileList( file, fileNameRegExp, files, recursive );
 				}
 			}
 		}
@@ -95,8 +114,7 @@ public class FileAndUrlUtils
 
 	public static List< String > getFiles( File inputDirectory, String filePattern )
 	{
-		final List< File > fileList =
-				de.embl.cba.tables.FileUtils.getFileList(
+		final List< File > fileList = getFileList(
 						inputDirectory, filePattern, false );
 
 		Collections.sort( fileList, new FileAndUrlUtils.SortFilesIgnoreCase() );
@@ -241,6 +259,149 @@ public class FileAndUrlUtils
 			default:
 				return false;
 		}
+	}
+
+	public static String[] getFileNames( String uri ) {
+		if ( uri == null ) {
+			return null;
+		}
+
+		ResourceType type = getType( uri );
+		switch (type) {
+			case HTTP:
+				if( isGithub( uri )) {
+					return GitHubUtils.getFileNames( uri );
+				} else {
+					// TODO - implement for other kinds of http?
+					return null;
+				}
+			case FILE:
+				List<File> files = getFileList( new File(uri), ".*", false );
+				if ( files.size() > 0 ) {
+					String[] fileNames = new String[files.size()];
+					for ( int i = 0; i< files.size(); i++) {
+						fileNames[i] = files.get(i).getName();
+					}
+					return fileNames;
+				} else {
+					return null;
+				}
+			case S3:
+				return getS3FileNames( uri );
+			default:
+				return null;
+		}
+	}
+
+	// objectName is used for the dialog labels e.g. 'table' etc...
+	public static String selectPath( String uri, String objectName ) throws IOException {
+
+		if ( uri == null ) {
+			return null;
+		}
+
+		ResourceType type = getType( uri );
+		String filePath = null;
+		switch (type) {
+			case HTTP:
+				if (isGithub(uri)) {
+					filePath = selectGitHubPathFromDirectory(uri, objectName);
+				} else {
+					// TODO - implement for other kinds of http?
+					filePath = null;
+				}
+				break;
+			case FILE:
+				final JFileChooser jFileChooser = new JFileChooser(uri);
+				jFileChooser.setDialogTitle( "Select " + objectName );
+				if (jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
+					filePath = jFileChooser.getSelectedFile().getAbsolutePath();
+				break;
+			case S3:
+				filePath = selectS3PathFromDirectory(uri, objectName);
+				break;
+			default:
+				return null;
+		}
+
+		if ( filePath == null ) return null;
+
+		if ( filePath.startsWith( "http" ) )
+			filePath = resolveURL( URI.create( filePath ) );
+
+		return filePath;
+
+	}
+
+	public static String resolveURL( URI uri )
+	{
+		while( isRelativePath( uri.toString() ) )
+		{
+			URI relativeURI = URI.create( getRelativePath( uri.toString() ) );
+			uri = uri.resolve( relativeURI ).normalize();
+		}
+
+		return uri.toString();
+	}
+
+	/**
+	 * The path points to a file that contains itself a path (e.g. MoBIE tables).
+	 *
+	 * @param path
+	 * @return
+	 */
+	public static String resolvePath( String path )
+	{
+		try {
+			while ( isRelativePath( path ) ) {
+				String relativePath = getRelativePath(path);
+				path = new File( new File( path ).getParent(), relativePath ).getCanonicalPath();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return path;
+	}
+
+	/**
+	 * Checks whether the file contains a path, pointing to another
+	 * version of itself.
+	 *
+	 * @param path
+	 * @return
+	 */
+	public static boolean isRelativePath( String path )
+	{
+		try ( final BufferedReader reader = getReader(path) )
+		{
+			final String firstLine = reader.readLine();
+			return firstLine.startsWith("..");
+		}
+		catch ( IOException e )
+		{
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public static String getRelativePath( String tablePath )
+	{
+		try( final BufferedReader reader = getReader( tablePath ) )
+		{
+			String link = reader.readLine();
+			return link;
+		}
+		catch ( IOException e )
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static boolean stringContainsItemFromList( String inputStr, ArrayList< String > items)
+	{
+		return items.parallelStream().anyMatch( inputStr::contains );
 	}
 
 }
