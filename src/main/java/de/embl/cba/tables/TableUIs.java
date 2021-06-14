@@ -41,8 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static de.embl.cba.tables.FileUtils.selectPathFromProjectOrFileSystem;
-
 
 public class TableUIs
 {

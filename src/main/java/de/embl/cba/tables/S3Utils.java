@@ -164,4 +164,8 @@ public abstract class S3Utils {
         }
         return paths;
     }
+
+    public static boolean isS3( String directory ) {
+        return directory.contains( "s3.amazon.aws.com" ) || directory.startsWith("https://s3");
+    }
 }

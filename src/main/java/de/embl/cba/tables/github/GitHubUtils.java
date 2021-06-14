@@ -110,4 +110,8 @@ public abstract class GitHubUtils
 		}
 		return bookmarkPaths;
 	}
+
+	public static boolean isGithub( String directory ) {
+		return directory.contains( "raw.githubusercontent" );
+	}
 }
