@@ -68,6 +68,19 @@ public class FileAndUrlUtils
 		}
 	}
 
+	public static BufferedReader getReader( String path )
+	{
+		InputStream stream;
+		try {
+			stream = getInputStream(path);
+		} catch (IOException e) {
+			throw new RuntimeException("Could not open " + path);
+		}
+		final InputStreamReader inReader = new InputStreamReader( stream );
+		final BufferedReader bufferedReader = new BufferedReader( inReader );
+		return bufferedReader;
+	}
+
 	public static List< File > getFileList( File directory, String fileNameRegExp, boolean recursive )
 	{
 		final ArrayList< File > files = new ArrayList<>();
@@ -281,7 +294,7 @@ public class FileAndUrlUtils
 	}
 
 	// objectName is used for the dialog labels e.g. 'table' etc...
-	public static String selectPath ( String uri, String objectName ) throws IOException {
+	public static String selectPath( String uri, String objectName ) throws IOException {
 
 		if ( uri == null ) {
 			return null;
@@ -314,13 +327,13 @@ public class FileAndUrlUtils
 		if ( filePath == null ) return null;
 
 		if ( filePath.startsWith( "http" ) )
-			filePath = resolveTableURL( URI.create( filePath ) );
+			filePath = resolveURL( URI.create( filePath ) );
 
 		return filePath;
 
 	}
 
-	public static String resolveTableURL(URI uri )
+	public static String resolveURL( URI uri )
 	{
 		while( isRelativePath( uri.toString() ) )
 		{
@@ -345,8 +358,16 @@ public class FileAndUrlUtils
 		return path;
 	}
 
-	public static boolean isRelativePath( String tablePath )  {
-		try ( final BufferedReader reader = Tables.getReader(tablePath) )
+	/**
+	 * Checks whether the file contains a path, pointing to another
+	 * version of itself.
+	 *
+	 * @param path
+	 * @return
+	 */
+	public static boolean isRelativePath( String path )
+	{
+		try ( final BufferedReader reader = getReader(path) )
 		{
 			final String firstLine = reader.readLine();
 			return firstLine.startsWith("..");
@@ -358,8 +379,9 @@ public class FileAndUrlUtils
 		}
 	}
 
-	public static String getRelativePath( String tablePath ) {
-		try( final BufferedReader reader = Tables.getReader( tablePath ) )
+	public static String getRelativePath( String tablePath )
+	{
+		try( final BufferedReader reader = getReader( tablePath ) )
 		{
 			String link = reader.readLine();
 			return link;

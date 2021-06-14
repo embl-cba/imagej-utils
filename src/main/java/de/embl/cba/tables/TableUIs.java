@@ -30,14 +30,12 @@ package de.embl.cba.tables;
 
 import de.embl.cba.tables.view.TableRowsTableView;
 import ij.gui.GenericDialog;
-import org.apache.commons.io.FilenameUtils;
 
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -152,7 +150,7 @@ public class TableUIs
 	{
 		String additionalTablesUrl = getAdditionalTablesUrl( tablesLocation, additionalTableNamesFile );
 
-		final BufferedReader reader = Tables.getReader( additionalTablesUrl );
+		final BufferedReader reader = FileAndUrlUtils.getReader( additionalTablesUrl );
 
 		final ArrayList< String > lines = new ArrayList<>();
 		String line = reader.readLine();

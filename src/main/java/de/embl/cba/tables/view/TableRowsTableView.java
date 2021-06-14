@@ -59,7 +59,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
-import static de.embl.cba.tables.TableRows.setTableCell;
+import static de.embl.cba.tables.Tables.setJTableCell;
 import static de.embl.cba.tables.color.CategoryTableRowColumnColoringModel.DARK_GREY;
 
 public class TableRowsTableView < T extends TableRow > extends JPanel
@@ -151,7 +151,7 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 				@Override
 				public void cellChanged( String columnName, String value )
 				{
-					setTableCell( finalRowIndex, columnName, value, getTable() );
+					setJTableCell( finalRowIndex, columnName, value, getTable() );
 				}
 			} );
 		}

@@ -36,13 +36,10 @@ import de.embl.cba.tables.tablerow.JTableFromTableRowsModelCreator;
 import de.embl.cba.tables.tablerow.TableRow;
 import org.scijava.table.GenericTable;
 
-import javax.activation.UnsupportedDataTypeException;
-import javax.management.RuntimeMBeanException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -131,7 +128,7 @@ public class Tables
 
 	public static List< String > readRows( String path )
 	{
-		BufferedReader br = getReader( path );
+		BufferedReader br = FileAndUrlUtils.getReader( path );
 
 		List< String > rows = readRows( br );
 
@@ -156,19 +153,6 @@ public class Tables
 			throw new RuntimeException( e );
 		}
 
-	}
-
-	public static BufferedReader getReader( String path )
-	{
-		InputStream stream;
-		try {
-			stream = FileAndUrlUtils.getInputStream(path);
-		} catch (IOException e) {
-			throw new RuntimeException("Could not open " + path);
-		}
-		final InputStreamReader inReader = new InputStreamReader( stream );
-		final BufferedReader bufferedReader = new BufferedReader( inReader );
-		return bufferedReader;
 	}
 
 	public static List< String > readRows( File file, int numRows )
@@ -229,6 +213,19 @@ public class Tables
 
 		}
 		return delim;
+	}
+
+	public static void addColumnToJTable( String columnName, String value, TableModel model )
+	{
+		try
+		{
+			Utils.parseDouble( value );
+			Tables.addColumn( model, columnName, 0.0D );
+		}
+		catch ( Exception e )
+		{
+			Tables.addColumn( model, columnName, "None" );
+		}
 	}
 
 	public static JTable createJTableFromStringList( List< String > strings, String delim )
@@ -804,5 +801,54 @@ public class Tables
 	{
 		Map< String, List< String > > columnNameToColumn = TableColumns.stringColumnsFromTableFile( path );
 		return columnBasedTableRowsFromColumns( columnNameToColumn );
+	}
+
+	/**
+	 * Write the values both in the TableRows and JTable
+	 *
+	 * TODO: this should not have to do it also in the table model.
+	 * somehow there should be a notification that the values in the table row have changed.
+	 * and then the TableView should take care of this!!
+	 *
+	 * @param rowIndex
+	 * @param column
+	 * @param value
+	 * @param table
+	 */
+	public static < T extends TableRow >
+	void setJTableCell(
+			int rowIndex,
+			String column,
+			String value,
+			JTable table )
+	{
+		final TableModel model = table.getModel();
+		final int columnIndex = table.getColumnModel().getColumnIndex( column );
+
+		final Object valueToBeReplaced = model.getValueAt( rowIndex, columnIndex );
+
+		if ( valueToBeReplaced.getClass().equals( Double.class ) )
+		{
+			try
+			{
+				final double number = Utils.parseDouble( value );
+
+				model.setValueAt(
+						number,
+						rowIndex,
+						columnIndex );
+			}
+			catch ( Exception e )
+			{
+				Logger.error( "Entered value must be numeric for column: " + column );
+			}
+		}
+		else
+		{
+			model.setValueAt(
+					value,
+					rowIndex,
+					columnIndex );
+		}
 	}
 }
