@@ -344,7 +344,13 @@ public class FileAndUrlUtils
 		return uri.toString();
 	}
 
-	public static String resolveTablePath ( String path )
+	/**
+	 * The path points to a file that contains itself a path (e.g. MoBIE tables).
+	 *
+	 * @param path
+	 * @return
+	 */
+	public static String resolvePath( String path )
 	{
 		try {
 			while ( isRelativePath( path ) ) {
