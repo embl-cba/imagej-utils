@@ -41,7 +41,4 @@ public interface TableRow
 	void setCell( String columnName, String value );
 
 	Set< String > getColumnNames();
-
-	@Deprecated
-	int rowIndex();
 }
