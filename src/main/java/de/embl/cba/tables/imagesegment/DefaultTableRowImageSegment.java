@@ -78,7 +78,7 @@ public class DefaultTableRowImageSegment extends AbstractTableRow implements Tab
 
 		// set cells
 		final List< String > columnNames = new ArrayList<>( columns.keySet() );
-		Collections.sort( columnNames );
+		//Collections.sort( columnNames );
 		for ( String column : columnNames )
 		{
 			cells.put( column, columns.get( column ).get( rowIndex ) );
