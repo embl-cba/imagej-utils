@@ -42,6 +42,9 @@ public abstract class AbstractTableRow
 	protected void notifyCellChangedListeners( final String columnName, final String value )
 	{
 		for ( TableRowListener listener : listeners.list )
-			new Thread( () -> listener.cellChanged( columnName, value ) ).start();
+		{
+			listener.cellChanged( columnName, value );
+		}
+		// new Thread( () -> listener.cellChanged( columnName, value ) ).start();
 	}
 }
