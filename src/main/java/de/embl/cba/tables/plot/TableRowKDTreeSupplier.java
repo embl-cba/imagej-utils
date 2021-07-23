@@ -99,6 +99,7 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 	 */
 	private void initialiseDataPoints( List< T > tableRows, String[] columns, double[] scaleFactors )
 	{
+		string2num = new HashMap<>(); // in case we need to plot categorical columns
 		dataPoints = new ArrayList<>();
 		dataPointTableRows = new ArrayList<>( );
 
@@ -126,7 +127,6 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 				}
 				catch ( Exception e )
 				{
-					string2num = new HashMap<>();
 					if ( ! string2num.containsKey( cell ) )
 					{
 						string2num.put( cell, Double.valueOf( string2num.size() ) );
