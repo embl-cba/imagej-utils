@@ -28,15 +28,18 @@
  */
 package de.embl.cba.tables.plot;
 
-import de.embl.cba.DebugHelper;
 import de.embl.cba.tables.Outlier;
 import de.embl.cba.tables.Utils;
 import de.embl.cba.tables.tablerow.TableRow;
+import de.embl.cba.transforms.utils.ExecutableClass;
 import net.imglib2.KDTree;
 import net.imglib2.RealPoint;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -58,6 +61,7 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 	private Map< T, RealPoint > tableRowToRealPoint;
 	double[] min = new double[ n ];
 	double[] max = new double[ n ];
+	private HashMap< String, Double > string2num;
 
 	public TableRowKDTreeSupplier( List< T > tableRows, String[] columns, double[] scaleFactors )
 	{
@@ -101,7 +105,7 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 		int size = tableRows.size();
 
 		Double[] xy = new Double[ 2 ];
-		boolean isNumber;
+		boolean isValidDataPoint;
 
 		for ( int i = 0; i < size; i++ )
 		{
@@ -111,13 +115,29 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 				if ( ( ( Outlier ) tableRow ).isOutlier() )  // From plateViewer for Corona screening project
 					continue;
 
-			isNumber = true;
+			isValidDataPoint = true;
 			for ( int d = 0; d < n; d++ )
 			{
-				xy[ d ] = Utils.parseDouble( tableRow.getCell( columns[ d ] ) );
+				final String cell = tableRow.getCell( columns[ d ] );
+
+				try
+				{
+					xy[ d ] = Utils.parseDouble( cell );
+				}
+				catch ( Exception e )
+				{
+					string2num = new HashMap<>();
+					if ( ! string2num.containsKey( cell ) )
+					{
+						string2num.put( cell, Double.valueOf( string2num.size() ) );
+					}
+
+					xy[ d ] =  string2num.get( cell );
+				}
+
 				if ( xy[ d ].isNaN() || xy[ d ].isInfinite() )
 				{
-					isNumber = false;
+					isValidDataPoint = false;
 					break;
 				}
 
@@ -127,7 +147,7 @@ public class TableRowKDTreeSupplier < T extends TableRow > implements Supplier< 
 				if ( xy[ d ] > max[ d ] ) max[ d ] = xy[ d ];
 			}
 
-			if ( isNumber )
+			if ( isValidDataPoint )
 			{
 				dataPoints.add( new RealPoint( xy[ 0 ], xy[ 1 ] ) );
 				dataPointTableRows.add( tableRow );
