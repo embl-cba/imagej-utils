@@ -92,6 +92,7 @@
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
+		<license.excludes>**/script_templates/**</license.excludes>
 	</properties>
 
 	<repositories>
