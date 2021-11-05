@@ -10,11 +10,11 @@
 
 	<groupId>de.embl.cba</groupId>
 	<artifactId>imagej-utils</artifactId>
-    <version>0.6.5-SNAPSHOT</version>
+    <version>0.6.4</version>
 
 	<name>ImageJ Utilities</name>
 	<description>Various Java code for ImageJ</description>
-	<url>https://github.com/tischi/imagej-utils</url>
+	<url>https://github.com/embl-cba/imagej-utils</url>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
 		<name>EMBL</name>
