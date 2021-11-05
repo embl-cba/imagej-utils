@@ -71,8 +71,8 @@
 		<url>https://github.com/tischi/imagej-utils/issues</url>
 	</issueManagement>
 	<ciManagement>
-		<system>Travis CI</system>
-		<url>https://travis-ci.com/tischi/imagej-utils</url>
+		<system>GitHub Actions</system>
+		<url>https://github.com/tischi/imagej-utils/actions</url>
 	</ciManagement>
 
 	<properties>
