@@ -61,18 +61,18 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/tischi/imagej-utils</connection>
-		<developerConnection>scm:git:git@github.com:tischi/imagej-utils</developerConnection>
+		<connection>scm:git:git://github.com/embl-cba/imagej-utils</connection>
+		<developerConnection>scm:git:git@github.com:embl-cba/imagej-utils</developerConnection>
 		<tag>imagej-utils</tag>
-		<url>https://github.com/tischi/imagej-utils</url>
+		<url>https://github.com/embl-cba/imagej-utils</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/tischi/imagej-utils/issues</url>
+		<url>https://github.com/embl-cba/imagej-utils/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>GitHub Actions</system>
-		<url>https://github.com/tischi/imagej-utils/actions</url>
+		<url>https://github.com/embl-cba/imagej-utils/actions</url>
 	</ciManagement>
 
 	<properties>
