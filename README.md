@@ -1,4 +1,4 @@
-[![](https://travis-ci.com/tischi/imagej-utils.svg?branch=master)](https://travis-ci.com/tischi/imagej-utils)
+[![](https://github.com/tischi/imagej-utils/actions/workflows/build-main.yml/badge.svg)](https://github.com/tischi/imagej-utils/actions/workflows/build-main.yml)
 
 # imagej-utils
 
