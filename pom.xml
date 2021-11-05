@@ -91,7 +91,7 @@
 		<j3dcore.version>1.6.0-scijava-2</j3dcore.version>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
-		<releaseProfiles>deploy-to-scijava</releaseProfiles>
+		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 		<license.excludes>**/script_templates/**</license.excludes>
 	</properties>
 
