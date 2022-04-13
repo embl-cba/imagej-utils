@@ -1444,12 +1444,9 @@ public class Utils
 			ImporterOptions opts = new ImporterOptions();
 			opts.setId( path );
 			opts.setVirtual( true );
-
 			ImportProcess process = new ImportProcess( opts );
 			process.execute();
-
 			ImagePlusReader impReader = new ImagePlusReader( process );
-
 			ImagePlus[] imps = impReader.openImagePlus();
 			return imps[ 0 ];
 		}
@@ -1458,7 +1455,6 @@ public class Utils
 			e.printStackTrace();
 			return null;
 		}
-
 	}
 
 	public static < T extends RealType< T > & NativeType< T > >

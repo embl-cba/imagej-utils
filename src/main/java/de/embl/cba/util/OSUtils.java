@@ -30,7 +30,6 @@ package de.embl.cba.util;
 
 public class OSUtils
 {
-
     public static String getOsName()
     {
         return System.getProperty("os.name");
@@ -39,9 +38,7 @@ public class OSUtils
     public static boolean isWindows()
     {
         String OS = getOsName();
-
         if ( OS.toLowerCase().contains( "win" ) ) return true;
-
         return false;
     }
 

@@ -28,6 +28,8 @@
  */
 package de.embl.cba.tables.tablerow;
 
+import de.embl.cba.tables.TableRows;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -130,15 +132,16 @@ public class DefaultTableRowsModel< T extends TableRow > implements TableRowsMod
 	@Override
 	public void addColumn( String columnName, List< String > entries )
 	{
-		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRow )
-		{
-			final Map< String, List< String > > columns = ( ( ColumnBasedTableRow ) tableRows.get( 0 ) ).getColumns();
-			columns.put( columnName, entries );
-		}
-		else
-		{
-			throw new UnsupportedOperationException( "Cannot add column to table rows of class: " + tableRows.get( 0 ).getClass());
-		}
+		TableRows.addColumn( tableRows, columnName, entries );
+//		if ( tableRows.get( 0 ) instanceof ColumnBasedTableRow )
+//		{
+//			final Map< String, List< String > > columns = ( ( ColumnBasedTableRow ) tableRows.get( 0 ) ).getColumns();
+//			columns.put( columnName, entries );
+//		}
+//		else
+//		{
+//			throw new UnsupportedOperationException( "Cannot add column to table rows of class: " + tableRows.get( 0 ).getClass());
+//		}
 	}
 
 	class TableRowsIterator implements Iterator< T >
