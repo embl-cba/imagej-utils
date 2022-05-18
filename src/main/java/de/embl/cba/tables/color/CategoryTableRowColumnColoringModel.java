@@ -117,8 +117,14 @@ public class CategoryTableRowColumnColoringModel< T extends TableRow >
 	{
 		if ( fixedColorMode ) return;
 		inputToRandomColor.clear();
-		this.randomSeed = seed;
+		randomSeed = seed;
 		notifyColoringListeners();
+	}
+
+	@Override
+	public int getRandomSeed()
+	{
+		return randomSeed;
 	}
 
 	public void fixedColorMode( boolean fixedColorMode )

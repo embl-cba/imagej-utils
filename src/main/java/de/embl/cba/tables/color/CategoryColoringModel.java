@@ -28,11 +28,9 @@
  */
 package de.embl.cba.tables.color;
 
-import de.embl.cba.tables.color.ColoringListener;
 import de.embl.cba.tables.select.Listeners;
 import net.imglib2.converter.Converter;
 import net.imglib2.type.numeric.ARGBType;
-
 
 public interface CategoryColoringModel< T > extends Converter< T, ARGBType >
 {
@@ -44,8 +42,11 @@ public interface CategoryColoringModel< T > extends Converter< T, ARGBType >
 	 */
 	Listeners< ColoringListener > listeners();
 
+	@Deprecated
 	void incRandomSeed();
 
 	void setRandomSeed( int seed );
+
+	int getRandomSeed();
 
 }
