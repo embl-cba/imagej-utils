@@ -35,6 +35,8 @@ import bdv.viewer.*;
 
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
+import bdv.viewer.render.RenderResult;
+import bdv.viewer.render.RenderTarget;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.FileUtils;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
@@ -55,7 +57,6 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.ui.RenderTarget;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
@@ -348,11 +349,28 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		{
 			BufferedImage bi;
 
-			@Override
 			public BufferedImage setBufferedImage( final BufferedImage bufferedImage )
 			{
 				bi = bufferedImage;
 				return null;
+			}
+
+			@Override
+			public RenderResult getReusableRenderResult()
+			{
+				return null;
+			}
+
+			@Override
+			public RenderResult createRenderResult()
+			{
+				return null;
+			}
+
+			@Override
+			public void setRenderResult( RenderResult renderResult )
+			{
+
 			}
 
 			@Override
@@ -427,11 +445,28 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		{
 			BufferedImage bi;
 
-			@Override
 			public BufferedImage setBufferedImage( final BufferedImage bufferedImage )
 			{
 				bi = bufferedImage;
 				return null;
+			}
+
+			@Override
+			public RenderResult getReusableRenderResult()
+			{
+				return null;
+			}
+
+			@Override
+			public RenderResult createRenderResult()
+			{
+				return null;
+			}
+
+			@Override
+			public void setRenderResult( RenderResult renderResult )
+			{
+
 			}
 
 			@Override
