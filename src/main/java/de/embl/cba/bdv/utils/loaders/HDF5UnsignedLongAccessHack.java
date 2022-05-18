@@ -133,7 +133,7 @@ public class HDF5UnsignedLongAccessHack implements IHDF5UnsignedLongAccess
 		final Class< ? > k2 = Class.forName( "ch.systemsx.cisd.hdf5.HDF5BaseReader" );
 		final Field f2 = k2.getDeclaredField( "fileId" );
 		f2.setAccessible( true );
-		fileId = ( ( Integer ) f2.get( baseReader ) ).intValue();
+		fileId = ( ( Long ) f2.get( baseReader ) ).intValue();
 
 		final Field f3 = k2.getDeclaredField( "h5" );
 		f3.setAccessible( true );
@@ -142,7 +142,7 @@ public class HDF5UnsignedLongAccessHack implements IHDF5UnsignedLongAccess
 		final Class< ? > k4 = Class.forName( "ch.systemsx.cisd.hdf5.HDF5" );
 		final Field f4 = k4.getDeclaredField( "numericConversionXferPropertyListID" );
 		f4.setAccessible( true );
-		numericConversionXferPropertyListID = ( ( Integer ) f4.get( h5 ) ).intValue();
+		numericConversionXferPropertyListID = ( ( Long ) f4.get( h5 ) ).intValue();
 
 		openDataSetCache = new OpenDataSetCache();
 	}
