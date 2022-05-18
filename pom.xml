@@ -12,7 +12,7 @@
 	<artifactId>imagej-utils</artifactId>
     <version>0.6.6-SNAPSHOT</version>
 
-	<!-- ../scijava-scripts/release-version.sh -->
+	<!-- ../scijava-scripts/release-version.sh -skip-version-check -->
 
 	<name>ImageJ Utilities</name>
 	<description>Various Java code for ImageJ</description>
