@@ -163,9 +163,8 @@ public class TableColumns
 				System.err.println("Column names: " + Arrays.toString( columnNames.toArray( new String[0] ) ));
 				System.err.println("Un-parsed row: " + tableRowsIncludingHeader.get( row) );
 				e.printStackTrace();
-				throw new RuntimeException( e  );
+				throw e;
 			}
-
 		}
 		// System.out.println( ( System.currentTimeMillis() - start ) / 1000.0 ) ;
 		return columnNameToStrings;
