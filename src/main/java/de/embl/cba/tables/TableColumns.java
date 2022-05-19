@@ -146,18 +146,28 @@ public class TableColumns
 		final int numRows = tableRowsIncludingHeader.size() - 1;
 
 		final long start = System.currentTimeMillis();
-
 		for ( int row = 1; row <= numRows; ++row )
 		{
-			final String[] split = tableRowsIncludingHeader.get( row ).split( delim );
-			for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
+			try
 			{
-				columnNameToStrings.get( columnNames.get( columnIndex ) ).add( split[ columnIndex ].replace( "\"", "" ) );
+				final String[] split = tableRowsIncludingHeader.get( row ).split( delim );
+				for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
+				{
+					columnNameToStrings.get( columnNames.get( columnIndex ) ).add( split[ columnIndex ].replace( "\"", "" ) );
+				}
 			}
+			catch ( Exception e )
+			{
+				System.err.println("Error parsing table: " + path);
+				System.err.println("Row index: " + row);
+				System.err.println("Column names: " + Arrays.toString( columnNames.toArray( new String[0] ) ));
+				System.err.println("Un-parsed row: " + tableRowsIncludingHeader.get( row) );
+				e.printStackTrace();
+				throw new RuntimeException( e  );
+			}
+
 		}
-
 		// System.out.println( ( System.currentTimeMillis() - start ) / 1000.0 ) ;
-
 		return columnNameToStrings;
 	}
 
