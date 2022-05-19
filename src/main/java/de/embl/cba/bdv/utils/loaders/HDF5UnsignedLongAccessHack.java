@@ -162,7 +162,10 @@ public class HDF5UnsignedLongAccessHack implements IHDF5UnsignedLongAccess
 			exists = true;
 		}
 		catch ( final Exception e )
-		{}
+		{
+			final String s = e.toString();
+			int a = 1;
+		}
 		if ( exists )
 			return new DimsAndExistence( reorder( realDimensions ), true );
 		else

@@ -41,7 +41,7 @@ public class SpimDataLoading
 {
 	public static void main( String[] args )
 	{
-		final File file = new File( SpimDataLoading.class.getResource( "bdv_mipmap-raw.xml" ).getFile() );
+		final File file = new File( "/Users/tischer/Documents/imagej-utils/src/test/resources/test-data/mri.xml" ) ;
 
 		final SpimData spimData = openSpimData( file );
 		final ArrayList< ConverterSetup > converterSetups = new ArrayList<>();
