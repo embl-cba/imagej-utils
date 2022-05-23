@@ -111,11 +111,11 @@ public class Utils
 	 */
 	public static Double parseDouble( String cell )
 	{
-		if ( cell.toLowerCase().equals( "nan" ) || cell.equals( "" ) )
+		if ( cell.equalsIgnoreCase( "nan" ) || cell.equals( "" ) )
 			return Double.NaN;
-		else if ( cell.toLowerCase().equals( "inf" ) )
+		else if ( cell.equalsIgnoreCase( "inf" ) )
 			return Double.POSITIVE_INFINITY;
-		else if ( cell.toLowerCase().equals( "-inf" ) )
+		else if ( cell.equalsIgnoreCase( "-inf" ) )
 			return Double.NEGATIVE_INFINITY;
 		else
 			return Double.parseDouble( cell );

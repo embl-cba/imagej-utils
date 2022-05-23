@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package explore;
+package develop;
 
 import customnode.CustomMesh;
 import customnode.CustomTriangleMesh;
