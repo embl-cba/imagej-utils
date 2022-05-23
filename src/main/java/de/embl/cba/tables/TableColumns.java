@@ -335,7 +335,8 @@ public class TableColumns
 //		System.out.println( ( System.currentTimeMillis() - start ) / 1000.0 ) ;
 
 		if ( numSkippedRows > 0 )
-			IJ.log("[WARNING] There were "+numSkippedRows+" rows that could not be matched during table merging.");
+			IJ.log("[WARNING] There were "+ numSkippedRows+" rows that were only present in the additional table.");
+
 		return newColumnsForMerging;
 	}
 
