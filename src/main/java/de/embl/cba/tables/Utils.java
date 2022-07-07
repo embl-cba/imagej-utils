@@ -111,7 +111,9 @@ public class Utils
 	 */
 	public static Double parseDouble( String cell )
 	{
-		if ( cell.equalsIgnoreCase( "nan" ) || cell.equals( "" ) )
+		if ( cell.equalsIgnoreCase( "nan" )
+				|| cell.equalsIgnoreCase( "na" )
+				|| cell.equals( "" ) )
 			return Double.NaN;
 		else if ( cell.equalsIgnoreCase( "inf" ) )
 			return Double.POSITIVE_INFINITY;
