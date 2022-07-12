@@ -393,40 +393,50 @@ public class TableColumns
 		}
 	}
 
-	public static Object[] asTypedArray( List< String > strings ) throws UnsupportedDataTypeException
+	public static Object[] asTypedArray( List< String > strings ) throws Exception
 	{
 		final Class columnType = getColumnType( strings.get( 0 ) );
 
 		int numRows = strings.size();
 
-		if ( columnType == Double.class )
+		try
 		{
-			return toDoubles( strings, numRows );
-		}
-		else if ( columnType == Integer.class ) // cast to Double anyway...
+			if ( columnType == Double.class )
+			{
+				return toDoubles( strings, numRows );
+			} else if ( columnType == Integer.class ) // cast to Double anyway...
+			{
+				return toDoubles( strings, numRows );
+			} else if ( columnType == String.class )
+			{
+				final String[] stringsArray = new String[ strings.size() ];
+				strings.toArray( stringsArray );
+				return stringsArray;
+			} else
+			{
+				throw new UnsupportedDataTypeException( "" );
+			}
+		} catch ( Exception e )
 		{
-			return toDoubles( strings, numRows );
-		}
-		else if ( columnType == String.class )
-		{
-			final String[] stringsArray = new String[ strings.size() ];
-			strings.toArray( stringsArray );
-			return stringsArray;
-		}
-		else
-		{
-			throw new UnsupportedDataTypeException("");
+			throw e;
 		}
 	}
 
-	public static Object[] toDoubles( List< String > strings, int numRows )
+	public static Object[] toDoubles( List< String > strings, int numRows ) throws NumberFormatException
 	{
-		final Double[] doubles = new Double[ numRows ];
+		try
+		{
+			final Double[] doubles = new Double[ numRows ];
 
-		for ( int row = 0; row < numRows; ++row )
-			doubles[ row ] =  Utils.parseDouble( strings.get( row ) );
+			for ( int row = 0; row < numRows; ++row )
+				doubles[ row ] = Utils.parseDouble( strings.get( row ) );
 
-		return doubles;
+			return doubles;
+		}
+		catch ( Exception e )
+		{
+			throw new NumberFormatException();
+		}
 	}
 
 	private static Class getColumnType( String cell )
