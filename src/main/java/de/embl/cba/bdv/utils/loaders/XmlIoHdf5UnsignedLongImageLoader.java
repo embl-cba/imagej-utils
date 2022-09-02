@@ -50,7 +50,6 @@ import static mpicbg.spim.data.XmlKeys.IMGLOADER_FORMAT_ATTRIBUTE_NAME;
 // Loader class auto-discovery happens here:
 // https://github.com/bigdataviewer/spimdata/blob/master/src/main/java/mpicbg/spim/data/generic/sequence/ImgLoaders.java#L53
 
-// Essentially copy and paste from bigdataviewer-core bdv.img.hdf5.XmlIoHdf5ImageLoader
 @ImgLoaderIo( format = "bdv.hdf5.ulong", type = Hdf5UnsignedLongImageLoader.class )
 public class XmlIoHdf5UnsignedLongImageLoader implements XmlIoBasicImgLoader< Hdf5UnsignedLongImageLoader >
 {

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package explore;
+package develop;
 
 import bdv.util.*;
 import bdv.viewer.Source;

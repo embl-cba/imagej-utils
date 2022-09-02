@@ -179,7 +179,7 @@ public abstract class TableRows
 		final int rowCount = tableRows.size();
 		for ( int row = 0; row < rowCount; row++ )
 		{
-			final double value = Double.parseDouble(  tableRows.get( row ).getCell( column ) );
+			final double value = Utils.parseDouble( tableRows.get( row ).getCell( column ) );
 			if ( value < min ) min = value;
 			if ( value > max ) max = value;
 		}

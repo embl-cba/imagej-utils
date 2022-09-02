@@ -26,33 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package tests;
+package develop;
 
-import mpicbg.spim.data.SpimData;
-import mpicbg.spim.data.SpimDataException;
-import mpicbg.spim.data.XmlIoSpimData;
-import mpicbg.spim.data.generic.sequence.BasicMultiResolutionImgLoader;
-import net.imglib2.RandomAccess;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedLongType;
-import org.junit.Test;
+import bdv.util.BdvFunctions;
+import bdv.util.BdvOptions;
+import bdv.viewer.Source;
+import de.embl.cba.bdv.utils.io.SPIMDataReaders;
+import net.imglib2.type.volatiles.VolatileARGBType;
 
-import static org.junit.Assert.assertEquals;
-
-public class BdvHdf5ULongLoadingTest
+public class ExploreLoadSettings
 {
-	@Test
-	public < R extends RealType< R > > void test() throws SpimDataException
+	public static void main( String[] args )
 	{
-		final SpimData spimData = new XmlIoSpimData().load( BdvHdf5ULongLoadingTest.class.getResource( "../test-data/labels-ulong.xml" ).getFile() );
-		final BasicMultiResolutionImgLoader imgLoader = ( BasicMultiResolutionImgLoader ) spimData.getSequenceDescription().getImgLoader();
-		final RandomAccessibleInterval< ? > rai = imgLoader.getSetupImgLoader( 0 ).getImage( 0, 0 );
-		final RandomAccess< ? > randomAccess = rai.randomAccess();
-		randomAccess.setPosition( new long[]{10,10,10} );
-		final UnsignedLongType longType = ( UnsignedLongType ) randomAccess.get();
-		System.out.println( longType.get() );
-		//System.out.println( realType.getRealDouble() );
-		//assertEquals( 2.0, realType.getRealDouble(), 0.0 );
+		final Source< VolatileARGBType > source =
+				SPIMDataReaders.openAsVolatileARGBTypeSource(
+						ExploreLoadSettings.class.getResource( "../test-data/Hela_full.xml" ).getFile(), 0 );
+
+		BdvFunctions.show( source, BdvOptions.options().is2D() );
 	}
 }

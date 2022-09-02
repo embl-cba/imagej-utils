@@ -29,6 +29,7 @@
 package de.embl.cba.tables;
 
 import de.embl.cba.tables.tablerow.TableRow;
+import ij.IJ;
 import ij.measure.ResultsTable;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -146,18 +147,27 @@ public class TableColumns
 		final int numRows = tableRowsIncludingHeader.size() - 1;
 
 		final long start = System.currentTimeMillis();
-
 		for ( int row = 1; row <= numRows; ++row )
 		{
-			final String[] split = tableRowsIncludingHeader.get( row ).split( delim );
-			for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
+			try
 			{
-				columnNameToStrings.get( columnNames.get( columnIndex ) ).add( split[ columnIndex ].replace( "\"", "" ) );
+				final String[] split = tableRowsIncludingHeader.get( row ).split( delim );
+				for ( int columnIndex = 0; columnIndex < numColumns; columnIndex++ )
+				{
+					columnNameToStrings.get( columnNames.get( columnIndex ) ).add( split[ columnIndex ].replace( "\"", "" ) );
+				}
+			}
+			catch ( Exception e )
+			{
+				System.err.println("Error parsing table: " + path);
+				System.err.println("Row index: " + row);
+				System.err.println("Column names: " + Arrays.toString( columnNames.toArray( new String[0] ) ));
+				System.err.println("Un-parsed row: " + tableRowsIncludingHeader.get( row) );
+				e.printStackTrace();
+				throw e;
 			}
 		}
-
 		// System.out.println( ( System.currentTimeMillis() - start ) / 1000.0 ) ;
-
 		return columnNameToStrings;
 	}
 
@@ -255,15 +265,15 @@ public class TableColumns
 		// create lookup map for finding the correct row,
 		// given reference cell entries
 		final HashMap< String, Integer > keyToRowIndex = new HashMap<>();
-		final StringBuilder referenceKeyBuilder = new StringBuilder();
+		final StringBuilder referenceKey = new StringBuilder();
 		for ( int rowIndex = 0; rowIndex < numRowsReferenceTable; rowIndex++ )
 		{
 			for ( String referenceColumnName : referenceColumnNames )
 			{
-				referenceKeyBuilder.append( referenceColumns.get( referenceColumnName ).get( rowIndex ) + "--" );
+				referenceKey.append( referenceColumns.get( referenceColumnName ).get( rowIndex ) + "--" );
 			}
-			keyToRowIndex.put( referenceKeyBuilder.toString(), rowIndex );
-			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear for reuse
+			keyToRowIndex.put( referenceKey.toString(), rowIndex );
+			referenceKey.delete( 0, referenceKey.length() ); // clear for reuse
 		}
 
 		// prepare the new columns with a default value
@@ -279,10 +289,8 @@ public class TableColumns
 				continue;
 			}
 
-			final String firstCell = columns.getValue().get( 0 );
-
-			String defaultValue;
-			if ( Tables.isNumeric( firstCell ) )
+			final String defaultValue;
+			if ( Tables.isNumeric( columns.getValue().get( 0 ) ) )
 				defaultValue = "NaN"; // for numbers
 			else
 				defaultValue = "None"; // for text
@@ -292,41 +300,42 @@ public class TableColumns
 			newColumnsForMerging.put( columns.getKey(), defaultValues );
 		}
 
-		// new column names excluding the reference columns
+		// new column names (excluding the reference columns)
 		final List< String > newColumnsForMergingNames = new ArrayList<>( newColumnsForMerging.keySet() );
 
-		// final long start = System.currentTimeMillis();
 		// go through the new columns and put their values
 		// into the correct row (i.e. targetRowIndex) of the columns to be merged
+		// final long start = System.currentTimeMillis();
 		final int numRows = newColumns.values().iterator().next().size();
+		int numSkippedRows = 0;
 		for ( int rowIndex = 0; rowIndex < numRows; ++rowIndex )
 		{
 			for ( String referenceColumnName : referenceColumnNames )
 			{
-				final String partialKey = newColumns.get( referenceColumnName ).get( rowIndex );
-				referenceKeyBuilder.append( partialKey + "--");
+				referenceKey.append( newColumns.get( referenceColumnName ).get( rowIndex ) + "--");
 			}
-
-			final String fullKey = referenceKeyBuilder.toString();
-
+			final String fullKey = referenceKey.toString();
+			referenceKey.delete( 0, referenceKey.length() ); // clear for reuse
 			final Integer targetRowIndex = keyToRowIndex.get( fullKey );
 
 			if ( targetRowIndex == null )
 			{
-				System.err.println( "Table row key could not be found in reference table: " + fullKey );
-				referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() );
+				// The key does not exist in the reference table.
+				// That means that there are entries in the table
+				// that is to be merged than in the reference table.
+				numSkippedRows++;
 				continue;
 			}
-
-			referenceKeyBuilder.delete( 0, referenceKeyBuilder.length() ); // clear for reuse
 
 			for ( String columnName : newColumnsForMergingNames )
 			{
 				newColumnsForMerging.get( columnName ).set( targetRowIndex, newColumns.get( columnName ).get( rowIndex ) );
 			}
 		}
-
 //		System.out.println( ( System.currentTimeMillis() - start ) / 1000.0 ) ;
+
+		if ( numSkippedRows > 0 )
+			IJ.log("[WARNING] There were "+ numSkippedRows+" rows that were only present in the additional table.");
 
 		return newColumnsForMerging;
 	}
@@ -384,40 +393,50 @@ public class TableColumns
 		}
 	}
 
-	public static Object[] asTypedArray( List< String > strings ) throws UnsupportedDataTypeException
+	public static Object[] asTypedArray( List< String > strings ) throws Exception
 	{
 		final Class columnType = getColumnType( strings.get( 0 ) );
 
 		int numRows = strings.size();
 
-		if ( columnType == Double.class )
+		try
 		{
-			return toDoubles( strings, numRows );
-		}
-		else if ( columnType == Integer.class ) // cast to Double anyway...
+			if ( columnType == Double.class )
+			{
+				return toDoubles( strings, numRows );
+			} else if ( columnType == Integer.class ) // cast to Double anyway...
+			{
+				return toDoubles( strings, numRows );
+			} else if ( columnType == String.class )
+			{
+				final String[] stringsArray = new String[ strings.size() ];
+				strings.toArray( stringsArray );
+				return stringsArray;
+			} else
+			{
+				throw new UnsupportedDataTypeException( "" );
+			}
+		} catch ( Exception e )
 		{
-			return toDoubles( strings, numRows );
-		}
-		else if ( columnType == String.class )
-		{
-			final String[] stringsArray = new String[ strings.size() ];
-			strings.toArray( stringsArray );
-			return stringsArray;
-		}
-		else
-		{
-			throw new UnsupportedDataTypeException("");
+			throw e;
 		}
 	}
 
-	public static Object[] toDoubles( List< String > strings, int numRows )
+	public static Object[] toDoubles( List< String > strings, int numRows ) throws NumberFormatException
 	{
-		final Double[] doubles = new Double[ numRows ];
+		try
+		{
+			final Double[] doubles = new Double[ numRows ];
 
-		for ( int row = 0; row < numRows; ++row )
-			doubles[ row ] =  Utils.parseDouble( strings.get( row ) );
+			for ( int row = 0; row < numRows; ++row )
+				doubles[ row ] = Utils.parseDouble( strings.get( row ) );
 
-		return doubles;
+			return doubles;
+		}
+		catch ( Exception e )
+		{
+			throw new NumberFormatException();
+		}
 	}
 
 	private static Class getColumnType( String cell )

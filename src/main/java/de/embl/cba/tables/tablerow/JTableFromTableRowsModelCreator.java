@@ -61,16 +61,18 @@ public class JTableFromTableRowsModelCreator
 		{
 			List< String > strings = tableRowsModel.getColumn( columnName );
 
-			Object[] objects = null;
 			try
 			{
-				objects = TableColumns.asTypedArray( strings );
+				Object[] objects = TableColumns.asTypedArray( strings );
+				model.addColumn( columnName, objects  );
 			}
-			catch ( UnsupportedDataTypeException e )
+			catch ( Exception e )
 			{
+				System.err.println("Error parsing column: " + columnName);
+				System.err.println("Skipping column: " + columnName);
 				e.printStackTrace();
+				//throw new RuntimeException("Error parsing column: " + columnName);
 			}
-			model.addColumn( columnName, objects  );
 		}
 
 		model.refreshColumnClassesFromObjectColumns();

@@ -744,10 +744,11 @@ public class TableRowsTableView < T extends TableRow > extends JPanel
 			{
 				final Object[] values = TableColumns.asTypedArray( columns.get( columnName ) );
 				addColumn( columnName, values );
-			} catch ( UnsupportedDataTypeException e )
+			}
+			catch ( Exception e )
 			{
-				Logger.error( "Could not add column " + columnName + ", because the" +
-						" data type could not be determined.");
+				e.printStackTrace();
+				throw new RuntimeException("Error adding column " + columnName );
 			}
 		}
 	}

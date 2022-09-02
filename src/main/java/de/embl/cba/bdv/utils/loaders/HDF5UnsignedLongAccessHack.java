@@ -38,19 +38,9 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import static bdv.img.hdf5.Util.reorder;
-import static hdf.hdf5lib.H5.H5Dclose;
-import static hdf.hdf5lib.H5.H5Dget_space;
-import static hdf.hdf5lib.H5.H5Dopen;
-import static hdf.hdf5lib.H5.H5Dread;
-import static hdf.hdf5lib.H5.H5Sclose;
-import static hdf.hdf5lib.H5.H5Screate_simple;
-import static hdf.hdf5lib.H5.H5Sget_simple_extent_dims;
-import static hdf.hdf5lib.H5.H5Sselect_hyperslab;
-import static hdf.hdf5lib.HDF5Constants.H5P_DEFAULT;
-import static hdf.hdf5lib.HDF5Constants.H5S_MAX_RANK;
-import static hdf.hdf5lib.HDF5Constants.H5S_SELECT_SET;
-import static hdf.hdf5lib.HDF5Constants.H5T_NATIVE_FLOAT;
-import static hdf.hdf5lib.HDF5Constants.H5T_NATIVE_ULONG;
+import static ch.systemsx.cisd.hdf5.hdf5lib.H5D.*;
+import static ch.systemsx.cisd.hdf5.hdf5lib.H5S.*;
+import static ch.systemsx.cisd.hdf5.hdf5lib.HDF5Constants.*;
 
 public class HDF5UnsignedLongAccessHack implements IHDF5UnsignedLongAccess
 {
@@ -69,9 +59,9 @@ public class HDF5UnsignedLongAccessHack implements IHDF5UnsignedLongAccess
 
 	private class OpenDataSet
 	{
-		final long dataSetId;
+		final int dataSetId;
 
-		final long fileSpaceId;
+		final int fileSpaceId;
 
 		public OpenDataSet( final String cellsPath )
 		{
@@ -133,7 +123,7 @@ public class HDF5UnsignedLongAccessHack implements IHDF5UnsignedLongAccess
 		final Class< ? > k2 = Class.forName( "ch.systemsx.cisd.hdf5.HDF5BaseReader" );
 		final Field f2 = k2.getDeclaredField( "fileId" );
 		f2.setAccessible( true );
-		fileId = ( ( Long ) f2.get( baseReader ) ).intValue();
+		fileId = ( ( Integer ) f2.get( baseReader ) ).intValue();
 
 		final Field f3 = k2.getDeclaredField( "h5" );
 		f3.setAccessible( true );
@@ -142,7 +132,7 @@ public class HDF5UnsignedLongAccessHack implements IHDF5UnsignedLongAccess
 		final Class< ? > k4 = Class.forName( "ch.systemsx.cisd.hdf5.HDF5" );
 		final Field f4 = k4.getDeclaredField( "numericConversionXferPropertyListID" );
 		f4.setAccessible( true );
-		numericConversionXferPropertyListID = ( ( Long ) f4.get( h5 ) ).intValue();
+		numericConversionXferPropertyListID = ( ( Integer ) f4.get( h5 ) ).intValue();
 
 		openDataSetCache = new OpenDataSetCache();
 	}
@@ -189,7 +179,7 @@ public class HDF5UnsignedLongAccessHack implements IHDF5UnsignedLongAccess
 		reorder( min, reorderedMin );
 
 		final OpenDataSet dataset = openDataSetCache.getDataSet( new ViewLevelId( timepoint, setup, level ) );
-		final long memorySpaceId = H5Screate_simple( reorderedDimensions.length, reorderedDimensions, null );
+		final int memorySpaceId = H5Screate_simple( reorderedDimensions.length, reorderedDimensions, null );
 		H5Sselect_hyperslab( dataset.fileSpaceId, H5S_SELECT_SET, reorderedMin, null, reorderedDimensions, null );
 		H5Dread( dataset.dataSetId, H5T_NATIVE_ULONG, memorySpaceId, dataset.fileSpaceId, numericConversionXferPropertyListID, dataBlock );
 		H5Sclose( memorySpaceId );
@@ -214,7 +204,7 @@ public class HDF5UnsignedLongAccessHack implements IHDF5UnsignedLongAccess
 		reorder( min, reorderedMin );
 
 		final OpenDataSet dataset = openDataSetCache.getDataSet( new ViewLevelId( timepoint, setup, level ) );
-		final long memorySpaceId = H5Screate_simple( reorderedDimensions.length, reorderedDimensions, null );
+		final int memorySpaceId = H5Screate_simple( reorderedDimensions.length, reorderedDimensions, null );
 		H5Sselect_hyperslab( dataset.fileSpaceId, H5S_SELECT_SET, reorderedMin, null, reorderedDimensions, null );
 		H5Dread( dataset.dataSetId, H5T_NATIVE_FLOAT, memorySpaceId, dataset.fileSpaceId, numericConversionXferPropertyListID, dataBlock );
 		H5Sclose( memorySpaceId );

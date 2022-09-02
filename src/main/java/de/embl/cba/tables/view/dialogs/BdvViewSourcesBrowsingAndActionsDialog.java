@@ -28,16 +28,18 @@
  */
 package de.embl.cba.tables.view.dialogs;
 
+import bdv.cache.CacheControl;
 import bdv.util.Prefs;
 import bdv.viewer.SynchronizedViewerState;
 import bdv.viewer.ViewerPanel;
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
-import bdv.viewer.render.RenderResult;
-import bdv.viewer.render.RenderTarget;
+import bdv.viewer.state.ViewerState;
 import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.tables.view.SegmentsBdvView;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.ui.PainterThread;
+import net.imglib2.ui.RenderTarget;
 import org.apache.commons.io.FilenameUtils;
 
 import javax.imageio.ImageIO;
@@ -173,28 +175,11 @@ public class BdvViewSourcesBrowsingAndActionsDialog extends JPanel
 		{
 			BufferedImage bi;
 
+			@Override
 			public BufferedImage setBufferedImage( final BufferedImage bufferedImage )
 			{
 				bi = bufferedImage;
 				return null;
-			}
-
-			@Override
-			public RenderResult getReusableRenderResult()
-			{
-				return null;
-			}
-
-			@Override
-			public RenderResult createRenderResult()
-			{
-				return null;
-			}
-
-			@Override
-			public void setRenderResult( RenderResult renderResult )
-			{
-
 			}
 
 			@Override
