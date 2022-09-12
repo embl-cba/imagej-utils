@@ -35,6 +35,8 @@ import bdv.viewer.*;
 
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
+import bdv.viewer.render.RenderTarget;
+import bdv.viewer.render.awt.BufferedImageRenderResult;
 import de.embl.cba.bdv.utils.BdvUtils;
 import de.embl.cba.bdv.utils.FileUtils;
 import de.embl.cba.bdv.utils.sources.ARGBConvertedRealSource;
@@ -55,7 +57,6 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.ui.RenderTarget;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
@@ -344,15 +345,26 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 
 		final ScaleBarOverlayRenderer scalebar = Prefs.showScaleBarInMovie() ? new ScaleBarOverlayRenderer() : null;
 
-		class MyTarget implements RenderTarget
+		class MyTarget implements RenderTarget< BufferedImageRenderResult >
 		{
-			BufferedImage bi;
+			final BufferedImageRenderResult renderResult = new BufferedImageRenderResult();
 
 			@Override
-			public BufferedImage setBufferedImage( final BufferedImage bufferedImage )
+			public BufferedImageRenderResult getReusableRenderResult()
 			{
-				bi = bufferedImage;
-				return null;
+				return renderResult;
+			}
+
+			@Override
+			public BufferedImageRenderResult createRenderResult()
+			{
+				return new BufferedImageRenderResult();
+			}
+
+			@Override
+			public void setRenderResult( BufferedImageRenderResult renderResult )
+			{
+
 			}
 
 			@Override
@@ -370,11 +382,6 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 
 		final MyTarget target = new MyTarget();
 		final MultiResolutionRenderer renderer = null;
-		// TODO: use BdvPlayground
-
-//		new MultiResolutionRenderer(
-//				target, new PainterThread( null ), new double[] { 1 }, 0, false, 1, null, false,
-//				viewer.getOptionValues().getAccumulateProjectorFactory(), new CacheControl.Dummy() );
 
 		int minTimepointIndex = 0;
 		int maxTimepointIndex = 0;
@@ -385,9 +392,10 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 			renderer.requestRepaint();
 			renderer.paint( renderState );
 
+			final BufferedImage bi = target.renderResult.getBufferedImage();
 			if ( Prefs.showScaleBarInMovie() )
 			{
-				final Graphics2D g2 = target.bi.createGraphics();
+				final Graphics2D g2 = bi.createGraphics();
 				g2.setClip( 0, 0, width, height );
 				scalebar.setViewerState( renderState );
 				scalebar.paint( g2 );
@@ -395,7 +403,7 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 
 			try
 			{
-				ImageIO.write( target.bi, "jpg", FileUtils.changeExtension( outputFile, "jpg" ) );
+				ImageIO.write( bi, "jpg", FileUtils.changeExtension( outputFile, "jpg" ) );
 			} catch ( IOException e )
 			{
 				e.printStackTrace();
@@ -423,15 +431,26 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 
 		final ScaleBarOverlayRenderer scalebar = Prefs.showScaleBarInMovie() ? new ScaleBarOverlayRenderer() : null;
 
-		class MyTarget implements RenderTarget
+		class MyTarget implements RenderTarget< BufferedImageRenderResult >
 		{
-			BufferedImage bi;
+			final BufferedImageRenderResult renderResult = new BufferedImageRenderResult();
 
 			@Override
-			public BufferedImage setBufferedImage( final BufferedImage bufferedImage )
+			public BufferedImageRenderResult getReusableRenderResult()
 			{
-				bi = bufferedImage;
-				return null;
+				return renderResult;
+			}
+
+			@Override
+			public BufferedImageRenderResult createRenderResult()
+			{
+				return new BufferedImageRenderResult();
+			}
+
+			@Override
+			public void setRenderResult( BufferedImageRenderResult renderResult )
+			{
+
 			}
 
 			@Override
@@ -458,15 +477,16 @@ public abstract class BdvViewCaptures < R extends RealType< R > >
 		renderer.requestRepaint();
 		renderer.paint( renderState );
 
+		final BufferedImage bi = target.renderResult.getBufferedImage();
 		if ( Prefs.showScaleBarInMovie() )
 		{
-			final Graphics2D g2 = target.bi.createGraphics();
+			final Graphics2D g2 = bi.createGraphics();
 			g2.setClip( 0, 0, width, height );
 			scalebar.setViewerState( renderState );
 			scalebar.paint( g2 );
 		}
 
-		return new ImagePlus( "ScreenShot", target.bi );
+		return new ImagePlus( "ScreenShot", bi );
 	}
 
 	// TODO: make show raw data part of the dialog

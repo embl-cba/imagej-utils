@@ -33,6 +33,8 @@ import bdv.viewer.SynchronizedViewerState;
 import bdv.viewer.ViewerPanel;
 import bdv.viewer.overlay.ScaleBarOverlayRenderer;
 import bdv.viewer.render.MultiResolutionRenderer;
+import bdv.viewer.render.RenderTarget;
+import bdv.viewer.render.awt.BufferedImageRenderResult;
 import de.embl.cba.bdv.utils.Logger;
 import de.embl.cba.tables.view.SegmentsBdvView;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -167,15 +169,26 @@ public class BdvViewSourcesBrowsingAndActionsDialog extends JPanel
 
 		final ScaleBarOverlayRenderer scalebar = Prefs.showScaleBarInMovie() ? new ScaleBarOverlayRenderer() : null;
 
-		class MyTarget implements RenderTarget
+		class MyTarget implements RenderTarget< BufferedImageRenderResult >
 		{
-			BufferedImage bi;
+			final BufferedImageRenderResult renderResult = new BufferedImageRenderResult();
 
 			@Override
-			public BufferedImage setBufferedImage( final BufferedImage bufferedImage )
+			public BufferedImageRenderResult getReusableRenderResult()
 			{
-				bi = bufferedImage;
-				return null;
+				return renderResult;
+			}
+
+			@Override
+			public BufferedImageRenderResult createRenderResult()
+			{
+				return new BufferedImageRenderResult();
+			}
+
+			@Override
+			public void setRenderResult( BufferedImageRenderResult renderResult )
+			{
+
 			}
 
 			@Override
@@ -190,6 +203,7 @@ public class BdvViewSourcesBrowsingAndActionsDialog extends JPanel
 				return height;
 			}
 		}
+
 
 		final MyTarget target = new MyTarget();
 		final MultiResolutionRenderer renderer =  null;
@@ -208,9 +222,10 @@ public class BdvViewSourcesBrowsingAndActionsDialog extends JPanel
 			renderer.requestRepaint();
 			renderer.paint( renderState );
 
+			final BufferedImage bi = target.renderResult.getBufferedImage();
 			if ( Prefs.showScaleBarInMovie() )
 			{
-				final Graphics2D g2 = target.bi.createGraphics();
+				final Graphics2D g2 = bi.createGraphics();
 				g2.setClip( 0, 0, width, height );
 				scalebar.setViewerState( renderState );
 				scalebar.paint( g2 );
@@ -218,7 +233,7 @@ public class BdvViewSourcesBrowsingAndActionsDialog extends JPanel
 
 			try
 			{
-				ImageIO.write( target.bi, "jpg", outputFile );
+				ImageIO.write( bi, "jpg", outputFile );
 			} catch ( IOException e )
 			{
 				e.printStackTrace();
