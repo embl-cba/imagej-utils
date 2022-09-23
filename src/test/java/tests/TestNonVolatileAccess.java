@@ -39,7 +39,6 @@ import static org.junit.Assert.assertEquals;
 
 public class TestNonVolatileAccess
 {
-	@Test
 	public < R extends RealType< R > > void lazySpimSourceAccess()
 	{
 		final LazySpimSource< R > source = new LazySpimSource<>( "source",
