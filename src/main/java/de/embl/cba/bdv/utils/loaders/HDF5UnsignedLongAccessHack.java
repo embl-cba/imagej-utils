@@ -166,9 +166,9 @@ public class HDF5UnsignedLongAccessHack implements IHDF5UnsignedLongAccess
 			int a = 1;
 		}
 		if ( exists )
-			return new DimsAndExistence( reorder( realDimensions ), true );
+			return new DimsAndExistence( reorder( realDimensions ), null, true );
 		else
-			return new DimsAndExistence( new long[] { 1, 1, 1 }, false );
+			return new DimsAndExistence( new long[] { 1, 1, 1 }, null, false );
 	}
 
 	@Override

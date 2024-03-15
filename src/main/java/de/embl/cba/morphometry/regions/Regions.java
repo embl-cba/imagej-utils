@@ -188,20 +188,24 @@ public abstract class Regions
 			double sizeInCalibratedUnits,
 			double calibration )
 	{
-		Logger.log( "Remove small regions..." );
 		final ImgLabeling< Integer, IntType > imgLabeling =
 				asImgLabeling( mask, ConnectedComponents.StructuringElement.FOUR_CONNECTED );
 
 		long minimalObjectSize = ( long ) ( sizeInCalibratedUnits / Math.pow( calibration, imgLabeling.numDimensions() ) );
 
 		final LabelRegions< Integer > labelRegions = new LabelRegions<>( imgLabeling );
+		int numRegions = 0, numRemoved = 0;
 		for ( LabelRegion labelRegion : labelRegions )
 		{
+			numRegions++;
 			if ( labelRegion.size() < minimalObjectSize )
 			{
+				numRemoved ++;
 				removeRegion( mask, labelRegion );
 			}
 		}
+
+		Logger.log( "Removed " + numRemoved + " small regions of " + numRegions + " total regions." );
 	}
 
 	public static < T extends RealType< T > & NativeType< T > >
